@@ -1,0 +1,46 @@
+{
+  "family": "ayahay-web-task-<TENANT>",
+  "containerDefinitions": [
+    {
+      "name": "ayahay-web-<TENANT>",
+      "image": "<IMAGE_URI>",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "name": "ayahay-web-<TENANT>-<PORT>-tcp",
+          "containerPort": <PORT>,
+          "hostPort": <PORT>,
+          "protocol": "tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "essential": true,
+      "environment": [],
+      "environmentFiles": [
+        {
+          "value": "arn:aws:s3:::ayahay-env/ayahay-<TENANT>-web.env",
+          "type": "s3"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/ayahay-web-<TENANT>",
+          "awslogs-create-group": "true",
+          "awslogs-region": "ap-southeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "taskRoleArn": "arn:aws:iam::861789509630:role/AyahayApiTask",
+  "executionRoleArn": "arn:aws:iam::861789509630:role/AyahayApiTask",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "1024",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  }
+}

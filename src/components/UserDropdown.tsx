@@ -1,0 +1,110 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContexts';
+
+const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: boolean }) => {
+  const { logout, currentUser, loggedInAccount } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const logOut = () => {
+    logout();
+  };
+
+  // Add useEffect for clicking outside dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <>
+      {/* User Dropdown Menu */}
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="flex items-center space-x-2 focus:outline-none"
+          aria-label="User menu"
+        >
+          <Image
+            src="/assets/icons/circle-user-round.svg"
+            alt="User Menu"
+            width={32}
+            height={32}
+            className={`w-8 h-8 transition-all duration-200 ${
+              shouldBeTransparent ? 'brightness-0 invert' : 'brightness-0'
+            }`}
+          />
+          {currentUser && (
+            <span
+              className={`text-sm font-medium hidden md:block ${shouldBeTransparent ? 'text-white' : 'text-gray-900'}`}
+            >
+              {loggedInAccount?.passenger?.firstName} {loggedInAccount?.passenger?.lastName}
+            </span>
+          )}
+        </button>
+
+        {/* Dropdown Menu */}
+        <div
+          className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 transition-all duration-200 ${
+            isDropdownOpen ? 'transform opacity-100 scale-100' : 'transform opacity-0 scale-95 pointer-events-none'
+          }`}
+        >
+          {currentUser ? (
+            <>
+              <div className="px-4 py-2 border-b border-gray-100">
+                <p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
+              </div>
+              <Link
+                href={`/profile/${loggedInAccount?.id}`}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                Profile
+              </Link>
+              <div className="border-t border-gray-100">
+                <button
+                  onClick={() => {
+                    logOut();
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+                >
+                  Log Out
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                Create Account
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default UserDropdown;

@@ -1,0 +1,8 @@
+trigger: none  # or 'main' if you want it automatic
+
+extends:
+  template: templates/build-template.yml
+  parameters:
+    ecrRepo: 'ayahay-web-qa'
+    dockerTag: 'qa-latest'
+    variableGroup: 'ayahay-web-env-group'

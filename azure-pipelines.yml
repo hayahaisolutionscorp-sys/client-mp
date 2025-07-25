@@ -1,0 +1,41 @@
+trigger:
+- master
+- dev
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: GitHubSyncVariables  # Reference variable group with GitHub PAT and repository details
+
+steps:
+- checkout: self
+  persistCredentials: true  # Authenticate with Azure Repos automatically
+  clean: true  # Ensure a clean workspace
+
+- script: |
+    # Configure Git
+    git config --global user.name "arndim01"
+    git config --global user.email "arndim.z01@gmail.com"
+
+    # Add GitHub as a remote
+    git remote add github https://$(GITHUB_PAT)@github.com/$(GITHUB_REPO).git
+
+    # Fetch changes from both repositories
+    git fetch origin
+    git fetch github
+
+    # Loop through branches to sync
+    for branch in master dev; do
+      echo "Processing branch: $branch"
+
+      # Checkout or create branch locally
+      git checkout $branch || git checkout -b $branch origin/$branch
+
+      # Allow merging unrelated histories and resolve conflicts
+      git merge github/$branch --allow-unrelated-histories -s recursive -X ours || echo "Conflicts resolved automatically for $branch"
+
+      # Push changes to GitHub
+      git push github $branch --force || echo "Failed to push $branch. Check logs."
+    done
+  displayName: "Sync Azure Repos with GitHub for All Branches"

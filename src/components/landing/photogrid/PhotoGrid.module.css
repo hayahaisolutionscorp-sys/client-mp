@@ -1,0 +1,13 @@
+.zoom-container {
+    overflow: hidden;
+    border-radius: 0.5rem; /* Keeps the rounded corners */
+    cursor: pointer; /* Adds pointer cursor */
+  }
+  
+  .zoom-container img {
+    transition: transform 0.3s ease;
+  }
+  
+  .zoom-container:hover img {
+    transform: scale(1.1); /* Slight zoom effect */
+  }  

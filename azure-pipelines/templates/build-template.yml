@@ -1,0 +1,69 @@
+parameters:
+  - name: ecrRepo
+    type: string
+  - name: dockerTag
+    type: string
+  - name: variableGroup
+    type: string
+
+stages:
+  - stage: BuildAndPush
+    displayName: Build and Push Docker Image to ECR
+    jobs:
+      - job: DockerBuildAndPush
+        displayName: Build and Push
+        pool:
+          vmImage: 'ubuntu-latest'
+        variables:
+          - group: ${{ parameters.variableGroup }}
+        steps:
+          - checkout: self
+
+          - script: |
+              echo "Logging into ECR..."
+              aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 861789509630.dkr.ecr.ap-southeast-2.amazonaws.com
+
+              echo "Building Docker image..."
+              docker build -t ${{ parameters.ecrRepo }}:${{ parameters.dockerTag }} -f Dockerfile .
+
+              echo "Tagging Docker image..."
+              docker tag ${{ parameters.ecrRepo }}:${{ parameters.dockerTag }} 861789509630.dkr.ecr.ap-southeast-2.amazonaws.com/${{ parameters.ecrRepo }}:${{ parameters.dockerTag }}
+
+              echo "Pushing Docker image to ECR..."
+              docker push 861789509630.dkr.ecr.ap-southeast-2.amazonaws.com/${{ parameters.ecrRepo }}:${{ parameters.dockerTag }}
+            displayName: Build and Push Docker Image
+            env:
+              AWS_ACCESS_KEY_ID: $(ENV_AWS_ACCESS_KEY)
+              AWS_SECRET_ACCESS_KEY: $(ENV_AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: ap-southeast-2
+
+          - script: |
+              echo "Fetching pushed image digest..."
+              IMAGE_DIGEST=$(aws ecr describe-images \
+                --repository-name ${{ parameters.ecrRepo }} \
+                --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageDigest' \
+                --output text)
+
+              IMAGE_URI="861789509630.dkr.ecr.ap-southeast-2.amazonaws.com/${{ parameters.ecrRepo }}@${IMAGE_DIGEST}"
+              echo "Captured Image URI: $IMAGE_URI"
+
+              echo "{\"imageUri\": \"$IMAGE_URI\"}" > image-info.json
+            displayName: Capture Image Digest
+            env:
+              AWS_ACCESS_KEY_ID: $(ENV_AWS_ACCESS_KEY)
+              AWS_SECRET_ACCESS_KEY: $(ENV_AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: ap-southeast-2
+
+          - task: PublishPipelineArtifact@1
+            displayName: Publish image digest artifact
+            inputs:
+              targetPath: 'image-info.json'
+              artifact: 'image-metadata'
+              publishLocation: 'pipeline'
+
+          - task: PublishPipelineArtifact@1
+            displayName: Publish task definition template
+            inputs:
+              targetPath: 'infra/task-def-template.json'
+              artifact: 'task-definitions'
+              publishLocation: 'pipeline'
