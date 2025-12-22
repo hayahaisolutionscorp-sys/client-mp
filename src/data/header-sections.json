@@ -1,0 +1,10 @@
+[
+    {
+        "id": 1,
+        "shippingLineId": 3,
+        "showPromos": true,
+        "showRoutes": true,
+        "showResources": true,
+        "showAboutUs": true
+    }
+]

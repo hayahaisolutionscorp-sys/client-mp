@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "shippingLineId": 3,
+        "fontStyle": "Inter",
+        "backgroundColor": "#FFFFFF",
+        "buttonDefaultColor": "#007BFF",
+        "buttonDestructiveColor": "#FF0000",
+        "buttonOutlineColor": "#007BFF",
+        "buttonSecondaryColor": "#6C757D",
+        "buttonGhostColor": "transparent",
+        "buttonLinkColor": "#007BFF",
+        "borderColor": "#DEE2E6",
+        "iconColor": "#007BFF"
+    }
+]

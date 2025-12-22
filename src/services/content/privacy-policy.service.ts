@@ -1,48 +1,24 @@
 import { IPrivacyPolicy } from '@/models';
 import { PRIVACY_POLICY_API } from 'constants/api';
 
+import privacyData from '@/data/privacy-policies.json';
+
 export const PrivacyPolicyService = {
   async getAll(): Promise<IPrivacyPolicy[]> {
-    try {
-      const response = await fetch(PRIVACY_POLICY_API);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch privacy policies: ${response.statusText}`);
-      }
-      return await response.json();
-    } catch (e) {
-      console.error('Error fetching privacy policies:', e);
-      throw e;
-    }
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return privacyData as any as IPrivacyPolicy[];
   },
 
   async getByShippingLineId(shippingLineId: number): Promise<IPrivacyPolicy[]> {
-    try {
-      const response = await fetch(`${PRIVACY_POLICY_API}/${shippingLineId}`);
-      if (!response.ok) {
-        throw new Error(`Error fetching privacy policies by shipping line ID: ${response.statusText}`);
-      }
-      return await response.json();
-    } catch (e) {
-      console.error('Error fetching privacy policies by shipping line ID:', e);
-      throw e;
-    }
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return (privacyData as any as IPrivacyPolicy[]).filter(p => p.shippingLineId === shippingLineId);
   },
 
   async getByTitleAndShippingLineId(
     titleId: string,
     shippingLineId: number
   ): Promise<IPrivacyPolicy | null> {
-    try {
-      const response = await fetch(
-        `${PRIVACY_POLICY_API}/section?titleId=${titleId}&shippingLineId=${shippingLineId}`
-      );
-      if (!response.ok) {
-        throw new Error(`Error fetching section: ${response.statusText}`);
-      }
-      return await response.json();
-    } catch (e) {
-      console.error('Error fetching section by titleId and shippingLineId:', e);
-      throw e;
-    }
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return (privacyData as any as IPrivacyPolicy[]).find(p => p.shippingLineId === shippingLineId && p.titleId === titleId) || null;
   },
 };

@@ -50,7 +50,7 @@ export default function ProfilePage() {
     const getProfileImageUrl = () => {
         if (imagePreview) {
             return imagePreview;
-        } 
+        }
         if (account?.profile_picture) {
             return account.profile_picture;
         }
@@ -88,7 +88,7 @@ export default function ProfilePage() {
             fileInputRef.current.click();
         }
     };
-    
+
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -98,7 +98,7 @@ export default function ProfilePage() {
         }
     };
 
-     
+
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({
@@ -115,14 +115,14 @@ export default function ProfilePage() {
                 await uploadProfilePicture(selectedImage, loggedInAccount.id);
                 await fetchAccount(loggedInAccount.id);
             }
-            
+
             if (Object.keys(formData).length > 0 && passenger) {
                 const updatedPassenger = await updatePassenger(passenger.id, formData);
                 if (updatedPassenger) {
                     setPassenger(updatedPassenger);
                 }
             }
-            
+
             setIsEditing(false);
             setFormData({});
             setSelectedImage(undefined);
@@ -148,22 +148,22 @@ export default function ProfilePage() {
 
     const handleRemoveVerification = async () => {
         if (!loggedInAccount) return;
-        
+
         try {
             // Call the API to remove verification
             await removeVerification(loggedInAccount.id);
-            
+
             // Update UI after successful API call
             setVerificationStatus("unverified");
             setShowRemoveVerificationDialog(false);
-            
+
             // Reset verification details
             setVerificationDetails({
                 govId: '',
                 idNumber: '',
                 discountType: ''
             });
-            
+
         } catch (error) {
             console.error("Failed to remove verification:", error);
             // You might want to show an error message to the user
@@ -203,7 +203,7 @@ export default function ProfilePage() {
         if (loggedInAccount === null || loggedInAccount === undefined) {
             return;
         }
-        
+
         if (loggedInAccount.role === 'Passenger') {
             fetchPassenger(loggedInAccount.passengerId!);
             fetchAccount(loggedInAccount.id);
@@ -243,7 +243,7 @@ export default function ProfilePage() {
                             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                                 <div className="bg-white p-6 rounded-lg shadow-xl max-w-3xl w-full max-h-screen overflow-y-auto">
                                     <h2 className="text-xl font-bold mb-4">Profile Verification</h2>
-                                    <ProfileVerificationForm 
+                                    <ProfileVerificationForm
                                         onSubmit={handleVerificationFormSubmit}
                                         onCancel={handleVerificationFormCancel}
                                     />
@@ -259,14 +259,14 @@ export default function ProfilePage() {
                                         This will remove your verification status. You&lsquo;ll need to verify your account again if you want to access verified features.
                                     </p>
                                     <div className="flex justify-end gap-3">
-                                        <Button 
-                                            variant="outline" 
+                                        <Button
+                                            variant="outline"
                                             onClick={handleCancelRemoveVerification}
                                         >
                                             Cancel
                                         </Button>
-                                        <Button 
-                                            variant="destructive" 
+                                        <Button
+                                            variant="destructive"
                                             onClick={handleRemoveVerification}
                                         >
                                             Remove Verification
@@ -288,9 +288,8 @@ export default function ProfilePage() {
                                         className="hidden"
                                     />
                                     <div
-                                        className={`relative h-24 w-24 rounded-full overflow-hidden ${
-                                            isEditing ? 'group cursor-pointer' : ''
-                                        }`}
+                                        className={`relative h-24 w-24 rounded-full overflow-hidden ${isEditing ? 'group cursor-pointer' : ''
+                                            }`}
                                         onClick={isEditing ? handleImageClick : undefined}
                                     >
                                         <Image
@@ -413,8 +412,8 @@ export default function ProfilePage() {
                                                         type="date"
                                                         disabled={!isEditing}
                                                         onChange={(e) => handleInputChange('birthdayIso', e.target.value)}
-                                                        value={isEditing 
-                                                            ? (formData.birthdayIso ? formData.birthdayIso.split('T')[0] : '') 
+                                                        value={isEditing
+                                                            ? (formData.birthdayIso ? formData.birthdayIso.split('T')[0] : '')
                                                             : (passenger.birthdayIso ? passenger.birthdayIso.split('T')[0] : '')
                                                         }
                                                         className="mt-1 w-full" />
@@ -472,7 +471,7 @@ export default function ProfilePage() {
                                             </div>
                                         )}
                                     </div>
-                                    
+
                                     {/* Verification button - only shown if not verified */}
                                     {verificationStatus === "unverified" && (
                                         <div>
@@ -485,14 +484,14 @@ export default function ProfilePage() {
                                             </Button>
                                         </div>
                                     )}
-                                    
+
                                     {/* Show pending message if status is pending */}
                                     {verificationStatus === "pending" && (
                                         <div className="text-yellow-600 font-medium">
                                             Your verification request is pending approval.
                                         </div>
                                     )}
-                                    
+
                                     {/* Show verification details only when verified */}
                                     {verificationStatus === "verified" && (
                                         <div className="space-y-6">
@@ -502,37 +501,37 @@ export default function ProfilePage() {
                                                     <span className="block text-sm font-medium text-gray-700 mb-1">
                                                         Government Id
                                                     </span>
-                                                    <Input 
-                                                        id="govId" 
+                                                    <Input
+                                                        id="govId"
                                                         value={verificationDetails.govId}
                                                         disabled
-                                                        className="mt-1 w-full" 
+                                                        className="mt-1 w-full"
                                                     />
                                                 </div>
                                                 <div>
                                                     <span className="block text-sm font-medium text-gray-700 mb-1">
                                                         ID Number
                                                     </span>
-                                                    <Input 
-                                                        id="idNumber" 
+                                                    <Input
+                                                        id="idNumber"
                                                         value={verificationDetails.idNumber}
                                                         disabled
-                                                        className="mt-1 w-full" 
+                                                        className="mt-1 w-full"
                                                     />
                                                 </div>
                                                 <div>
                                                     <span className="block text-sm font-medium text-gray-700 mb-1">
                                                         Discount Type
                                                     </span>
-                                                    <Input 
-                                                        id="discountType" 
+                                                    <Input
+                                                        id="discountType"
                                                         value={verificationDetails.discountType}
                                                         disabled
-                                                        className="mt-1 w-full" 
+                                                        className="mt-1 w-full"
                                                     />
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Option to remove verification */}
                                             <Button
                                                 type="button"

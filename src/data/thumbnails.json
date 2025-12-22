@@ -1,0 +1,18 @@
+[
+    {
+        "id": 1,
+        "shippingLineId": 3,
+        "label": "Promo 1",
+        "filename": "promo1.jpg",
+        "location": "Carousel",
+        "imageOrder": 1
+    },
+    {
+        "id": 2,
+        "shippingLineId": 3,
+        "label": "Route 1",
+        "filename": "route1.jpg",
+        "location": "Photogrid",
+        "imageOrder": 1
+    }
+]

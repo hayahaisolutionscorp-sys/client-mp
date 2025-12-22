@@ -1,13 +1,10 @@
 import { ICabinType } from '@/models';
 import { CABIN_TYPES_API } from 'constants/api';
 
+import cabinTypesData from '@/data/cabin-types.json';
+
 export async function getAllCabinTypes(): Promise<ICabinType[] | undefined> {
-  const response = await fetch(CABIN_TYPES_API);
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch cabin-types');
-  }
-
-  return response.json();
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return cabinTypesData as any as ICabinType[];
 }
 

@@ -1,0 +1,14 @@
+[
+    {
+        "id": 1,
+        "shippingLineId": 3,
+        "title": "Ayahay Launches",
+        "content": "We are live!",
+        "publishedDate": "2024-01-01T00:00:00.000Z",
+        "isPublish": true,
+        "videoUrl": "",
+        "articleUrl": "",
+        "type": "News",
+        "category": "Company"
+    }
+]

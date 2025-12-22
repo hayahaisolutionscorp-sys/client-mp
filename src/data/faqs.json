@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "shippingLineId": 3,
+        "category": "Booking",
+        "question": "How do I book?",
+        "answer": "Select your route and date."
+    },
+    {
+        "id": 2,
+        "shippingLineId": 3,
+        "category": "Refunds",
+        "question": "Can I refund?",
+        "answer": "Yes, within 24 hours."
+    }
+]

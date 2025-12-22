@@ -25,7 +25,7 @@ export default function RegisterPage() {
   const [step, setStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
-  
+
   const [formData, setFormData] = useState<RegisterForm>({
     email: "",
     password: "",
@@ -79,18 +79,18 @@ export default function RegisterPage() {
   }
 
   const handleRegister = async (values: RegisterForm) => {
-      const { email, password } = values;
-      setLoading(true);
-  
-      try {
-        await register(email, password, values);
-        router.push('/');
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const { email, password } = values;
+    setLoading(true);
+
+    try {
+      await register(email, password, values);
+      router.push('/');
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="grid min-h-screen md:grid-cols-2">
@@ -120,37 +120,32 @@ export default function RegisterPage() {
             <div className="flex items-center">
               <div className="flex items-center space-x-2">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300 ${
-                    step === 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-500"
-                  }`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300 ${step === 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-500"
+                    }`}
                 >
                   <UserIcon className="h-4 w-4" />
                 </div>
                 <span
-                  className={`text-sm font-medium transition-colors duration-300 ${
-                    step === 1 ? "text-blue-500" : "text-gray-500"
-                  }`}
+                  className={`text-sm font-medium transition-colors duration-300 ${step === 1 ? "text-blue-500" : "text-gray-500"
+                    }`}
                 >
                   Account Info
                 </span>
               </div>
               <div
-                className={`mx-4 h-[2px] w-16 transition-colors duration-300 ${
-                  step === 2 ? "bg-blue-500" : "bg-gray-200"
-                }`}
+                className={`mx-4 h-[2px] w-16 transition-colors duration-300 ${step === 2 ? "bg-blue-500" : "bg-gray-200"
+                  }`}
               />
               <div className="flex items-center space-x-2">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300 ${
-                    step === 2 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-500"
-                  }`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300 ${step === 2 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-500"
+                    }`}
                 >
                   <UserPlusIcon className="h-4 w-4" />
                 </div>
                 <span
-                  className={`text-sm font-medium transition-colors duration-300 ${
-                    step === 2 ? "text-blue-500" : "text-gray-500"
-                  }`}
+                  className={`text-sm font-medium transition-colors duration-300 ${step === 2 ? "text-blue-500" : "text-gray-500"
+                    }`}
                 >
                   Passenger Info
                 </span>
@@ -299,8 +294,8 @@ export default function RegisterPage() {
                 <Button type="button" variant="outline" className="w-full" onClick={handleBack}>
                   Back
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-blue-500 hover:bg-blue-600"
                   disabled={loading}
                 >

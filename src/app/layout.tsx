@@ -13,11 +13,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body> {/* Ensure <body> is present */}
-      <AuthContextProvider>
-        <BodyWrapper> {/* Wrap everything inside BodyWrapper */}
-          <LayoutWrapper>
-            {children}
-          </LayoutWrapper>
+        <AuthContextProvider>
+          <BodyWrapper> {/* Wrap everything inside BodyWrapper */}
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
           </BodyWrapper>
         </AuthContextProvider>
       </body>

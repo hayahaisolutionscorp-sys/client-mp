@@ -1,0 +1,1044 @@
+[
+    {
+        "id": 24282,
+        "referenceNo": "1G11V199BF2742EF",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 14,
+        "destPortId": 7,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2025-12-24T21:30:00.000Z",
+        "bookingStartDateIso": "2025-12-17T21:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-23T21:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T00:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 24282,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "119",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 24158,
+        "referenceNo": "42IKY199BF24EF87",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 7,
+        "destPortId": 14,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2025-12-24T21:30:00.000Z",
+        "bookingStartDateIso": "2025-12-17T21:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-23T21:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T00:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 24158,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "114",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25166,
+        "referenceNo": "QMQSY19A9D1D95B7",
+        "shipId": 14,
+        "shippingLineId": 4,
+        "srcPortId": 17,
+        "destPortId": 18,
+        "rateTableId": 15,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 5,
+        "vehicleCapacity": 5,
+        "departureDateIso": "2025-12-24T22:00:00.000Z",
+        "bookingStartDateIso": "2025-12-17T22:00:00.000Z",
+        "bookingCutOffDateIso": "2025-12-23T22:00:00.000Z",
+        "arrivalTimeDateIso": "2025-12-24T23:15:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25166,
+                "cabinId": "14",
+                "cabin": {
+                    "id": "14",
+                    "shipId": 14,
+                    "cabinTypeId": "6",
+                    "cabinType": {
+                        "id": "6",
+                        "shippingLineId": 4,
+                        "name": "Lower Deck",
+                        "description": "Lower Deck"
+                    },
+                    "name": "Sunriser Fastcraft Lower Deck",
+                    "recommendedPassengerCapacity": "100"
+                },
+                "availablePassengerCapacity": "100",
+                "passengerCapacity": "100",
+                "adultFare": "350"
+            },
+            {
+                "tripId": 25166,
+                "cabinId": "22",
+                "cabin": {
+                    "id": "22",
+                    "shipId": 14,
+                    "cabinTypeId": "7",
+                    "cabinType": {
+                        "id": "7",
+                        "shippingLineId": 4,
+                        "name": "Upper Deck",
+                        "description": "Upper Deck"
+                    },
+                    "name": "Sunriser Fastcraft Upper Deck",
+                    "recommendedPassengerCapacity": "30"
+                },
+                "availablePassengerCapacity": "30",
+                "passengerCapacity": "30",
+                "adultFare": "400"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26778,
+        "referenceNo": "JIJ9F19B43EE4A7D",
+        "shipId": 15,
+        "shippingLineId": 4,
+        "srcPortId": 17,
+        "destPortId": 18,
+        "rateTableId": 16,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2025-12-24T23:00:00.000Z",
+        "bookingStartDateIso": "2025-12-17T23:00:00.000Z",
+        "bookingCutOffDateIso": "2025-12-23T23:00:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T01:15:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26778,
+                "cabinId": "15",
+                "cabin": {
+                    "id": "15",
+                    "shipId": 15,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 4,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Sunriser LCT Non-Aircon",
+                    "recommendedPassengerCapacity": "250"
+                },
+                "availablePassengerCapacity": "250",
+                "passengerCapacity": "250",
+                "adultFare": "350"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 23184,
+        "referenceNo": "QCOBZ1995735A600",
+        "shipId": 4,
+        "shippingLineId": 2,
+        "srcPortId": 3,
+        "destPortId": 4,
+        "rateTableId": 5,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2025-12-24T23:30:00.000Z",
+        "bookingStartDateIso": "2025-12-17T23:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T20:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T03:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 23184,
+                "cabinId": "4",
+                "cabin": {
+                    "id": "4",
+                    "shipId": 4,
+                    "cabinTypeId": "3",
+                    "cabinType": {
+                        "id": "3",
+                        "shippingLineId": 2,
+                        "name": "Aircon",
+                        "description": "Aircon"
+                    },
+                    "name": "Maica 5 Aircon",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "82",
+                "passengerCapacity": "120",
+                "adultFare": "2800"
+            },
+            {
+                "tripId": 23184,
+                "cabinId": "5",
+                "cabin": {
+                    "id": "5",
+                    "shipId": 4,
+                    "cabinTypeId": "4",
+                    "cabinType": {
+                        "id": "4",
+                        "shippingLineId": 2,
+                        "name": "Open Air",
+                        "description": "Open Air"
+                    },
+                    "name": "Maica 5 Open Air",
+                    "recommendedPassengerCapacity": "40"
+                },
+                "availablePassengerCapacity": "20",
+                "passengerCapacity": "20",
+                "adultFare": "2800"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25290,
+        "referenceNo": "W0NIU19A9D209BEF",
+        "shipId": 14,
+        "shippingLineId": 4,
+        "srcPortId": 18,
+        "destPortId": 17,
+        "rateTableId": 15,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 5,
+        "vehicleCapacity": 5,
+        "departureDateIso": "2025-12-25T00:00:00.000Z",
+        "bookingStartDateIso": "2025-12-18T00:00:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T20:00:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T01:15:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25290,
+                "cabinId": "14",
+                "cabin": {
+                    "id": "14",
+                    "shipId": 14,
+                    "cabinTypeId": "6",
+                    "cabinType": {
+                        "id": "6",
+                        "shippingLineId": 4,
+                        "name": "Lower Deck",
+                        "description": "Lower Deck"
+                    },
+                    "name": "Sunriser Fastcraft Lower Deck",
+                    "recommendedPassengerCapacity": "100"
+                },
+                "availablePassengerCapacity": "100",
+                "passengerCapacity": "100",
+                "adultFare": "350"
+            },
+            {
+                "tripId": 25290,
+                "cabinId": "22",
+                "cabin": {
+                    "id": "22",
+                    "shipId": 14,
+                    "cabinTypeId": "7",
+                    "cabinType": {
+                        "id": "7",
+                        "shippingLineId": 4,
+                        "name": "Upper Deck",
+                        "description": "Upper Deck"
+                    },
+                    "name": "Sunriser Fastcraft Upper Deck",
+                    "recommendedPassengerCapacity": "30"
+                },
+                "availablePassengerCapacity": "30",
+                "passengerCapacity": "30",
+                "adultFare": "400"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 24159,
+        "referenceNo": "E830B199BF24EFA8",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 7,
+        "destPortId": 14,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2025-12-25T00:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T00:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T00:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T03:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 24159,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "105",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 24283,
+        "referenceNo": "TLS3Y199BF274300",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 14,
+        "destPortId": 7,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2025-12-25T00:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T00:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T00:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T03:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 24283,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "119",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25168,
+        "referenceNo": "BVJWS19A9D1D95E0",
+        "shipId": 14,
+        "shippingLineId": 4,
+        "srcPortId": 17,
+        "destPortId": 18,
+        "rateTableId": 15,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 5,
+        "vehicleCapacity": 5,
+        "departureDateIso": "2025-12-25T02:00:00.000Z",
+        "bookingStartDateIso": "2025-12-18T02:00:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T02:00:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T03:15:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25168,
+                "cabinId": "14",
+                "cabin": {
+                    "id": "14",
+                    "shipId": 14,
+                    "cabinTypeId": "6",
+                    "cabinType": {
+                        "id": "6",
+                        "shippingLineId": 4,
+                        "name": "Lower Deck",
+                        "description": "Lower Deck"
+                    },
+                    "name": "Sunriser Fastcraft Lower Deck",
+                    "recommendedPassengerCapacity": "100"
+                },
+                "availablePassengerCapacity": "100",
+                "passengerCapacity": "100",
+                "adultFare": "350"
+            },
+            {
+                "tripId": 25168,
+                "cabinId": "22",
+                "cabin": {
+                    "id": "22",
+                    "shipId": 14,
+                    "cabinTypeId": "7",
+                    "cabinType": {
+                        "id": "7",
+                        "shippingLineId": 4,
+                        "name": "Upper Deck",
+                        "description": "Upper Deck"
+                    },
+                    "name": "Sunriser Fastcraft Upper Deck",
+                    "recommendedPassengerCapacity": "30"
+                },
+                "availablePassengerCapacity": "30",
+                "passengerCapacity": "30",
+                "adultFare": "400"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26798,
+        "referenceNo": "XCHYS19B43EFA5E8",
+        "shipId": 15,
+        "shippingLineId": 4,
+        "srcPortId": 18,
+        "destPortId": 17,
+        "rateTableId": 16,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2025-12-25T02:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T02:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T22:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T04:45:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26798,
+                "cabinId": "15",
+                "cabin": {
+                    "id": "15",
+                    "shipId": 15,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 4,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Sunriser LCT Non-Aircon",
+                    "recommendedPassengerCapacity": "250"
+                },
+                "availablePassengerCapacity": "250",
+                "passengerCapacity": "250",
+                "adultFare": "350"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25291,
+        "referenceNo": "GMJ5R19A9D209C02",
+        "shipId": 15,
+        "shippingLineId": 4,
+        "srcPortId": 18,
+        "destPortId": 17,
+        "rateTableId": 16,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2025-12-25T03:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T03:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T23:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T05:45:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25291,
+                "cabinId": "15",
+                "cabin": {
+                    "id": "15",
+                    "shipId": 15,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 4,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Sunriser LCT Non-Aircon",
+                    "recommendedPassengerCapacity": "250"
+                },
+                "availablePassengerCapacity": "250",
+                "passengerCapacity": "250",
+                "adultFare": "350"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25292,
+        "referenceNo": "WH4WL19A9D209C10",
+        "shipId": 14,
+        "shippingLineId": 4,
+        "srcPortId": 18,
+        "destPortId": 17,
+        "rateTableId": 15,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 5,
+        "vehicleCapacity": 5,
+        "departureDateIso": "2025-12-25T04:00:00.000Z",
+        "bookingStartDateIso": "2025-12-18T04:00:00.000Z",
+        "bookingCutOffDateIso": "2025-12-25T00:00:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T05:15:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25292,
+                "cabinId": "14",
+                "cabin": {
+                    "id": "14",
+                    "shipId": 14,
+                    "cabinTypeId": "6",
+                    "cabinType": {
+                        "id": "6",
+                        "shippingLineId": 4,
+                        "name": "Lower Deck",
+                        "description": "Lower Deck"
+                    },
+                    "name": "Sunriser Fastcraft Lower Deck",
+                    "recommendedPassengerCapacity": "100"
+                },
+                "availablePassengerCapacity": "100",
+                "passengerCapacity": "100",
+                "adultFare": "350"
+            },
+            {
+                "tripId": 25292,
+                "cabinId": "22",
+                "cabin": {
+                    "id": "22",
+                    "shipId": 14,
+                    "cabinTypeId": "7",
+                    "cabinType": {
+                        "id": "7",
+                        "shippingLineId": 4,
+                        "name": "Upper Deck",
+                        "description": "Upper Deck"
+                    },
+                    "name": "Sunriser Fastcraft Upper Deck",
+                    "recommendedPassengerCapacity": "30"
+                },
+                "availablePassengerCapacity": "30",
+                "passengerCapacity": "30",
+                "adultFare": "400"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 23185,
+        "referenceNo": "PGM8P1995735A65C",
+        "shipId": 4,
+        "shippingLineId": 2,
+        "srcPortId": 4,
+        "destPortId": 3,
+        "rateTableId": 5,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2025-12-25T04:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T04:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-25T01:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T08:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 23185,
+                "cabinId": "4",
+                "cabin": {
+                    "id": "4",
+                    "shipId": 4,
+                    "cabinTypeId": "3",
+                    "cabinType": {
+                        "id": "3",
+                        "shippingLineId": 2,
+                        "name": "Aircon",
+                        "description": "Aircon"
+                    },
+                    "name": "Maica 5 Aircon",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "96",
+                "passengerCapacity": "120",
+                "adultFare": "2800"
+            },
+            {
+                "tripId": 23185,
+                "cabinId": "5",
+                "cabin": {
+                    "id": "5",
+                    "shipId": 4,
+                    "cabinTypeId": "4",
+                    "cabinType": {
+                        "id": "4",
+                        "shippingLineId": 2,
+                        "name": "Open Air",
+                        "description": "Open Air"
+                    },
+                    "name": "Maica 5 Open Air",
+                    "recommendedPassengerCapacity": "40"
+                },
+                "availablePassengerCapacity": "20",
+                "passengerCapacity": "20",
+                "adultFare": "2800"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26779,
+        "referenceNo": "06TM319B43EE4A8C",
+        "shipId": 15,
+        "shippingLineId": 4,
+        "srcPortId": 17,
+        "destPortId": 18,
+        "rateTableId": 16,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2025-12-25T05:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T05:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T05:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T07:45:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26779,
+                "cabinId": "15",
+                "cabin": {
+                    "id": "15",
+                    "shipId": 15,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 4,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Sunriser LCT Non-Aircon",
+                    "recommendedPassengerCapacity": "250"
+                },
+                "availablePassengerCapacity": "250",
+                "passengerCapacity": "250",
+                "adultFare": "350"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25169,
+        "referenceNo": "4YDCY19A9D1D95F4",
+        "shipId": 14,
+        "shippingLineId": 4,
+        "srcPortId": 17,
+        "destPortId": 18,
+        "rateTableId": 15,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 5,
+        "vehicleCapacity": 5,
+        "departureDateIso": "2025-12-25T06:00:00.000Z",
+        "bookingStartDateIso": "2025-12-18T06:00:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T06:00:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T07:15:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25169,
+                "cabinId": "14",
+                "cabin": {
+                    "id": "14",
+                    "shipId": 14,
+                    "cabinTypeId": "6",
+                    "cabinType": {
+                        "id": "6",
+                        "shippingLineId": 4,
+                        "name": "Lower Deck",
+                        "description": "Lower Deck"
+                    },
+                    "name": "Sunriser Fastcraft Lower Deck",
+                    "recommendedPassengerCapacity": "100"
+                },
+                "availablePassengerCapacity": "100",
+                "passengerCapacity": "100",
+                "adultFare": "350"
+            },
+            {
+                "tripId": 25169,
+                "cabinId": "22",
+                "cabin": {
+                    "id": "22",
+                    "shipId": 14,
+                    "cabinTypeId": "7",
+                    "cabinType": {
+                        "id": "7",
+                        "shippingLineId": 4,
+                        "name": "Upper Deck",
+                        "description": "Upper Deck"
+                    },
+                    "name": "Sunriser Fastcraft Upper Deck",
+                    "recommendedPassengerCapacity": "30"
+                },
+                "availablePassengerCapacity": "30",
+                "passengerCapacity": "30",
+                "adultFare": "400"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 24284,
+        "referenceNo": "A8LCW199BF274311",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 14,
+        "destPortId": 7,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2025-12-25T06:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T06:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T06:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T09:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 24284,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "105",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 24160,
+        "referenceNo": "FIE2B199BF24EFC3",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 7,
+        "destPortId": 14,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2025-12-25T06:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T06:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T06:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T09:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 24160,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "111",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25293,
+        "referenceNo": "3NX2O19A9D209C1F",
+        "shipId": 14,
+        "shippingLineId": 4,
+        "srcPortId": 18,
+        "destPortId": 17,
+        "rateTableId": 15,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 5,
+        "vehicleCapacity": 5,
+        "departureDateIso": "2025-12-25T08:00:00.000Z",
+        "bookingStartDateIso": "2025-12-18T08:00:00.000Z",
+        "bookingCutOffDateIso": "2025-12-25T04:00:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T09:15:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25293,
+                "cabinId": "14",
+                "cabin": {
+                    "id": "14",
+                    "shipId": 14,
+                    "cabinTypeId": "6",
+                    "cabinType": {
+                        "id": "6",
+                        "shippingLineId": 4,
+                        "name": "Lower Deck",
+                        "description": "Lower Deck"
+                    },
+                    "name": "Sunriser Fastcraft Lower Deck",
+                    "recommendedPassengerCapacity": "100"
+                },
+                "availablePassengerCapacity": "99",
+                "passengerCapacity": "100",
+                "adultFare": "350"
+            },
+            {
+                "tripId": 25293,
+                "cabinId": "22",
+                "cabin": {
+                    "id": "22",
+                    "shipId": 14,
+                    "cabinTypeId": "7",
+                    "cabinType": {
+                        "id": "7",
+                        "shippingLineId": 4,
+                        "name": "Upper Deck",
+                        "description": "Upper Deck"
+                    },
+                    "name": "Sunriser Fastcraft Upper Deck",
+                    "recommendedPassengerCapacity": "30"
+                },
+                "availablePassengerCapacity": "30",
+                "passengerCapacity": "30",
+                "adultFare": "400"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26799,
+        "referenceNo": "NZ2ZC19B43EFA60E",
+        "shipId": 15,
+        "shippingLineId": 4,
+        "srcPortId": 18,
+        "destPortId": 17,
+        "rateTableId": 16,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2025-12-25T08:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T08:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-25T04:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T10:45:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26799,
+                "cabinId": "15",
+                "cabin": {
+                    "id": "15",
+                    "shipId": 15,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 4,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Sunriser LCT Non-Aircon",
+                    "recommendedPassengerCapacity": "250"
+                },
+                "availablePassengerCapacity": "250",
+                "passengerCapacity": "250",
+                "adultFare": "350"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 24285,
+        "referenceNo": "DC294199BF274321",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 14,
+        "destPortId": 7,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2025-12-25T09:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T09:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T09:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T12:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 24285,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "111",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 24161,
+        "referenceNo": "OC2Y7199BF24F000",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 7,
+        "destPortId": 14,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2025-12-25T09:30:00.000Z",
+        "bookingStartDateIso": "2025-12-18T09:30:00.000Z",
+        "bookingCutOffDateIso": "2025-12-24T09:30:00.000Z",
+        "arrivalTimeDateIso": "2025-12-25T12:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 24161,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "118",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    }
+]

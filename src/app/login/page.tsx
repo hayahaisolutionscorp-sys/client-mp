@@ -99,8 +99,8 @@ export default function LoginPage() {
     }
 
     try {
-        await resetPassword(email);
-        return true;
+      await resetPassword(email);
+      return true;
     } catch (error) {
       console.error('Error sending reset email:', error);
       return false;
@@ -149,17 +149,17 @@ export default function LoginPage() {
               <div className="flex items-center justify-between">
                 <div className="text-sm font-medium">Password</div>
                 <button
-                    type="button"
-                    onClick={() => setShowForgotPassword(true)}
-                    className="text-xs text-blue-500 hover:underline"
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-xs text-blue-500 hover:underline"
                 >
-                    Forgot password?
+                  Forgot password?
                 </button>
                 <ForgotPasswordModal
-                    isOpen={showForgotPassword}
-                    onClose={() => setShowForgotPassword(false)}
-                    onSubmit={handleForgotPassword}
-                    email={email}
+                  isOpen={showForgotPassword}
+                  onClose={() => setShowForgotPassword(false)}
+                  onSubmit={handleForgotPassword}
+                  email={email}
                 />
               </div>
               <div className="relative">

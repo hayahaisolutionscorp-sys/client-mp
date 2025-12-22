@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "shippingLineId": 3,
+        "imageFilename": "about_main.jpg",
+        "imageLabel": "Our Team",
+        "imageCaption": "Dedicated to serving you",
+        "welcomeTitle": "Welcome to Ayahay",
+        "welcomeDescription": "The best way to travel by sea.",
+        "ourStoryTitle": "Our Story",
+        "ourStoryDescription": "Started in 2024...",
+        "ourExpertiseTitle": "Expertise",
+        "ourExpertiseDescription": "Safety and comfort.",
+        "ourCoreValues": "[]",
+        "tabsBackgroundColor": "#f0f0f0"
+    }
+]

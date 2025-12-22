@@ -1,0 +1,110 @@
+[
+    {
+        "id": 1,
+        "name": "Bogo, Cebu",
+        "code": "BOG",
+        "coordinates": "11.073693182779547, 124.00137655728518"
+    },
+    {
+        "id": 2,
+        "name": "Palompon, Leyte",
+        "code": "PAL",
+        "coordinates": "11.052586848655011, 124.38273845062568"
+    },
+    {
+        "id": 3,
+        "name": "Coron, Palawan",
+        "code": "COR",
+        "coordinates": "11.991718767688672, 120.2116031248779"
+    },
+    {
+        "id": 4,
+        "name": "El Nido, Palawan",
+        "code": "ELN",
+        "coordinates": "11.181070833721607, 119.38674769153273"
+    },
+    {
+        "id": 7,
+        "name": "Danao, Cebu",
+        "code": "DAN",
+        "coordinates": "10.520777734852047, 124.02981904379241"
+    },
+    {
+        "id": 8,
+        "name": "Isabel, Leyte",
+        "code": "ISL",
+        "coordinates": "10.89637445179971, 124.45091327180545"
+    },
+    {
+        "id": 11,
+        "name": "Kawit, Medellin",
+        "code": "KWT",
+        "coordinates": "11.183295213220719, 123.94324393517877"
+    },
+    {
+        "id": 12,
+        "name": "Santa Fe, Bantayan",
+        "code": "SFE",
+        "coordinates": "11.164850335829845, 123.80565824117733"
+    },
+    {
+        "id": 13,
+        "name": "Mactan, Cebu",
+        "code": "MAC",
+        "coordinates": "10.330629564075343, 123.97604293272475"
+    },
+    {
+        "id": 14,
+        "name": "Consuelo, Camotes",
+        "code": "CON",
+        "coordinates": "10.636746788365484, 124.29765316479677"
+    },
+    {
+        "id": 15,
+        "name": "Toledo, Cebu",
+        "code": "TOL",
+        "coordinates": "10.377801855922261, 123.63440182861845"
+    },
+    {
+        "id": 16,
+        "name": "San Carlos, Negros",
+        "code": "SAN",
+        "coordinates": "10.4777184621598, 123.42221072158726"
+    },
+    {
+        "id": 17,
+        "name": "Cordova, Cebu",
+        "code": "COR",
+        "coordinates": "10.24231143532704, 123.95643101717046"
+    },
+    {
+        "id": 18,
+        "name": "Getafe, Bohol",
+        "code": "GET",
+        "coordinates": "10.155328238584564, 124.15878747293283"
+    },
+    {
+        "id": 19,
+        "name": "Port1 Tabuelan, Cebu",
+        "code": "TAB1",
+        "coordinates": "10.832053393029785, 123.87054807699961"
+    },
+    {
+        "id": 20,
+        "name": "Port2 Tabuelan, Cebu",
+        "code": "TAB2",
+        "coordinates": "10.835799948525652, 123.87180111583037"
+    },
+    {
+        "id": 21,
+        "name": "Escalante, Neg. Occ.",
+        "code": "ESC",
+        "coordinates": "10.825213412715204, 123.55217419833804"
+    },
+    {
+        "id": 22,
+        "name": "Carmen, Cebu",
+        "code": "CAR",
+        "coordinates": "10.584463444240647, 124.02451190181247"
+    }
+]

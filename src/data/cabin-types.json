@@ -1,0 +1,14 @@
+[
+    {
+        "id": 1,
+        "name": "Economy",
+        "description": "Standard seating",
+        "isAircon": true
+    },
+    {
+        "id": 2,
+        "name": "Tourist",
+        "description": "Comfortable seating",
+        "isAircon": true
+    }
+]

@@ -19,7 +19,7 @@ import { IVehicle } from '../vehicle/vehicle.model';
  * tables/models (e.g. TravelAgencyShippingLine)
  */
 export interface IAccount {
-  // firebase user ID
+  // user ID
   id: string;
   passengerId?: number;
   passenger?: IPassenger;
@@ -35,7 +35,7 @@ export interface IAccount {
   email: string;
   emailConsent: boolean;
   role: keyof typeof ACCOUNT_ROLE;
-  // TODO: properly save isEmailVerified from Firebase next time
+
   isEmailVerified?: boolean;
   apiKey?: string;
 
