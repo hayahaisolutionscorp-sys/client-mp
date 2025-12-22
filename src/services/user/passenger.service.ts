@@ -33,27 +33,33 @@ export async function updatePassenger(
   passengerId: number,
   passengerData: Partial<IPassenger>
 ): Promise<IPassenger | undefined> {
-  try {
-    const { data: updatedPassenger } = await axios.patch<IPassenger>(
-      `${PASSENGER_API}/${passengerId}`,
-      passengerData
-    );
-    return updatedPassenger;
-  } catch (e) {
-    console.error('Error updating passenger:', e);
-    throw e;
-  }
+  // try {
+  //   const { data: updatedPassenger } = await axios.patch<IPassenger>(
+  //     `${PASSENGER_API}/${passengerId}`,
+  //     passengerData
+  //   );
+  //   return updatedPassenger;
+  // } catch (e) {
+  //   console.error('Error updating passenger:', e);
+  //   throw e;
+  // }
+
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return undefined;
 }
 
 export async function getPassenger(
   passengerId: number
 ): Promise<IPassenger | undefined> {
-  try {
-    const { data: passenger } = await axios.get<IPassenger>(
-      `${PASSENGER_API}/${passengerId}`
-    );
-    return passenger;
-  } catch (e) {
-    console.error(e);
-  }
+  // try {
+  //   const { data: passenger } = await axios.get<IPassenger>(
+  //     `${PASSENGER_API}/${passengerId}`
+  //   );
+  //   return passenger;
+  // } catch (e) {
+  //   console.error(e);
+  // }
+
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return undefined;
 }

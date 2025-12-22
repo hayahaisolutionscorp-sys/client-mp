@@ -4,6 +4,7 @@ import { getAllShippingLines, getShippingLineServer } from './shipping-line.serv
 import { getPort, getPorts } from './port.service';
 import { getRateTableById } from '../booking/rate-table.service';
 import { cacheItem, fetchItem } from 'helpers/cache.helpers';
+import axios from '@/services/core/axios';
 
 import { getAllCabinTypes } from './cabin-type.service';
 import { getAllShippingLinesServer } from './shipping-line.service';
@@ -31,6 +32,20 @@ export async function getAvailableTrips(
   searchQuery: SearchAvailableTrips,
   pagination: PaginatedRequest
 ): Promise<PaginatedResponse<ITrip> | undefined> {
+  // try {
+  //   const { data } = await axios.get(TRIP_API, {
+  //     params: {
+  //       shippingLineId,
+  //       ...searchQuery,
+  //       ...pagination
+  //     }
+  //   });
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
+
   // Simulate search
   await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -80,6 +95,19 @@ export async function getScheduleAndFares(
   shippingLineId?: number,
   retryCount = 0
 ): Promise<ITrip[]> {
+  // try {
+  //   const { data } = await axios.get(`${TRIP_API}/schedule`, {
+  //     params: {
+  //       departureDate: departureDateISO,
+  //       shippingLineId
+  //     }
+  //   });
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return [];
+  // }
+
   await new Promise(resolve => setTimeout(resolve, 500));
   let filteredTrips = tripsData as any as ITrip[];
 
@@ -132,3 +160,4 @@ export interface Filters {
 }
 
 type TripCache = { [tripId: number]: ITrip };
+

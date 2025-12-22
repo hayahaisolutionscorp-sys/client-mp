@@ -3,9 +3,18 @@ import { getAllShippingLines } from '../shipping-line/shipping-line.service';
 import { getVehicleType } from './vehicle-type.service';
 import { fetchItem } from 'helpers/cache.helpers';
 import { IBooking, IBookingTripPassenger, IBookingTripVehicle } from '@/models';
+import axios from '@/services/core/axios';
 // import { PaginatedRequest, PaginatedResponse } from 'http/pagination';
 
 export async function createTentativeBooking(tempBooking: IBooking): Promise<IBooking> {
+  // try {
+  //   const { data } = await axios.post(BOOKING_API, tempBooking);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   throw e;
+  // }
+
   await new Promise(resolve => setTimeout(resolve, 500));
 
   if (tempBooking.bookingTrips === undefined || tempBooking.bookingTrips.length === 0) {
@@ -31,6 +40,14 @@ export async function createTentativeBooking(tempBooking: IBooking): Promise<IBo
 }
 
 export async function getBookingById(bookingId: string): Promise<IBooking> {
+  // try {
+  //   const { data } = await axios.get(`${BOOKING_API}/${bookingId}`);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   throw e;
+  // }
+
   await new Promise(resolve => setTimeout(resolve, 300));
   // Return a dummy booking or null. For a smoother demo, we can return a generic dummy booking
   return {
@@ -72,6 +89,14 @@ export async function getSavedBookingsInBrowser(): Promise<IBooking[] | undefine
 }
 
 export async function requestBooking(tentativeBookingId: number, contactEmail?: string): Promise<IBooking | undefined> {
+  // try {
+  //   const { data } = await axios.post(`${BOOKING_API}/request`, { tentativeBookingId, contactEmail });
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
+
   await new Promise(resolve => setTimeout(resolve, 500));
   return {
     id: String(tentativeBookingId),
@@ -88,6 +113,14 @@ export async function requestBooking(tentativeBookingId: number, contactEmail?: 
 }
 
 export async function getBookingRequestById(tempBookingId: number): Promise<IBooking | undefined> {
+  // try {
+  //   const { data } = await axios.get(`${BOOKING_API}/request/${tempBookingId}`);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
+
   await new Promise(resolve => setTimeout(resolve, 300));
   return {
     id: String(tempBookingId),
@@ -107,6 +140,14 @@ export async function getBookingTripPassengerById(
   tripId: number,
   passengerId: number
 ): Promise<IBookingTripPassenger | undefined> {
+  // try {
+  //   const { data } = await axios.get(`${BOOKING_API}/${bookingId}/trips/${tripId}/passengers/${passengerId}`);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
+
   await new Promise(resolve => setTimeout(resolve, 100));
   return undefined;
 }
@@ -116,6 +157,15 @@ export async function getBookingTripVehicleById(
   tripId: number,
   vehicleId: number
 ): Promise<IBookingTripVehicle | undefined> {
+  // try {
+  //   const { data } = await axios.get(`${BOOKING_API}/${bookingId}/trips/${tripId}/vehicles/${vehicleId}`);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
+
   await new Promise(resolve => setTimeout(resolve, 100));
   return undefined;
 }
+
