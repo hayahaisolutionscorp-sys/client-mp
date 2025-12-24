@@ -1,4 +1,6 @@
-const BASE_URL = process.env.NEXT_PUBLIC_AMAZONAWS_STORAGE || 'https://ayahay-assets.s3.ap-southeast-2.amazonaws.com';
+// const BASE_URL = process.env.NEXT_PUBLIC_AMAZONAWS_STORAGE || 'https://ayahay-assets.s3.ap-southeast-2.amazonaws.com';
+const BASE_URL = process.env.NEXT_PUBLIC_AMAZONAWS_STORAGE || '';
+
 
 export const SHIPPING_LINE_LOGO = `${BASE_URL}/shipping_line_logo/`;
 export const CAROUSEL_IMAGES = `${BASE_URL}/carousel/`;

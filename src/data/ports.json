@@ -106,5 +106,11 @@
         "name": "Carmen, Cebu",
         "code": "CAR",
         "coordinates": "10.584463444240647, 124.02451190181247"
+    },
+    {
+        "id": 23,
+        "name": "Mars, Space",
+        "code": "MAR",
+        "coordinates": "10.584463444240647, 124.02451190181247"
     }
 ]

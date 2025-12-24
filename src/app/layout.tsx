@@ -1,11 +1,11 @@
 import "./globals.css";
 
-import { metadata } from "./metadata";
+import { generateMetadata } from "./metadata";
 import AuthContextProvider from "@/contexts/AuthContexts";
 import LayoutWrapper from "./layoutWrapper";
 import BodyWrapper from '@/components/BodyWrapper';
 
-export { metadata };
+export { generateMetadata };
 
 export default function RootLayout({
   children,

@@ -2,6 +2,17 @@ import ScheduleAndFares from '@/components/schedule-and-fares/ScheduleAndFares';
 import { Card, CardContent, CardFooter } from '@/components/ui/Card';
 import { CalendarIcon } from 'lucide-react';
 
+import { getPageMetadata } from '@/services/content/seo.service';
+import { Metadata } from 'next';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageMetadata('find-trips');
+  return {
+    title: seo.title as any,
+    description: seo.description,
+  };
+}
+
 const ScheduleAndFaresPage = () => {
   return (
     <div className="container max-w-[1500px] mx-auto py-4 sm:py-8 px-4 sm:px-6">

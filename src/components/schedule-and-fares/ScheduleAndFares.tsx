@@ -10,7 +10,12 @@ import ScheduleTable from './ScheduleTable';
 import { ScheduleItem } from './ScheduleItem';
 import { IShip, ITrip } from '@/models';
 
-const ScheduleAndFares = () => {
+interface ScheduleAndFaresProps {
+  srcPortId?: number;
+  destPortId?: number;
+}
+
+const ScheduleAndFares = ({ srcPortId, destPortId }: ScheduleAndFaresProps) => {
   const [allShips, setAllShips] = useState<IShip[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
@@ -48,7 +53,7 @@ const ScheduleAndFares = () => {
           throw new Error('Invalid date format');
         }
 
-        const trips: ITrip[] = await getScheduleAndFares(selectedDate, parseInt(shippingLineId));
+        const trips: ITrip[] = await getScheduleAndFares(selectedDate, parseInt(shippingLineId), srcPortId, destPortId);
 
         const formatted = trips.map((trip) => ({
           time: `${toPhilippinesTime(trip.departureDateIso, DATE_SECONDARY_DEFAULT_FORMAT)} - (${toPhilippinesTime(
@@ -60,10 +65,10 @@ const ScheduleAndFares = () => {
           fare:
             Array.isArray(trip.availableCabins) && trip.availableCabins.length
               ? trip.availableCabins
-                  .map(
-                    (cabin) => `${cabin.cabin?.cabinType?.name ?? 'Unknown'}: ${formatCurrency(cabin.adultFare, 'Php')}`
-                  )
-                  .join(', ')
+                .map(
+                  (cabin) => `${cabin.cabin?.cabinType?.name ?? 'Unknown'}: ${formatCurrency(cabin.adultFare, 'Php')}`
+                )
+                .join(', ')
               : 'No fares available'
         }));
 
@@ -85,7 +90,7 @@ const ScheduleAndFares = () => {
     };
 
     fetchSchedule();
-  }, [selectedDate, shippingLineId, allShips]);
+  }, [selectedDate, shippingLineId, allShips, srcPortId, destPortId]);
 
   return (
     <div className="space-y-6">

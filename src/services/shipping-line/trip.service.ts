@@ -4,6 +4,7 @@ import { getAllShippingLines, getShippingLineServer } from './shipping-line.serv
 import { getPort, getPorts } from './port.service';
 import { getRateTableById } from '../booking/rate-table.service';
 import { cacheItem, fetchItem } from 'helpers/cache.helpers';
+import { toPhilippinesTime } from 'helpers/date.helpers';
 import axios from '@/services/core/axios';
 
 import { getAllCabinTypes } from './cabin-type.service';
@@ -64,8 +65,12 @@ export async function getAvailableTrips(
   }
 
   if (searchQuery.departureDate) {
-    // Simple string match or date comparison
-    filteredTrips = filteredTrips.filter(t => t.departureDateIso.startsWith(searchQuery.departureDate as string));
+    const searchDatePH = toPhilippinesTime(searchQuery.departureDate as string, 'YYYY-MM-DD');
+
+    filteredTrips = filteredTrips.filter(t => {
+      const tripDatePH = toPhilippinesTime(t.departureDateIso, 'YYYY-MM-DD');
+      return tripDatePH === searchDatePH;
+    });
   }
 
   // Enrich with associated entities
@@ -93,6 +98,8 @@ export async function fetchAssociatedEntitiesToTrip(trip: ITrip): Promise<void> 
 export async function getScheduleAndFares(
   departureDateISO?: string,
   shippingLineId?: number,
+  srcPortId?: number,
+  destPortId?: number,
   retryCount = 0
 ): Promise<ITrip[]> {
   // try {
@@ -112,12 +119,24 @@ export async function getScheduleAndFares(
   let filteredTrips = tripsData as any as ITrip[];
 
   if (departureDateISO) {
-    const dateOnly = departureDateISO.split('T')[0];
-    filteredTrips = filteredTrips.filter(t => t.departureDateIso.startsWith(dateOnly));
+    const searchDatePH = toPhilippinesTime(departureDateISO, 'YYYY-MM-DD');
+
+    filteredTrips = filteredTrips.filter(t => {
+      const tripDatePH = toPhilippinesTime(t.departureDateIso, 'YYYY-MM-DD');
+      return tripDatePH === searchDatePH;
+    });
   }
 
   if (shippingLineId) {
     filteredTrips = filteredTrips.filter(t => t.shippingLineId === shippingLineId);
+  }
+
+  if (srcPortId) {
+    filteredTrips = filteredTrips.filter(t => t.srcPortId === srcPortId);
+  }
+
+  if (destPortId) {
+    filteredTrips = filteredTrips.filter(t => t.destPortId === destPortId);
   }
 
   // Enrich with associated entities

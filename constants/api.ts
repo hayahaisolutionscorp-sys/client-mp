@@ -34,3 +34,4 @@ export const THEME_SETTINGS_API = `${BASE_URL}/theme-settings`;
 export const FAQ_API = `${BASE_URL}/faq`;
 export const PRESS_API = `${BASE_URL}/press`;
 export const PRIVACY_POLICY_API = `${BASE_URL}/privacy-policy`;
+export const SEO_API = `${BASE_URL}/seo`;

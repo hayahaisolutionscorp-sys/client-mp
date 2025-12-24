@@ -1,0 +1,30 @@
+{
+    "global": {
+        "title": "Ayahay Online Booking",
+        "description": "Hasul nga proseso? Kalas ug oras? Walay kasiguradohan makakuha ug ticket? Book now at Ayahay.com. Kay ang pagsakay dapay, ayahay!",
+        "openGraph": {
+            "title": "Ayahay Online Booking",
+            "description": "Hasul nga proseso? Kalas ug oras? Walay kasiguradohan makakuha ug ticket? Book now at Ayahay.com.",
+            "siteName": "Ayahay",
+            "images": [
+                {
+                    "url": "/assets/images/logo.png",
+                    "width": 1200,
+                    "height": 630
+                }
+            ],
+            "locale": "en_PH",
+            "type": "website"
+        }
+    },
+    "pages": {
+        "landing": {
+            "title": "Book Ferry Tickets Online | Ayahay",
+            "description": "Hasul nga proseso? landing Book your ferry tickets online with Ayahay. Fast, easy, and secure booking for shipping lines in the Philippines."
+        },
+        "find-trips": {
+            "title": "Find Ferry Trips | Ayahay",
+            "description": "Hasul nga proseso? find-trips Check ferry schedules and fares. Find the best trips for your travel dates."
+        }
+    }
+}
