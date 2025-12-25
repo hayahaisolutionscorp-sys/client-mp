@@ -23,21 +23,21 @@ const Footer = () => {
   }, []);
 
   useEffect(() => {
-      const fetchHeroSection = async () => {
-        const parsedId = parseInt(shippingLineId, 10);
-        if (isNaN(parsedId)) {
-          console.error("Invalid shippingLineId:", shippingLineId);
-          return;
-        }
-    
-        const footerSection = await getFooterSectionByShippingLineId(parsedId);
-        if (footerSection) {
-          setFooterSection(footerSection);
-        }
-      };
-    
-      fetchHeroSection();
-    }, [shippingLineId])
+    const fetchHeroSection = async () => {
+      const parsedId = parseInt(shippingLineId, 10);
+      if (isNaN(parsedId)) {
+        console.error("Invalid shippingLineId:", shippingLineId);
+        return;
+      }
+
+      const footerSection = await getFooterSectionByShippingLineId(parsedId);
+      if (footerSection) {
+        setFooterSection(footerSection);
+      }
+    };
+
+    fetchHeroSection();
+  }, [shippingLineId])
 
   return (
     <>
@@ -46,7 +46,7 @@ const Footer = () => {
       >
         {/* Main content area */}
         <div className="flex flex-col lg:flex-row lg:justify-between gap-8">
-            
+
           {/* Logo and Tagline */}
           <div className="flex flex-col items-center mb-2 lg:mb-0 lg:items-start">
             <div
@@ -78,7 +78,7 @@ const Footer = () => {
             {(footerSection?.hasAboutUs || footerSection?.hasPress) && (
               <div>
                 <h3 className="font-semibold mb-5">Company</h3>
-                <ul className="space-y-3 text-sm sm:text-base opacity-50">
+                <ul className="space-y-3 text-sm sm:text-base opacity-80">
                   {footerSection?.hasAboutUs && (
                     <li><Link href="/about-us" className="hover:underline">About us</Link></li>
                   )}
@@ -92,7 +92,7 @@ const Footer = () => {
             {(footerSection?.hasFaq) && (
               <div>
                 <h3 className="font-semibold mb-5">Support</h3>
-                <ul className="space-y-3 text-sm sm:text-base opacity-50">
+                <ul className="space-y-3 text-sm sm:text-base opacity-80">
                   {footerSection?.hasFaq && (
                     <li><Link href="/faq" className="hover:underline">FAQ</Link></li>
                   )}
@@ -103,7 +103,7 @@ const Footer = () => {
             {(footerSection?.hasPrivacyPolicy || footerSection?.hasTermsAndConditions) && (
               <div>
                 <h3 className="font-semibold mb-5">Legal Docs</h3>
-                <ul className="space-y-3 text-sm sm:text-base opacity-50">
+                <ul className="space-y-3 text-sm sm:text-base opacity-80">
                   {footerSection?.hasPrivacyPolicy && (
                     <li><Link href="/privacy-policy" className="hover:underline">Privacy Policy</Link></li>
                   )}
@@ -119,69 +119,69 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-5">Customer Care</h3>
             {(footerSection?.primaryContactNumberNetwork && footerSection?.primaryContactNumber) && (
-              <p className="mb-5 text-sm sm:text-base opacity-50">
+              <p className="mb-5 text-sm sm:text-base opacity-80">
                 {footerSection.primaryContactNumberNetwork}: {footerSection.primaryContactNumber}
               </p>
             )}
             {(footerSection?.secondaryContactNumberNetwork && footerSection?.secondaryContactNumber) && (
-              <p className="mb-5 text-sm sm:text-base opacity-50">
+              <p className="mb-5 text-sm sm:text-base opacity-80">
                 {footerSection.secondaryContactNumberNetwork}: {footerSection.secondaryContactNumber}
               </p>
             )}
 
             <h4 className="font-semibold mt-8 mb-5">Need support?</h4>
             {footerSection?.email && (
-              <a href={`mailto:${footerSection.email}`} className="text-sm sm:text-base opacity-50 hover:underline">
+              <a href={`mailto:${footerSection.email}`} className="text-sm sm:text-base opacity-80 hover:underline">
                 {footerSection.email}
               </a>
             )}
           </div>
         </div>
 
-      {/* Bottom Section */}
-      <div className="mt-8 pt-6 border-t border-white opacity-50 flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm">
-        {(shippingLineId && shippingLineId !== "3") ? (
-          <div className="flex items-center justify-center mb-4 sm:mb-0">
-            <p className="mr-2 text-center sm:text-left">
-              © 2025 Powered by Ayahay.
+        {/* Bottom Section */}
+        <div className="mt-8 pt-6 border-t border-white opacity-80 flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm">
+          {(shippingLineId && shippingLineId !== "3") ? (
+            <div className="flex items-center justify-center mb-4 sm:mb-0">
+              <p className="mr-2 text-center sm:text-left">
+                © 2025 Powered by Ayahay.
+              </p>
+              <Image
+                src="/assets/images/ayahay_logo_only.png"
+                alt="Ayahay Logo"
+                width={70}
+                height={70}
+                className="h-[35px] w-[35px] object-contain"
+              />
+            </div>
+          ) : (
+            <p className="mb-4 sm:mb-0 text-center sm:text-left">
+              © 2025 Ayahay. All rights reserved.
             </p>
-            <Image
-              src="/assets/images/ayahay_logo_only.png"
-              alt="Ayahay Logo"
-              width={70}
-              height={70}
-              className="h-[35px] w-[35px] object-contain"
-            />
+          )}
+          <div className="flex space-x-4">
+            {footerSection?.twitterUrl && (
+              <a href={`${footerSection.twitterUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Twitter">
+                <FaXTwitter className="opacity-80 w-5 h-5" />
+              </a>
+            )}
+            {footerSection?.linkedInUrl && (
+              <a href={`${footerSection.linkedInUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on LinkedIn">
+                <FaLinkedin className="opacity-80 w-5 h-5" />
+              </a>
+            )}
+            {footerSection?.facebookUrl && (
+              <a href={`${footerSection.facebookUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Facebook">
+                <FaFacebook className="opacity-80 w-5 h-5" />
+              </a>
+            )}
+            {footerSection?.instagramUrl && (
+              <a href={`${footerSection.instagramUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Instagram">
+                <FaInstagram className="opacity-80 w-5 h-5" />
+              </a>
+            )}
           </div>
-        ) : (
-          <p className="mb-4 sm:mb-0 text-center sm:text-left">
-            © 2025 Ayahay. All rights reserved.
-          </p>
-        )}
-        <div className="flex space-x-4">
-          {footerSection?.twitterUrl && (
-            <a href={`${footerSection.twitterUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">
-              <FaXTwitter className="opacity-50 w-5 h-5" />
-            </a>
-          )}
-          {footerSection?.linkedInUrl && (
-            <a href={`${footerSection.linkedInUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">
-              <FaLinkedin className="opacity-50 w-5 h-5" />
-            </a>
-          )}
-          {footerSection?.facebookUrl && (
-            <a href={`${footerSection.facebookUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">
-              <FaFacebook className="opacity-50 w-5 h-5" />
-            </a>
-          )}
-          {footerSection?.instagramUrl && (
-            <a href={`${footerSection.instagramUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">
-              <FaInstagram className="opacity-50 w-5 h-5" />
-            </a>
-          )}
         </div>
-      </div>
-    </footer>
+      </footer>
     </>
   );
 };

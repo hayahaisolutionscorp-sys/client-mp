@@ -34,7 +34,7 @@ export default function PressPage() {
     <div className="min-h-screen bg-[#F8FCFF] px-4 sm:px-6 py-8 sm:py-12">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-[#29b6f6]">Press Releases</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-customBlue">Press Releases</h1>
           <p className="text-gray-600">Stay updated with the latest news and announcements from Ayahay</p>
         </div>
 

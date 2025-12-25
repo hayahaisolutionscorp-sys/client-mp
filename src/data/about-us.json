@@ -2,7 +2,7 @@
     {
         "id": 1,
         "shippingLineId": 3,
-        "imageFilename": "about_main.jpg",
+        "imageFilename": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVT9s6YRT35lzgtNKNLfaRWrTjkRQVgA0Juw&s",
         "imageLabel": "Our Team",
         "imageCaption": "Dedicated to serving you",
         "welcomeTitle": "Welcome to Ayahay",
@@ -12,6 +12,6 @@
         "ourExpertiseTitle": "Expertise",
         "ourExpertiseDescription": "Safety and comfort.",
         "ourCoreValues": "[]",
-        "tabsBackgroundColor": "#f0f0f0"
+        "tabsBackgroundColor": "#153677"
     }
 ]

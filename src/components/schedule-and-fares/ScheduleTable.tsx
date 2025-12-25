@@ -1,5 +1,6 @@
-import { ScheduleItem as ScheduleItemType} from "./ScheduleItem";
+import { ScheduleItem as ScheduleItemType } from "./ScheduleItem";
 import ScheduleItem from "./ScheduleItem";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface ScheduleTableProps {
   schedule: ScheduleItemType[];
@@ -9,8 +10,34 @@ interface ScheduleTableProps {
 const ScheduleTable = ({ schedule, loading }: ScheduleTableProps) => {
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-32 bg-slate-50 rounded-lg mx-2">
-        <p className="text-lg sm:text-xl text-muted-foreground">Loading schedule...</p>
+      <div className="mt-6 rounded-md border overflow-hidden mx-2">
+        {/* Skeleton Header */}
+        <div className="hidden sm:grid grid-cols-4 bg-slate-100 p-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-6 w-24 bg-slate-200" />
+          ))}
+        </div>
+        {/* Skeleton Rows */}
+        <div className="divide-y">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="p-4 flex flex-col sm:grid sm:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-28" />
+              </div>
+              <div className="flex justify-end">
+                <Skeleton className="h-6 w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

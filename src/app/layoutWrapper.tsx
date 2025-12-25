@@ -16,7 +16,7 @@ export default function LayoutWrapper({
   return (
     <>
       {!hideLayout && <Navbar />}
-      <div className="">{children}</div>
+      <main className="">{children}</main>
       {!hideLayout && !isProfilePage && (
         <div id="Resources" className="w-full lg:pt-56">
           <div className="flex items-center justify-center w-full">

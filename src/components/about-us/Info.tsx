@@ -6,7 +6,7 @@ import { hexToRgb } from 'helpers/theme.helpers';
 import DOMPurify from 'isomorphic-dompurify';
 import { IAboutUs } from '@/models';
 
-export default function Info({aboutUs}: {aboutUs: IAboutUs}) {
+export default function Info({ aboutUs }: { aboutUs: IAboutUs }) {
   return (
     <Tabs defaultValue="welcome" className="mb-16">
       <TabsList className="grid w-full grid-cols-3">
@@ -15,7 +15,7 @@ export default function Info({aboutUs}: {aboutUs: IAboutUs}) {
           className="data-[state=active]:bg-[rgba(var(--bg-color),1)] data-[state=active]:text-primary-foreground"
           style={
             {
-              '--bg-color': hexToRgb(aboutUs?.tabsBackgroundColor || '#23abff')
+              '--bg-color': hexToRgb(aboutUs?.tabsBackgroundColor || '#0060df')
             } as React.CSSProperties
           }
         >
@@ -26,7 +26,7 @@ export default function Info({aboutUs}: {aboutUs: IAboutUs}) {
           className="data-[state=active]:bg-[rgba(var(--bg-color),1)] data-[state=active]:text-primary-foreground"
           style={
             {
-              '--bg-color': hexToRgb(aboutUs?.tabsBackgroundColor || '#23abff')
+              '--bg-color': hexToRgb(aboutUs?.tabsBackgroundColor || '#0060df')
             } as React.CSSProperties
           }
         >
@@ -37,7 +37,7 @@ export default function Info({aboutUs}: {aboutUs: IAboutUs}) {
           className="data-[state=active]:bg-[rgba(var(--bg-color),1)] data-[state=active]:text-primary-foreground"
           style={
             {
-              '--bg-color': hexToRgb(aboutUs?.tabsBackgroundColor || '#23abff')
+              '--bg-color': hexToRgb(aboutUs?.tabsBackgroundColor || '#0060df')
             } as React.CSSProperties
           }
         >

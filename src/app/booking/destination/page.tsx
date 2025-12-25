@@ -19,7 +19,8 @@ export default async function Destination() {
         <MobileFilterModal filtersPromise={filters} />
 
         <div className="flex-1 lg:pl-8 space-y-4 sm:space-y-6">
-          <TripsSelector/>
+          <h1 className="sr-only">Available Trips</h1>
+          <TripsSelector />
         </div>
       </div>
     </>

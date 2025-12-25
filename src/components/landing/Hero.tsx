@@ -22,16 +22,18 @@ export default async function Hero() {
   } else if (heroSection?.fileType.toLowerCase() == 'image') {
     captionBackground = (
       <Media
-        src={`${HERO_SECTION_IMAGES}${heroSection?.shippingLineId}/${heroSection?.filename}`}
+        // src={`${HERO_SECTION_IMAGES}${heroSection?.shippingLineId}/${heroSection?.filename}`}
+        src={heroSection?.filename || ''}
         type="image"
-        alt={heroSection?.label || 'Background Image'}
+        alt={heroSection?.label || ''}
         className="absolute min-w-full min-h-full w-auto h-auto object-cover"
       />
     );
   } else {
     captionBackground = (
       <Media
-        src={`${HERO_SECTION_IMAGES}${heroSection?.shippingLineId}/${heroSection?.filename}`}
+        // src={`${HERO_SECTION_IMAGES}${heroSection?.shippingLineId}/${heroSection?.filename}`}
+        src={heroSection?.filename || ''}
         type="video"
         autoPlay={true}
         loop={true}
@@ -53,6 +55,7 @@ export default async function Hero() {
             loop
             playsInline
             muted
+            aria-hidden="true"
           />
         )}
 

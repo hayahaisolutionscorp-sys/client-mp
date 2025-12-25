@@ -118,6 +118,7 @@ export default function LoginPage() {
           <ArrowLeft className="h-6 w-6" />
         </Link>
         <div className="w-full max-w-md space-y-6">
+          <h1 className="sr-only">Login</h1>
           <div className="flex justify-center">
             <Image
               src="/assets/icons/Ayahay_blue_vertical.svg"
@@ -151,7 +152,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-xs text-blue-500 hover:underline"
+                  className="text-xs text-blue-600 hover:underline"
                 >
                   Forgot password?
                 </button>
@@ -177,6 +178,7 @@ export default function LoginPage() {
                   size="icon"
                   className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Toggle password visibility"
                 >
                   {showPassword ? (
                     <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
@@ -223,18 +225,18 @@ export default function LoginPage() {
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-blue-500 hover:underline">
+              <Link href="/register" className="text-blue-600 hover:underline">
                 Register now
               </Link>
             </p>
           </div>
           <p className="text-center text-sm text-muted-foreground">
             By signing up, you agree to our{" "}
-            <Link href="/terms" className="text-blue-500 hover:underline">
+            <Link href="/terms" className="text-blue-600 hover:underline">
               Terms of Use
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-blue-500 hover:underline">
+            <Link href="/privacy" className="text-blue-600 hover:underline">
               Privacy Policy
             </Link>
           </p>

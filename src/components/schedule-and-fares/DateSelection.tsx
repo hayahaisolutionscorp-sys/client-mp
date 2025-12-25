@@ -91,7 +91,7 @@ const DateSelection: FC<{ onDateChange?: (date: string | null) => void }> = ({ o
 
   return (
     <div className="flex items-center bg-white p-2 mb-5 border rounded-lg shadow-md w-full overflow-hidden lg:mt-6">
-      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handlePrevious} disabled={windowStart === 0}>
+      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handlePrevious} disabled={windowStart === 0} aria-label="Previous dates">
         <FiChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
       <div className="h-[60px] sm:h-[76px] w-[1px] bg-gray-300 mx-1 sm:mx-2"></div>
@@ -123,7 +123,7 @@ const DateSelection: FC<{ onDateChange?: (date: string | null) => void }> = ({ o
         </div>
       )}
       <div className="h-[60px] sm:h-[76px] w-[1px] bg-gray-300 mx-1 sm:mx-2"></div>
-      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handleNext} disabled={uniqueDates.length < windowSize}>
+      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handleNext} disabled={uniqueDates.length < windowSize} aria-label="Next dates">
         <FiChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
     </div>

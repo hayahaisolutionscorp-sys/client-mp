@@ -63,7 +63,7 @@ module.exports = {
 					'5': 'hsl(var(--chart-5))'
 				},
 				customGreen: '#58dc88',
-				customBlue: "#23abff",
+				customBlue: "#0060df",
 				customText: '#051036',
 			},
 			borderRadius: {

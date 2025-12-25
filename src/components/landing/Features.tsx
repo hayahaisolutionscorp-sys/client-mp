@@ -20,7 +20,7 @@ export default async function Features() {
             icon={
               <Image
                 src="/assets/features/best_price_guarantee.svg"
-                alt="Best Price Guarantee"
+                alt=""
                 width={65}
                 height={65}
               />
@@ -33,7 +33,7 @@ export default async function Features() {
             icon={
               <Image
                 src="/assets/features/easy_and_quick_booking.svg"
-                alt="Best Price Guarantee"
+                alt=""
                 width={65}
                 height={65}
               />
@@ -46,7 +46,7 @@ export default async function Features() {
             icon={
               <Image
                 src="/assets/features/customer_care_24_for_7.svg"
-                alt="Best Price Guarantee"
+                alt=""
                 width={65}
                 height={65}
               />

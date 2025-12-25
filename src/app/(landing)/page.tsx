@@ -1,7 +1,10 @@
 import Hero from '@/components/landing/Hero';
-import Promos from '@/components/landing/Promos';
-import PopularRoutes from '@/components/landing/PopularRoutes';
-import WhyChooseUs from '@/components/landing/WhyChooseUs';
+import dynamic from 'next/dynamic';
+
+const Promos = dynamic(() => import('@/components/landing/Promos'), { ssr: true });
+const PopularRoutes = dynamic(() => import('@/components/landing/PopularRoutes'), { ssr: true });
+const WhyChooseUs = dynamic(() => import('@/components/landing/WhyChooseUs'), { ssr: true });
+
 
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';

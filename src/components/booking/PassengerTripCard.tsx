@@ -13,7 +13,8 @@ import Image from 'next/image';
 import { toPhilippinesTime } from 'helpers/date.helpers';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import { DATE_SECONDARY_DEFAULT_FORMAT, TIME_DEFAULT_FORMAT, SHIPPING_LINE_LOGO } from 'constants/index';
-import { ITrip } from '@/models';
+import { IShippingLine, ITrip } from '@/models';
+import { getShippingLine } from '@/services/shipping-line/shipping-line.service';
 
 interface PassengerTripCardProps {
   trips: ITrip[] | undefined;
@@ -24,6 +25,7 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
   const pathname = usePathname();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [shippingLines, setShippingLines] = useState<Record<number, IShippingLine>>({});
   const departureCabinId = searchParams.get('departureCabinId') ?? 0;
   const returnCabinId = searchParams.get('returnCabinId') ?? 0;
   const themeSettings = useThemeSettings();
@@ -33,6 +35,28 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
     const timeout = setTimeout(() => setIsLoading(false), 2000);
     return () => clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    const fetchShippingLines = async () => {
+      if (!trips) return;
+
+      const uniqueShippingLineIds = Array.from(new Set(trips.map((trip) => trip.shippingLineId)));
+      const lines: Record<number, IShippingLine> = {};
+
+      await Promise.all(
+        uniqueShippingLineIds.map(async (id) => {
+          const line = await getShippingLine(id);
+          if (line) {
+            lines[id] = line;
+          }
+        })
+      );
+
+      setShippingLines(lines);
+    };
+
+    fetchShippingLines();
+  }, [trips]);
   return (
     <div className="w-full h-auto">
       <div
@@ -93,26 +117,32 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
 
                 {/* Shipping Line Logo - Mobile */}
                 <div className="flex justify-center sm:hidden mb-4">
-                  <Image
-                    src={`${SHIPPING_LINE_LOGO}${trips[0].shippingLine?.logoFilename}`}
-                    alt="Shipping Company Logo"
-                    width={140}
-                    height={140}
-                    className="w-auto h-[60px] object-contain"
-                  />
+                  {shippingLines[trips[0].shippingLineId]?.logoFilename && (
+                    <Image
+                      // src={`${SHIPPING_LINE_LOGO}${trips[0].shippingLine?.logoFilename}`}
+                      src={shippingLines[trips[0].shippingLineId].logoFilename}
+                      alt="Shipping Company Logo"
+                      width={140}
+                      height={140}
+                      className="w-auto h-[60px] object-contain"
+                    />
+                  )}
                 </div>
                 {/* Trip Journey Visualization */}
                 <div className="flex items-center justify-between gap-2 sm:gap-4 mb-4 w-full">
                   {/* Origin */}
                   <div className="flex flex-col items-center flex-shrink-0 w-[30%] sm:w-auto">
                     <div className="hidden sm:flex items-center justify-center mb-2">
-                      <Image
-                        src={`${SHIPPING_LINE_LOGO}${trips[0].shippingLine?.logoFilename}`}
-                        alt="Shipping Company Logo"
-                        width={160}
-                        height={160}
-                        className="w-auto h-[50px] object-contain"
-                      />
+                      {shippingLines[trips[0].shippingLineId]?.logoFilename && (
+                        <Image
+                          // src={`${SHIPPING_LINE_LOGO}${trips[0].shippingLine?.logoFilename}`}
+                          src={shippingLines[trips[0].shippingLineId].logoFilename}
+                          alt="Shipping Company Logo"
+                          width={160}
+                          height={160}
+                          className="w-auto h-[50px] object-contain"
+                        />
+                      )}
                     </div>
                     <div className="flex flex-col items-center bg-gray-50 rounded-lg p-2 sm:p-3 w-full">
                       <div className="flex items-center mb-1">
@@ -140,13 +170,16 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
                   {/* Destination */}
                   <div className="flex flex-col items-center flex-shrink-0 w-[30%] sm:w-auto">
                     <div className="hidden sm:flex items-center justify-center mb-2">
-                      <Image
-                        src={`${SHIPPING_LINE_LOGO}${trips[0].shippingLine?.logoFilename}`}
-                        alt="Shipping Company Logo"
-                        width={160}
-                        height={160}
-                        className="w-auto h-[50px] object-contain"
-                      />
+                      {shippingLines[trips[0].shippingLineId]?.logoFilename && (
+                        <Image
+                          // src={`${SHIPPING_LINE_LOGO}${trips[0].shippingLine?.logoFilename}`}
+                          src={shippingLines[trips[0].shippingLineId].logoFilename}
+                          alt="Shipping Company Logo"
+                          width={160}
+                          height={160}
+                          className="w-auto h-[50px] object-contain"
+                        />
+                      )}
                     </div>
                     <div className="flex flex-col items-center bg-gray-50 rounded-lg p-2 sm:p-3 w-full">
                       <div className="flex items-center mb-1">
@@ -175,13 +208,16 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
                     </div>
                     <div className="flex flex-col sm:flex-row items-center mb-3 sm:mb-4 w-full gap-3 sm:gap-5">
                       <div className="flex justify-center sm:justify-start w-full sm:w-auto mb-3 sm:mb-0">
-                        <Image
-                          src={`${SHIPPING_LINE_LOGO}${trips[0].shippingLine?.logoFilename}`}
-                          alt="Shipping Company Logo Departure"
-                          width={160}
-                          height={160}
-                          className="w-auto h-[50px] sm:h-[60px] sm:mr-4 object-contain"
-                        />
+                        {shippingLines[trips[0].shippingLineId]?.logoFilename && (
+                          <Image
+                            // src={`${SHIPPING_LINE_LOGO}${trips[0].shippingLine?.logoFilename}`}
+                            src={shippingLines[trips[0].shippingLineId].logoFilename}
+                            alt="Shipping Company Logo Departure"
+                            width={160}
+                            height={160}
+                            className="w-auto h-[50px] sm:h-[60px] sm:mr-4 object-contain"
+                          />
+                        )}
                       </div>
                       <div className="flex flex-col items-center sm:items-start w-full">
                         <div className="flex items-center p-2 bg-white rounded-lg shadow-sm mb-2">
@@ -261,13 +297,16 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
 
                     <div className="flex flex-col sm:flex-row items-center mb-3 sm:mb-4 w-full gap-3 sm:gap-5">
                       <div className="flex justify-center sm:justify-start w-full sm:w-auto mb-3 sm:mb-0">
-                        <Image
-                          src={`${SHIPPING_LINE_LOGO}${trips[0].shippingLine?.logoFilename}`}
-                          alt="Shipping Company Logo Departure"
-                          width={160}
-                          height={160}
-                          className="w-auto h-[50px] sm:h-[60px] sm:mr-4 object-contain"
-                        />
+                        {trips[1] && shippingLines[trips[1].shippingLineId]?.logoFilename && (
+                          <Image
+                            // src={`${SHIPPING_LINE_LOGO}${trips[1].shippingLine?.logoFilename}`}
+                            src={shippingLines[trips[1].shippingLineId].logoFilename}
+                            alt="Shipping Company Logo Return"
+                            width={160}
+                            height={160}
+                            className="w-auto h-[50px] sm:h-[60px] sm:mr-4 object-contain"
+                          />
+                        )}
                       </div>
                       <div className="flex flex-col items-center sm:items-start w-full">
                         <div className="flex items-center p-2 bg-white rounded-lg shadow-sm mb-2">

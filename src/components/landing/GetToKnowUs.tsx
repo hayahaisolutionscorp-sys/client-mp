@@ -20,7 +20,7 @@ export default function GetToKnowUs() {
     <div className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-16 p-4 sm:p-8 md:p-12 lg:p-16">
       {/* Video Section */}
       <div className="w-full lg:w-[400px] h-[400px] lg:h-[495px] bg-white shadow-xl rounded-2xl overflow-hidden">
-        <video className="w-full h-full object-cover" src={videoSrc} autoPlay loop playsInline muted />
+        <video className="w-full h-full object-cover" src={videoSrc} autoPlay={true} preload="none" playsInline muted aria-hidden="true" />
       </div>
 
       {/* Content Section */}
@@ -47,10 +47,9 @@ export default function GetToKnowUs() {
               key={tabName}
               onClick={() => setTab(tabName as TabName)}
               aria-label={`Show ${tabName}`}
-              aria-selected={tab === tabName}
-              className={`relative px-4 py-2 rounded-md font-semibold transition-colors ${
-                tab === tabName ? 'bg-customBlue text-white' : 'bg-white-500 border shadow-lg text-customText'
-              }`}
+              aria-pressed={tab === tabName}
+              className={`relative px-4 py-2 rounded-md font-semibold transition-colors ${tab === tabName ? 'bg-customBlue text-white' : 'bg-white-500 border shadow-lg text-customText'
+                }`}
             >
               {tabName}
               {tab === tabName && (

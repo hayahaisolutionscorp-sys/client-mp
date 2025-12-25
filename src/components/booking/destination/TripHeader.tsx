@@ -98,7 +98,7 @@ export default function TripHeader({ label }: HeaderProps) {
     <div className="flex flex-col justify-between items-start sm:items-center bg-transparent pb-3 sm:pb-0 sm:flex-row">
       {/* Header Content */}
       <div className="hidden w-full sm:block sm:w-auto">
-        <p className="text-sm text-gray-500">{label}</p>
+        <h2 className="text-sm text-gray-500 font-normal">{label}</h2>
         <div className="flex flex-wrap items-center text-base sm:text-lg font-semibold text-customText">
           <span className="break-words">{departureName}</span>
           {departureName && arrivalName && (

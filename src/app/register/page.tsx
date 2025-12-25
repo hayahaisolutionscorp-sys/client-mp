@@ -103,6 +103,7 @@ export default function RegisterPage() {
           <ArrowLeft className="h-6 w-6" />
         </Link>
         <div className="w-full max-w-md space-y-6">
+          <h1 className="sr-only">Register</h1>
           <div className="flex justify-center">
             <Image
               src="/assets/icons/Ayahay_blue_vertical.svg"
@@ -126,7 +127,7 @@ export default function RegisterPage() {
                   <UserIcon className="h-4 w-4" />
                 </div>
                 <span
-                  className={`text-sm font-medium transition-colors duration-300 ${step === 1 ? "text-blue-500" : "text-gray-500"
+                  className={`text-sm font-medium transition-colors duration-300 ${step === 1 ? "text-blue-500" : "text-gray-700"
                     }`}
                 >
                   Account Info
@@ -144,7 +145,7 @@ export default function RegisterPage() {
                   <UserPlusIcon className="h-4 w-4" />
                 </div>
                 <span
-                  className={`text-sm font-medium transition-colors duration-300 ${step === 2 ? "text-blue-500" : "text-gray-500"
+                  className={`text-sm font-medium transition-colors duration-300 ${step === 2 ? "text-blue-500" : "text-gray-700"
                     }`}
                 >
                   Passenger Info
@@ -183,6 +184,7 @@ export default function RegisterPage() {
                     size="icon"
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
                   >
                     {showPassword ? (
                       <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
@@ -209,6 +211,7 @@ export default function RegisterPage() {
                     size="icon"
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
                   >
                     {showPassword ? (
                       <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
@@ -307,11 +310,11 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-muted-foreground">
             By signing up, you agree to our{" "}
-            <Link href="/terms" className="text-blue-500 hover:underline">
+            <Link href="/terms" className="text-blue-600 hover:underline">
               Terms of Use
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-blue-500 hover:underline">
+            <Link href="/privacy" className="text-blue-600 hover:underline">
               Privacy Policy
             </Link>
           </p>

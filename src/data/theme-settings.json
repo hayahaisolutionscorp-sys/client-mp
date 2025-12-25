@@ -3,7 +3,7 @@
         "id": 1,
         "shippingLineId": 3,
         "fontStyle": "Inter",
-        "backgroundColor": "#FFFFFF",
+        "backgroundColor": "#007BFF",
         "buttonDefaultColor": "#007BFF",
         "buttonDestructiveColor": "#FF0000",
         "buttonOutlineColor": "#007BFF",

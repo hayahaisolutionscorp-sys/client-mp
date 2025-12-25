@@ -78,7 +78,8 @@ export default async function AboutPage() {
 
       <div className="mb-16 relative aspect-[2/1] w-full">
         <Image
-          src={`${ABOUT_US_IMAGES}${aboutUs?.shippingLineId}/${aboutUs?.imageFilename}`}
+          // src={`${ABOUT_US_IMAGES}${aboutUs?.shippingLineId}/${aboutUs?.imageFilename}`}
+          src={aboutUs?.imageFilename || ''}
           alt={aboutUs?.imageLabel || ''}
           fill
           priority
@@ -92,7 +93,7 @@ export default async function AboutPage() {
       <Info aboutUs={aboutUs!} />
 
       <section className="mb-16 py-12 rounded-xl">
-        <h2 className="text-3xl font-semibold mb-8 text-center text-primary">Our Core Values</h2>
+        <h2 className="text-3xl font-semibold mb-8 text-center text-customBlue">Our Core Values</h2>
         <div className="grid md:grid-cols-3 gap-8 px-4">
           {Array.isArray(coreValues) &&
             coreValues.map((value, index) => (

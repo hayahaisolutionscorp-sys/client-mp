@@ -14,7 +14,8 @@ export default async function ContactUs() {
     <section
       className="relative bg-cover bg-no-repeat bg-center min-h-screen flex items-center"
       style={{
-        backgroundImage: `url('${CONTACT_US_IMAGES}${contactUs?.shippingLineId}/${contactUs?.backgroundImageFilename}')`
+        // backgroundImage: `url('${CONTACT_US_IMAGES}${contactUs?.shippingLineId}/${contactUs?.backgroundImageFilename}')`
+        backgroundImage: `url('${contactUs?.backgroundImageFilename}')`
       }}
     >
       <div
@@ -40,21 +41,21 @@ export default async function ContactUs() {
               {contactUs?.contactNumber && (
                 <li className="flex items-center space-x-4">
                   <FaMobileAlt className="text-2xl" />
-                  <h4>{contactUs.contactNumber}</h4>
+                  <h3>{contactUs.contactNumber}</h3>
                 </li>
               )}
 
               {contactUs?.email && (
                 <li className="flex items-center space-x-4">
                   <MdOutlineMail className="text-2xl" />
-                  <h4>{contactUs.email}</h4>
+                  <h3>{contactUs.email}</h3>
                 </li>
               )}
 
               {contactUs?.address && (
                 <li className="flex items-center space-x-4">
                   <FaMapMarkerAlt className="text-2xl" />
-                  <h4>{contactUs.address}</h4>
+                  <h3>{contactUs.address}</h3>
                 </li>
               )}
             </ul>
