@@ -48,16 +48,22 @@ export default function LoginPage() {
     return () => clearInterval(timer)
   }, [slides.length])
 
+  const [error, setError] = useState<string | null>(null);
+
   // Handle email/password login
   const handleLogin = async (values: LoginForm) => {
     const { email, password } = values;
     setLoading(true);
+    setError(null);
 
     try {
       await signIn(email, password);
       router.push('/');
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      console.error(err);
+      // Extract error message similar to how AuthContext does it, or rely on what's thrown
+      const msg = err.response?.data?.message || err.message || "Invalid email or password";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -131,6 +137,11 @@ export default function LoginPage() {
           <div className="text-center">
             <p className="text-sm text-muted-foreground">Enter your Email and Password to Continue</p>
           </div>
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm text-center">
+              {error}
+            </div>
+          )}
           <form className="space-y-4" onSubmit={(e: FormEvent) => {
             e.preventDefault();
             handleLogin({ email, password });

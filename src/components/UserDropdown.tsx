@@ -35,15 +35,33 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
           className="flex items-center space-x-2 focus:outline-none"
           aria-label="User menu"
         >
-          <Image
-            src="/assets/icons/circle-user-round.svg"
-            alt="User Menu"
-            width={32}
-            height={32}
-            className={`w-8 h-8 transition-all duration-200 ${
-              shouldBeTransparent ? 'brightness-0 invert' : 'brightness-0'
-            }`}
-          />
+          {loggedInAccount?.profile_picture ? (
+            <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-200">
+              <Image
+                src={loggedInAccount.profile_picture}
+                alt="Profile"
+                fill
+                className="object-cover"
+              />
+            </div>
+          ) : currentUser ? (
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm transition-all duration-200 ${shouldBeTransparent ? 'bg-white/20 text-white backdrop-blur-sm border border-white/40 hover:bg-white/30' : 'bg-blue-600 text-white'
+                }`}
+            >
+              {(loggedInAccount?.passenger?.firstName?.charAt(0) || currentUser.email?.charAt(0) || '?').toUpperCase()}
+            </div>
+          ) : (
+            <Image
+              src="/assets/icons/circle-user-round.svg"
+              alt="User Menu"
+              width={32}
+              height={32}
+              className={`w-8 h-8 transition-all duration-200 ${shouldBeTransparent ? 'brightness-0 invert' : 'brightness-0'
+                }`}
+            />
+          )}
+
           {currentUser && (
             <span
               className={`text-sm font-medium hidden md:block ${shouldBeTransparent ? 'text-white' : 'text-gray-900'}`}
@@ -55,9 +73,8 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
 
         {/* Dropdown Menu */}
         <div
-          className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 transition-all duration-200 ${
-            isDropdownOpen ? 'transform opacity-100 scale-100' : 'transform opacity-0 scale-95 pointer-events-none'
-          }`}
+          className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 transition-all duration-200 ${isDropdownOpen ? 'transform opacity-100 scale-100' : 'transform opacity-0 scale-95 pointer-events-none'
+            }`}
         >
           {currentUser ? (
             <>

@@ -1,20 +1,20 @@
 import { cacheItem, fetchItem } from 'helpers/cache.helpers';
 import axios from '../core/axios';
-import { ACCOUNT_API, VERIFICATION_API } from 'constants/api';
+import { ACCOUNT_API, VERIFICATION_API, AUTH_API } from 'constants/api';
 import { UPLOAD_API } from 'constants/api';
 import { IAccount, IPassenger } from '@/models';
 
 export async function getAccountInformation(): Promise<IAccount | undefined> {
-  const cachedAccountInformation = fetchItem<IAccount>('logged-in-account');
+  const cachedAccountInformation = fetchItem<IAccount>('logged-in-user-profile');
   if (cachedAccountInformation !== undefined) {
     return cachedAccountInformation;
   }
 
   try {
-    const { data } = await axios.get(`${ACCOUNT_API}/mine`);
+    const { data } = await axios.get(`${AUTH_API}/me`);
 
-    cacheItem('logged-in-account', data);
-    return data;
+    cacheItem('logged-in-user-profile', data.data);
+    return data.data;
   } catch (e) {
     console.error(e);
     return undefined;

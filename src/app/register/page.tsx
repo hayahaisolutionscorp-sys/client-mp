@@ -71,6 +71,28 @@ export default function RegisterPage() {
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
+    const errors: Record<string, string> = {}
+
+    // Simple email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      errors.email = "Please enter a valid email address"
+    }
+
+    if (!formData.password || formData.password.length < 8) {
+      errors.password = "Password must be at least 8 characters"
+    }
+
+    if (formData.password !== formData.confirm) {
+      errors.confirm = "Passwords do not match"
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+
+    setValidationErrors({})
     setStep(2)
   }
 
@@ -78,15 +100,36 @@ export default function RegisterPage() {
     setStep(1)
   }
 
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [generalError, setGeneralError] = useState<string | null>(null);
+
   const handleRegister = async (values: RegisterForm) => {
     const { email, password } = values;
     setLoading(true);
+    setValidationErrors({}); // Clear previous errors
+    setGeneralError(null); // Clear previous general errors
 
     try {
       await register(email, password, values);
       router.push('/');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      // Construct validation errors object if the error message is comma-separated list of validations
+      if (error.message && typeof error.message === 'string' && error.message.includes(',')) {
+        const errors: Record<string, string> = {};
+        error.message.split(',').forEach((err: string) => {
+          const [field] = err.trim().split(' ');
+          if (field) {
+            // Map error message to field name if possible, simple heuristic
+            // The API returns "firstName should not be empty", so field is "firstName"
+            errors[field] = err.trim();
+          }
+        });
+        setValidationErrors(errors);
+      } else {
+        // Handle general errors like "User already exists"
+        setGeneralError(error.message || "An unexpected error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -155,7 +198,12 @@ export default function RegisterPage() {
           </div>
 
           {step === 1 ? (
-            <form onSubmit={handleNext} className="space-y-4">
+            <form onSubmit={handleNext} className="space-y-4" noValidate>
+              {generalError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <span className="block sm:inline">{generalError}</span>
+                </div>
+              )}
               <div className="space-y-2">
                 <div className="text-sm font-medium">Email</div>
                 <Input
@@ -165,7 +213,9 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
+                  className={validationErrors.email ? "border-red-500" : ""}
                 />
+                {validationErrors.email && <p className="text-xs text-red-500">{validationErrors.email}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Password</div>
@@ -177,6 +227,7 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={handleInputChange}
                     required
+                    className={validationErrors.password ? "border-red-500" : ""}
                   />
                   <Button
                     type="button"
@@ -193,6 +244,7 @@ export default function RegisterPage() {
                     )}
                   </Button>
                 </div>
+                {validationErrors.password && <p className="text-xs text-red-500">{validationErrors.password}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Repeat Password</div>
@@ -204,6 +256,7 @@ export default function RegisterPage() {
                     value={formData.confirm}
                     onChange={handleInputChange}
                     required
+                    className={validationErrors.confirm ? "border-red-500" : ""}
                   />
                   <Button
                     type="button"
@@ -220,6 +273,7 @@ export default function RegisterPage() {
                     )}
                   </Button>
                 </div>
+                {validationErrors.confirm && <p className="text-xs text-red-500">{validationErrors.confirm}</p>}
               </div>
               <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600">
                 Next
@@ -227,6 +281,11 @@ export default function RegisterPage() {
             </form>
           ) : (
             <form onSubmit={(e) => { e.preventDefault(); handleRegister(formData); }} className="space-y-4">
+              {generalError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <span className="block sm:inline">{generalError}</span>
+                </div>
+              )}
               <div className="space-y-2">
                 <div className="text-sm font-medium">First Name</div>
                 <Input
@@ -235,7 +294,9 @@ export default function RegisterPage() {
                   value={formData.firstName}
                   onChange={handleInputChange}
                   required
+                  className={validationErrors.firstName ? "border-red-500" : ""}
                 />
+                {validationErrors.firstName && <p className="text-xs text-red-500">{validationErrors.firstName}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Last Name</div>
@@ -245,7 +306,9 @@ export default function RegisterPage() {
                   value={formData.lastName}
                   onChange={handleInputChange}
                   required
+                  className={validationErrors.lastName ? "border-red-500" : ""}
                 />
+                {validationErrors.lastName && <p className="text-xs text-red-500">{validationErrors.lastName}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Sex</div>
@@ -254,7 +317,7 @@ export default function RegisterPage() {
                   value={formData.sex}
                   onValueChange={(value: "Male" | "Female") => setFormData((prev) => ({ ...prev, sex: value }))}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className={`w-full ${validationErrors.sex ? "border-red-500" : ""}`}>
                     <SelectValue placeholder="Select your sex" />
                   </SelectTrigger>
                   <SelectContent>
@@ -262,6 +325,7 @@ export default function RegisterPage() {
                     <SelectItem value="Female">Female</SelectItem>
                   </SelectContent>
                 </Select>
+                {validationErrors.sex && <p className="text-xs text-red-500">{validationErrors.sex}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Date of Birth</div>
@@ -271,7 +335,21 @@ export default function RegisterPage() {
                   value={formData.birthday}
                   onChange={handleInputChange}
                   required
+                  className={validationErrors.birthday ? "border-red-500" : ""}
                 />
+                {validationErrors.birthday && <p className="text-xs text-red-500">{validationErrors.birthday}</p>}
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Mobile Number</div>
+                <Input
+                  name="mobile_number"
+                  placeholder="+639123456789"
+                  value={formData.mobile_number}
+                  onChange={handleInputChange}
+                  required
+                  className={validationErrors.mobile_number ? "border-red-500" : ""}
+                />
+                {validationErrors.mobile_number && <p className="text-xs text-red-500">{validationErrors.mobile_number}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Address</div>
@@ -281,7 +359,9 @@ export default function RegisterPage() {
                   value={formData.address}
                   onChange={handleInputChange}
                   required
+                  className={validationErrors.address ? "border-red-500" : ""}
                 />
+                {validationErrors.address && <p className="text-xs text-red-500">{validationErrors.address}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Nationality</div>
@@ -291,7 +371,9 @@ export default function RegisterPage() {
                   value={formData.nationality}
                   onChange={handleInputChange}
                   required
+                  className={validationErrors.nationality ? "border-red-500" : ""}
                 />
+                {validationErrors.nationality && <p className="text-xs text-red-500">{validationErrors.nationality}</p>}
               </div>
               <div className="flex space-x-4">
                 <Button type="button" variant="outline" className="w-full" onClick={handleBack}>

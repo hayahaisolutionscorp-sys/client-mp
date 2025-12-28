@@ -1,6 +1,7 @@
 // Cached items that will be invalidated when user signs out
 export const accountRelatedCacheKeys = <const>[
   'logged-in-account',
+  'logged-in-user-profile',
   'jwt',
   'my-notifications',
 ];

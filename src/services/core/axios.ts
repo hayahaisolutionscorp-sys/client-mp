@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { fetchItem } from 'helpers/cache.helpers';
 
-const instance = axios.create();
+const instance = axios.create({
+  withCredentials: true,
+});
 
 instance.interceptors.request.use(
   (config) => {
