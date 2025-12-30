@@ -18,7 +18,7 @@ export async function getContactUs(): Promise<IContactUs[] | undefined> {
   //   return undefined;
   // }
 
-  await new Promise(resolve => setTimeout(resolve, 100));
+
   return contactUsData as IContactUs[];
 }
 
@@ -33,6 +33,6 @@ export async function getContactUsByShippingLineId(
   //   return undefined;
   // }
 
-  await new Promise(resolve => setTimeout(resolve, 100));
+
   return (contactUsData as IContactUs[]).find(c => c.shippingLineId === shippingLineId);
 }

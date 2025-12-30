@@ -7,6 +7,7 @@ export interface SeoMetadata {
     description: string;
     openGraph?: any;
     icons?: any;
+    manifest?: any;
 }
 
 export async function getGlobalMetadata(): Promise<SeoMetadata> {
@@ -21,7 +22,7 @@ export async function getGlobalMetadata(): Promise<SeoMetadata> {
     return seoData.global as any as SeoMetadata;
 }
 
-export async function getPageMetadata(pageKey: 'landing' | 'find-trips'): Promise<SeoMetadata> {
+export async function getPageMetadata(pageKey: 'landing' | 'find-trips' | 'faq' | 'press' | 'terms' | 'about-us' | 'contact-us' | 'privacy-policy' | 'route'): Promise<SeoMetadata> {
     // try {
     //   const { data } = await axios.get(`${SEO_API}/pages/${pageKey}`);
     //   return data;

@@ -16,6 +16,7 @@ interface MediaProps {
   loop?: boolean;
   muted?: boolean;
   className?: string;
+  priority?: boolean;
 }
 
 export default function Media({
@@ -28,9 +29,20 @@ export default function Media({
   loop = false,
   muted = false,
   className = "",
+  priority = false,
 }: MediaProps) {
   if (type === "image") {
-    return <Image src={src} alt={alt} layout="fill" className={className} />;
+    if (!src) return null;
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className={className}
+        priority={priority}
+        sizes="100vw"
+      />
+    );
   }
 
   if (type === "youtube") {

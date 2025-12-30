@@ -4,6 +4,16 @@ import { CONTACT_US_IMAGES } from 'constants/storage';
 import { hexToRgb } from 'helpers/theme.helpers';
 import ContactUsForm from '@/components/contact-us/ContactUsForm';
 import { getContactUsByShippingLineId, getThemeSettingsByShippingLineId } from '@/services';
+import { getPageMetadata } from '@/services/content/seo.service';
+import { Metadata } from 'next';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageMetadata('contact-us');
+  return {
+    title: seo.title as any,
+    description: seo.description,
+  };
+}
 
 export default async function ContactUs() {
   const shippingLineId = parseInt(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3');

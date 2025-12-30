@@ -1,6 +1,16 @@
 import TermsSidebar from '@/components/terms/TermsSidebar'
 import { terms } from './terms.data'
 import { TermsContent } from '@/components/terms/TermsContent'
+import { getPageMetadata } from '@/services/content/seo.service';
+import { Metadata } from 'next';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageMetadata('terms');
+  return {
+    title: seo.title as any,
+    description: seo.description,
+  };
+}
 
 export default function TermsPage() {
   return (

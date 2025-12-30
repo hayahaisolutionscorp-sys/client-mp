@@ -9,6 +9,16 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import Info from '@/components/about-us/Info';
 import { getAboutUsByShippingLineId } from '@/services';
+import { getPageMetadata } from '@/services/content/seo.service';
+import { Metadata } from 'next';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageMetadata('about-us');
+  return {
+    title: seo.title as any,
+    description: seo.description,
+  };
+}
 
 export type IconKey = 'Lightbulb' | 'Shield' | 'Users';
 

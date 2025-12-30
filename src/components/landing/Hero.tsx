@@ -26,7 +26,8 @@ export default async function Hero() {
         src={heroSection?.filename || ''}
         type="image"
         alt={heroSection?.label || ''}
-        className="absolute min-w-full min-h-full w-auto h-auto object-cover"
+        className="object-cover"
+        priority={true}
       />
     );
   } else {

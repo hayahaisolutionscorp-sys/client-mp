@@ -18,7 +18,7 @@ export async function getThemeSettings(): Promise<IThemeSettings[] | undefined> 
   //   return undefined;
   // }
 
-  await new Promise(resolve => setTimeout(resolve, 100));
+
   return themeSettingsData as IThemeSettings[];
 }
 
@@ -33,6 +33,6 @@ export async function getThemeSettingsByShippingLineId(
   //   return undefined;
   // }
 
-  await new Promise(resolve => setTimeout(resolve, 100));
+
   return (themeSettingsData as IThemeSettings[]).find(t => t.shippingLineId === shippingLineId);
 }

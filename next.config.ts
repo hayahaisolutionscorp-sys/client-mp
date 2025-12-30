@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+const withPWA = require('next-pwa')({
+  dest: 'public', // destination directory for the PWA files
+  disable: process.env.NODE_ENV === 'development', // disable PWA in development
+  register: true, // register the PWA service worker
+  skipWaiting: true, // skip waiting for service worker activation
+});
+
 const nextConfig: NextConfig = {
   // For development purposes only
   images: {
@@ -19,7 +26,7 @@ const nextConfig: NextConfig = {
   //       pathname: '/**',
   //     },
   //   ],
-
+  //
   // },
   // Add this for now para ma build ang project remove when good to go
   eslint: {
@@ -27,4 +34,4 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
