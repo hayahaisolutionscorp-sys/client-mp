@@ -17,6 +17,7 @@ interface MediaProps {
   muted?: boolean;
   className?: string;
   priority?: boolean;
+  playsInline?: boolean;
 }
 
 export default function Media({
@@ -30,6 +31,7 @@ export default function Media({
   muted = false,
   className = "",
   priority = false,
+  playsInline = false,
 }: MediaProps) {
   if (type === "image") {
     if (!src) return null;
@@ -51,7 +53,7 @@ export default function Media({
 
   if (type === "video") {
     return (
-      <video src={src} autoPlay={autoPlay} loop={loop} muted={muted} playsInline className={className}></video>
+      <video src={src} autoPlay={autoPlay} loop={loop} muted={muted} playsInline={playsInline} className={className}></video>
     );
   }
 

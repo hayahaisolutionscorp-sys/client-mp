@@ -1,17 +1,16 @@
 import Media from '@/components/landing/Media';
 import SearchBox from '@/components/landing/SearchBox';
-import { getHeroSectionByShippingLineId } from '@/services';
+import { getHeroSections } from '@/services';
 import { HERO_SECTION_IMAGES } from 'constants/storage';
 
 export default async function Hero() {
-  const shippingLineId = parseInt(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3');
-  const heroSection = await getHeroSectionByShippingLineId(shippingLineId);
+  const heroSection = await getHeroSections();
   let captionBackground;
 
-  if (heroSection?.fileType.toLowerCase() == 'youtube') {
+  if (heroSection?.bg_type?.toLowerCase() == 'youtube') {
     captionBackground = (
       <Media
-        src={heroSection?.youtubeUrl}
+        src={heroSection?.bg_url}
         type="youtube"
         playing={true}
         loop={true}
@@ -19,13 +18,13 @@ export default async function Hero() {
         className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover scale-150"
       />
     );
-  } else if (heroSection?.fileType.toLowerCase() == 'image') {
+  } else if (heroSection?.bg_type?.toLowerCase() == 'image') {
     captionBackground = (
       <Media
         // src={`${HERO_SECTION_IMAGES}${heroSection?.shippingLineId}/${heroSection?.filename}`}
-        src={heroSection?.filename || ''}
+        src={heroSection?.bg_url || ''}
         type="image"
-        alt={heroSection?.label || ''}
+        alt={heroSection?.bg_alt || ''}
         className="object-cover"
         priority={true}
       />
@@ -34,7 +33,7 @@ export default async function Hero() {
     captionBackground = (
       <Media
         // src={`${HERO_SECTION_IMAGES}${heroSection?.shippingLineId}/${heroSection?.filename}`}
-        src={heroSection?.filename || ''}
+        src={heroSection?.bg_url || ''}
         type="video"
         autoPlay={true}
         loop={true}
@@ -63,9 +62,9 @@ export default async function Hero() {
         {/* Content overlay on top of the video */}
         <div className="flex flex-col items-center absolute z-[10] inset-0 text-white text-center mt-[85px] md:mt-[100px] lg:mt-[150px]">
           <h1 className="font-bold leading-tight px-6 text-[22px] min-w-[500px] max-w-[500px] md:text-[40px] md:max-w-[800px] lg:text-[50px] lg:max-w-[1002px]">
-            {heroSection?.caption1}
+            {heroSection?.title}
           </h1>
-          <p className="font-normal px-4 pt-3 text-xs md:text-lg">{heroSection?.caption2}</p>
+          <p className="font-normal px-4 pt-3 text-xs md:text-lg">{heroSection?.subtitle}</p>
         </div>
       </div>
 

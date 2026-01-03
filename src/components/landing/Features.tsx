@@ -1,59 +1,53 @@
 import Image from 'next/image';
+import { getWhyChooseReasons, getWhyChooseSection } from '@/services/content/features.service';
 
 export default async function Features() {
+  const [section, reasons] = await Promise.all([
+    getWhyChooseSection(),
+    getWhyChooseReasons()
+  ]);
+
+  if (!section || !reasons) return null;
+
+  const title = section.title.includes('Ayahay!') ? (
+    <>
+      {section.title.replace('Ayahay!', '')}
+      <span className="text-customBlue">Ayahay!</span>
+    </>
+  ) : (
+    section.title
+  );
+
   return (
     <section className="w-full">
       <div className="min-h-[400px] flex flex-col items-center justify-center px-4 sm:px-6 md:px-8">
         <div className="w-full text-center max-w-4xl mx-auto mb-12 sm:mb-16">
           <h2 className="font-bold text-customText text-2xl sm:text-3xl md:text-4xl mb-4">
-            Why Choose <span className="text-customBlue">Ayahay!</span>
+            {title}
           </h2>
           <p className="text-customText/80 text-sm sm:text-base md:text-lg max-w-3xl mx-auto">
-            Ayahay serves as a platform that caters to the needs of both shipping lines and passengers/shippers in the
-            Philippines. It acts as a bridge between shipping lines and passengers/shippers, providing a centralized
-            platform for efficient communication and transactions.
+            {section.description}
           </p>
         </div>
 
         <div className="grid gap-6 sm:gap-8 md:gap-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-7xl mx-auto">
-          <FeatureCard
-            icon={
-              <Image
-                src="/assets/features/best_price_guarantee.svg"
-                alt=""
-                width={65}
-                height={65}
+          {reasons
+            .sort((a, b) => a.display_order - b.display_order)
+            .map((reason) => (
+              <FeatureCard
+                key={reason.id}
+                icon={
+                  <Image
+                    src={reason.icon_url}
+                    alt={reason.icon_alt}
+                    width={65}
+                    height={65}
+                  />
+                }
+                title={reason.title}
+                description={reason.description}
               />
-            }
-            title="Best Price Guarantee"
-            description="Enjoy the lowest fares for your journey, with no hidden fees — guaranteed!"
-          />
-
-          <FeatureCard
-            icon={
-              <Image
-                src="/assets/features/easy_and_quick_booking.svg"
-                alt=""
-                width={65}
-                height={65}
-              />
-            }
-            title="Easy & Quick Booking"
-            description="Book your trip in just a few steps and get ready to sail without the wait!"
-          />
-
-          <FeatureCard
-            icon={
-              <Image
-                src="/assets/features/customer_care_24_for_7.svg"
-                alt=""
-                width={65}
-                height={65}
-              />
-            }
-            title="Customer Care 24/7"
-            description="We're here for you anytime, with round-the-clock support to assist you on your journey!"
-          />
+            ))}
         </div>
       </div>
     </section>

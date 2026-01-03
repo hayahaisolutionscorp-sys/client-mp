@@ -9,9 +9,23 @@ import { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('contact-us');
+
   return {
-    title: seo.title as any,
-    description: seo.description,
+    title: seo?.title,
+    description: seo?.description,
+    keywords: seo?.keywords,
+    robots: seo?.robots,
+    alternates: seo?.alternates,
+    openGraph: seo?.openGraph ? {
+      title: seo.openGraph.title || seo.title,
+      description: seo.openGraph.description || seo.description,
+      images: seo.openGraph.images,
+      type: seo.openGraph.type,
+      siteName: seo.openGraph.siteName,
+      locale: seo.openGraph.locale,
+      url: seo.openGraph.url,
+    } : undefined,
+    twitter: seo?.twitter,
   };
 }
 

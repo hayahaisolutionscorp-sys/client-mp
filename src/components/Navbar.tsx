@@ -15,7 +15,8 @@ type NavItem = {
   redirect_url: string;
 };
 import UserDropdown from './UserDropdown';
-import { getHeaderSectionByShippingLineId } from '@/services';
+import { getHeadersSections } from '@/services';
+import { getBrandingConfig } from '@/services/ui/branding.service';
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -44,7 +45,8 @@ const Navbar = () => {
         itemsToRemove = ['WhyChooseUs', 'Partner'];
       }
 
-      const headerSection = await getHeaderSectionByShippingLineId(parsedId);
+      const headerSection = await getHeadersSections();
+
       if (headerSection) {
         if (!headerSection.showPromos) itemsToRemove.push('Promos');
         if (!headerSection.showRoutes) itemsToRemove.push('Routes');
@@ -58,6 +60,16 @@ const Navbar = () => {
 
     fetchHeaderSection();
   }, [shippingLineId]);
+
+  const [branding, setBranding] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      const config = await getBrandingConfig();
+      setBranding(config);
+    };
+    fetchBranding();
+  }, []);
 
   // Handle scroll lock when menu is open
   useEffect(() => {
@@ -94,12 +106,13 @@ const Navbar = () => {
   const position = isHome ? 'absolute' : 'relative';
   const backgroundColor = shouldBeTransparent ? 'text-white bg-black bg-opacity-35' : 'text-black bg-white';
 
-  const logoSrc =
-    shippingLineId && shippingLineId !== '3'
+  const logoSrc = branding?.logo
+    ? (shouldBeTransparent ? branding.logo.light : branding.logo.dark)
+    : (shippingLineId && shippingLineId !== '3'
       ? `${SHIPPING_LINE_LOGO}${shippingLine?.logoFilename}`
       : shouldBeTransparent
-      ? '/assets/images/ayahay_logo_white.png'
-      : '/assets/images/ayahay_logo_blue.png';
+        ? '/assets/images/ayahay_logo_white.png'
+        : '/assets/images/ayahay_logo_blue.png');
 
   return (
     <>
@@ -133,11 +146,10 @@ const Navbar = () => {
                         setActiveNav(item.id);
                         scrollToElement(item.id);
                       }}
-                      className={`text-md font-medium transition-all duration-300 ${
-                        activeNav === item.id
-                          ? 'border-b-2 border-current'
-                          : 'hover:border-b-2 border-transparent hover:border-current'
-                      }`}
+                      className={`text-md font-medium transition-all duration-300 ${activeNav === item.id
+                        ? 'border-b-2 border-current'
+                        : 'hover:border-b-2 border-transparent hover:border-current'
+                        }`}
                     >
                       {item.name}
                     </button>
@@ -145,11 +157,10 @@ const Navbar = () => {
                     <Link
                       key={item.id}
                       href={item.redirect_url}
-                      className={`text-md font-medium transition-all duration-300 ${
-                        activeNav === item.id
-                          ? 'border-b-2 border-current'
-                          : 'hover:border-b-2 border-transparent hover:border-current'
-                      }`}
+                      className={`text-md font-medium transition-all duration-300 ${activeNav === item.id
+                        ? 'border-b-2 border-current'
+                        : 'hover:border-b-2 border-transparent hover:border-current'
+                        }`}
                     >
                       {item.name}
                     </Link>
@@ -168,19 +179,16 @@ const Navbar = () => {
                 >
                   <div className="relative w-6 h-6">
                     <span
-                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${
-                        isMenuOpen ? 'rotate-45 translate-y-0' : '-translate-y-2'
-                      }`}
+                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? 'rotate-45 translate-y-0' : '-translate-y-2'
+                        }`}
                     />
                     <span
-                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${
-                        isMenuOpen ? 'opacity-0' : 'opacity-100'
-                      }`}
+                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? 'opacity-0' : 'opacity-100'
+                        }`}
                     />
                     <span
-                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${
-                        isMenuOpen ? '-rotate-45 translate-y-0' : 'translate-y-2'
-                      }`}
+                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? '-rotate-45 translate-y-0' : 'translate-y-2'
+                        }`}
                     />
                   </div>
                 </button>
@@ -192,9 +200,8 @@ const Navbar = () => {
         {/* Mobile menu overlay */}
         {isHome && (
           <div
-            className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${
-              isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
+            className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
             style={{ zIndex: 40 }}
           >
             <div className="h-full w-full px-4 pt-[100px] overflow-y-auto">
@@ -202,9 +209,8 @@ const Navbar = () => {
                 {/* Mobile menu overlay */}
                 {isHome && (
                   <div
-                    className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${
-                      isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
+                    className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                      }`}
                     style={{ zIndex: 40 }}
                   >
                     <div className="h-full w-full px-4 pt-[100px] overflow-y-auto">
@@ -217,9 +223,8 @@ const Navbar = () => {
                                 setActiveNav(item.id);
                                 scrollToElement(item.id);
                               }}
-                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${
-                                isMenuOpen ? 'opacity-100' : 'opacity-0'
-                              } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
+                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                                } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
                             >
                               {item.name}
                             </button>
@@ -228,9 +233,8 @@ const Navbar = () => {
                               key={item.id}
                               href={item.redirect_url}
                               onClick={() => setIsMenuOpen(false)}
-                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${
-                                isMenuOpen ? 'opacity-100' : 'opacity-0'
-                              } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
+                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                                } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
                             >
                               {item.name}
                             </Link>
@@ -249,9 +253,8 @@ const Navbar = () => {
       {/* Mobile backdrop */}
       {isHome && (
         <div
-          className={`fixed inset-0 bg-black transition-opacity duration-300 md:hidden ${
-            isMenuOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
-          }`}
+          className={`fixed inset-0 bg-black transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
+            }`}
           style={{ zIndex: 30 }}
           onClick={() => setIsMenuOpen(false)}
         />

@@ -9,8 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { SHIPPING_LINE_LOGO } from "constants/storage"
 import { useShippingLineForWhiteLabel } from '@/hooks/shipping-line';
-import { getFooterSectionByShippingLineId } from "@/services";
+import { getFooterSections } from "@/services";
 import { IFooterSection } from "@/models";
+import { getBrandingConfig } from "@/services/ui/branding.service";
 
 const Footer = () => {
   const [footerSection, setFooterSection] = useState<IFooterSection | undefined>(undefined);
@@ -23,21 +24,25 @@ const Footer = () => {
   }, []);
 
   useEffect(() => {
-    const fetchHeroSection = async () => {
-      const parsedId = parseInt(shippingLineId, 10);
-      if (isNaN(parsedId)) {
-        console.error("Invalid shippingLineId:", shippingLineId);
-        return;
-      }
-
-      const footerSection = await getFooterSectionByShippingLineId(parsedId);
+    const fetchFooterSection = async () => {
+      const footerSection = await getFooterSections();
       if (footerSection) {
         setFooterSection(footerSection);
       }
     };
 
-    fetchHeroSection();
-  }, [shippingLineId])
+    fetchFooterSection();
+  }, [shippingLineId]);
+
+  const [branding, setBranding] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      const config = await getBrandingConfig();
+      setBranding(config);
+    };
+    fetchBranding();
+  }, []);
 
   return (
     <>
@@ -55,9 +60,16 @@ const Footer = () => {
             >
               <Image
                 src={
-                  (shippingLineId && shippingLineId !== "3")
-                    ? `${SHIPPING_LINE_LOGO}${shippingLine?.logoFilename}?cache_buster=${cacheBuster}`
-                    : "/assets/images/ayahay_logo_white.png"
+                  branding?.logo
+                    ? branding.logo.light // Footer usually has dark background, so maybe light logo? 
+                    // Wait, `Navbar` used logic based on `shouldBeTransparent`.
+                    // The Footer background is `#13357B` (dark blue).
+                    // So we probably want the Light logo ("white-ish").
+                    // The existing code uses `ayahay_logo_white.png` for default. 
+                    // So `branding.logo.light` is appropriate.
+                    : (shippingLineId && shippingLineId !== "3")
+                      ? `${SHIPPING_LINE_LOGO}${shippingLine?.logoFilename}?cache_buster=${cacheBuster}`
+                      : "/assets/images/ayahay_logo_white.png"
                 }
                 alt="Ayahay Logo"
                 width={200}

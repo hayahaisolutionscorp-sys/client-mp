@@ -19,7 +19,14 @@ export const publicCacheKeys = <const>[
   'saved-bookings',
   'booking-json',
   'booking-response',
-  'query-params'
+  'query-params',
+  'header-sections',
+  'destinations',
+  'promos',
+  'hero-sections',
+  'footer-sections',
+  'partners',
+
 ];
 
 export const cacheKeys = <const>[

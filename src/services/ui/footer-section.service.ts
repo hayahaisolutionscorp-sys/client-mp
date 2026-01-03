@@ -1,25 +1,25 @@
 import { IFooterSection } from '@/models';
 import { FOOTER_SECTION_API } from 'constants/api';
-import { cacheItem, fetchItem } from 'helpers/cache.helpers';
-import axios from '@/services/core/axios';
+
 
 import footerSectionsData from '@/data/footer-sections.json';
 
-export async function getFooterSections(): Promise<IFooterSection[] | undefined> {
-  // const cached = fetchItem<IFooterSection[]>('footer-sections');
-  // if (cached) return cached;
-  //
-  // try {
-  //   const { data } = await axios.get(FOOTER_SECTION_API);
-  //   cacheItem('footer-sections', data);
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return undefined;
-  // }
+export async function getFooterSections(): Promise<IFooterSection | undefined> {
+  try {
+    const res = await fetch(FOOTER_SECTION_API, {
+      next: { tags: ['footer-sections'], revalidate: 3600 }
+    });
 
-  await new Promise(resolve => setTimeout(resolve, 100));
-  return footerSectionsData as IFooterSection[];
+    if (res.ok) {
+      const { data } = await res.json();
+      return data;
+    }
+
+    return undefined;
+  } catch (e) {
+    console.error(e);
+    return undefined;
+  }
 }
 
 export async function getFooterSectionByShippingLineId(

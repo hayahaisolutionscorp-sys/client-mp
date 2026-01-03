@@ -1,11 +1,24 @@
 import { Suspense } from 'react';
 import Carousel from '@/components/landing/Carousel';
 import CarouselSkeleton from './skeletons/CarouselSkeleton';
-import { getThumbnailsByShippingLineId } from '@/services';
+// import { getThumbnailsByShippingLineId } from '@/services';
+import { getPromos } from '@/services/ui/promos.service';
+import { IThumbnail } from '@/models';
+
 
 export default async function Promos() {
   const shippingLineId = parseInt(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3');
-  const promoImages = getThumbnailsByShippingLineId('Carousel', shippingLineId);
+
+  const promoImages = getPromos().then(promos =>
+    promos.map(promo => ({
+      id: 0, // Mock ID as IThumbnail expects number, but API returns UUID
+      shippingLineId: shippingLineId,
+      label: promo.image_alt || '',
+      filename: promo.image_url,
+      location: '',
+      imageOrder: promo.display_order
+    }))
+  );
 
   return (
     <div id="Promos" className="relative w-full overflow-hidden mt-16">
