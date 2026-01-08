@@ -1,19 +1,15 @@
 "use client";
 
+// src/components/press/PressItemContent.tsx
 import React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
   Calendar,
-  Video,
   FileText,
-  ExternalLink,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { VideoEmbed } from "@/components/press/VideoEmbed";
 import { colors } from "@/lib/colors";
-
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { IPress } from "@/models";
 
@@ -48,14 +44,8 @@ export function PressItemContent({ pressItem }: PressItemContentProps) {
             style={{ backgroundColor: themeSettings?.backgroundColor }}
           >
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <span className="px-3 sm:px-4 py-1 border rounded-full bg-white/20 text-xs sm:text-sm">
-                {pressItem.category}
-              </span>
-              {pressItem.type.toLowerCase() === "video" ? (
-                <Video className="w-5 h-5 sm:w-6 sm:h-6" />
-              ) : (
-                <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
-              )}
+              {/* Fixed icon/Badge for standard press release */}
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">
               {pressItem.title}
@@ -71,24 +61,6 @@ export function PressItemContent({ pressItem }: PressItemContentProps) {
                 {pressItem.content}
               </p>
             </div>
-
-            {pressItem.videoUrl && <VideoEmbed url={pressItem.videoUrl} />}
-
-            {pressItem.articleUrl && (
-              <Button variant="default">
-                <a
-                  href={pressItem.articleUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-white text-sm sm:text-base"
-                  style={{ backgroundColor: "transparent" }}
-                >
-                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
-                    Read full article on LinkedIn
-                  <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
-                </a>
-              </Button>
-            )}
           </CardContent>
         </Card>
       </div>

@@ -1,25 +1,26 @@
-import { IContactUs } from '@/models';
-import { CONTACT_US_API } from 'constants/api';
-import { cacheItem, fetchItem } from 'helpers/cache.helpers';
+import { IContactInformation, IContactUs } from '@/models';
+import { CONTACT_INFORMATION_API, CONTACT_US_API } from 'constants/api';
+// import { cacheItem, fetchItem } from 'helpers/cache.helpers';
 import axios from '@/services/core/axios';
 
 import contactUsData from '@/data/contact-us.json';
 
-export async function getContactUs(): Promise<IContactUs[] | undefined> {
-  // const cached = fetchItem<IContactUs[]>('contact-us');
-  // if (cached) return cached;
-  //
-  // try {
-  //   const { data } = await axios.get(CONTACT_US_API);
-  //   cacheItem('contact-us', data);
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return undefined;
-  // }
+export async function getContactUs(): Promise<IContactInformation[]> {
+  try {
+    const res = await fetch(CONTACT_INFORMATION_API, {
+      next: { tags: ['contact-us'], revalidate: 3600 }
+    });
 
+    if (res.ok) {
+      const { data } = await res.json();
+      return data;
+    }
 
-  return contactUsData as IContactUs[];
+    return [];
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
 }
 
 export async function getContactUsByShippingLineId(

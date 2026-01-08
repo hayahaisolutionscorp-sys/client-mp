@@ -29,10 +29,12 @@ export const HEADER_SECTION_API = `${BASE_URL}/pages/header-config`;
 export const HERO_SECTION_API = `${BASE_URL}/pages/home/page-sections/hero`;
 export const FOOTER_SECTION_API = `${BASE_URL}/pages/footer-config`;
 export const ABOUT_US_API = `${BASE_URL}/about-us`;
-export const CONTACT_US_API = `${BASE_URL}/contact-us`;
+export const CONTACT_INFORMATION_API = `${BASE_URL}/contact-information`;
 export const THEME_SETTINGS_API = `${BASE_URL}/theme-settings`;
-export const FAQ_API = `${BASE_URL}/faq`;
+export const FAQ_API = `${BASE_URL}/faq`; // Keeping for backward compatibility if needed, or remove? Plan didn't explicitly say remove, but new one is /faqs
+export const FAQS_API = `${BASE_URL}/faqs`;
 export const PRESS_API = `${BASE_URL}/press`;
+export const PRESS_RELEASES_API = `${BASE_URL}/press-releases`;
 export const PRIVACY_POLICY_API = `${BASE_URL}/privacy-policy`;
 export const SEO_API = `${BASE_URL}/pages`;
 export const PROMOS_API = `${BASE_URL}/travel-promotions`;
@@ -41,7 +43,10 @@ export const BRANDING_API = `${BASE_URL}/gen_configs`;
 export const GET_TO_KNOW_API = `${BASE_URL}/pages/home/page-sections/get_to_know`;
 export const GET_TO_KNOW_MISSION_API = `${BASE_URL}/pages/home/page-sections/get_to_know_mission`;
 export const GET_TO_KNOW_VISION_API = `${BASE_URL}/pages/home/page-sections/get_to_know_vision`;
-export const WHY_CHOOSE_REASONS_API = `${BASE_URL}/why-choose-reasons`;
+export const WHY_CHOOSE_REASONS_API = `${BASE_URL}/home/why_choose/section-cards`;
 export const WHY_CHOOSE_SECTION_API = `${BASE_URL}/pages/home/page-sections/why_choose`;
+export const ABOUT_US_SECTION_API = `${BASE_URL}/pages/about-us/page-sections`;
 export const OUR_PARTNERS_API = `${BASE_URL}/partners`;
+export const ABOUT_US_CORE_VALUES_API = `${BASE_URL}/about-us/core_values/section-cards`;
+
 

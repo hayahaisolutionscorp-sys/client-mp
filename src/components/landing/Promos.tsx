@@ -7,12 +7,9 @@ import { IThumbnail } from '@/models';
 
 
 export default async function Promos() {
-  const shippingLineId = parseInt(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3');
-
   const promoImages = getPromos().then(promos =>
     promos.map(promo => ({
       id: 0, // Mock ID as IThumbnail expects number, but API returns UUID
-      shippingLineId: shippingLineId,
       label: promo.image_alt || '',
       filename: promo.image_url,
       location: '',

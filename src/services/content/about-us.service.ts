@@ -1,37 +1,60 @@
-import { IAboutUs } from '@/models';
-import { ABOUT_US_API } from 'constants/api';
-import { cacheItem, fetchItem } from 'helpers/cache.helpers';
-import axios from '@/services/core/axios';
 
-import aboutUsData from '@/data/about-us.json';
+import { ABOUT_US_SECTION_API, ABOUT_US_CORE_VALUES_API } from 'constants/api';
+import { ICoreValue } from '@/models';
 
-export async function getAboutUs(): Promise<IAboutUs[] | undefined> {
-  // const cached = fetchItem<IAboutUs[]>('about-us');
-  // if (cached) return cached;
-  //
-  // try {
-  //   const { data } = await axios.get(ABOUT_US_API);
-  //   cacheItem('about-us', data);
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return undefined;
-  // }
-
-  await new Promise(resolve => setTimeout(resolve, 100));
-  return aboutUsData as IAboutUs[];
+export interface IAboutUsSection {
+  id: string;
+  page_id: string;
+  type: string;
+  bg_type: string | null;
+  bg_url: string | null;
+  bg_alt: string | null;
+  title: string | null;
+  subtitle: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string | null;
 }
 
-export async function getAboutUsByShippingLineId(shippingLineId: number): Promise<IAboutUs | undefined> {
-  // try {
-  //   const { data } = await axios.get(`${ABOUT_US_API}/shippingLine/${shippingLineId}`);
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return undefined;
-  // }
+export async function getAboutUsSection(sectionType: string): Promise<IAboutUsSection | undefined> {
+  const cacheKey = `about-us-${sectionType.replace('_', '-')}`;
 
-  await new Promise(resolve => setTimeout(resolve, 100));
-  return (aboutUsData as IAboutUs[]).find(a => a.shippingLineId === shippingLineId);
+  try {
+    const res = await fetch(`${ABOUT_US_SECTION_API}/${sectionType}`, {
+      next: { tags: [cacheKey], revalidate: 3600 },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch about-us section ${sectionType}`);
+    }
+
+    const { data } = await res.json();
+    return data;
+  } catch (e) {
+    console.error(`Error fetching about-us section ${sectionType}:`, e);
+    return undefined;
+  }
 }
+
+export async function getCoreValues(): Promise<ICoreValue[]> {
+  const cacheKey = 'about-us-core-values';
+
+  try {
+    const res = await fetch(ABOUT_US_CORE_VALUES_API, {
+      next: { tags: [cacheKey], revalidate: 3600 },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch about-us core values`);
+    }
+
+    const { data } = await res.json();
+    return data;
+  } catch (e) {
+    console.error(`Error fetching about-us core values:`, e);
+    return [];
+  }
+}
+
+
 

@@ -1,12 +1,11 @@
 export interface IPress {
   id: number;
-  shippingLineId: number;
   title: string;
   content: string;
-  publishedDate: Date;
-  isPublish: boolean;
-  videoUrl: string;
-  articleUrl: string;
-  type: string;
-  category: string;
+  publish_date: string;
+  slug: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string | null;
 }

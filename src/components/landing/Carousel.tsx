@@ -5,8 +5,6 @@ import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { BsDot } from 'react-icons/bs';
 import { IoClose } from 'react-icons/io5';
 import Image from 'next/image';
-
-import { CAROUSEL_IMAGES } from 'constants/storage';
 import { IThumbnail } from '@/models';
 
 const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {

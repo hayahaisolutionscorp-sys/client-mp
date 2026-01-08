@@ -1,6 +1,5 @@
 export interface IAboutUs {
   id: number;
-  shippingLineId: number;
   imageFilename: string;
   imageLabel: string;
   imageCaption: string;

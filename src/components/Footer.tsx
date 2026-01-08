@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { SHIPPING_LINE_LOGO } from "constants/storage"
 import { useShippingLineForWhiteLabel } from '@/hooks/shipping-line';
-import { getFooterSections } from "@/services";
+import { getContactUs, getFooterSections } from "@/services";
 import { IFooterSection } from "@/models";
 import { getBrandingConfig } from "@/services/ui/branding.service";
 
@@ -35,14 +35,30 @@ const Footer = () => {
   }, [shippingLineId]);
 
   const [branding, setBranding] = useState<any>(null);
+  const [contactInfo, setContactInfo] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchBranding = async () => {
       const config = await getBrandingConfig();
       setBranding(config);
     };
+    const fetchContactInfo = async () => {
+      const info = await getContactUs();
+      setContactInfo(info);
+    }
     fetchBranding();
+    fetchContactInfo();
   }, []);
+
+  const socialLinks = {
+    facebook: contactInfo.find(c => c.type === 'facebook' && c.is_active),
+    instagram: contactInfo.find(c => c.type === 'instagram' && c.is_active),
+    twitter: contactInfo.find(c => c.type === 'twitter' && c.is_active),
+    linkedin: contactInfo.find(c => c.type === 'linkedin' && c.is_active),
+  };
+
+  const phoneNumbers = contactInfo.filter(c => c.type === 'phone' && c.is_active);
+  const emails = contactInfo.filter(c => c.type === 'email' && c.is_active);
 
   return (
     <>
@@ -130,23 +146,18 @@ const Footer = () => {
           {/* Contact Details */}
           <div>
             <h3 className="font-semibold mb-5">Customer Care</h3>
-            {(footerSection?.primaryContactNumberNetwork && footerSection?.primaryContactNumber) && (
-              <p className="mb-5 text-sm sm:text-base opacity-80">
-                {footerSection.primaryContactNumberNetwork}: {footerSection.primaryContactNumber}
+            {phoneNumbers.map(phone => (
+              <p key={phone.id} className="mb-5 text-sm sm:text-base opacity-80 whitespace-nowrap">
+                {phone.label}: {phone.value}
               </p>
-            )}
-            {(footerSection?.secondaryContactNumberNetwork && footerSection?.secondaryContactNumber) && (
-              <p className="mb-5 text-sm sm:text-base opacity-80">
-                {footerSection.secondaryContactNumberNetwork}: {footerSection.secondaryContactNumber}
-              </p>
-            )}
+            ))}
 
             <h4 className="font-semibold mt-8 mb-5">Need support?</h4>
-            {footerSection?.email && (
-              <a href={`mailto:${footerSection.email}`} className="text-sm sm:text-base opacity-80 hover:underline">
-                {footerSection.email}
+            {emails.map(email => (
+              <a key={email.id} href={`mailto:${email.value}`} className="block mb-2 text-sm sm:text-base opacity-80 hover:underline">
+                {email.value}
               </a>
-            )}
+            ))}
           </div>
         </div>
 
@@ -171,23 +182,23 @@ const Footer = () => {
             </p>
           )}
           <div className="flex space-x-4">
-            {footerSection?.twitterUrl && (
-              <a href={`${footerSection.twitterUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Twitter">
+            {socialLinks.twitter && (
+              <a href={`${socialLinks.twitter.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Twitter">
                 <FaXTwitter className="opacity-80 w-5 h-5" />
               </a>
             )}
-            {footerSection?.linkedInUrl && (
-              <a href={`${footerSection.linkedInUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on LinkedIn">
+            {socialLinks.linkedin && (
+              <a href={`${socialLinks.linkedin.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on LinkedIn">
                 <FaLinkedin className="opacity-80 w-5 h-5" />
               </a>
             )}
-            {footerSection?.facebookUrl && (
-              <a href={`${footerSection.facebookUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Facebook">
+            {socialLinks.facebook && (
+              <a href={`${socialLinks.facebook.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Facebook">
                 <FaFacebook className="opacity-80 w-5 h-5" />
               </a>
             )}
-            {footerSection?.instagramUrl && (
-              <a href={`${footerSection.instagramUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Instagram">
+            {socialLinks.instagram && (
+              <a href={`${socialLinks.instagram.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Instagram">
                 <FaInstagram className="opacity-80 w-5 h-5" />
               </a>
             )}

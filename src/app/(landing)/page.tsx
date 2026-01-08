@@ -32,8 +32,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const shippingLineId = parseInt(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3');
-
   return (
     <div className="bg-[#EEF8FC]">
       <Hero />
@@ -41,7 +39,7 @@ export default async function Home() {
       <div className="bg-[#EEF8FC]">
         <Promos />
         <PopularRoutes />
-        {shippingLineId === 3 && <WhyChooseUs />}
+        <WhyChooseUs />
       </div>
     </div>
   );

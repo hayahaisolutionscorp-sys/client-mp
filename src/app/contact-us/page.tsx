@@ -3,7 +3,7 @@ import { MdOutlineMail } from 'react-icons/md';
 import { CONTACT_US_IMAGES } from 'constants/storage';
 import { hexToRgb } from 'helpers/theme.helpers';
 import ContactUsForm from '@/components/contact-us/ContactUsForm';
-import { getContactUsByShippingLineId, getThemeSettingsByShippingLineId } from '@/services';
+import { getContactUs, getContactUsByShippingLineId, getThemeSettingsByShippingLineId } from '@/services';
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
 
@@ -30,9 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactUs() {
-  const shippingLineId = parseInt(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3');
-  const contactUs = await getContactUsByShippingLineId(shippingLineId);
-  const themeSettings = await getThemeSettingsByShippingLineId(shippingLineId);
+  // TODO: Update ni sha
+  const contactUs = await getContactUsByShippingLineId(3);
+  const themeSettings = await getThemeSettingsByShippingLineId(3);
+  const contactInfo = await getContactUs();
+
+  const phoneNumbers = contactInfo.filter(c => c.type === 'phone' && c.is_active);
+  const emails = contactInfo.filter(c => c.type === 'email' && c.is_active);
 
   return (
     <section
@@ -62,26 +66,19 @@ export default async function ContactUs() {
             <p className="text-md text-white">{contactUs?.headingDescription}</p>
 
             <ul className="space-y-4">
-              {contactUs?.contactNumber && (
-                <li className="flex items-center space-x-4">
+              {phoneNumbers.map(phone => (
+                <li key={phone.id} className="flex items-center space-x-4">
                   <FaMobileAlt className="text-2xl" />
-                  <h3>{contactUs.contactNumber}</h3>
+                  <h3>{phone.label}: {phone.value}</h3>
                 </li>
-              )}
+              ))}
 
-              {contactUs?.email && (
-                <li className="flex items-center space-x-4">
+              {emails.map(email => (
+                <li key={email.id} className="flex items-center space-x-4">
                   <MdOutlineMail className="text-2xl" />
-                  <h3>{contactUs.email}</h3>
+                  <h3>{email.value}</h3>
                 </li>
-              )}
-
-              {contactUs?.address && (
-                <li className="flex items-center space-x-4">
-                  <FaMapMarkerAlt className="text-2xl" />
-                  <h3>{contactUs.address}</h3>
-                </li>
-              )}
+              ))}
             </ul>
           </div>
 

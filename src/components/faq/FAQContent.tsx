@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import FAQCategoryTabs from './FAQCategoryTabs';
-import { FAQItem } from '@/app/faq/faq.data';
+import { IFaq } from '@/models';
 import FAQItemComponent from './FAQItemComponent';
 
 interface FAQContentProps {
-  faqs: FAQItem[];
+  faqs: IFaq[];
   categories: string[];
   themeColor: string;
 }

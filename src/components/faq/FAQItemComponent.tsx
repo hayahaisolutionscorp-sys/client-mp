@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import { IoIosArrowDown } from 'react-icons/io';
 import { hexToRgb } from 'helpers/theme.helpers';
-import { FAQItem } from '@/app/faq/faq.data';
+import { IFaq } from '@/models';
 
 interface FAQItemComponentProps {
-  faq: FAQItem;
+  faq: IFaq;
   themeColor: string;
 }
 
@@ -86,9 +86,8 @@ export default function FAQItemComponent({ faq, themeColor }: FAQItemComponentPr
       >
         <span className="font-medium text-gray-900 pr-4">{faq.question}</span>
         <IoIosArrowDown
-          className={`flex-shrink-0 w-5 h-5 text-gray-500 transition-transform duration-300 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`flex-shrink-0 w-5 h-5 text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''
+            }`}
         />
       </button>
 

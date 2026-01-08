@@ -5,8 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { NAV_ITEMS, SHIPPING_LINE_LOGO } from 'constants/index';
-import { useShippingLineForWhiteLabel } from '@/hooks/shipping-line';
+import { NAV_ITEMS } from 'constants/index';
 
 type NavItem = {
   id: string;
@@ -22,28 +21,15 @@ const Navbar = () => {
   const pathname = usePathname();
   const [activeNav, setActiveNav] = useState('Book');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [shippingLineId, setShippingLineId] = useState('3'); // Default to Ayahay
   const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
-  const shippingLine = useShippingLineForWhiteLabel();
-
-  useEffect(() => {
-    const envId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3';
-    setShippingLineId(envId);
-  }, []);
 
   useEffect(() => {
     const fetchHeaderSection = async () => {
-      const parsedId = parseInt(shippingLineId, 10);
-      if (isNaN(parsedId)) {
-        console.error('Invalid shippingLineId:', shippingLineId);
-        return;
-      }
-
       let itemsToRemove: string[] = [];
 
-      if (parsedId !== 3) {
-        itemsToRemove = ['WhyChooseUs', 'Partner'];
-      }
+      // if (parsedId !== 3) {
+      //   itemsToRemove = ['WhyChooseUs', 'Partner'];
+      // }
 
       const headerSection = await getHeadersSections();
 
@@ -52,6 +38,9 @@ const Navbar = () => {
         if (!headerSection.showRoutes) itemsToRemove.push('Routes');
         if (!headerSection.showResources) itemsToRemove.push('Resources');
         if (!headerSection.showAboutUs) itemsToRemove.push('AboutUs');
+        // prep lng
+        // if (!headerSection.showWhyChooseUs) itemsToRemove.push('WhyChooseUs');
+        // if (!headerSection.showPartner) itemsToRemove.push('Partner');
       }
 
       const tempFilteredNavItems = NAV_ITEMS.filter((item) => !itemsToRemove.includes(item.id));
@@ -59,7 +48,7 @@ const Navbar = () => {
     };
 
     fetchHeaderSection();
-  }, [shippingLineId]);
+  }, []);
 
   const [branding, setBranding] = useState<any>(null);
 
@@ -101,18 +90,14 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  if (!branding) return null;
+
   const isHome = pathname === '/';
   const shouldBeTransparent = isHome && !isMenuOpen;
   const position = isHome ? 'absolute' : 'relative';
   const backgroundColor = shouldBeTransparent ? 'text-white bg-black bg-opacity-35' : 'text-black bg-white';
 
-  const logoSrc = branding?.logo
-    ? (shouldBeTransparent ? branding.logo.light : branding.logo.dark)
-    : (shippingLineId && shippingLineId !== '3'
-      ? `${SHIPPING_LINE_LOGO}${shippingLine?.logoFilename}`
-      : shouldBeTransparent
-        ? '/assets/images/ayahay_logo_white.png'
-        : '/assets/images/ayahay_logo_blue.png');
+  const logoSrc = isHome ? branding.logo.light : branding.logo.dark;
 
   return (
     <>
