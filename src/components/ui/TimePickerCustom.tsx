@@ -43,7 +43,7 @@ const TimePicker = ({ selectedTime, onChange }: TimePickerProps) => {
       <div className="flex items-center space-x-1">
         {/* Hour Dropdown */}
         <select
-          className="text-sm w-16 p-2 border rounded-md text-center"
+          className="text-sm w-16 p-2 border rounded-md text-center bg-white text-black"
           value={hour}
           onChange={(e) => {
             const selectedHour = Number(e.target.value);
@@ -65,7 +65,7 @@ const TimePicker = ({ selectedTime, onChange }: TimePickerProps) => {
 
         {/* Minute Dropdown */}
         <select
-          className="text-sm w-16 p-2 border rounded-md text-center"
+          className="text-sm w-16 p-2 border rounded-md text-center bg-white text-black"
           value={minute}
           onChange={(e) => setMinute(Number(e.target.value))}
         >

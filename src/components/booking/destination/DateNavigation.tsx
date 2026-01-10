@@ -151,7 +151,7 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
       {/* Loading Indicator or Dates */}
       {loading ? (
         <div className="flex justify-center items-center w-full">
-          <FiLoader className="animate-spin text-2xl sm:text-4xl" style={{ color: themeSettings?.iconColor || "#23abff" }} />
+          <FiLoader className="animate-spin text-2xl sm:text-4xl" style={{ color: themeSettings?.accent || "#23abff" }} />
         </div>
       ) : (
         <div className="flex items-center justify-between w-full overflow-x-hidden no-scrollbar hide-scrollbar">
@@ -173,7 +173,7 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
                     transition-all duration-300 ease-in-out
                     ${isSelected ? "border-b-4 border-[rgba(var(--border-color),1)]" : ""}
                     hover:border-b-4 hover:border-[rgba(var(--border-color),0.5)]`}
-                  style={{ "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff") } as React.CSSProperties}
+                  style={{ "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21") } as React.CSSProperties}
                 >
                   <span className="text-sm sm:text-base font-medium">{item.day}</span>
                   <span className="text-xs sm:text-sm font-bold">{item.date}</span>

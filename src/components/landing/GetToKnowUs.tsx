@@ -9,6 +9,7 @@ import {
   getGetToKnowVision,
   IGetToKnowData
 } from '@/services/ui/get-to-know.service';
+import { useThemeSettings } from '@/hooks/theme-settings';
 
 export default function GetToKnowUs() {
   const [tab, setTab] = useState<'Mission' | 'Vision'>('Mission');
@@ -16,6 +17,7 @@ export default function GetToKnowUs() {
   const [missionData, setMissionData] = useState<IGetToKnowData | null>(null);
   const [visionData, setVisionData] = useState<IGetToKnowData | null>(null);
   const [loading, setLoading] = useState(true);
+  const themeSettings = useThemeSettings();
 
   const TABS = {
     Mission: 'Mission',
@@ -74,7 +76,10 @@ export default function GetToKnowUs() {
       <div className="flex flex-col flex-1 space-y-6">
         <h2 className="font-bold text-customText text-2xl sm:text-3xl md:text-4xl">{mainData?.title || 'Get To Know Us'}</h2>
 
-        <div className="text-customText/80 text-sm sm:text-base border-l-4 border-customBlue pl-4 space-y-4 whitespace-pre-wrap">
+        <div
+          className="text-customText/80 text-sm sm:text-base border-l-4 border-customBlue pl-4 space-y-4 whitespace-pre-wrap"
+          style={{ borderColor: themeSettings?.primaryColor }}
+        >
           {mainData?.description}
         </div>
 
@@ -91,7 +96,10 @@ export default function GetToKnowUs() {
             >
               {tabName}
               {tab === tabName && (
-                <span className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-customBlue"></span>
+                <span
+                  className="absolute bottom-[-8px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-customBlue"
+                  style={{ borderTopColor: themeSettings?.primaryColor }}
+                ></span>
               )}
             </Button>
           ))}

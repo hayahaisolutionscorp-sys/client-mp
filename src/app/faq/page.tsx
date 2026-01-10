@@ -1,8 +1,8 @@
 import FAQ from '@/components/faq/FAQ';
 import FAQHeroSection from '@/components/faq/FAQHeroSection';
-import { getThemeSettingsByShippingLineId } from '@/services';
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
+import themeSettings from '@/data/theme-settings.json';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('faq');
@@ -28,18 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FAQPage() {
   const shippingLineId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3';
-
-  let themeSettings = null;
-  try {
-    const parsedId = parseInt(shippingLineId, 10);
-    if (!isNaN(parsedId)) {
-      themeSettings = await getThemeSettingsByShippingLineId(parsedId);
-    }
-  } catch (error) {
-    console.error('Error fetching theme settings:', error);
-  }
-
-  const backgroundColor = themeSettings?.backgroundColor || '#23abff';
+  const theme = themeSettings[0];
+  const backgroundColor = theme.primaryColor || '#91363C';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#EEF8FC]">

@@ -52,9 +52,7 @@ export async function getAvailableTrips(
 
   let filteredTrips = tripsData as any as ITrip[];
 
-  if (shippingLineId) {
-    filteredTrips = filteredTrips.filter(t => t.shippingLineId === shippingLineId);
-  }
+
 
   if (searchQuery.srcPortId) {
     filteredTrips = filteredTrips.filter(t => t.srcPortId === Number(searchQuery.srcPortId));
@@ -64,8 +62,10 @@ export async function getAvailableTrips(
     filteredTrips = filteredTrips.filter(t => t.destPortId === Number(searchQuery.destPortId));
   }
 
-  if (searchQuery.departureDate) {
-    const searchDatePH = toPhilippinesTime(searchQuery.departureDate as string, 'YYYY-MM-DD');
+  const dateToFilter = searchQuery.filterSpecificDate || searchQuery.departureDate;
+
+  if (dateToFilter) {
+    const searchDatePH = toPhilippinesTime(dateToFilter as string, 'YYYY-MM-DD');
 
     filteredTrips = filteredTrips.filter(t => {
       const tripDatePH = toPhilippinesTime(t.departureDateIso, 'YYYY-MM-DD');
@@ -127,9 +127,7 @@ export async function getScheduleAndFares(
     });
   }
 
-  if (shippingLineId) {
-    filteredTrips = filteredTrips.filter(t => t.shippingLineId === shippingLineId);
-  }
+
 
   if (srcPortId) {
     filteredTrips = filteredTrips.filter(t => t.srcPortId === srcPortId);

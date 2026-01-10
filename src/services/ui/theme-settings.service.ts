@@ -5,7 +5,7 @@ import axios from '@/services/core/axios';
 
 import themeSettingsData from '@/data/theme-settings.json';
 
-export async function getThemeSettings(): Promise<IThemeSettings[] | undefined> {
+export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
   // const cached = fetchItem<IThemeSettings[]>('theme-settings');
   // if (cached) return cached;
   //
@@ -19,7 +19,7 @@ export async function getThemeSettings(): Promise<IThemeSettings[] | undefined> 
   // }
 
 
-  return themeSettingsData as IThemeSettings[];
+  return (themeSettingsData as IThemeSettings[])[0];
 }
 
 export async function getThemeSettingsByShippingLineId(

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { FaCar, FaShip, FaCheckCircle } from 'react-icons/fa';
 import { IoMdPin } from 'react-icons/io';
 import { TbPointFilled } from 'react-icons/tb';
-import { MdError } from 'react-icons/md';
+import { MdError, MdEventSeat } from 'react-icons/md';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { Button } from '@/components/ui/Button';
 import Image from 'next/image';
@@ -139,12 +139,10 @@ export default function TripCards({
   const filteredTrips = trips.filter((trip) => {
     if (!selectedDate) return true;
 
-    const tripDate = new Date(trip.departureDateIso);
-    tripDate.setHours(12, 0, 0, 0);
-    const selectedDateObj = new Date(selectedDate);
-    selectedDateObj.setHours(12, 0, 0, 0);
+    const tripDatePH = toPhilippinesTime(trip.departureDateIso, 'YYYY-MM-DD');
+    const selectedDatePH = toPhilippinesTime(selectedDate, 'YYYY-MM-DD');
 
-    return tripDate.toDateString() === selectedDateObj.toDateString();
+    return tripDatePH === selectedDatePH;
   });
 
   // Filter based on selected cabin (keep existing logic)
@@ -194,17 +192,22 @@ export default function TripCards({
           <div
             key={trip.id}
             className={`relative bg-white border-2 rounded-lg shadow-sm transition-all duration-300 ease-in-out 
-                      ${isTripSelected ? 'ring-2 ring-green-500' : 'hover:border-[rgba(var(--border-color),1)]'}`}
+                      ${isTripSelected ? '' : 'hover:border-[rgba(var(--border-color),1)]'}`}
             style={
               {
-                '--border-color': hexToRgb(themeSettings?.borderColor || '#23abff')
+                '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
+                borderColor: isTripSelected ? themeSettings?.accent || '#8C1F21' : undefined,
+                boxShadow: isTripSelected ? `0 0 0 1px ${themeSettings?.accent || '#8C1F21'}` : undefined
               } as React.CSSProperties
             }
           >
             {/* Selected Trip Indicator */}
             {isTripSelected && (
               <div className="absolute -top-3 -right-3 z-10">
-                <FaCheckCircle className="w-6 h-6 text-green-500 bg-white rounded-full" />
+                <FaCheckCircle
+                  className="w-6 h-6 bg-white rounded-full"
+                  style={{ color: themeSettings?.accent || '#22c55e' }}
+                />
               </div>
             )}
 
@@ -214,12 +217,25 @@ export default function TripCards({
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 sm:mb-4">
                 {/* Vehicle Slots & Selected Cabin */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="inline-flex items-center px-3 py-1 bg-green-50 font-semibold text-green-600 border rounded-full text-sm">
+                  <div
+                    className="inline-flex items-center px-3 py-1 font-semibold border rounded-full text-sm"
+                    style={{
+                      backgroundColor: `rgba(${hexToRgb(themeSettings?.accent || '#8C1F21')}, 0.1)`,
+                      color: themeSettings?.accent || '#8C1F21',
+                      borderColor: `rgba(${hexToRgb(themeSettings?.accent || '#8C1F21')}, 0.2)`
+                    }}
+                  >
                     <FaCar className="mr-2" />
                     <span>{trip.availableVehicleCapacity} Vehicle Slots</span>
                   </div>
                   {selectedCabin && selectedCabin.tripId === trip.id && (
-                    <div className="inline-flex items-center px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-sm">
+                    <div
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm"
+                      style={{
+                        backgroundColor: `rgba(${hexToRgb(themeSettings?.accent || '#8C1F21')}, 0.1)`,
+                        color: themeSettings?.accent || '#8C1F21'
+                      }}
+                    >
                       <TbPointFilled className="mr-1" />
                       <span>{selectedCabin.cabinType}</span>
                     </div>
@@ -242,7 +258,7 @@ export default function TripCards({
                     {toPhilippinesTime(trip.departureDateIso, DATE_SECONDARY_DEFAULT_FORMAT)}
                   </span>
                   <div className="flex items-center text-gray-700">
-                    <FaShip className="mr-2" style={{ color: themeSettings?.iconColor || '#051036' }} />
+                    <FaShip className="mr-2" style={{ color: themeSettings?.accent || '#051036' }} />
                     <span className="text-sm font-medium">{getShipDetailsById(trip.shipId)?.name || 'Unknown'}</span>
                   </div>
                 </div>
@@ -252,13 +268,15 @@ export default function TripCards({
               <div className="grid grid-cols-1 md:grid-cols-[200px_1fr_150px] gap-6 items-center">
                 {/* Shipping Line Logo */}
                 <div className="hidden md:flex justify-center">
-                  <Image
-                    src={`${SHIPPING_LINE_LOGO}${trip.shippingLine?.logoFilename}`}
-                    alt="Shipping Company Logo"
-                    width={200}
-                    height={500}
-                    className="w-auto h-[100px] object-contain"
-                  />
+                  {trip.shippingLine?.logoFilename && (
+                    <Image
+                      src={`${SHIPPING_LINE_LOGO}${trip.shippingLine?.logoFilename}`}
+                      alt="Shipping Company Logo"
+                      width={200}
+                      height={500}
+                      className="w-auto h-[100px] object-contain"
+                    />
+                  )}
                 </div>
 
                 {/* Journey Timeline */}
@@ -274,9 +292,9 @@ export default function TripCards({
                   {/* Journey Line */}
                   <div className="flex-1 max-w-[200px] mx-4">
                     <div className="flex items-center justify-center space-x-2">
-                      <FaShip className="flex-shrink-0" style={{ color: themeSettings?.iconColor || '23abff' }} />
+                      <FaShip className="flex-shrink-0" style={{ color: themeSettings?.accent || '#23abff' }} />
                       <div className="w-full border-t-2 border-dashed border-gray-300"></div>
-                      <IoMdPin className="text-green-500 flex-shrink-0" />
+                      <IoMdPin className="flex-shrink-0" style={{ color: themeSettings?.accent || '#22c55e' }} />
                     </div>
                   </div>
 
@@ -295,8 +313,8 @@ export default function TripCards({
                     {selectedCabin && selectedCabin.tripId === trip.id
                       ? formatCurrency(selectedCabin.cabinFare)
                       : trip.availableCabins?.length
-                      ? formatCurrency(Math.min(...trip.availableCabins.map((cabin) => cabin.adultFare)))
-                      : 'N/A'}
+                        ? formatCurrency(Math.min(...trip.availableCabins.map((cabin) => cabin.adultFare)))
+                        : 'N/A'}
                   </p>
                   <Button
                     variant={selectedCabin || isTripExpanded ? 'destructive' : 'default'}
@@ -322,28 +340,28 @@ export default function TripCards({
                     return (
                       <div
                         key={cabinData.cabinId}
-                        className={`bg-white rounded-lg p-4 border-2 transition-all ${
-                          isCabinSelected
-                            ? 'ring-2 ring-green-500'
-                            : 'border-gray-200 hover:border-[rgba(var(--border-color),1)]'
-                        }`}
+                        className={`bg-white rounded-lg p-4 border-2 transition-all ${isCabinSelected
+                          ? ''
+                          : 'border-gray-200 hover:border-[rgba(var(--border-color),1)]'
+                          }`}
                         style={
                           {
-                            '--border-color': hexToRgb(themeSettings?.borderColor || '#23abff')
+                            '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
+                            borderColor: isCabinSelected ? themeSettings?.accent || '#8C1F21' : undefined,
+                            boxShadow: isCabinSelected ? `0 0 0 1px ${themeSettings?.accent || '#8C1F21'}` : undefined
                           } as React.CSSProperties
                         }
                       >
                         <div className="flex justify-between items-start mb-4">
                           <h4 className="text-lg font-semibold text-gray-900">{cabin?.cabinType?.name || 'N/A'}</h4>
                           <div className="flex items-center space-x-2 text-sm">
-                            <Image
-                              src="/assets/images/seats_icon.svg"
-                              alt="Seats"
-                              width={50}
-                              height={50}
+                            <MdEventSeat
                               className="w-4 h-4"
+                              style={{ color: themeSettings?.accent || '#8C1F21' }}
                             />
-                            <span className="text-blue-600">{cabinData.availablePassengerCapacity} seats left</span>
+                            <span style={{ color: themeSettings?.accent || '#8C1F21' }}>
+                              {cabinData.availablePassengerCapacity} seats left
+                            </span>
                           </div>
                         </div>
 
@@ -395,7 +413,7 @@ export default function TripCards({
                     <span>Seating arrangements may vary by vessel.</span>
                     <AiOutlineInfoCircle
                       className="ml-1 mt-[2px]"
-                      style={{ color: themeSettings?.iconColor || '#23abff' }}
+                      style={{ color: themeSettings?.accent || '#23abff' }}
                     />
                   </div>
                 </div>

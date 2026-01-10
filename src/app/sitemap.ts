@@ -31,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         if (pressReleases) {
             pressRoutes = pressReleases.map((press) => ({
                 url: `${baseUrl}/press/${press.id}`,
-                lastModified: new Date(press.publishedDate),
+                lastModified: new Date(press.publish_date),
                 changeFrequency: 'weekly' as const,
                 priority: 0.7,
             }));

@@ -1,14 +1,29 @@
 [
     {
-        "id": 1,
-        "shippingLineId": 3,
-        "title": "Ayahay Launches",
-        "content": "We are live!",
-        "publishedDate": "2024-01-01T00:00:00.000Z",
-        "isPublish": true,
-        "videoUrl": "",
-        "articleUrl": "",
-        "type": "News",
-        "category": "Company"
+        "id": "aznar-partnership",
+        "title": "Aznar and Ayahay partnership",
+        "publishedDate": "2023-11-15",
+        "videoUrl": "https://youtu.be/YXzM5rmCUrM",
+        "content": "Ayahay is proud to announce our partnership with Aznar, a leading player in the logistics industry. This collaboration marks a significant milestone in our journey to revolutionize the booking and transportation experience for our customers.",
+        "type": "Video",
+        "category": "Partnerships"
+    },
+    {
+        "id": "pier1-survey",
+        "title": "Survey Findings at Pier 1 in Cebu City",
+        "publishedDate": "2023-12-01",
+        "videoUrl": "https://youtu.be/T31zGUGcvjk",
+        "content": "We recently conducted an extensive survey at Pier 1 in Cebu City to better understand the needs and challenges faced by our customers. The insights gathered from this survey will play a crucial role in shaping our services and improving the overall customer experience.",
+        "type": "Video",
+        "category": "Research"
+    },
+    {
+        "id": "first-client",
+        "title": "Onboarding Our First Shipping Line Client",
+        "publishedDate": "2024-01-10",
+        "articleUrl": "https://www.linkedin.com/pulse/onboarding-our-first-shipping-line-client-upffc/",
+        "content": "We are thrilled to announce the successful onboarding of our first shipping line client. This marks a significant milestone for Ayahay and demonstrates the value and efficiency of our booking and logistics platform.",
+        "type": "Article",
+        "category": "Milestones"
     }
 ]

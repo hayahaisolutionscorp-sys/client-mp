@@ -148,7 +148,7 @@ export default function TripsSelector() {
           <div className="flex items-center justify-center py-6 sm:py-8">
             <FiLoader
               className="animate-spin text-2xl sm:text-4xl"
-              style={{ color: themeSettings?.iconColor || '#23abff' }}
+              style={{ color: themeSettings?.accent || '#23abff' }}
             />
             <span className="ml-3 sm:ml-4 text-base sm:text-lg text-gray-600">Loading trips...</span>
           </div>
@@ -185,7 +185,7 @@ export default function TripsSelector() {
               <div className="flex items-center justify-center py-6 sm:py-8">
                 <FiLoader
                   className="animate-spin text-2xl sm:text-4xl"
-                  style={{ color: themeSettings?.iconColor || '#23abff' }}
+                  style={{ color: themeSettings?.accent || '#23abff' }}
                 />
                 <span className="ml-3 sm:ml-4 text-base sm:text-lg text-gray-600">Loading trips...</span>
               </div>

@@ -11,6 +11,7 @@ import { getAboutUsSection, getCoreValues } from '@/services/content/about-us.se
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
 import { IAboutUs } from '@/models';
+import themeSettings from '@/data/theme-settings.json';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('about-us');
@@ -48,6 +49,8 @@ export default async function AboutPage() {
     getAboutUsSection('core_values').then(() => getCoreValues()),
   ]);
 
+  const theme = themeSettings[0];
+
   const aboutUsData: IAboutUs = {
     id: 0, // Placeholder
     // Hero Section
@@ -69,11 +72,16 @@ export default async function AboutPage() {
 
     // Defaults / Unused
     ourCoreValues: '[]',
-    tabsBackgroundColor: '#0060df',
+    tabsBackgroundColor: theme.primaryColor || '#0060df',
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div
+      className="container mx-auto px-4 py-8 max-w-6xl"
+      style={{
+        '--primary-color': theme.primaryColor || '#91363C'
+      } as React.CSSProperties}
+    >
       <h1 className="text-4xl font-bold mb-12">About Us</h1>
 
       <div className="mb-16 relative aspect-[2/1] w-full">
@@ -92,30 +100,35 @@ export default async function AboutPage() {
       <Info aboutUs={aboutUsData} />
 
       <section className="mb-16 py-12 rounded-xl">
-        <h2 className="text-3xl font-semibold mb-8 text-center text-customBlue">Our Core Values</h2>
+        <h2 className="text-3xl font-semibold mb-8 text-center text-[var(--primary-color)]">Our Core Values</h2>
         <div className="grid md:grid-cols-3 gap-8 px-4">
           {coreValues.map((value, index) => (
             <Card key={value.id} className="overflow-hidden group">
               <CardContent className="p-6">
                 <div className="mb-4 flex justify-center">
-                  <div className="flex justify-center items-center h-16 w-16 relative">
-                    <Media
-                      src={value.icon_url}
-                      type="image"
-                      alt={value.icon_alt}
-                      className="object-contain"
-                    />
-                  </div>
+                  <div
+                    className="h-16 w-16 relative bg-[var(--primary-color)]"
+                    style={{
+                      maskImage: `url(${value.icon_url})`,
+                      maskRepeat: 'no-repeat',
+                      maskPosition: 'center',
+                      maskSize: 'contain',
+                      WebkitMaskImage: `url(${value.icon_url})`,
+                      WebkitMaskRepeat: 'no-repeat',
+                      WebkitMaskPosition: 'center',
+                      WebkitMaskSize: 'contain',
+                    }}
+                  />
                 </div>
 
-                <h3 className="text-xl font-semibold mb-2 text-center group-hover:text-blue-700 transition-colors">
+                <h3 className="text-xl font-semibold mb-2 text-center group-hover:text-[var(--primary-color)] transition-colors">
                   {value.title}
                 </h3>
                 <p className="text-center text-gray-600 group-hover:text-gray-800 transition-colors">
                   {value.description}
                 </p>
               </CardContent>
-              <div className="h-1 w-full bg-gradient-to-r from-transparent via-blue-500 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-in-out" />
+              <div className="h-1 w-full bg-gradient-to-r from-transparent via-[var(--primary-color)] to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-in-out" />
             </Card>
           ))}
         </div>

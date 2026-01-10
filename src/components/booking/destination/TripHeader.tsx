@@ -121,7 +121,7 @@ export default function TripHeader({ label }: HeaderProps) {
           className="flex items-center w-full sm:w-[185px] space-x-1 px-2 py-2 bg-white text-customText border rounded-md shadow-sm hover:bg-gray-100 focus:border-2 focus:border-[rgba(var(--border-color),1)]"
           style={
             {
-              '--border-color': hexToRgb(themeSettings?.borderColor || '#23abff')
+              '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21')
             } as React.CSSProperties
           }
         >

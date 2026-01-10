@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation"
 import ProfileVerificationForm, { VerificationFormData } from "@/components/profile/ProfileVerificationForm"
 import { IPassenger, IAccount } from "@/models"
 import { getAccountInformation, getPassenger, uploadProfilePicture, updatePassenger, removeVerification, getVerificationRequest } from "@/services"
+import { useThemeSettings } from "@/hooks/theme-settings"
 
 type VerificationStatus = "unverified" | "pending" | "verified"
 
@@ -33,6 +34,7 @@ interface VerificationDetails {
 export default function ProfilePage() {
     const router = useRouter();
     const { loggedInAccount, loading } = useAuth();
+    const themeSettings = useThemeSettings();
 
     const [formData, setFormData] = useState<Partial<IPassenger>>({});
     const [passenger, setPassenger] = useState<IPassenger | undefined>();
@@ -247,7 +249,12 @@ export default function ProfilePage() {
 
         <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-6">
             {/* Header Card */}
-            <Card className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border-none shadow-md">
+            <Card
+                className="w-full border-none shadow-md"
+                style={{
+                    background: themeSettings ? `linear-gradient(to right, ${themeSettings.primaryColor}1a, ${themeSettings.secondaryColor}1a)` : undefined
+                }}
+            >
                 <CardContent className="pt-6">
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="relative">
@@ -260,7 +267,8 @@ export default function ProfilePage() {
                                 className="hidden"
                             />
                             <div
-                                className="relative h-24 w-24 md:h-32 md:w-32 rounded-full ring-4 ring-white shadow-lg overflow-hidden cursor-pointer group bg-blue-600 flex items-center justify-center"
+                                className="relative h-24 w-24 md:h-32 md:w-32 rounded-full ring-4 ring-white shadow-lg overflow-hidden cursor-pointer group flex items-center justify-center"
+                                style={{ backgroundColor: themeSettings?.primaryColor }}
                                 onClick={handleImageClick}
                             >
                                 {getProfileImageUrl() ? (
@@ -307,16 +315,19 @@ export default function ProfilePage() {
 
             {/* Main Content Tabs */}
             <Tabs defaultValue="personal-info" className="w-full">
-                <TabsList className="w-full justify-start border-b rounded-none bg-transparent p-0 mb-6">
+                <TabsList
+                    className="w-full justify-start border-b rounded-none bg-transparent p-0 mb-6"
+                    style={{ '--theme-primary': themeSettings?.primaryColor } as React.CSSProperties}
+                >
                     <TabsTrigger
                         value="personal-info"
-                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-8 py-3"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-[var(--theme-primary)] data-[state=active]:text-[var(--theme-primary)] data-[state=active]:bg-transparent px-8 py-3"
                     >
                         Personal Info
                     </TabsTrigger>
                     <TabsTrigger
                         value="booking-history"
-                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-8 py-3"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-[var(--theme-primary)] data-[state=active]:text-[var(--theme-primary)] data-[state=active]:bg-transparent px-8 py-3"
                     >
                         Booking History
                     </TabsTrigger>

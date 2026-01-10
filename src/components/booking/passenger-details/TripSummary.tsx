@@ -83,7 +83,7 @@ export default function TripSummary({ departureTripId, returnTripId }: Props) {
           >
             <IoArrowBack
               className="w-6 h-6 md:w-8 md:h-8 mr-2"
-              style={{ color: themeSettings?.iconColor || '#23abff' }}
+              style={{ color: themeSettings?.accent || '#23abff' }}
             />
           </a>
           <h4 className="font-semibold text-xl md:text-2xl text-customText my-4 mr-2">Trip Summary</h4>
@@ -109,7 +109,7 @@ export default function TripSummary({ departureTripId, returnTripId }: Props) {
           <div className="flex items-start">
             <PiInfo
               className="flex-shrink-0 mr-2 mt-[2.5px]"
-              style={{ color: themeSettings?.iconColor || '#23abff' }}
+              style={{ color: themeSettings?.accent || '#23abff' }}
             />
             <p className="text-sm text-customText leading-relaxed">
               If the trip is <strong className="font-semibold">fully booked</strong> or{' '}

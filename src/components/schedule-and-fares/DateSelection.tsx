@@ -97,7 +97,7 @@ const DateSelection: FC<{ onDateChange?: (date: string | null) => void }> = ({ o
       <div className="h-[60px] sm:h-[76px] w-[1px] bg-gray-300 mx-1 sm:mx-2"></div>
       {loading ? (
         <div className="flex justify-center items-center w-full">
-          <FiLoader className="animate-spin text-2xl sm:text-4xl" style={{ color: themeSettings?.iconColor || "#23abff" }} />
+          <FiLoader className="animate-spin text-2xl sm:text-4xl" style={{ color: themeSettings?.accent || "#23abff" }} />
         </div>
       ) : (
         <div className="flex items-center justify-between w-full overflow-x-hidden no-scrollbar hide-scrollbar">
@@ -111,7 +111,7 @@ const DateSelection: FC<{ onDateChange?: (date: string | null) => void }> = ({ o
                   variant={null}
                   onClick={() => handleDateClick(item.date)}
                   className={`flex flex-col items-center justify-center w-full h-full ${isSelected ? "border-b-4 border-[rgba(var(--border-color),1)]" : ""}`}
-                  style={{ "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff") } as React.CSSProperties}
+                  style={{ "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21") } as React.CSSProperties}
                 >
                   <span className="text-sm sm:text-base font-medium">{item.day}</span>
                   <span className="text-xs sm:text-sm font-bold">{item.date}</span>

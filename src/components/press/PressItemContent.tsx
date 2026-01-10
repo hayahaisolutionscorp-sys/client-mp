@@ -9,9 +9,9 @@ import {
   FileText,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import { colors } from "@/lib/colors";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { IPress } from "@/models";
+import { hexToRgb } from "helpers/theme.helpers";
 
 interface PressItemContentProps {
   pressItem: IPress & {
@@ -21,18 +21,20 @@ interface PressItemContentProps {
 
 export function PressItemContent({ pressItem }: PressItemContentProps) {
   const themeSettings = useThemeSettings();
+  const primaryColor = themeSettings?.primaryColor || "#000000";
 
   return (
     <div
       className="min-h-screen px-4 sm:px-6 py-8 sm:py-12 pb-32 sm:pb-60"
       style={{
-        background: `linear-gradient(180deg, ${colors.primaryLight}1A 0%, ${colors.background} 100%)`,
+        background: `linear-gradient(180deg, rgba(${hexToRgb(primaryColor)}, 0.1) 0%, ${themeSettings?.backgroundColor || '#FFFFFF'} 100%)`,
       }}
     >
       <div className="max-w-6xl mx-auto">
         <Link
           href="/press"
-          className="inline-flex items-center mb-6 sm:mb-8 text-primary hover:text-primary-dark transition-colors duration-200"
+          className="inline-flex items-center mb-6 sm:mb-8 hover:opacity-80 transition-colors duration-200"
+          style={{ color: primaryColor }}
         >
           <ArrowLeft className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
           Back to Press Releases

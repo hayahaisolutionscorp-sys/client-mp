@@ -30,6 +30,7 @@ export const HERO_SECTION_API = `${BASE_URL}/pages/home/page-sections/hero`;
 export const FOOTER_SECTION_API = `${BASE_URL}/pages/footer-config`;
 export const ABOUT_US_API = `${BASE_URL}/about-us`;
 export const CONTACT_INFORMATION_API = `${BASE_URL}/contact-information`;
+export const CONTACT_US_API = `${BASE_URL}/contact-us`; // Assumption for endpoint
 export const THEME_SETTINGS_API = `${BASE_URL}/theme-settings`;
 export const FAQ_API = `${BASE_URL}/faq`; // Keeping for backward compatibility if needed, or remove? Plan didn't explicitly say remove, but new one is /faqs
 export const FAQS_API = `${BASE_URL}/faqs`;

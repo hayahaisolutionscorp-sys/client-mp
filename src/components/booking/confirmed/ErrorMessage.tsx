@@ -26,7 +26,7 @@ export default function ErrorMessage({ errorCode }: { errorCode?: number }) {
             className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-customText bg-transparent border border-[rgba(var(--border-color),1)] rounded hover:bg-[rgba(var(--bg-color),1)] hover:text-white focus:outline-none focus:ring-2 focus:ring-[rgba(var(--border-color),1)] focus:ring-offset-2 transition-colors duration-200"
             style={
               {
-                '--border-color': hexToRgb(themeSettings?.borderColor || '#23abff'),
+                '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
                 '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
               } as React.CSSProperties
             }
@@ -47,7 +47,7 @@ export default function ErrorMessage({ errorCode }: { errorCode?: number }) {
             className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-customText bg-transparent border border-[rgba(var(--border-color),1)] rounded hover:bg-[rgba(var(--bg-color),1)] hover:text-white focus:outline-none focus:ring-2 focus:ring-[rgba(var(--border-color),1)] focus:ring-offset-2 transition-colors duration-200"
             style={
               {
-                '--border-color': hexToRgb(themeSettings?.borderColor || '#23abff'),
+                '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
                 '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
               } as React.CSSProperties
             }
@@ -68,7 +68,7 @@ export default function ErrorMessage({ errorCode }: { errorCode?: number }) {
             className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-customText bg-transparent border border-[rgba(var(--border-color),1)] rounded hover:bg-[rgba(var(--bg-color),1)] hover:text-white focus:outline-none focus:ring-2 focus:ring-[rgba(var(--border-color),1)] focus:ring-offset-2 transition-colors duration-200"
             style={
               {
-                '--border-color': hexToRgb(themeSettings?.borderColor || '#23abff'),
+                '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
                 '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
               } as React.CSSProperties
             }

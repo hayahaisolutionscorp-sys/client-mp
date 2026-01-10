@@ -115,10 +115,10 @@ const SearchBox: React.FC = () => {
 
     try {
       // Get the dates in correct format for filtering
-      const departureDateForFilter = departureDate ? 
+      const departureDateForFilter = departureDate ?
         new Date(departureDate.getTime() - departureDate.getTimezoneOffset() * 60000).toISOString() : undefined;
 
-      const returnDateForFilter = returnDate ? 
+      const returnDateForFilter = returnDate ?
         new Date(returnDate.getTime() - returnDate.getTimezoneOffset() * 60000).toISOString() : undefined;
 
       // Prepare search values, ensuring number fields are converted to strings
@@ -134,16 +134,16 @@ const SearchBox: React.FC = () => {
         sortReturn: "departureDate",
         filterSpecificDepartureDate: departureDateForFilter,
         filterSpecificReturnDate: returnDateForFilter,
-        page: "1",        
+        page: "1",
       };
-    
+
       // Filter out undefined values to avoid passing empty params
       const queryParams = new URLSearchParams(
         Object.entries(searchValues)
           .filter(([, value]) => value !== undefined) // Filter out undefined values
           .map(([key, value]) => [key, value as string]) // Ensure the values are cast as strings
       ).toString();
-    
+
       router.push(`/booking/destination?${queryParams}`);
 
     } catch (error) {
@@ -152,13 +152,13 @@ const SearchBox: React.FC = () => {
     } finally {
       setIsLoading(false); // Reset loading state
     }
-  };  
+  };
 
   return (
     <div className={`flex items-center justify-center absolute z-10 inset-0 w-full px-4 
       ${bookingType?.toLowerCase() === "round trip"
-          ? "top-[380px]"
-          : "top-[330px]"
+        ? "top-[380px]"
+        : "top-[330px]"
       } sm:top-[210px] md:top-[310px] lg:top-[400px]`}
     >
       <div className="bg-white rounded-xl shadow-xl p-4 w-full h-auto transition-all duration-300 ease-in-out hover:shadow-2xl 
@@ -196,7 +196,7 @@ const SearchBox: React.FC = () => {
           <div className="hidden sm:flex items-center justify-center h-[55px]">
             <LuArrowRightLeft
               className="w-5 h-5"
-              style={{ color: themeSettings?.iconColor || "#23abff" }}
+              style={{ color: themeSettings?.accent || "#23abff" }}
             />
           </div>
           <PortDropdownFieldset
@@ -226,9 +226,8 @@ const SearchBox: React.FC = () => {
               variant="default"
               onClick={handleSearchClick}
               disabled={!isFormValid || isLoading}
-              className={`${
-                !isFormValid ? "bg-gray-400" : ""
-              } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
+              className={`${!isFormValid ? "bg-gray-400" : ""
+                } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
               <BiSolidShip className="h-5 w-5 text-white" />
               <span>Search Trip</span>
               {isLoading && (
@@ -258,9 +257,8 @@ const SearchBox: React.FC = () => {
               variant="default"
               onClick={handleSearchClick}
               disabled={!isFormValid || isLoading}
-              className={`${
-                !isFormValid ? "bg-gray-400" : ""
-              } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
+              className={`${!isFormValid ? "bg-gray-400" : ""
+                } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
               <BiSolidShip className="h-5 w-5 text-white" />
               <span>Search Trip</span>
               {isLoading && (

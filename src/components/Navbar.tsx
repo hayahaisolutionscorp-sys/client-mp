@@ -27,10 +27,6 @@ const Navbar = () => {
     const fetchHeaderSection = async () => {
       let itemsToRemove: string[] = [];
 
-      // if (parsedId !== 3) {
-      //   itemsToRemove = ['WhyChooseUs', 'Partner'];
-      // }
-
       const headerSection = await getHeadersSections();
 
       if (headerSection) {

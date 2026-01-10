@@ -6,7 +6,7 @@ import { FaCar, FaShip } from 'react-icons/fa';
 import { IoMdPin } from 'react-icons/io';
 import { FiLoader } from 'react-icons/fi';
 import { BiTimer } from 'react-icons/bi';
-import { MdDateRange } from 'react-icons/md';
+import { MdDateRange, MdAirlineSeatReclineNormal } from 'react-icons/md';
 import { usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -29,7 +29,7 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
   const departureCabinId = searchParams.get('departureCabinId') ?? 0;
   const returnCabinId = searchParams.get('returnCabinId') ?? 0;
   const themeSettings = useThemeSettings();
-  const primaryColor = themeSettings?.iconColor || '#23abff';
+  const primaryColor = themeSettings?.accent || '#23abff';
 
   useEffect(() => {
     const timeout = setTimeout(() => setIsLoading(false), 2000);
@@ -85,7 +85,14 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
 
                   {pathname.includes('/booking/passenger-details') && (
                     <div className="flex flex-wrap items-center justify-center gap-2 w-full md:w-auto">
-                      <div className="flex items-center px-4 py-2 bg-green-50 text-green-600 border border-green-200 rounded-lg">
+                      <div
+                        className="flex items-center px-4 py-2 rounded-lg"
+                        style={{
+                          backgroundColor: `${primaryColor}15`,
+                          color: primaryColor,
+                          border: `1px solid ${primaryColor}30`
+                        }}
+                      >
                         <FaCar className="mr-2 text-lg" />
                         <span className="text-sm font-medium">{trips[0].availableVehicleCapacity} Vehicle Slots</span>
                       </div>
@@ -97,12 +104,9 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
                           border: `1px solid ${primaryColor}30`
                         }}
                       >
-                        <Image
-                          src="/assets/images/seats_icon.svg"
-                          alt="Seats Icon"
-                          width={50}
-                          height={50}
+                        <MdAirlineSeatReclineNormal
                           className="h-5 w-5 mr-2"
+                          style={{ color: primaryColor }}
                         />
                         <span className="text-sm font-medium">
                           {trips[0].availableCabins
@@ -164,7 +168,7 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
                       className="flex-1 border-t-2 border-dashed mx-1 sm:mx-2"
                       style={{ borderColor: `${primaryColor}80` }}
                     ></div>
-                    <IoMdPin className="text-lg sm:text-xl text-green-500 flex-shrink-0" />
+                    <IoMdPin className="text-lg sm:text-xl flex-shrink-0" style={{ color: primaryColor }} />
                   </div>
 
                   {/* Destination */}
@@ -246,7 +250,11 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
 
                         {pathname.includes('/booking/passenger-details') && (
                           <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <div className="flex items-center px-3 py-1 bg-blue-50 rounded-lg">
+                            <div className="flex items-center px-3 py-1 bg-blue-50 rounded-lg"
+                              style={{
+                                backgroundColor: `${primaryColor}15`,
+                              }}
+                            >
                               <Image
                                 src="/assets/images/seats_icon.svg"
                                 alt="Seats Icon"
@@ -254,7 +262,7 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
                                 height={40}
                                 className="h-4 w-4 mr-1.5"
                               />
-                              <span className="text-xs font-medium text-blue-600">
+                              <span className="text-xs font-medium" style={{ color: primaryColor }}>
                                 {trips[0].availableCabins
                                   .filter((cabin) => cabin.cabinId === Number(departureCabinId))
                                   .map((cabin) => cabin.availablePassengerCapacity)}{' '}
@@ -262,9 +270,13 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
                               </span>
                             </div>
 
-                            <div className="flex items-center px-3 py-1 bg-green-50 rounded-lg">
-                              <FaCar className="mr-1.5 text-xs text-green-600" />
-                              <span className="text-xs font-medium text-green-600">
+                            <div className="flex items-center px-3 py-1 rounded-lg"
+                              style={{
+                                backgroundColor: `${primaryColor}15`,
+                              }}
+                            >
+                              <FaCar className="mr-1.5 text-xs" style={{ color: primaryColor }} />
+                              <span className="text-xs font-medium" style={{ color: primaryColor }}>
                                 {trips[0].availableVehicleCapacity} Vehicles
                               </span>
                             </div>
@@ -332,7 +344,11 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
 
                         {pathname.includes('/booking/passenger-details') && (
                           <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <div className="flex items-center px-3 py-1 bg-blue-50 rounded-lg">
+                            <div className="flex items-center px-3 py-1 bg-blue-50 rounded-lg"
+                              style={{
+                                backgroundColor: `${primaryColor}15`,
+                              }}
+                            >
                               <Image
                                 src="/assets/images/seats_icon.svg"
                                 alt="Seats Icon"
@@ -340,7 +356,7 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
                                 height={40}
                                 className="h-4 w-4 mr-1.5"
                               />
-                              <span className="text-xs font-medium text-blue-600">
+                              <span className="text-xs font-medium" style={{ color: primaryColor }}>
                                 {trips[1]?.availableCabins
                                   .filter((cabin) => cabin.cabinId === Number(returnCabinId))
                                   .map((cabin) => cabin.availablePassengerCapacity)}{' '}
@@ -348,9 +364,13 @@ export default function PassengerTripCard({ trips }: PassengerTripCardProps) {
                               </span>
                             </div>
 
-                            <div className="flex items-center px-3 py-1 bg-green-50 rounded-lg">
-                              <FaCar className="mr-1.5 text-xs text-green-600" />
-                              <span className="text-xs font-medium text-green-600">
+                            <div className="flex items-center px-3 py-1 rounded-lg"
+                              style={{
+                                backgroundColor: `${primaryColor}15`,
+                              }}
+                            >
+                              <FaCar className="mr-1.5 text-xs" style={{ color: primaryColor }} />
+                              <span className="text-xs font-medium" style={{ color: primaryColor }}>
                                 {trips[1]?.availableVehicleCapacity} Vehicles
                               </span>
                             </div>

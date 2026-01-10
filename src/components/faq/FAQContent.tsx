@@ -18,7 +18,12 @@ export default function FAQContent({ faqs, categories, themeColor }: FAQContentP
 
   return (
     <>
-      <FAQCategoryTabs categories={categories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+      <FAQCategoryTabs
+        categories={categories}
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+        themeColor={themeColor}
+      />
 
       {/* FAQ Items */}
       <div className="space-y-3 md:space-y-4">

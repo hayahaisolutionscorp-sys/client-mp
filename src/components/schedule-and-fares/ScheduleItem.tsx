@@ -1,4 +1,5 @@
 import { Ship } from 'lucide-react';
+import { useThemeSettings } from '@/hooks/theme-settings';
 
 export interface ScheduleItem {
   time: string;
@@ -13,6 +14,8 @@ interface ScheduleItemProps {
 
 
 const ScheduleItem = ({ item }: ScheduleItemProps) => {
+  const themeSettings = useThemeSettings();
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-4 p-4 sm:p-6 items-start sm:items-center hover:bg-slate-50 transition-colors gap-4 sm:gap-3">
       {/* Date & Time */}
@@ -39,7 +42,7 @@ const ScheduleItem = ({ item }: ScheduleItemProps) => {
       {/* Ship */}
       <div className="flex items-center gap-3">
         <span className="sm:hidden text-base text-slate-600">Ship:</span>
-        <Ship className="h-5 w-5 text-sky-500" />
+        <Ship className="h-5 w-5" style={{ color: themeSettings?.accent || '#0ea5e9' }} />
         <div className="text-base sm:text-lg font-medium">{item.ship}</div>
       </div>
 
@@ -56,7 +59,12 @@ const ScheduleItem = ({ item }: ScheduleItemProps) => {
                 className="flex flex-row sm:flex-col gap-2 sm:gap-1 items-baseline justify-between sm:items-end"
               >
                 <div className="text-sm sm:text-base text-muted-foreground">{fare.split(': ')[0]}</div>
-                <div className="text-base sm:text-lg font-bold text-sky-700">{fare.split(': ')[1]}</div>
+                <div
+                  className="text-base sm:text-lg font-bold"
+                  style={{ color: themeSettings?.primaryColor || '#0369a1' }}
+                >
+                  {fare.split(': ')[1]}
+                </div>
               </div>
             ))}
           </div>

@@ -6,6 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { toPhilippinesTime } from 'helpers/date.helpers';
 import { DATE_SECONDARY_DEFAULT_FORMAT } from 'constants/default';
 import { IBooking } from '@/models';
+import { useThemeSettings } from '@/hooks/theme-settings';
 
 interface PaymentSuccessCardProps {
   booking?: IBooking;
@@ -14,6 +15,8 @@ interface PaymentSuccessCardProps {
 export default function PaymentSuccessCard({ booking }: PaymentSuccessCardProps) {
   const isXs = useMediaQuery({ maxWidth: 640 }); // Detects 'xs' screens
   const isSm = useMediaQuery({ minWidth: 641, maxWidth: 768 }); // Detects 'sm' screens
+  const themeSettings = useThemeSettings();
+  const primaryColor = themeSettings?.accent || '#23abff';
 
   const size = isXs ? 192 : isSm ? 224 : 256;
 
@@ -23,11 +26,14 @@ export default function PaymentSuccessCard({ booking }: PaymentSuccessCardProps)
 
   return (
     <div className="flex flex-col items-center justify-center w-full">
-      <div className="w-full bg-white border-2 border-green-400 shadow-lg rounded-lg p-4 sm:p-6">
+      <div
+        className="w-full bg-white border-2 shadow-lg rounded-lg p-4 sm:p-6"
+        style={{ borderColor: primaryColor }}
+      >
         <div className="text-center my-2">
-          <div className="flex justify-center text-green-600">
+          <div className="flex justify-center" style={{ color: primaryColor }}>
             <GiCheckMark className="w-5 sm:w-6 h-5 sm:h-6 mr-2" />
-            <h1 className="text-lg sm:text-xl font-semibold text-green-600">Payment Successful</h1>
+            <h1 className="text-lg sm:text-xl font-semibold">Payment Successful</h1>
           </div>
         </div>
         <div className="flex items-center justify-center w-auto h-auto my-4 sm:my-6">
@@ -44,13 +50,13 @@ export default function PaymentSuccessCard({ booking }: PaymentSuccessCardProps)
         </div>
         <div className="text-center mb-6 sm:mb-8">
           <p className="text-base sm:text-lg font-semibold text-customText">
-            Status: <span className="text-green-600">{booking?.bookingStatus}</span>
+            Status: <span style={{ color: primaryColor }}>{booking?.bookingStatus}</span>
           </p>
         </div>
         <div className="space-y-2 sm:space-y-3 text-gray-700">
           <div className="flex justify-start items-center">
             <span className="font-medium text-gray-500 w-[120px] sm:w-[150px] mr-4 sm:mr-16">Payment Status:</span>
-            <span className="font-semibold text-green-600">{booking?.paymentStatus}</span>
+            <span className="font-semibold" style={{ color: primaryColor }}>{booking?.paymentStatus}</span>
           </div>
           <hr className="border-t-2 border-dashed border-gray-300" />
           <div className="flex justify-start items-center">
@@ -81,24 +87,6 @@ export default function PaymentSuccessCard({ booking }: PaymentSuccessCardProps)
           </div>
         </div>
       </div>
-
-      {/* <div className="flex flex-col sm:flex-row items-center justify-center w-full space-y-3 sm:space-y-0 sm:space-x-4 mt-6 mb-8"> */}
-      {/* Print Receipt Button */}
-      {/* <Button
-          className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
-        >
-          <span className="text-customText text-sm font-medium">Print Receipt</span>
-          <CiReceipt className="text-gray-500 ml-2" />
-        </Button> */}
-
-      {/* Print Itinerary Button */}
-      {/* <Button
-          className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
-        >
-          <span className="text-customText text-sm font-medium">Print Itinerary</span>
-          <MdLocalPrintshop className="text-gray-500 ml-2" />
-        </Button> */}
-      {/* </div> */}
     </div>
   );
 }

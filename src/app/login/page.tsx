@@ -10,9 +10,12 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPassword";
 import { LoginForm } from "@/models";
+import themeSettings from '@/data/theme-settings.json';
 
 export default function LoginPage() {
   const router = useRouter();
+  const theme = themeSettings[0];
+  const primaryColor = theme.primaryColor || '#91363C';
 
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false)
@@ -155,6 +158,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-400"
               />
             </div>
             <div className="space-y-2">
@@ -163,7 +167,8 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-xs text-blue-600 hover:underline"
+                  className="text-xs hover:underline"
+                  style={{ color: primaryColor }}
                 >
                   Forgot password?
                 </button>
@@ -182,6 +187,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-400"
                 />
                 <Button
                   type="button"
@@ -201,7 +207,8 @@ export default function LoginPage() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600"
+              className="w-full text-white"
+              style={{ backgroundColor: primaryColor }}
               disabled={loading}
             >
               {loading ? "Signing in..." : "Sign In"}
@@ -236,24 +243,24 @@ export default function LoginPage() {
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-blue-600 hover:underline">
+              <Link href="/register" className="hover:underline" style={{ color: primaryColor }}>
                 Register now
               </Link>
             </p>
           </div>
           <p className="text-center text-sm text-muted-foreground">
             By signing up, you agree to our{" "}
-            <Link href="/terms" className="text-blue-600 hover:underline">
+            <Link href="/terms" className="hover:underline" style={{ color: primaryColor }}>
               Terms of Use
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-blue-600 hover:underline">
+            <Link href="/privacy" className="hover:underline" style={{ color: primaryColor }}>
               Privacy Policy
             </Link>
           </p>
         </div>
       </div>
-      <div className="relative hidden bg-blue-500 md:block md:rounded-l-3xl overflow-hidden">
+      <div className="relative hidden md:block md:rounded-l-3xl overflow-hidden" style={{ backgroundColor: primaryColor }}>
         <div className="absolute inset-0">
           <Image
             src={slides[currentSlide].image || "/placeholder.svg"}
@@ -262,7 +269,7 @@ export default function LoginPage() {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-blue-500/20" />
+          <div className="absolute inset-0" style={{ backgroundColor: `${primaryColor}33` }} /> {/* 20% opacity = 33 in hex */}
         </div>
         <div className="relative flex h-full flex-col items-center justify-center p-6 text-center text-white">
           <h2 className="mb-2 text-2xl font-bold">{slides[currentSlide].title}</h2>

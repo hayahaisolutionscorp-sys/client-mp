@@ -9,6 +9,18 @@ export interface IThemeSettings {
   buttonSecondaryColor: string;
   buttonGhostColor: string;
   buttonLinkColor: string;
-  borderColor: string;
+
   iconColor: string;
+
+  // New Fields
+  primaryColor: string;
+  secondaryColor: string;
+  accent: string;
+}
+
+export interface IThemeSettingsNew {
+  primaryColor: string;
+  secondaryColor: string;
+  accent: string;
+  fontStyle: string;
 }

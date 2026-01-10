@@ -139,9 +139,8 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
   return (
     <div className={containerClasses}>
       <div
-        className={`${
-          isModal ? 'sticky top-0 bg-white border-b border-gray-200 z-10' : ''
-        } px-6 py-4 flex items-center justify-between`}
+        className={`${isModal ? 'sticky top-0 bg-white border-b border-gray-200 z-10' : ''
+          } px-6 py-4 flex items-center justify-between`}
       >
         <h3 className="text-lg font-bold text-gray-900">Filters</h3>
         {isModal && onClose && (
@@ -166,6 +165,7 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
                   checked={checkedCabinTypes.has(cabinType.id)}
                   onChange={() => handleCabinTypeChange(cabinType.id)}
                   className="h-4 w-4 rounded border-gray-300 text-customBlue focus:ring-customBlue"
+                  style={{ colorScheme: 'light' }}
                 />
                 <label
                   htmlFor={`${isModal ? 'modal-' : ''}${cabinType.name}`}
@@ -194,6 +194,7 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
                       checked={checkedShippingLines.has(line.id)}
                       onChange={() => handleShippingLineChange(line.id)}
                       className="h-4 w-4 rounded border-gray-300 text-customBlue focus:ring-customBlue"
+                      style={{ colorScheme: 'light' }}
                     />
                     <label
                       htmlFor={`${isModal ? 'modal-' : ''}${line.name}`}

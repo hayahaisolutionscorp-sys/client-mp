@@ -1,6 +1,7 @@
 import PressList from '@/components/press/PressList';
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
+import themeSettings from '@/data/theme-settings.json';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('press');
@@ -25,5 +26,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function PressPage() {
-  return <PressList />;
+  const theme = themeSettings[0];
+  return <PressList themeSettings={theme} />;
 }

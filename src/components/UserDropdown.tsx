@@ -4,11 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContexts';
+import { useThemeSettings } from '@/hooks/theme-settings';
 
 const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: boolean }) => {
   const { logout, currentUser, loggedInAccount } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const themeSettings = useThemeSettings();
 
   const logOut = () => {
     logout();
@@ -46,8 +48,11 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
             </div>
           ) : currentUser ? (
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm transition-all duration-200 ${shouldBeTransparent ? 'bg-white/20 text-white backdrop-blur-sm border border-white/40 hover:bg-white/30' : 'bg-blue-600 text-white'
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm transition-all duration-200 ${shouldBeTransparent ? 'bg-white/20 text-white backdrop-blur-sm border border-white/40 hover:bg-white/30' : 'text-white'
                 }`}
+              style={{
+                backgroundColor: !shouldBeTransparent && themeSettings?.primaryColor ? themeSettings.primaryColor : undefined
+              }}
             >
               {(loggedInAccount?.passenger?.firstName?.charAt(0) || currentUser.email?.charAt(0) || '?').toUpperCase()}
             </div>

@@ -10,7 +10,9 @@
         "buttonSecondaryColor": "#6C757D",
         "buttonGhostColor": "transparent",
         "buttonLinkColor": "#007BFF",
-        "borderColor": "#DEE2E6",
-        "iconColor": "#007BFF"
+        "iconColor": "#007BFF",
+        "primaryColor": "#91363C",
+        "secondaryColor": "#d14b4e",
+        "accent": "#8C1F21"
     }
 ]

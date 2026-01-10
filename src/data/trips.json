@@ -1,7 +1,7 @@
 [
     {
-        "id": 25939,
-        "referenceNo": "PO8ZQ19A9D419FE0",
+        "id": 25959,
+        "referenceNo": "ZMRXN19A9D41A149",
         "shipId": 2,
         "shippingLineId": 1,
         "srcPortId": 1,
@@ -12,13 +12,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2025-12-31T17:00:00.000Z",
-        "bookingStartDateIso": "2025-12-24T17:00:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T13:00:00.000Z",
-        "arrivalTimeDateIso": "2025-12-31T19:00:00.000Z",
+        "departureDateIso": "2026-01-10T17:00:00.000Z",
+        "bookingStartDateIso": "2026-01-03T17:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T13:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-10T19:00:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25939,
+                "tripId": 25959,
                 "cabinId": "3",
                 "cabin": {
                     "id": "3",
@@ -38,7 +38,7 @@
                 "adultFare": "550"
             },
             {
-                "tripId": 25939,
+                "tripId": 25959,
                 "cabinId": "23",
                 "cabin": {
                     "id": "23",
@@ -58,7 +58,7 @@
                 "adultFare": "450"
             },
             {
-                "tripId": 25939,
+                "tripId": 25959,
                 "cabinId": "28",
                 "cabin": {
                     "id": "28",
@@ -78,7 +78,7 @@
                 "adultFare": "380"
             },
             {
-                "tripId": 25939,
+                "tripId": 25959,
                 "cabinId": "29",
                 "cabin": {
                     "id": "29",
@@ -102,8 +102,8 @@
         "meals": []
     },
     {
-        "id": 26404,
-        "referenceNo": "3QDN519A9D5643EB",
+        "id": 26454,
+        "referenceNo": "4GRBZ19A9D56483D",
         "shipId": 10,
         "shippingLineId": 1,
         "srcPortId": 12,
@@ -114,13 +114,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2025-12-31T17:30:00.000Z",
-        "bookingStartDateIso": "2025-12-24T17:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T13:30:00.000Z",
-        "arrivalTimeDateIso": "2025-12-31T18:25:00.000Z",
+        "departureDateIso": "2026-01-10T17:30:00.000Z",
+        "bookingStartDateIso": "2026-01-03T17:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T13:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-10T18:25:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26404,
+                "tripId": 26454,
                 "cabinId": "10",
                 "cabin": {
                     "id": "10",
@@ -140,7 +140,7 @@
                 "adultFare": "310"
             },
             {
-                "tripId": 26404,
+                "tripId": 26454,
                 "cabinId": "24",
                 "cabin": {
                     "id": "24",
@@ -164,50 +164,8 @@
         "meals": []
     },
     {
-        "id": 25753,
-        "referenceNo": "TZE2N19A9D3BDCF1",
-        "shipId": 12,
-        "shippingLineId": 2,
-        "srcPortId": 14,
-        "destPortId": 7,
-        "rateTableId": 11,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 0,
-        "vehicleCapacity": 0,
-        "departureDateIso": "2025-12-31T21:30:00.000Z",
-        "bookingStartDateIso": "2025-12-24T21:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-30T21:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T00:00:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 25753,
-                "cabinId": "12",
-                "cabin": {
-                    "id": "12",
-                    "shipId": 12,
-                    "cabinTypeId": "5",
-                    "cabinType": {
-                        "id": "5",
-                        "shippingLineId": 2,
-                        "name": "Economy",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "DanCon RoRo Economy",
-                    "recommendedPassengerCapacity": "120"
-                },
-                "availablePassengerCapacity": "120",
-                "passengerCapacity": "120",
-                "adultFare": "300"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 26187,
-        "referenceNo": "N5HHY19A9D4B37D1",
+        "id": 26207,
+        "referenceNo": "WPUOS19A9D4B3920",
         "shipId": 3,
         "shippingLineId": 1,
         "srcPortId": 8,
@@ -218,13 +176,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2025-12-31T21:30:00.000Z",
-        "bookingStartDateIso": "2025-12-24T21:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T17:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T01:30:00.000Z",
+        "departureDateIso": "2026-01-10T21:30:00.000Z",
+        "bookingStartDateIso": "2026-01-03T21:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T17:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T01:30:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26187,
+                "tripId": 26207,
                 "cabinId": "6",
                 "cabin": {
                     "id": "6",
@@ -248,25 +206,25 @@
         "meals": []
     },
     {
-        "id": 25629,
-        "referenceNo": "GD7XY19A9D39F130",
+        "id": 25793,
+        "referenceNo": "YHHCX19A9D3BDF83",
         "shipId": 12,
         "shippingLineId": 2,
-        "srcPortId": 7,
-        "destPortId": 14,
+        "srcPortId": 14,
+        "destPortId": 7,
         "rateTableId": 11,
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
         "availableVehicleCapacity": 0,
         "vehicleCapacity": 0,
-        "departureDateIso": "2025-12-31T21:30:00.000Z",
-        "bookingStartDateIso": "2025-12-24T21:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-30T13:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T00:00:00.000Z",
+        "departureDateIso": "2026-01-10T21:30:00.000Z",
+        "bookingStartDateIso": "2026-01-03T21:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-09T21:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T00:00:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25629,
+                "tripId": 25793,
                 "cabinId": "12",
                 "cabin": {
                     "id": "12",
@@ -281,7 +239,7 @@
                     "name": "DanCon RoRo Economy",
                     "recommendedPassengerCapacity": "120"
                 },
-                "availablePassengerCapacity": "116",
+                "availablePassengerCapacity": "120",
                 "passengerCapacity": "120",
                 "adultFare": "300"
             }
@@ -290,8 +248,8 @@
         "meals": []
     },
     {
-        "id": 25442,
-        "referenceNo": "KP5S419A9D25E21C",
+        "id": 25482,
+        "referenceNo": "WA32Z19A9D25E4E9",
         "shipId": 14,
         "shippingLineId": 4,
         "srcPortId": 17,
@@ -302,13 +260,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 5,
         "vehicleCapacity": 5,
-        "departureDateIso": "2025-12-31T22:00:00.000Z",
-        "bookingStartDateIso": "2025-12-24T22:00:00.000Z",
-        "bookingCutOffDateIso": "2025-12-30T22:00:00.000Z",
-        "arrivalTimeDateIso": "2025-12-31T23:15:00.000Z",
+        "departureDateIso": "2026-01-10T22:00:00.000Z",
+        "bookingStartDateIso": "2026-01-03T22:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-09T22:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-10T23:15:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25442,
+                "tripId": 25482,
                 "cabinId": "14",
                 "cabin": {
                     "id": "14",
@@ -328,7 +286,7 @@
                 "adultFare": "350"
             },
             {
-                "tripId": 25442,
+                "tripId": 25482,
                 "cabinId": "22",
                 "cabin": {
                     "id": "22",
@@ -352,70 +310,8 @@
         "meals": []
     },
     {
-        "id": 26249,
-        "referenceNo": "86XNF19A9D50230C",
-        "shipId": 10,
-        "shippingLineId": 1,
-        "srcPortId": 11,
-        "destPortId": 12,
-        "rateTableId": 9,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 10,
-        "vehicleCapacity": 10,
-        "departureDateIso": "2025-12-31T22:30:00.000Z",
-        "bookingStartDateIso": "2025-12-24T22:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T18:30:00.000Z",
-        "arrivalTimeDateIso": "2025-12-31T23:25:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 26249,
-                "cabinId": "10",
-                "cabin": {
-                    "id": "10",
-                    "shipId": 10,
-                    "cabinTypeId": "1",
-                    "cabinType": {
-                        "id": "1",
-                        "shippingLineId": 1,
-                        "name": "Aircon",
-                        "description": "Aircon"
-                    },
-                    "name": "Melrivic 2 Aircon",
-                    "recommendedPassengerCapacity": "50"
-                },
-                "availablePassengerCapacity": "0",
-                "passengerCapacity": "0",
-                "adultFare": "310"
-            },
-            {
-                "tripId": 26249,
-                "cabinId": "24",
-                "cabin": {
-                    "id": "24",
-                    "shipId": 10,
-                    "cabinTypeId": "2",
-                    "cabinType": {
-                        "id": "2",
-                        "shippingLineId": 1,
-                        "name": "Non-Aircon",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "Melrivic 2 Non-Aircon",
-                    "recommendedPassengerCapacity": "0"
-                },
-                "availablePassengerCapacity": "50",
-                "passengerCapacity": "50",
-                "adultFare": "250"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 26063,
-        "referenceNo": "P281O19A9D43D9D9",
+        "id": 26083,
+        "referenceNo": "IKN1P19A9D43DB43",
         "shipId": 2,
         "shippingLineId": 1,
         "srcPortId": 2,
@@ -426,13 +322,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2025-12-31T22:30:00.000Z",
-        "bookingStartDateIso": "2025-12-24T22:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T18:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T00:30:00.000Z",
+        "departureDateIso": "2026-01-10T22:30:00.000Z",
+        "bookingStartDateIso": "2026-01-03T22:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T18:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T00:30:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26063,
+                "tripId": 26083,
                 "cabinId": "3",
                 "cabin": {
                     "id": "3",
@@ -452,7 +348,7 @@
                 "adultFare": "550"
             },
             {
-                "tripId": 26063,
+                "tripId": 26083,
                 "cabinId": "23",
                 "cabin": {
                     "id": "23",
@@ -472,7 +368,7 @@
                 "adultFare": "450"
             },
             {
-                "tripId": 26063,
+                "tripId": 26083,
                 "cabinId": "28",
                 "cabin": {
                     "id": "28",
@@ -492,7 +388,7 @@
                 "adultFare": "380"
             },
             {
-                "tripId": 26063,
+                "tripId": 26083,
                 "cabinId": "29",
                 "cabin": {
                     "id": "29",
@@ -516,50 +412,70 @@
         "meals": []
     },
     {
-        "id": 26792,
-        "referenceNo": "I3ED719B43EE4B6E",
-        "shipId": 15,
-        "shippingLineId": 4,
-        "srcPortId": 17,
-        "destPortId": 18,
-        "rateTableId": 16,
+        "id": 26299,
+        "referenceNo": "GC00F19A9D502729",
+        "shipId": 10,
+        "shippingLineId": 1,
+        "srcPortId": 11,
+        "destPortId": 12,
+        "rateTableId": 9,
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2025-12-31T23:00:00.000Z",
-        "bookingStartDateIso": "2025-12-24T23:00:00.000Z",
-        "bookingCutOffDateIso": "2025-12-30T23:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T01:15:00.000Z",
+        "departureDateIso": "2026-01-10T22:30:00.000Z",
+        "bookingStartDateIso": "2026-01-03T22:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T18:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-10T23:25:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26792,
-                "cabinId": "15",
+                "tripId": 26299,
+                "cabinId": "10",
                 "cabin": {
-                    "id": "15",
-                    "shipId": 15,
+                    "id": "10",
+                    "shipId": 10,
+                    "cabinTypeId": "1",
+                    "cabinType": {
+                        "id": "1",
+                        "shippingLineId": 1,
+                        "name": "Aircon",
+                        "description": "Aircon"
+                    },
+                    "name": "Melrivic 2 Aircon",
+                    "recommendedPassengerCapacity": "50"
+                },
+                "availablePassengerCapacity": "0",
+                "passengerCapacity": "0",
+                "adultFare": "310"
+            },
+            {
+                "tripId": 26299,
+                "cabinId": "24",
+                "cabin": {
+                    "id": "24",
+                    "shipId": 10,
                     "cabinTypeId": "2",
                     "cabinType": {
                         "id": "2",
-                        "shippingLineId": 4,
+                        "shippingLineId": 1,
                         "name": "Non-Aircon",
                         "description": "Non-Aircon"
                     },
-                    "name": "Sunriser LCT Non-Aircon",
-                    "recommendedPassengerCapacity": "250"
+                    "name": "Melrivic 2 Non-Aircon",
+                    "recommendedPassengerCapacity": "0"
                 },
-                "availablePassengerCapacity": "250",
-                "passengerCapacity": "250",
-                "adultFare": "350"
+                "availablePassengerCapacity": "50",
+                "passengerCapacity": "50",
+                "adultFare": "250"
             }
         ],
         "availableSeatTypes": [],
         "meals": []
     },
     {
-        "id": 23198,
-        "referenceNo": "AZKUO1995735A7A0",
+        "id": 23218,
+        "referenceNo": "7QZ2Q1995735A928",
         "shipId": 4,
         "shippingLineId": 2,
         "srcPortId": 3,
@@ -570,13 +486,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2025-12-31T23:30:00.000Z",
-        "bookingStartDateIso": "2025-12-24T23:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T20:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T03:00:00.000Z",
+        "departureDateIso": "2026-01-10T23:30:00.000Z",
+        "bookingStartDateIso": "2026-01-03T23:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T20:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T03:00:00.000Z",
         "availableCabins": [
             {
-                "tripId": 23198,
+                "tripId": 23218,
                 "cabinId": "4",
                 "cabin": {
                     "id": "4",
@@ -591,12 +507,12 @@
                     "name": "Maica 5 Aircon",
                     "recommendedPassengerCapacity": "120"
                 },
-                "availablePassengerCapacity": "89",
+                "availablePassengerCapacity": "90",
                 "passengerCapacity": "120",
                 "adultFare": "2800"
             },
             {
-                "tripId": 23198,
+                "tripId": 23218,
                 "cabinId": "5",
                 "cabin": {
                     "id": "5",
@@ -620,50 +536,50 @@
         "meals": []
     },
     {
-        "id": 25566,
-        "referenceNo": "CF0QC19A9D292372",
-        "shipId": 11,
-        "shippingLineId": 2,
-        "srcPortId": 13,
-        "destPortId": 14,
-        "rateTableId": 10,
+        "id": 25483,
+        "referenceNo": "4MY7119A9D25E4F6",
+        "shipId": 15,
+        "shippingLineId": 4,
+        "srcPortId": 17,
+        "destPortId": 18,
+        "rateTableId": 16,
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
-        "availableVehicleCapacity": 15,
-        "vehicleCapacity": 15,
-        "departureDateIso": "2026-01-01T00:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T00:00:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T14:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T01:45:00.000Z",
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2026-01-11T00:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T00:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T00:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T02:15:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25566,
-                "cabinId": "11",
+                "tripId": 25483,
+                "cabinId": "15",
                 "cabin": {
-                    "id": "11",
-                    "shipId": 11,
-                    "cabinTypeId": "3",
+                    "id": "15",
+                    "shipId": 15,
+                    "cabinTypeId": "2",
                     "cabinType": {
-                        "id": "3",
-                        "shippingLineId": 2,
-                        "name": "Aircon",
-                        "description": "Aircon"
+                        "id": "2",
+                        "shippingLineId": 4,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
                     },
-                    "name": "Maica 7 Aircon",
-                    "recommendedPassengerCapacity": "120"
+                    "name": "Sunriser LCT Non-Aircon",
+                    "recommendedPassengerCapacity": "250"
                 },
-                "availablePassengerCapacity": "118",
-                "passengerCapacity": "120",
-                "adultFare": "650"
+                "availablePassengerCapacity": "250",
+                "passengerCapacity": "250",
+                "adultFare": "350"
             }
         ],
         "availableSeatTypes": [],
         "meals": []
     },
     {
-        "id": 25318,
-        "referenceNo": "PCLBV19A9D236624",
+        "id": 25358,
+        "referenceNo": "34A8S19A9D2368CA",
         "shipId": 14,
         "shippingLineId": 4,
         "srcPortId": 18,
@@ -674,13 +590,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 5,
         "vehicleCapacity": 5,
-        "departureDateIso": "2026-01-01T00:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T00:00:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T20:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T01:15:00.000Z",
+        "departureDateIso": "2026-01-11T00:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T00:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T20:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T01:15:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25318,
+                "tripId": 25358,
                 "cabinId": "14",
                 "cabin": {
                     "id": "14",
@@ -700,7 +616,7 @@
                 "adultFare": "350"
             },
             {
-                "tripId": 25318,
+                "tripId": 25358,
                 "cabinId": "22",
                 "cabin": {
                     "id": "22",
@@ -724,92 +640,8 @@
         "meals": []
     },
     {
-        "id": 25754,
-        "referenceNo": "BUACP19A9D3BDD02",
-        "shipId": 12,
-        "shippingLineId": 2,
-        "srcPortId": 14,
-        "destPortId": 7,
-        "rateTableId": 11,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 0,
-        "vehicleCapacity": 0,
-        "departureDateIso": "2026-01-01T00:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T00:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T00:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T03:00:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 25754,
-                "cabinId": "12",
-                "cabin": {
-                    "id": "12",
-                    "shipId": 12,
-                    "cabinTypeId": "5",
-                    "cabinType": {
-                        "id": "5",
-                        "shippingLineId": 2,
-                        "name": "Economy",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "DanCon RoRo Economy",
-                    "recommendedPassengerCapacity": "120"
-                },
-                "availablePassengerCapacity": "119",
-                "passengerCapacity": "120",
-                "adultFare": "300"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 25630,
-        "referenceNo": "QGOUL19A9D39F143",
-        "shipId": 12,
-        "shippingLineId": 2,
-        "srcPortId": 7,
-        "destPortId": 14,
-        "rateTableId": 11,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 0,
-        "vehicleCapacity": 0,
-        "departureDateIso": "2026-01-01T00:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T00:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-30T16:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T03:00:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 25630,
-                "cabinId": "12",
-                "cabin": {
-                    "id": "12",
-                    "shipId": 12,
-                    "cabinTypeId": "5",
-                    "cabinType": {
-                        "id": "5",
-                        "shippingLineId": 2,
-                        "name": "Economy",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "DanCon RoRo Economy",
-                    "recommendedPassengerCapacity": "120"
-                },
-                "availablePassengerCapacity": "113",
-                "passengerCapacity": "120",
-                "adultFare": "300"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 26405,
-        "referenceNo": "LXCPC19A9D564402",
+        "id": 26455,
+        "referenceNo": "UX16V19A9D56484A",
         "shipId": 10,
         "shippingLineId": 1,
         "srcPortId": 12,
@@ -818,15 +650,15 @@
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
-        "availableVehicleCapacity": 10,
+        "availableVehicleCapacity": 9,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T00:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T00:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T20:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T01:25:00.000Z",
+        "departureDateIso": "2026-01-11T00:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T00:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T20:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T01:25:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26405,
+                "tripId": 26455,
                 "cabinId": "10",
                 "cabin": {
                     "id": "10",
@@ -846,7 +678,7 @@
                 "adultFare": "310"
             },
             {
-                "tripId": 26405,
+                "tripId": 26455,
                 "cabinId": "24",
                 "cabin": {
                     "id": "24",
@@ -861,7 +693,7 @@
                     "name": "Melrivic 2 Non-Aircon",
                     "recommendedPassengerCapacity": "0"
                 },
-                "availablePassengerCapacity": "50",
+                "availablePassengerCapacity": "48",
                 "passengerCapacity": "50",
                 "adultFare": "250"
             }
@@ -870,112 +702,50 @@
         "meals": []
     },
     {
-        "id": 25598,
-        "referenceNo": "CLINI19A9D3314E8",
-        "shipId": 11,
+        "id": 25794,
+        "referenceNo": "2Q2JE19A9D3BDF8F",
+        "shipId": 12,
         "shippingLineId": 2,
         "srcPortId": 14,
-        "destPortId": 13,
-        "rateTableId": 10,
+        "destPortId": 7,
+        "rateTableId": 11,
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
-        "availableVehicleCapacity": 15,
-        "vehicleCapacity": 15,
-        "departureDateIso": "2026-01-01T02:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T02:00:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T02:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T03:45:00.000Z",
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2026-01-11T00:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T00:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T00:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T03:00:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25598,
-                "cabinId": "11",
+                "tripId": 25794,
+                "cabinId": "12",
                 "cabin": {
-                    "id": "11",
-                    "shipId": 11,
-                    "cabinTypeId": "3",
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
                     "cabinType": {
-                        "id": "3",
+                        "id": "5",
                         "shippingLineId": 2,
-                        "name": "Aircon",
-                        "description": "Aircon"
+                        "name": "Economy",
+                        "description": "Non-Aircon"
                     },
-                    "name": "Maica 7 Aircon",
+                    "name": "DanCon RoRo Economy",
                     "recommendedPassengerCapacity": "120"
                 },
-                "availablePassengerCapacity": "120",
+                "availablePassengerCapacity": "115",
                 "passengerCapacity": "120",
-                "adultFare": "650"
+                "adultFare": "300"
             }
         ],
         "availableSeatTypes": [],
         "meals": []
     },
     {
-        "id": 25444,
-        "referenceNo": "1I5AI19A9D25E24C",
-        "shipId": 14,
-        "shippingLineId": 4,
-        "srcPortId": 17,
-        "destPortId": 18,
-        "rateTableId": 15,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 5,
-        "vehicleCapacity": 5,
-        "departureDateIso": "2026-01-01T02:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T02:00:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T02:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T03:15:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 25444,
-                "cabinId": "14",
-                "cabin": {
-                    "id": "14",
-                    "shipId": 14,
-                    "cabinTypeId": "6",
-                    "cabinType": {
-                        "id": "6",
-                        "shippingLineId": 4,
-                        "name": "Lower Deck",
-                        "description": "Lower Deck"
-                    },
-                    "name": "Sunriser Fastcraft Lower Deck",
-                    "recommendedPassengerCapacity": "100"
-                },
-                "availablePassengerCapacity": "100",
-                "passengerCapacity": "100",
-                "adultFare": "350"
-            },
-            {
-                "tripId": 25444,
-                "cabinId": "22",
-                "cabin": {
-                    "id": "22",
-                    "shipId": 14,
-                    "cabinTypeId": "7",
-                    "cabinType": {
-                        "id": "7",
-                        "shippingLineId": 4,
-                        "name": "Upper Deck",
-                        "description": "Upper Deck"
-                    },
-                    "name": "Sunriser Fastcraft Upper Deck",
-                    "recommendedPassengerCapacity": "30"
-                },
-                "availablePassengerCapacity": "30",
-                "passengerCapacity": "30",
-                "adultFare": "400"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 25940,
-        "referenceNo": "6BPNM19A9D419FFA",
+        "id": 25960,
+        "referenceNo": "ARDOX19A9D41A15B",
         "shipId": 2,
         "shippingLineId": 1,
         "srcPortId": 1,
@@ -986,13 +756,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T02:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T02:00:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T22:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T04:00:00.000Z",
+        "departureDateIso": "2026-01-11T02:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T02:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T22:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T04:00:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25940,
+                "tripId": 25960,
                 "cabinId": "3",
                 "cabin": {
                     "id": "3",
@@ -1012,7 +782,7 @@
                 "adultFare": "550"
             },
             {
-                "tripId": 25940,
+                "tripId": 25960,
                 "cabinId": "23",
                 "cabin": {
                     "id": "23",
@@ -1032,7 +802,7 @@
                 "adultFare": "450"
             },
             {
-                "tripId": 25940,
+                "tripId": 25960,
                 "cabinId": "28",
                 "cabin": {
                     "id": "28",
@@ -1052,7 +822,7 @@
                 "adultFare": "380"
             },
             {
-                "tripId": 25940,
+                "tripId": 25960,
                 "cabinId": "29",
                 "cabin": {
                     "id": "29",
@@ -1076,213 +846,25 @@
         "meals": []
     },
     {
-        "id": 26250,
-        "referenceNo": "O95C919A9D50232B",
-        "shipId": 10,
-        "shippingLineId": 1,
-        "srcPortId": 11,
-        "destPortId": 12,
-        "rateTableId": 9,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 10,
-        "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T02:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T02:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T22:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T03:25:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 26250,
-                "cabinId": "10",
-                "cabin": {
-                    "id": "10",
-                    "shipId": 10,
-                    "cabinTypeId": "1",
-                    "cabinType": {
-                        "id": "1",
-                        "shippingLineId": 1,
-                        "name": "Aircon",
-                        "description": "Aircon"
-                    },
-                    "name": "Melrivic 2 Aircon",
-                    "recommendedPassengerCapacity": "50"
-                },
-                "availablePassengerCapacity": "0",
-                "passengerCapacity": "0",
-                "adultFare": "310"
-            },
-            {
-                "tripId": 26250,
-                "cabinId": "24",
-                "cabin": {
-                    "id": "24",
-                    "shipId": 10,
-                    "cabinTypeId": "2",
-                    "cabinType": {
-                        "id": "2",
-                        "shippingLineId": 1,
-                        "name": "Non-Aircon",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "Melrivic 2 Non-Aircon",
-                    "recommendedPassengerCapacity": "0"
-                },
-                "availablePassengerCapacity": "50",
-                "passengerCapacity": "50",
-                "adultFare": "250"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 26812,
-        "referenceNo": "Z3V4F19B43EFA709",
-        "shipId": 15,
-        "shippingLineId": 4,
-        "srcPortId": 18,
-        "destPortId": 17,
-        "rateTableId": 16,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 10,
-        "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T02:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T02:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T22:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T04:45:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 26812,
-                "cabinId": "15",
-                "cabin": {
-                    "id": "15",
-                    "shipId": 15,
-                    "cabinTypeId": "2",
-                    "cabinType": {
-                        "id": "2",
-                        "shippingLineId": 4,
-                        "name": "Non-Aircon",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "Sunriser LCT Non-Aircon",
-                    "recommendedPassengerCapacity": "250"
-                },
-                "availablePassengerCapacity": "250",
-                "passengerCapacity": "250",
-                "adultFare": "350"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 26125,
-        "referenceNo": "IZ92Z19A9D479744",
-        "shipId": 3,
-        "shippingLineId": 1,
-        "srcPortId": 7,
-        "destPortId": 8,
-        "rateTableId": 2,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 10,
-        "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T02:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T02:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T22:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T06:30:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 26125,
-                "cabinId": "6",
-                "cabin": {
-                    "id": "6",
-                    "shipId": 3,
-                    "cabinTypeId": "2",
-                    "cabinType": {
-                        "id": "2",
-                        "shippingLineId": 1,
-                        "name": "Non-Aircon",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "Manoling 1 Non-Aircon",
-                    "recommendedPassengerCapacity": "50"
-                },
-                "availablePassengerCapacity": "50",
-                "passengerCapacity": "50",
-                "adultFare": "450"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 25319,
-        "referenceNo": "83MA519A9D23663A",
-        "shipId": 15,
-        "shippingLineId": 4,
-        "srcPortId": 18,
-        "destPortId": 17,
-        "rateTableId": 16,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 10,
-        "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T03:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T03:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T23:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T05:45:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 25319,
-                "cabinId": "15",
-                "cabin": {
-                    "id": "15",
-                    "shipId": 15,
-                    "cabinTypeId": "2",
-                    "cabinType": {
-                        "id": "2",
-                        "shippingLineId": 4,
-                        "name": "Non-Aircon",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "Sunriser LCT Non-Aircon",
-                    "recommendedPassengerCapacity": "250"
-                },
-                "availablePassengerCapacity": "250",
-                "passengerCapacity": "250",
-                "adultFare": "350"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 25320,
-        "referenceNo": "VEYFQ19A9D23664B",
+        "id": 25484,
+        "referenceNo": "6BKHS19A9D25E506",
         "shipId": 14,
         "shippingLineId": 4,
-        "srcPortId": 18,
-        "destPortId": 17,
+        "srcPortId": 17,
+        "destPortId": 18,
         "rateTableId": 15,
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
         "availableVehicleCapacity": 5,
         "vehicleCapacity": 5,
-        "departureDateIso": "2026-01-01T04:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T04:00:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T00:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T05:15:00.000Z",
+        "departureDateIso": "2026-01-11T02:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T02:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T02:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T03:15:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25320,
+                "tripId": 25484,
                 "cabinId": "14",
                 "cabin": {
                     "id": "14",
@@ -1302,7 +884,7 @@
                 "adultFare": "350"
             },
             {
-                "tripId": 25320,
+                "tripId": 25484,
                 "cabinId": "22",
                 "cabin": {
                     "id": "22",
@@ -1326,8 +908,216 @@
         "meals": []
     },
     {
-        "id": 23199,
-        "referenceNo": "DOHAD1995735A7B1",
+        "id": 26145,
+        "referenceNo": "M8GJN19A9D47988D",
+        "shipId": 3,
+        "shippingLineId": 1,
+        "srcPortId": 7,
+        "destPortId": 8,
+        "rateTableId": 2,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2026-01-11T02:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T02:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T22:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T06:30:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26145,
+                "cabinId": "6",
+                "cabin": {
+                    "id": "6",
+                    "shipId": 3,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 1,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Manoling 1 Non-Aircon",
+                    "recommendedPassengerCapacity": "50"
+                },
+                "availablePassengerCapacity": "50",
+                "passengerCapacity": "50",
+                "adultFare": "450"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26300,
+        "referenceNo": "139PA19A9D50273A",
+        "shipId": 10,
+        "shippingLineId": 1,
+        "srcPortId": 11,
+        "destPortId": 12,
+        "rateTableId": 9,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2026-01-11T02:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T02:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T22:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T03:25:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26300,
+                "cabinId": "10",
+                "cabin": {
+                    "id": "10",
+                    "shipId": 10,
+                    "cabinTypeId": "1",
+                    "cabinType": {
+                        "id": "1",
+                        "shippingLineId": 1,
+                        "name": "Aircon",
+                        "description": "Aircon"
+                    },
+                    "name": "Melrivic 2 Aircon",
+                    "recommendedPassengerCapacity": "50"
+                },
+                "availablePassengerCapacity": "0",
+                "passengerCapacity": "0",
+                "adultFare": "310"
+            },
+            {
+                "tripId": 26300,
+                "cabinId": "24",
+                "cabin": {
+                    "id": "24",
+                    "shipId": 10,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 1,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Melrivic 2 Non-Aircon",
+                    "recommendedPassengerCapacity": "0"
+                },
+                "availablePassengerCapacity": "50",
+                "passengerCapacity": "50",
+                "adultFare": "250"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25359,
+        "referenceNo": "ZQSO619A9D2368DA",
+        "shipId": 15,
+        "shippingLineId": 4,
+        "srcPortId": 18,
+        "destPortId": 17,
+        "rateTableId": 16,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2026-01-11T03:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T03:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T23:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T05:45:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25359,
+                "cabinId": "15",
+                "cabin": {
+                    "id": "15",
+                    "shipId": 15,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 4,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Sunriser LCT Non-Aircon",
+                    "recommendedPassengerCapacity": "250"
+                },
+                "availablePassengerCapacity": "250",
+                "passengerCapacity": "250",
+                "adultFare": "350"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25360,
+        "referenceNo": "GRCIH19A9D2368EC",
+        "shipId": 14,
+        "shippingLineId": 4,
+        "srcPortId": 18,
+        "destPortId": 17,
+        "rateTableId": 15,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 5,
+        "vehicleCapacity": 5,
+        "departureDateIso": "2026-01-11T04:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T04:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T00:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T05:15:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25360,
+                "cabinId": "14",
+                "cabin": {
+                    "id": "14",
+                    "shipId": 14,
+                    "cabinTypeId": "6",
+                    "cabinType": {
+                        "id": "6",
+                        "shippingLineId": 4,
+                        "name": "Lower Deck",
+                        "description": "Lower Deck"
+                    },
+                    "name": "Sunriser Fastcraft Lower Deck",
+                    "recommendedPassengerCapacity": "100"
+                },
+                "availablePassengerCapacity": "99",
+                "passengerCapacity": "100",
+                "adultFare": "350"
+            },
+            {
+                "tripId": 25360,
+                "cabinId": "22",
+                "cabin": {
+                    "id": "22",
+                    "shipId": 14,
+                    "cabinTypeId": "7",
+                    "cabinType": {
+                        "id": "7",
+                        "shippingLineId": 4,
+                        "name": "Upper Deck",
+                        "description": "Upper Deck"
+                    },
+                    "name": "Sunriser Fastcraft Upper Deck",
+                    "recommendedPassengerCapacity": "30"
+                },
+                "availablePassengerCapacity": "30",
+                "passengerCapacity": "30",
+                "adultFare": "400"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 23219,
+        "referenceNo": "0LCTS1995735A939",
         "shipId": 4,
         "shippingLineId": 2,
         "srcPortId": 4,
@@ -1338,13 +1128,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T04:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T04:30:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T01:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T08:00:00.000Z",
+        "departureDateIso": "2026-01-11T04:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T04:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T01:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T08:00:00.000Z",
         "availableCabins": [
             {
-                "tripId": 23199,
+                "tripId": 23219,
                 "cabinId": "4",
                 "cabin": {
                     "id": "4",
@@ -1359,12 +1149,12 @@
                     "name": "Maica 5 Aircon",
                     "recommendedPassengerCapacity": "120"
                 },
-                "availablePassengerCapacity": "70",
+                "availablePassengerCapacity": "84",
                 "passengerCapacity": "120",
                 "adultFare": "2800"
             },
             {
-                "tripId": 23199,
+                "tripId": 23219,
                 "cabinId": "5",
                 "cabin": {
                     "id": "5",
@@ -1388,8 +1178,8 @@
         "meals": []
     },
     {
-        "id": 26406,
-        "referenceNo": "M4KHU19A9D564414",
+        "id": 26456,
+        "referenceNo": "9Z8DP19A9D56485B",
         "shipId": 10,
         "shippingLineId": 1,
         "srcPortId": 12,
@@ -1398,15 +1188,15 @@
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
-        "availableVehicleCapacity": 10,
+        "availableVehicleCapacity": 6,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T04:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T04:30:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T00:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T05:25:00.000Z",
+        "departureDateIso": "2026-01-11T04:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T04:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T00:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T05:25:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26406,
+                "tripId": 26456,
                 "cabinId": "10",
                 "cabin": {
                     "id": "10",
@@ -1426,7 +1216,7 @@
                 "adultFare": "310"
             },
             {
-                "tripId": 26406,
+                "tripId": 26456,
                 "cabinId": "24",
                 "cabin": {
                     "id": "24",
@@ -1441,7 +1231,7 @@
                     "name": "Melrivic 2 Non-Aircon",
                     "recommendedPassengerCapacity": "0"
                 },
-                "availablePassengerCapacity": "50",
+                "availablePassengerCapacity": "42",
                 "passengerCapacity": "50",
                 "adultFare": "250"
             }
@@ -1450,50 +1240,50 @@
         "meals": []
     },
     {
-        "id": 26793,
-        "referenceNo": "N1QNT19B43EE4B7E",
-        "shipId": 15,
-        "shippingLineId": 4,
-        "srcPortId": 17,
-        "destPortId": 18,
-        "rateTableId": 16,
+        "id": 26996,
+        "referenceNo": "OP9LT19B910CF088",
+        "shipId": 7,
+        "shippingLineId": 1,
+        "srcPortId": 7,
+        "destPortId": 8,
+        "rateTableId": 3,
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T05:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T05:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T05:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T07:45:00.000Z",
+        "departureDateIso": "2026-01-11T05:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T05:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T01:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T09:30:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26793,
-                "cabinId": "15",
+                "tripId": 26996,
+                "cabinId": "7",
                 "cabin": {
-                    "id": "15",
-                    "shipId": 15,
+                    "id": "7",
+                    "shipId": 7,
                     "cabinTypeId": "2",
                     "cabinType": {
                         "id": "2",
-                        "shippingLineId": 4,
+                        "shippingLineId": 1,
                         "name": "Non-Aircon",
                         "description": "Non-Aircon"
                     },
-                    "name": "Sunriser LCT Non-Aircon",
-                    "recommendedPassengerCapacity": "250"
+                    "name": "Manoling 2 Non-Aircon",
+                    "recommendedPassengerCapacity": "50"
                 },
-                "availablePassengerCapacity": "250",
-                "passengerCapacity": "250",
-                "adultFare": "350"
+                "availablePassengerCapacity": "50",
+                "passengerCapacity": "50",
+                "adultFare": "450"
             }
         ],
         "availableSeatTypes": [],
         "meals": []
     },
     {
-        "id": 25445,
-        "referenceNo": "6VXD819A9D25E25D",
+        "id": 25485,
+        "referenceNo": "10RSP19A9D25E518",
         "shipId": 14,
         "shippingLineId": 4,
         "srcPortId": 17,
@@ -1504,13 +1294,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 5,
         "vehicleCapacity": 5,
-        "departureDateIso": "2026-01-01T06:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T06:00:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T06:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T07:15:00.000Z",
+        "departureDateIso": "2026-01-11T06:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T06:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T06:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T07:15:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25445,
+                "tripId": 25485,
                 "cabinId": "14",
                 "cabin": {
                     "id": "14",
@@ -1530,7 +1320,7 @@
                 "adultFare": "350"
             },
             {
-                "tripId": 25445,
+                "tripId": 25485,
                 "cabinId": "22",
                 "cabin": {
                     "id": "22",
@@ -1554,8 +1344,8 @@
         "meals": []
     },
     {
-        "id": 26064,
-        "referenceNo": "PLGCD19A9D43D9E8",
+        "id": 26084,
+        "referenceNo": "MGG4M19A9D43DB56",
         "shipId": 2,
         "shippingLineId": 1,
         "srcPortId": 2,
@@ -1564,15 +1354,15 @@
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
-        "availableVehicleCapacity": 9,
+        "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T06:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T06:00:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T02:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T08:00:00.000Z",
+        "departureDateIso": "2026-01-11T06:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T06:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T02:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T08:00:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26064,
+                "tripId": 26084,
                 "cabinId": "3",
                 "cabin": {
                     "id": "3",
@@ -1587,12 +1377,12 @@
                     "name": "Melrivic 7 Aircon",
                     "recommendedPassengerCapacity": "50"
                 },
-                "availablePassengerCapacity": "49",
+                "availablePassengerCapacity": "50",
                 "passengerCapacity": "50",
                 "adultFare": "550"
             },
             {
-                "tripId": 26064,
+                "tripId": 26084,
                 "cabinId": "23",
                 "cabin": {
                     "id": "23",
@@ -1612,7 +1402,7 @@
                 "adultFare": "450"
             },
             {
-                "tripId": 26064,
+                "tripId": 26084,
                 "cabinId": "28",
                 "cabin": {
                     "id": "28",
@@ -1632,7 +1422,7 @@
                 "adultFare": "380"
             },
             {
-                "tripId": 26064,
+                "tripId": 26084,
                 "cabinId": "29",
                 "cabin": {
                     "id": "29",
@@ -1656,50 +1446,8 @@
         "meals": []
     },
     {
-        "id": 25755,
-        "referenceNo": "PV72R19A9D3BDD14",
-        "shipId": 12,
-        "shippingLineId": 2,
-        "srcPortId": 14,
-        "destPortId": 7,
-        "rateTableId": 11,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 0,
-        "vehicleCapacity": 0,
-        "departureDateIso": "2026-01-01T06:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T06:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T06:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T09:00:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 25755,
-                "cabinId": "12",
-                "cabin": {
-                    "id": "12",
-                    "shipId": 12,
-                    "cabinTypeId": "5",
-                    "cabinType": {
-                        "id": "5",
-                        "shippingLineId": 2,
-                        "name": "Economy",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "DanCon RoRo Economy",
-                    "recommendedPassengerCapacity": "120"
-                },
-                "availablePassengerCapacity": "103",
-                "passengerCapacity": "120",
-                "adultFare": "300"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 25631,
-        "referenceNo": "B5XI619A9D39F17B",
+        "id": 25671,
+        "referenceNo": "FD7OS19A9D39F45C",
         "shipId": 12,
         "shippingLineId": 2,
         "srcPortId": 7,
@@ -1710,325 +1458,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 0,
         "vehicleCapacity": 0,
-        "departureDateIso": "2026-01-01T06:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T06:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-30T22:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T09:00:00.000Z",
+        "departureDateIso": "2026-01-11T06:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T06:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-09T22:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T09:00:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25631,
-                "cabinId": "12",
-                "cabin": {
-                    "id": "12",
-                    "shipId": 12,
-                    "cabinTypeId": "5",
-                    "cabinType": {
-                        "id": "5",
-                        "shippingLineId": 2,
-                        "name": "Economy",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "DanCon RoRo Economy",
-                    "recommendedPassengerCapacity": "120"
-                },
-                "availablePassengerCapacity": "116",
-                "passengerCapacity": "120",
-                "adultFare": "300"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 26251,
-        "referenceNo": "M7H6319A9D50233F",
-        "shipId": 10,
-        "shippingLineId": 1,
-        "srcPortId": 11,
-        "destPortId": 12,
-        "rateTableId": 9,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 10,
-        "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T06:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T06:30:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T02:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T07:25:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 26251,
-                "cabinId": "10",
-                "cabin": {
-                    "id": "10",
-                    "shipId": 10,
-                    "cabinTypeId": "1",
-                    "cabinType": {
-                        "id": "1",
-                        "shippingLineId": 1,
-                        "name": "Aircon",
-                        "description": "Aircon"
-                    },
-                    "name": "Melrivic 2 Aircon",
-                    "recommendedPassengerCapacity": "50"
-                },
-                "availablePassengerCapacity": "0",
-                "passengerCapacity": "4",
-                "adultFare": "310"
-            },
-            {
-                "tripId": 26251,
-                "cabinId": "24",
-                "cabin": {
-                    "id": "24",
-                    "shipId": 10,
-                    "cabinTypeId": "2",
-                    "cabinType": {
-                        "id": "2",
-                        "shippingLineId": 1,
-                        "name": "Non-Aircon",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "Melrivic 2 Non-Aircon",
-                    "recommendedPassengerCapacity": "0"
-                },
-                "availablePassengerCapacity": "50",
-                "passengerCapacity": "50",
-                "adultFare": "250"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 25321,
-        "referenceNo": "5TQN919A9D236658",
-        "shipId": 14,
-        "shippingLineId": 4,
-        "srcPortId": 18,
-        "destPortId": 17,
-        "rateTableId": 15,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 5,
-        "vehicleCapacity": 5,
-        "departureDateIso": "2026-01-01T08:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T08:00:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T04:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T09:15:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 25321,
-                "cabinId": "14",
-                "cabin": {
-                    "id": "14",
-                    "shipId": 14,
-                    "cabinTypeId": "6",
-                    "cabinType": {
-                        "id": "6",
-                        "shippingLineId": 4,
-                        "name": "Lower Deck",
-                        "description": "Lower Deck"
-                    },
-                    "name": "Sunriser Fastcraft Lower Deck",
-                    "recommendedPassengerCapacity": "100"
-                },
-                "availablePassengerCapacity": "100",
-                "passengerCapacity": "100",
-                "adultFare": "350"
-            },
-            {
-                "tripId": 25321,
-                "cabinId": "22",
-                "cabin": {
-                    "id": "22",
-                    "shipId": 14,
-                    "cabinTypeId": "7",
-                    "cabinType": {
-                        "id": "7",
-                        "shippingLineId": 4,
-                        "name": "Upper Deck",
-                        "description": "Upper Deck"
-                    },
-                    "name": "Sunriser Fastcraft Upper Deck",
-                    "recommendedPassengerCapacity": "30"
-                },
-                "availablePassengerCapacity": "30",
-                "passengerCapacity": "30",
-                "adultFare": "400"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 26188,
-        "referenceNo": "UPOBU19A9D4B37E0",
-        "shipId": 3,
-        "shippingLineId": 1,
-        "srcPortId": 8,
-        "destPortId": 7,
-        "rateTableId": 2,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 8,
-        "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T08:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T08:30:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T04:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T12:30:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 26188,
-                "cabinId": "6",
-                "cabin": {
-                    "id": "6",
-                    "shipId": 3,
-                    "cabinTypeId": "2",
-                    "cabinType": {
-                        "id": "2",
-                        "shippingLineId": 1,
-                        "name": "Non-Aircon",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "Manoling 1 Non-Aircon",
-                    "recommendedPassengerCapacity": "50"
-                },
-                "availablePassengerCapacity": "44",
-                "passengerCapacity": "50",
-                "adultFare": "450"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 26813,
-        "referenceNo": "CI6E019B43EFA726",
-        "shipId": 15,
-        "shippingLineId": 4,
-        "srcPortId": 18,
-        "destPortId": 17,
-        "rateTableId": 16,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 10,
-        "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T08:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T08:30:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T04:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T10:45:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 26813,
-                "cabinId": "15",
-                "cabin": {
-                    "id": "15",
-                    "shipId": 15,
-                    "cabinTypeId": "2",
-                    "cabinType": {
-                        "id": "2",
-                        "shippingLineId": 4,
-                        "name": "Non-Aircon",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "Sunriser LCT Non-Aircon",
-                    "recommendedPassengerCapacity": "250"
-                },
-                "availablePassengerCapacity": "250",
-                "passengerCapacity": "250",
-                "adultFare": "350"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 26407,
-        "referenceNo": "UG50Y19A9D564427",
-        "shipId": 10,
-        "shippingLineId": 1,
-        "srcPortId": 12,
-        "destPortId": 11,
-        "rateTableId": 9,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 10,
-        "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T08:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T08:30:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T04:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T09:25:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 26407,
-                "cabinId": "10",
-                "cabin": {
-                    "id": "10",
-                    "shipId": 10,
-                    "cabinTypeId": "1",
-                    "cabinType": {
-                        "id": "1",
-                        "shippingLineId": 1,
-                        "name": "Aircon",
-                        "description": "Aircon"
-                    },
-                    "name": "Melrivic 2 Aircon",
-                    "recommendedPassengerCapacity": "50"
-                },
-                "availablePassengerCapacity": "0",
-                "passengerCapacity": "0",
-                "adultFare": "310"
-            },
-            {
-                "tripId": 26407,
-                "cabinId": "24",
-                "cabin": {
-                    "id": "24",
-                    "shipId": 10,
-                    "cabinTypeId": "2",
-                    "cabinType": {
-                        "id": "2",
-                        "shippingLineId": 1,
-                        "name": "Non-Aircon",
-                        "description": "Non-Aircon"
-                    },
-                    "name": "Melrivic 2 Non-Aircon",
-                    "recommendedPassengerCapacity": "0"
-                },
-                "availablePassengerCapacity": "50",
-                "passengerCapacity": "50",
-                "adultFare": "250"
-            }
-        ],
-        "availableSeatTypes": [],
-        "meals": []
-    },
-    {
-        "id": 25632,
-        "referenceNo": "BN26V19A9D39F191",
-        "shipId": 12,
-        "shippingLineId": 2,
-        "srcPortId": 7,
-        "destPortId": 14,
-        "rateTableId": 11,
-        "status": "Awaiting",
-        "allowOnlineBooking": true,
-        "seatSelection": false,
-        "availableVehicleCapacity": 0,
-        "vehicleCapacity": 0,
-        "departureDateIso": "2026-01-01T09:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T09:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T01:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T12:00:00.000Z",
-        "availableCabins": [
-            {
-                "tripId": 25632,
+                "tripId": 25671,
                 "cabinId": "12",
                 "cabin": {
                     "id": "12",
@@ -2052,8 +1488,8 @@
         "meals": []
     },
     {
-        "id": 25756,
-        "referenceNo": "V5VYK19A9D3BDD20",
+        "id": 25795,
+        "referenceNo": "OGHGY19A9D3BDF9B",
         "shipId": 12,
         "shippingLineId": 2,
         "srcPortId": 14,
@@ -2064,13 +1500,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 0,
         "vehicleCapacity": 0,
-        "departureDateIso": "2026-01-01T09:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T09:30:00.000Z",
-        "bookingCutOffDateIso": "2025-12-31T09:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T12:00:00.000Z",
+        "departureDateIso": "2026-01-11T06:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T06:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T06:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T09:00:00.000Z",
         "availableCabins": [
             {
-                "tripId": 25756,
+                "tripId": 25795,
                 "cabinId": "12",
                 "cabin": {
                     "id": "12",
@@ -2085,7 +1521,7 @@
                     "name": "DanCon RoRo Economy",
                     "recommendedPassengerCapacity": "120"
                 },
-                "availablePassengerCapacity": "112",
+                "availablePassengerCapacity": "117",
                 "passengerCapacity": "120",
                 "adultFare": "300"
             }
@@ -2094,8 +1530,8 @@
         "meals": []
     },
     {
-        "id": 26252,
-        "referenceNo": "FUSEC19A9D502353",
+        "id": 26301,
+        "referenceNo": "1WRPN19A9D50274B",
         "shipId": 10,
         "shippingLineId": 1,
         "srcPortId": 11,
@@ -2106,13 +1542,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T10:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T10:30:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T06:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T11:25:00.000Z",
+        "departureDateIso": "2026-01-11T06:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T06:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T02:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T07:25:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26252,
+                "tripId": 26301,
                 "cabinId": "10",
                 "cabin": {
                     "id": "10",
@@ -2132,7 +1568,7 @@
                 "adultFare": "310"
             },
             {
-                "tripId": 26252,
+                "tripId": 26301,
                 "cabinId": "24",
                 "cabin": {
                     "id": "24",
@@ -2156,8 +1592,70 @@
         "meals": []
     },
     {
-        "id": 26408,
-        "referenceNo": "H4IRO19A9D564437",
+        "id": 25361,
+        "referenceNo": "ED2TE19A9D23691D",
+        "shipId": 14,
+        "shippingLineId": 4,
+        "srcPortId": 18,
+        "destPortId": 17,
+        "rateTableId": 15,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 5,
+        "vehicleCapacity": 5,
+        "departureDateIso": "2026-01-11T08:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T08:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T04:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T09:15:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25361,
+                "cabinId": "14",
+                "cabin": {
+                    "id": "14",
+                    "shipId": 14,
+                    "cabinTypeId": "6",
+                    "cabinType": {
+                        "id": "6",
+                        "shippingLineId": 4,
+                        "name": "Lower Deck",
+                        "description": "Lower Deck"
+                    },
+                    "name": "Sunriser Fastcraft Lower Deck",
+                    "recommendedPassengerCapacity": "100"
+                },
+                "availablePassengerCapacity": "100",
+                "passengerCapacity": "100",
+                "adultFare": "350"
+            },
+            {
+                "tripId": 25361,
+                "cabinId": "22",
+                "cabin": {
+                    "id": "22",
+                    "shipId": 14,
+                    "cabinTypeId": "7",
+                    "cabinType": {
+                        "id": "7",
+                        "shippingLineId": 4,
+                        "name": "Upper Deck",
+                        "description": "Upper Deck"
+                    },
+                    "name": "Sunriser Fastcraft Upper Deck",
+                    "recommendedPassengerCapacity": "30"
+                },
+                "availablePassengerCapacity": "30",
+                "passengerCapacity": "30",
+                "adultFare": "400"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26457,
+        "referenceNo": "20JVO19A9D564866",
         "shipId": 10,
         "shippingLineId": 1,
         "srcPortId": 12,
@@ -2168,13 +1666,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T12:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T12:30:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T08:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T13:25:00.000Z",
+        "departureDateIso": "2026-01-11T08:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T08:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T04:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T09:25:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26408,
+                "tripId": 26457,
                 "cabinId": "10",
                 "cabin": {
                     "id": "10",
@@ -2194,7 +1692,7 @@
                 "adultFare": "310"
             },
             {
-                "tripId": 26408,
+                "tripId": 26457,
                 "cabinId": "24",
                 "cabin": {
                     "id": "24",
@@ -2218,25 +1716,25 @@
         "meals": []
     },
     {
-        "id": 26126,
-        "referenceNo": "Q7LCL19A9D479752",
+        "id": 26208,
+        "referenceNo": "LX6PR19A9D4B3931",
         "shipId": 3,
         "shippingLineId": 1,
-        "srcPortId": 7,
-        "destPortId": 8,
+        "srcPortId": 8,
+        "destPortId": 7,
         "rateTableId": 2,
         "status": "Awaiting",
         "allowOnlineBooking": true,
         "seatSelection": false,
-        "availableVehicleCapacity": 8,
+        "availableVehicleCapacity": 9,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T14:00:00.000Z",
-        "bookingStartDateIso": "2025-12-25T14:00:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T10:00:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T18:00:00.000Z",
+        "departureDateIso": "2026-01-11T08:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T08:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T04:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T12:30:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26126,
+                "tripId": 26208,
                 "cabinId": "6",
                 "cabin": {
                     "id": "6",
@@ -2251,7 +1749,7 @@
                     "name": "Manoling 1 Non-Aircon",
                     "recommendedPassengerCapacity": "50"
                 },
-                "availablePassengerCapacity": "45",
+                "availablePassengerCapacity": "48",
                 "passengerCapacity": "50",
                 "adultFare": "450"
             }
@@ -2260,8 +1758,134 @@
         "meals": []
     },
     {
-        "id": 26253,
-        "referenceNo": "38ERC19A9D502366",
+        "id": 25796,
+        "referenceNo": "F3VHR19A9D3BDFA8",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 14,
+        "destPortId": 7,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2026-01-11T09:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T09:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T09:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T12:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25796,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "118",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 25672,
+        "referenceNo": "E965Q19A9D39F4A1",
+        "shipId": 12,
+        "shippingLineId": 2,
+        "srcPortId": 7,
+        "destPortId": 14,
+        "rateTableId": 11,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 0,
+        "vehicleCapacity": 0,
+        "departureDateIso": "2026-01-11T09:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T09:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-10T01:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T12:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 25672,
+                "cabinId": "12",
+                "cabin": {
+                    "id": "12",
+                    "shipId": 12,
+                    "cabinTypeId": "5",
+                    "cabinType": {
+                        "id": "5",
+                        "shippingLineId": 2,
+                        "name": "Economy",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "DanCon RoRo Economy",
+                    "recommendedPassengerCapacity": "120"
+                },
+                "availablePassengerCapacity": "120",
+                "passengerCapacity": "120",
+                "adultFare": "300"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26989,
+        "referenceNo": "YGDQI19B910BCDA5",
+        "shipId": 7,
+        "shippingLineId": 1,
+        "srcPortId": 8,
+        "destPortId": 7,
+        "rateTableId": 3,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2026-01-11T10:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T10:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T06:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T14:30:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26989,
+                "cabinId": "7",
+                "cabin": {
+                    "id": "7",
+                    "shipId": 7,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 1,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Manoling 2 Non-Aircon",
+                    "recommendedPassengerCapacity": "50"
+                },
+                "availablePassengerCapacity": "50",
+                "passengerCapacity": "50",
+                "adultFare": "450"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26302,
+        "referenceNo": "XIIV819A9D50275C",
         "shipId": 10,
         "shippingLineId": 1,
         "srcPortId": 11,
@@ -2272,13 +1896,13 @@
         "seatSelection": false,
         "availableVehicleCapacity": 10,
         "vehicleCapacity": 10,
-        "departureDateIso": "2026-01-01T15:30:00.000Z",
-        "bookingStartDateIso": "2025-12-25T15:30:00.000Z",
-        "bookingCutOffDateIso": "2026-01-01T11:30:00.000Z",
-        "arrivalTimeDateIso": "2026-01-01T16:25:00.000Z",
+        "departureDateIso": "2026-01-11T10:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T10:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T06:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T11:25:00.000Z",
         "availableCabins": [
             {
-                "tripId": 26253,
+                "tripId": 26302,
                 "cabinId": "10",
                 "cabin": {
                     "id": "10",
@@ -2298,7 +1922,215 @@
                 "adultFare": "310"
             },
             {
-                "tripId": 26253,
+                "tripId": 26302,
+                "cabinId": "24",
+                "cabin": {
+                    "id": "24",
+                    "shipId": 10,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 1,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Melrivic 2 Non-Aircon",
+                    "recommendedPassengerCapacity": "0"
+                },
+                "availablePassengerCapacity": "50",
+                "passengerCapacity": "50",
+                "adultFare": "250"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26458,
+        "referenceNo": "SK9Y019A9D564873",
+        "shipId": 10,
+        "shippingLineId": 1,
+        "srcPortId": 12,
+        "destPortId": 11,
+        "rateTableId": 9,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2026-01-11T12:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T12:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T08:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T13:25:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26458,
+                "cabinId": "10",
+                "cabin": {
+                    "id": "10",
+                    "shipId": 10,
+                    "cabinTypeId": "1",
+                    "cabinType": {
+                        "id": "1",
+                        "shippingLineId": 1,
+                        "name": "Aircon",
+                        "description": "Aircon"
+                    },
+                    "name": "Melrivic 2 Aircon",
+                    "recommendedPassengerCapacity": "50"
+                },
+                "availablePassengerCapacity": "0",
+                "passengerCapacity": "0",
+                "adultFare": "310"
+            },
+            {
+                "tripId": 26458,
+                "cabinId": "24",
+                "cabin": {
+                    "id": "24",
+                    "shipId": 10,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 1,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Melrivic 2 Non-Aircon",
+                    "recommendedPassengerCapacity": "0"
+                },
+                "availablePassengerCapacity": "50",
+                "passengerCapacity": "50",
+                "adultFare": "250"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26146,
+        "referenceNo": "RXLSM19A9D47989C",
+        "shipId": 3,
+        "shippingLineId": 1,
+        "srcPortId": 7,
+        "destPortId": 8,
+        "rateTableId": 2,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2026-01-11T14:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T14:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T10:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T18:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26146,
+                "cabinId": "6",
+                "cabin": {
+                    "id": "6",
+                    "shipId": 3,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 1,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Manoling 1 Non-Aircon",
+                    "recommendedPassengerCapacity": "50"
+                },
+                "availablePassengerCapacity": "50",
+                "passengerCapacity": "50",
+                "adultFare": "450"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26982,
+        "referenceNo": "UXW1119B91090202",
+        "shipId": 7,
+        "shippingLineId": 1,
+        "srcPortId": 7,
+        "destPortId": 8,
+        "rateTableId": 3,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2026-01-11T15:00:00.000Z",
+        "bookingStartDateIso": "2026-01-04T15:00:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T11:00:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T19:00:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26982,
+                "cabinId": "7",
+                "cabin": {
+                    "id": "7",
+                    "shipId": 7,
+                    "cabinTypeId": "2",
+                    "cabinType": {
+                        "id": "2",
+                        "shippingLineId": 1,
+                        "name": "Non-Aircon",
+                        "description": "Non-Aircon"
+                    },
+                    "name": "Manoling 2 Non-Aircon",
+                    "recommendedPassengerCapacity": "50"
+                },
+                "availablePassengerCapacity": "50",
+                "passengerCapacity": "50",
+                "adultFare": "450"
+            }
+        ],
+        "availableSeatTypes": [],
+        "meals": []
+    },
+    {
+        "id": 26303,
+        "referenceNo": "E3QYI19A9D502778",
+        "shipId": 10,
+        "shippingLineId": 1,
+        "srcPortId": 11,
+        "destPortId": 12,
+        "rateTableId": 9,
+        "status": "Awaiting",
+        "allowOnlineBooking": true,
+        "seatSelection": false,
+        "availableVehicleCapacity": 10,
+        "vehicleCapacity": 10,
+        "departureDateIso": "2026-01-11T15:30:00.000Z",
+        "bookingStartDateIso": "2026-01-04T15:30:00.000Z",
+        "bookingCutOffDateIso": "2026-01-11T11:30:00.000Z",
+        "arrivalTimeDateIso": "2026-01-11T16:25:00.000Z",
+        "availableCabins": [
+            {
+                "tripId": 26303,
+                "cabinId": "10",
+                "cabin": {
+                    "id": "10",
+                    "shipId": 10,
+                    "cabinTypeId": "1",
+                    "cabinType": {
+                        "id": "1",
+                        "shippingLineId": 1,
+                        "name": "Aircon",
+                        "description": "Aircon"
+                    },
+                    "name": "Melrivic 2 Aircon",
+                    "recommendedPassengerCapacity": "50"
+                },
+                "availablePassengerCapacity": "0",
+                "passengerCapacity": "0",
+                "adultFare": "310"
+            },
+            {
+                "tripId": 26303,
                 "cabinId": "24",
                 "cabin": {
                     "id": "24",

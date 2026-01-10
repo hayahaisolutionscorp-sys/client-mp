@@ -11,6 +11,7 @@ import { SHIPPING_LINE_LOGO } from "constants/storage"
 import { useShippingLineForWhiteLabel } from '@/hooks/shipping-line';
 import { getContactUs, getFooterSections } from "@/services";
 import { IFooterSection } from "@/models";
+import { useThemeSettings } from "@/hooks/theme-settings";
 import { getBrandingConfig } from "@/services/ui/branding.service";
 
 const Footer = () => {
@@ -18,6 +19,7 @@ const Footer = () => {
   const shippingLineId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || "3"; // Default to Ayahay "3"
   const [cacheBuster, setCacheBuster] = useState("");
   const shippingLine = useShippingLineForWhiteLabel();
+  const themeSettings = useThemeSettings();
 
   useEffect(() => {
     setCacheBuster(uuidv4());
@@ -62,8 +64,9 @@ const Footer = () => {
 
   return (
     <>
-      <footer className="bg-[#13357B] text-white py-10 px-6 
-        sm:px-10 lg:pt-48"
+      <footer
+        className="bg-[#13357B] text-white py-10 px-6 sm:px-10 lg:pt-48"
+        style={{ backgroundColor: themeSettings?.primaryColor }}
       >
         {/* Main content area */}
         <div className="flex flex-col lg:flex-row lg:justify-between gap-8">

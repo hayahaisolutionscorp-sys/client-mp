@@ -53,7 +53,7 @@ const ScheduleAndFares = ({ srcPortId, destPortId }: ScheduleAndFaresProps) => {
           throw new Error('Invalid date format');
         }
 
-        const trips: ITrip[] = await getScheduleAndFares(selectedDate, parseInt(shippingLineId), srcPortId, destPortId);
+        const trips: ITrip[] = await getScheduleAndFares(selectedDate, undefined, srcPortId, destPortId);
 
         const formatted = trips.map((trip) => ({
           time: `${toPhilippinesTime(trip.departureDateIso, DATE_SECONDARY_DEFAULT_FORMAT)} - (${toPhilippinesTime(
