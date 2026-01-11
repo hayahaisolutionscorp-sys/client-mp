@@ -49,6 +49,11 @@ export const AuthService = {
         return response.data;
     },
 
+    verifyResetCode: async (email: string, code: string) => {
+        const response = await axios.post(`${AUTH_API}/verify-reset-code`, { email, code });
+        return response.data;
+    },
+
     resetPassword: async (data: any) => {
         const response = await axios.post(`${AUTH_API}/reset-password`, data);
         return response.data;

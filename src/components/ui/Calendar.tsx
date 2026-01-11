@@ -22,7 +22,7 @@ function Calendar({
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
+        caption_label: cn("text-sm font-medium", (props.captionLayout === "dropdown" || props.captionLayout === "dropdown-buttons") && "hidden"),
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 transition-colors"
@@ -48,11 +48,26 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
+        caption_dropdowns: "flex justify-center gap-1",
+        dropdown: "rounded-md border border-gray-300 px-1 py-0.5 text-xs bg-white",
         ...classNames,
       }}
       components={{
         IconLeft: () => <ChevronLeft className="h-4 w-4" />,
         IconRight: () => <ChevronRight className="h-4 w-4" />,
+        Dropdown: ({ children, className, ...props }) => {
+          return (
+            <select
+              className={cn(
+                "rounded-md border border-gray-300 px-1 py-0.5 text-xs bg-white cursor-pointer hover:bg-gray-50",
+                className
+              )}
+              {...props}
+            >
+              {children}
+            </select>
+          );
+        },
       }}
       {...props}
     />

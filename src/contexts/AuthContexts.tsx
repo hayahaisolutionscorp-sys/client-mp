@@ -15,7 +15,9 @@ interface AuthContextType {
     signInWithGoogle: () => Promise<any | null>;
     signInWithFacebook: () => Promise<any | null>;
     logout: () => Promise<void>;
-    resetPassword: (email: string) => Promise<boolean>;
+    forgotPassword: (email: string) => Promise<boolean>;
+    verifyResetCode: (email: string, code: string) => Promise<boolean>;
+    confirmResetPassword: (data: any) => Promise<boolean>;
     sendEmailVerification: (user: any) => Promise<void>;
     notification: {
         type: 'success' | 'error' | null;
@@ -129,7 +131,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             // The API will strip extra fields.
             // Ideally I should construct the object that matches the API expectation.
 
-            showNotification('success', 'Registration successful! Please login.');
+            showNotification('success', 'Registration successful!');
 
             // Auto login? The API register does NOT automatically login usually, 
             // but the controller implementation sets cookies?
@@ -176,7 +178,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         return null;
     };
 
-    const resetPassword = async (email: string): Promise<boolean> => {
+    const forgotPassword = async (email: string): Promise<boolean> => {
         try {
             setLoading(true);
             await AuthService.forgotPassword(email);
@@ -184,8 +186,21 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             return true;
         } catch (error: any) {
             const msg = error.response?.data?.message || 'Failed to request password reset';
-            showNotification('error', msg);
-            return false;
+            throw new Error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const verifyResetCode = async (email: string, code: string): Promise<boolean> => {
+        try {
+            setLoading(true);
+            await AuthService.verifyResetCode(email, code);
+            showNotification('success', 'Password reset code verified successfully!');
+            return true;
+        } catch (error: any) {
+            const msg = error.response?.data?.message || 'Failed to verify password reset code';
+            throw new Error(msg);
         } finally {
             setLoading(false);
         }
@@ -196,7 +211,22 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         console.warn('sendEmailVerification not supported by API');
     };
 
+    const confirmResetPassword = async (data: any): Promise<boolean> => {
+        try {
+            setLoading(true);
+            await AuthService.resetPassword(data);
+            showNotification('success', 'Password reset successful!');
+            return true;
+        } catch (error: any) {
+            const msg = error.response?.data?.message || 'Failed to reset password';
+            throw new Error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const logout = async (): Promise<void> => {
+
         try {
             setLoading(true);
             await AuthService.logout();
@@ -220,7 +250,9 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         logout,
         signInWithGoogle,
         signInWithFacebook,
-        resetPassword,
+        forgotPassword,
+        verifyResetCode,
+        confirmResetPassword,
         sendEmailVerification,
         notification
     };
@@ -230,7 +262,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             {children}
             {notification && (
                 <div
-                    className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-opacity duration-300 ${notification?.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                    className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-opacity duration-300 ${notification?.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-black'
                         }`}
                 >
                     {notification?.message}

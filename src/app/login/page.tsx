@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input"
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPassword";
+import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import { LoginForm } from "@/models";
 import { useThemeSettings } from "@/hooks/theme-settings";
 
@@ -19,10 +20,10 @@ export default function LoginPage() {
 
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false)
-  const [currentSlide, setCurrentSlide] = useState(0)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+
 
 
   // Import auth context functions
@@ -30,26 +31,9 @@ export default function LoginPage() {
     signIn,
     signInWithGoogle,
     signInWithFacebook,
-    resetPassword,
   } = useAuth();
 
-  const slides = [
-    { image: '/assets/photogrid/palompon.png', title: 'Palompon, Leyte' },
-    { image: '/assets/photogrid/camotes.jpg', title: 'Camotes Island, Cebu' },
-    { image: '/assets/photogrid/coron.png', title: 'Coron, Palawan' },
-    { image: '/assets/photogrid/el-nido.png', title: 'El Nido, Palawan' },
-    { image: '/assets/photogrid/isabel.png', title: 'Isabel, Leyte' },
-    { image: '/assets/photogrid/mactan.png', title: 'Mactan, Cebu' },
-    { image: '/assets/photogrid/santa-fe.png', title: 'Santa Fe, Bantayan' },
-    { image: '/assets/photogrid/kawit.png', title: 'Kawit Medellin' },
-  ]
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [slides.length])
 
   const [error, setError] = useState<string | null>(null);
 
@@ -98,21 +82,6 @@ export default function LoginPage() {
       router.push('/');
     } catch (error: unknown) {
       console.error('Facebook sign-in error:', error);
-    }
-  };
-
-  // Handle forgot password
-  const handleForgotPassword = async (email: string) => {
-    if (!email) {
-      return false;
-    }
-
-    try {
-      await resetPassword(email);
-      return true;
-    } catch (error) {
-      console.error('Error sending reset email:', error);
-      return false;
     }
   };
 
@@ -175,7 +144,6 @@ export default function LoginPage() {
                 <ForgotPasswordModal
                   isOpen={showForgotPassword}
                   onClose={() => setShowForgotPassword(false)}
-                  onSubmit={handleForgotPassword}
                   email={email}
                 />
               </div>
@@ -260,32 +228,8 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-      <div className="relative hidden md:block md:rounded-l-3xl overflow-hidden" style={{ backgroundColor: primaryColor }}>
-        <div className="absolute inset-0">
-          <Image
-            src={slides[currentSlide].image || "/placeholder.svg"}
-            alt={slides[currentSlide].title}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0" style={{ backgroundColor: `${primaryColor}33` }} /> {/* 20% opacity = 33 in hex */}
-        </div>
-        <div className="relative flex h-full flex-col items-center justify-center p-6 text-center text-white">
-          <h2 className="mb-2 text-2xl font-bold">{slides[currentSlide].title}</h2>
-          <p className="mb-6 text-3xl font-bold">Quick, Easy Booking & Reach Your Destination with Ease</p>
-          <p className="text-xl">Kay Ang Pagsakay, Dapat AYAHAY!</p>
-          <div className="mt-8 flex gap-2">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                className={`h-2 w-2 rounded-full ${currentSlide === index ? "bg-white" : "bg-white/50"}`}
-                onClick={() => setCurrentSlide(index)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      <AuthSidebar />
     </main>
   )
 }
+

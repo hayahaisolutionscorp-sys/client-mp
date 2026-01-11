@@ -247,7 +247,7 @@ export default function ProfilePage() {
 
     return (
 
-        <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="container mx-auto pb-10 px-4 sm:px-6 lg:px-8 space-y-6">
             {/* Header Card */}
             <Card
                 className="w-full border-none shadow-md"

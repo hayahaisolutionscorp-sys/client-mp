@@ -14,6 +14,7 @@ export async function getAccountInformation(): Promise<IAccount | undefined> {
     const { data } = await axios.get(`${AUTH_API}/me`);
 
     cacheItem('logged-in-user-profile', data.data);
+    console.log('user: ', data.data);
     return data.data;
   } catch (e) {
     console.error(e);

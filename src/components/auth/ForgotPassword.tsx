@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useAuth } from '@/contexts/AuthContexts';
+import { useRouter } from 'next/navigation';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (email: string) => Promise<boolean>;
   email: string;
 }
 
-export function ForgotPasswordModal({ isOpen, onClose, onSubmit, email }: ForgotPasswordModalProps) {
+export function ForgotPasswordModal({ isOpen, onClose, email }: ForgotPasswordModalProps) {
   const [emailInput, setEmailInput] = useState(email);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
+  const { forgotPassword } = useAuth();
 
   if (!isOpen) return null;
 
@@ -26,15 +30,23 @@ export function ForgotPasswordModal({ isOpen, onClose, onSubmit, email }: Forgot
     }
 
     setLoading(true);
+    if (!email) {
+      return false;
+    }
+
     try {
-      const success = await onSubmit(emailInput);
-      if (success) {
-        onClose();
-      } else {
-        setError("Failed to send reset email. Please try again.");
-      }
-    } catch (error: unknown) {
+      await forgotPassword(email);
+
+      sessionStorage.setItem('reset_email', email);
+
+      // set expiry timestamp for timer
+      sessionStorage.setItem('resend_otp', (Date.now() + 300000).toString());
+
+      router.push('/reset-password/verify-otp');
+      return true;
+    } catch (error) {
       setError(error instanceof Error ? error.message : "An unexpected error occurred");
+      return false;
     } finally {
       setLoading(false);
     }

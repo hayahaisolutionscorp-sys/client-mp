@@ -1,13 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Link from "next/link"
 import Image from "next/image"
-import { EyeIcon, EyeOffIcon, ArrowLeft, UserIcon, UserPlusIcon } from "lucide-react"
+import { EyeIcon, EyeOffIcon, ArrowLeft, UserIcon, UserPlusIcon, CalendarIcon } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
+import { AuthSidebar } from "@/components/auth/AuthSidebar";
+
 import {
   Select,
   SelectContent,
@@ -16,18 +18,21 @@ import {
   SelectValue,
 } from "@/components/ui/Select"
 import { RegisterForm } from "@/models";
+import BirthDatePicker from "@/components/ui/BirthDatePicker";
+import Combobox from "@/components/ui/Combobox";
+import { NATIONALITIES } from "constants/default";
 import { useThemeSettings } from "@/hooks/theme-settings";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuth();  // Remove sendEmailVerification
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || '#91363C';
+  const dateToday = new Date();
+  const { register, signInWithGoogle, signInWithFacebook } = useAuth();
 
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
-  const [currentSlide, setCurrentSlide] = useState(0)
 
   const [formData, setFormData] = useState<RegisterForm>({
     email: "",
@@ -36,7 +41,7 @@ export default function RegisterPage() {
     firstName: "",
     lastName: "",
     sex: "Male",
-    birthday: "",
+    birthday: dateToday.toISOString().split('T')[0],
     address: "",
     nationality: "",
     agreement: false,
@@ -45,24 +50,6 @@ export default function RegisterPage() {
     mobile_number: "",
     emailConsent: false
   })
-
-  const slides = [
-    { image: '/assets/photogrid/palompon.png', title: 'Palompon, Leyte' },
-    { image: '/assets/photogrid/camotes.jpg', title: 'Camotes Island, Cebu' },
-    { image: '/assets/photogrid/coron.png', title: 'Coron, Palawan' },
-    { image: '/assets/photogrid/el-nido.png', title: 'El Nido, Palawan' },
-    { image: '/assets/photogrid/isabel.png', title: 'Isabel, Leyte' },
-    { image: '/assets/photogrid/mactan.png', title: 'Mactan, Cebu' },
-    { image: '/assets/photogrid/santa-fe.png', title: 'Santa Fe, Bantayan' },
-    { image: '/assets/photogrid/kawit.png', title: 'Kawit Medellin' },
-  ]
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [slides.length])  // Add slides.length to dependencies
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -84,6 +71,11 @@ export default function RegisterPage() {
 
     if (!formData.password || formData.password.length < 8) {
       errors.password = "Password must be at least 8 characters"
+    } else {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/
+      if (!passwordRegex.test(formData.password)) {
+        errors.password = "Password must have at least 1 uppercase, lowercase, number, and special character"
+      }
     }
 
     if (formData.password !== formData.confirm) {
@@ -135,6 +127,39 @@ export default function RegisterPage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    try {
+      setLoading(true);
+      const result = await signInWithGoogle();
+      if (result?.user) {
+        router.push('/');
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error && 'code' in error && error.code === 'auth/popup-closed-by-user') {
+        console.log('Google sign-in cancelled by user');
+      } else {
+        console.error('Google sign-in error:', error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookRegister = async () => {
+    try {
+      await signInWithFacebook();
+      router.push('/');
+    } catch (error: unknown) {
+      console.error('Facebook sign-in error:', error);
+    }
+  };
+
+  const setBirthday: Dispatch<SetStateAction<Date | undefined>> = (value) => {
+    if (value instanceof Date) {
+      setFormData((prev) => ({ ...prev, birthday: value.toISOString().split('T')[0] }));
     }
   };
 
@@ -319,7 +344,8 @@ export default function RegisterPage() {
                 />
                 {validationErrors.lastName && <p className="text-xs text-red-500">{validationErrors.lastName}</p>}
               </div>
-              <div className="space-y-2">
+                <div className="gap-3 flex w-full">
+                   <div className="space-y-2 flex-1">
                 <div className="text-sm font-medium">Sex</div>
                 <Select
                   name="sex"
@@ -336,18 +362,12 @@ export default function RegisterPage() {
                 </Select>
                 {validationErrors.sex && <p className="text-xs text-red-500">{validationErrors.sex}</p>}
               </div>
-              <div className="space-y-2">
-                <div className="text-sm font-medium">Date of Birth</div>
-                <Input
-                  name="birthday"
-                  type="date"
-                  value={formData.birthday}
-                  onChange={handleInputChange}
-                  required
-                  className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.birthday ? "border-red-500" : ""}`}
-                />
+              <div className="space-y-2 flex-1">
+                <div className="text-sm font-medium">Date of Birth</div>  
+                  <BirthDatePicker date={new Date(formData.birthday)} setDate={setBirthday} validationErrors={validationErrors} />
                 {validationErrors.birthday && <p className="text-xs text-red-500">{validationErrors.birthday}</p>}
               </div>
+             </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Mobile Number</div>
                 <Input
@@ -374,13 +394,11 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Nationality</div>
-                <Input
-                  name="nationality"
-                  placeholder="Filipino, Chinese, American, etc."
-                  value={formData.nationality}
-                  onChange={handleInputChange}
-                  required
-                  className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.nationality ? "border-red-500" : ""}`}
+                <Combobox
+                  values={NATIONALITIES}
+                  placeholder="Select nationality"
+                  defaultValue={formData.nationality}
+                  onChange={(value) => setFormData((prev) => ({ ...prev, nationality: value }))}
                 />
                 {validationErrors.nationality && <p className="text-xs text-red-500">{validationErrors.nationality}</p>}
               </div>
@@ -400,6 +418,44 @@ export default function RegisterPage() {
             </form>
           )}
 
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or register with</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              onClick={handleGoogleRegister}
+              variant="outline"
+              className="w-full"
+              disabled={loading}
+            >
+              <Image src="/assets/icons/google_logo.svg" alt="Google" width={20} height={20} className="mr-2" />
+              Google
+            </Button>
+            <Button
+              onClick={handleFacebookRegister}
+              variant="outline"
+              className="w-full"
+              disabled={loading}
+            >
+              <Image src="/assets/icons/facebook_logo.svg" alt="Facebook" width={20} height={20} className="mr-2" />
+              Facebook
+            </Button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <Link href="/login" className="text-blue-600 hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </div>
+
           <p className="text-center text-sm text-muted-foreground">
             By signing up, you agree to our{" "}
             <Link href="/terms" className="hover:underline" style={{ color: primaryColor }}>
@@ -412,32 +468,9 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
-      <div className="relative hidden md:block" style={{ backgroundColor: primaryColor }}>
-        <div className="absolute inset-0">
-          <Image
-            src={slides[currentSlide].image || "/placeholder.svg"}
-            alt={slides[currentSlide].title}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0" style={{ backgroundColor: `${primaryColor}33` }} />
-        </div>
-        <div className="relative flex h-full flex-col items-center justify-center p-6 text-center text-white">
-          <h2 className="mb-2 text-2xl font-bold">{slides[currentSlide].title}</h2>
-          <p className="mb-6 text-3xl font-bold">Quick, Easy Booking & Reach Your Destination with Ease</p>
-          <p className="text-xl">Kay Ang Pagsakay, Dapat AYAHAY!</p>
-          <div className="mt-8 flex gap-2">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                className={`h-2 w-2 rounded-full ${currentSlide === index ? "bg-white" : "bg-white/50"}`}
-                onClick={() => setCurrentSlide(index)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      <AuthSidebar />
     </main>
   )
 }
+
+
