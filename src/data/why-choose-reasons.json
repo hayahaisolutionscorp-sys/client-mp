@@ -7,7 +7,7 @@
         "description": "Enjoy the lowest fares for your journey, with no hidden fees — guaranteed!",
         "icon_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-cards/e47108ec-11c9-4ffd-954a-51f0fe0f5551.svg",
         "icon_alt": "Best Price Guarantee icon",
-        "display_order": 1,
+        "display_order": 2,
         "is_active": true,
         "created_at": "2026-01-08T03:31:28.888Z",
         "updated_at": null
@@ -20,7 +20,7 @@
         "description": "Book your trip in just a few steps and get ready to sail without the wait!",
         "icon_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-cards/decb5c50-5e72-42d3-a359-ed8b856b9def.svg",
         "icon_alt": "Easy & Quick Booking icon",
-        "display_order": 2,
+        "display_order": 3,
         "is_active": true,
         "created_at": "2026-01-08T03:31:28.888Z",
         "updated_at": null
@@ -33,7 +33,7 @@
         "description": "We're here for you anytime, with round-the-clock support to assist you on your journey!",
         "icon_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-cards/35054765-fee0-462c-8d5c-e33f536bc8d4.svg",
         "icon_alt": "Customer Care 24/7 icon",
-        "display_order": 3,
+        "display_order": 1,
         "is_active": true,
         "created_at": "2026-01-08T03:31:28.888Z",
         "updated_at": null

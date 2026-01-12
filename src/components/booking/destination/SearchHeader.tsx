@@ -38,9 +38,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const shippingLineId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID;
-  const brandingId = process.env.NEXT_PUBLIC_BRANDING_ID;
-  // const shippingLine = useShippingLineForWhiteLabel();
+
   const [branding, setBranding] = useState<IBrandingConfig | null>(null);
 
   // Utility to check if a date string is valid
@@ -346,14 +344,14 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
         <div className={isScroll ? 'block' : 'hidden'}>
           {/* <Image
             src={
-              branding?.logo?.dark || (shippingLineId ? '' : '/assets/images/ayahay_logo_blue.png')
+              branding?.logo?.dark || '/assets/images/ayahay_logo_blue.png'
             }
             alt={branding?.brand_name || 'Ayahay Logo'}
             height={500}
             width={800}
-            className={`w-auto object-contain ${shippingLineId ? 'h-[150px]' : 'h-[100px]'}`}
+            className={`w-auto object-contain h-[100px]`}
           /> */}
-          {!shippingLineId && <p className="mt-2 text-center">Kay Ang Pagsakay, Dapat AYAHAY!</p>}
+          <p className="mt-2 text-center">Kay Ang Pagsakay, Dapat AYAHAY!</p>
         </div>
       </div>
 

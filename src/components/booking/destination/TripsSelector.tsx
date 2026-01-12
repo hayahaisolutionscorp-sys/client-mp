@@ -32,8 +32,7 @@ export default function TripsSelector() {
     searchParams.get('filterSpecificReturnDate')
   );
 
-  const rawValue = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID;
-  const shippingLineId: number | undefined = !isNaN(Number(rawValue)) ? Number(rawValue) : undefined;
+
   const themeSettings = useThemeSettings();
 
   const cleanSearchQuery = (searchQuery: SearchAvailableTrips): SearchAvailableTrips => {
@@ -81,7 +80,7 @@ export default function TripsSelector() {
 
       const cleanedSearchDepartureQuery = cleanSearchQuery(searchQuery);
 
-      const availableDepartureTrips = await getAvailableTrips(shippingLineId, cleanedSearchDepartureQuery, pagination);
+      const availableDepartureTrips = await getAvailableTrips(undefined, cleanedSearchDepartureQuery, pagination);
       setDepartureTrips(availableDepartureTrips?.data ?? []);
 
       if (searchParams.get('returnDate')) {
@@ -94,7 +93,7 @@ export default function TripsSelector() {
 
         const cleanedSearchReturnQuery = cleanSearchQuery(searchQuery);
 
-        const availableReturnTrips = await getAvailableTrips(shippingLineId, cleanedSearchReturnQuery, pagination);
+        const availableReturnTrips = await getAvailableTrips(undefined, cleanedSearchReturnQuery, pagination);
         setReturnTrips(availableReturnTrips?.data ?? []);
       }
     } catch (err) {
@@ -103,7 +102,7 @@ export default function TripsSelector() {
     } finally {
       setLoading(false);
     }
-  }, [searchParams, shippingLineId]);
+  }, [searchParams]);
 
   useEffect(() => {
     fetchTrips();

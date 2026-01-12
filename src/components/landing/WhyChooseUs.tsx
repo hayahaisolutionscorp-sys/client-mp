@@ -1,3 +1,4 @@
+import { getWhyChooseReasons } from '@/services/content/features.service';
 import Features from '@/components/landing/Features';
 import GetToKnowUs from '@/components/landing/GetToKnowUs';
 import OurPartners from '@/components/landing/OurPartners';
@@ -5,10 +6,13 @@ import { Suspense } from 'react';
 import OurPartnersSkeleton from './skeletons/OurPartnersSkeleton';
 
 export default async function WhyChooseUs() {
+  const reasons = await getWhyChooseReasons();
+  const sortedReasons = reasons ? reasons.sort((a, b) => a.display_order - b.display_order) : [];
+
   return (
     <>
       <div id="WhyChooseUs" className="container max-w-7xl mt-16 mx-auto px-6 sm:px-8 lg:px-10 pb-10">
-        <Features />
+        <Features reasons={sortedReasons} />
         <div className="mt-12">
           <GetToKnowUs />
         </div>

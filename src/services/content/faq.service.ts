@@ -7,7 +7,7 @@ import faqsData from '@/data/faqs.json';
 export async function getFaqs(): Promise<IFaq[]> {
   try {
     if (!IS_CLIENT) {
-      return (faqsData as IFaq[]).filter(f => f.is_active).sort((a, b) => a.display_order - b.display_order);
+      return (faqsData as unknown as IFaq[]).filter(f => f.is_active).sort((a, b) => a.display_order - b.display_order);
     }
 
     const res = await fetch(FAQS_API, {

@@ -24,7 +24,7 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
   const [checkedCabinTypes, setCheckedCabinTypes] = useState<Set<number>>(new Set());
   const [checkedShippingLines, setCheckedShippingLines] = useState<Set<number>>(new Set());
 
-  const shippingLineId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID;
+
 
   // Sync state with query parameters
   useEffect(() => {
@@ -178,36 +178,32 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
           </div>
         </div>
 
-        {!shippingLineId && (
-          <>
-            <div className="border-t border-gray-200" />
+        <div className="border-t border-gray-200" />
 
-            {/* Shipping Lines Section */}
-            <div>
-              <h4 className="font-bold text-base text-gray-800 mb-3">Shipping Lines</h4>
-              <div className="space-y-3">
-                {filters.shippingLines.map((line) => (
-                  <div key={line.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`${isModal ? 'modal-' : ''}${line.name}`}
-                      checked={checkedShippingLines.has(line.id)}
-                      onChange={() => handleShippingLineChange(line.id)}
-                      className="h-4 w-4 rounded border-gray-300 text-customBlue focus:ring-customBlue"
-                      style={{ colorScheme: 'light' }}
-                    />
-                    <label
-                      htmlFor={`${isModal ? 'modal-' : ''}${line.name}`}
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      {line.name}
-                    </label>
-                  </div>
-                ))}
+        {/* Shipping Lines Section */}
+        <div>
+          <h4 className="font-bold text-base text-gray-800 mb-3">Shipping Lines</h4>
+          <div className="space-y-3">
+            {filters.shippingLines.map((line) => (
+              <div key={line.id} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id={`${isModal ? 'modal-' : ''}${line.name}`}
+                  checked={checkedShippingLines.has(line.id)}
+                  onChange={() => handleShippingLineChange(line.id)}
+                  className="h-4 w-4 rounded border-gray-300 text-customBlue focus:ring-customBlue"
+                  style={{ colorScheme: 'light' }}
+                />
+                <label
+                  htmlFor={`${isModal ? 'modal-' : ''}${line.name}`}
+                  className="text-sm font-medium text-gray-700"
+                >
+                  {line.name}
+                </label>
               </div>
-            </div>
-          </>
-        )}
+            ))}
+          </div>
+        </div>
 
         <div className="border-t border-gray-200" />
 

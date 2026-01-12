@@ -5,7 +5,7 @@ import { getDestinations } from '@/services/ui/destinations.service';
 
 
 export default async function PopularRoutes() {
-  const shippingLineId = parseInt(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3');
+  const shippingLineId = 3; // Default to Ayahay
   const routeImages = getDestinations().then(destinations =>
     destinations.map(dest => ({
       id: 0, // Mock ID

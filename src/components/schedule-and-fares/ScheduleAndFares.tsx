@@ -24,7 +24,7 @@ const ScheduleAndFares = ({ srcPortId, destPortId, themeColor = '#0060df', accen
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const shippingLineId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '0';
+
 
   useEffect(() => {
     const fetchAllShips = async () => {
@@ -78,8 +78,7 @@ const ScheduleAndFares = ({ srcPortId, destPortId, themeColor = '#0060df', accen
       } catch (error) {
         console.error('Schedule fetch error:', {
           error,
-          selectedDate,
-          shippingLineId
+          selectedDate
         });
 
         const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
@@ -92,7 +91,7 @@ const ScheduleAndFares = ({ srcPortId, destPortId, themeColor = '#0060df', accen
     };
 
     fetchSchedule();
-  }, [selectedDate, shippingLineId, allShips, srcPortId, destPortId]);
+  }, [selectedDate, allShips, srcPortId, destPortId]);
 
   return (
     <div className="space-y-6">
