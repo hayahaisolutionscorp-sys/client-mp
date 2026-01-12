@@ -1,35 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Video, FileText, Calendar } from 'lucide-react';
 
-import { hexToRgb } from 'helpers/theme.helpers';
-import { getPress } from '@/services';
 import { IPress } from '@/models';
 
 interface PressListProps {
-    themeSettings: any; // Using any for simplicity as IThemeSettings imports might cause issues if strict, but ideally should be typed. I'll rely on the existing import.
+    themeSettings: any;
+    press: IPress[];
 }
 
-export default function PressList({ themeSettings }: PressListProps) {
-    const [press, setPress] = useState<IPress[]>([]);
-
-    useEffect(() => {
-        const fetchPress = async () => {
-            const response = await getPress();
-            setPress(response || []);
-        };
-
-        fetchPress();
-    }, []);
+export default function PressList({ themeSettings, press }: PressListProps) {
 
     return (
         <div className="min-h-screen bg-[#F8FCFF] px-4 sm:px-6 py-8 sm:py-12">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-12">
-                    <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: themeSettings?.primaryColor || '#23abff' }}>Press Releases</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: themeSettings?.primary || '#23abff' }}>Press Releases</h1>
                     <p className="text-gray-600">Stay updated with the latest news and announcements from Ayahay</p>
                 </div>
 
@@ -42,7 +30,7 @@ export default function PressList({ themeSettings }: PressListProps) {
                         >
                             <div className="p-6">
                                 <div className="flex items-between gap-2 mb-4">
-                                    <FileText className="w-5 h-5" style={{ color: themeSettings?.primaryColor || '#23abff' }} />
+                                    <FileText className="w-5 h-5" style={{ color: themeSettings?.primary || '#23abff' }} />
                                     {/* Category removed from schema, maybe use 'News' or generic label if needed, or remove badge */}
                                     {/* <div
                                         className="px-3 py-1 border rounded-full text-xs bg-[rgba(var(--bg-color),0.1)] text-[rgba(var(--bg-color),1)]"

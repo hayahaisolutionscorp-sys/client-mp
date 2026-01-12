@@ -2,12 +2,14 @@
 import Image from 'next/image';
 import { getWhyChooseReasons, getWhyChooseSection } from '@/services/content/features.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
+import { getBrandingConfig } from '@/services/ui/branding.service';
 
 export default async function Features() {
-  const [section, reasons, themeSettings] = await Promise.all([
+  const [section, reasons, themeSettings, brandingConfig] = await Promise.all([
     getWhyChooseSection(),
     getWhyChooseReasons(),
-    getThemeSettings()
+    getThemeSettings(),
+    getBrandingConfig()
   ]);
 
   if (!section || !reasons) return null;
@@ -15,7 +17,7 @@ export default async function Features() {
   const title = section.title.includes('Ayahay!') ? (
     <>
       {section.title.replace('Ayahay!', '')}
-      <span style={{ color: themeSettings?.accent }}>{process.env.NEXT_PUBLIC_TENANT_NAME}!</span>
+      <span style={{ color: themeSettings?.accent }}>{brandingConfig?.brand_name}!</span>
     </>
   ) : (
     section.title

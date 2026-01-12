@@ -13,9 +13,11 @@ import { IShip, ITrip } from '@/models';
 interface ScheduleAndFaresProps {
   srcPortId?: number;
   destPortId?: number;
+  themeColor?: string;
+  accentColor?: string;
 }
 
-const ScheduleAndFares = ({ srcPortId, destPortId }: ScheduleAndFaresProps) => {
+const ScheduleAndFares = ({ srcPortId, destPortId, themeColor = '#0060df', accentColor = '#23abff' }: ScheduleAndFaresProps) => {
   const [allShips, setAllShips] = useState<IShip[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
@@ -94,8 +96,8 @@ const ScheduleAndFares = ({ srcPortId, destPortId }: ScheduleAndFaresProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="px-2">
-        <DateSelection onDateChange={setSelectedDate} />
+      <div className="px-2" style={{ '--primary-color': themeColor } as React.CSSProperties}>
+        <DateSelection onDateChange={setSelectedDate} accentColor={accentColor} />
       </div>
 
       {error && (

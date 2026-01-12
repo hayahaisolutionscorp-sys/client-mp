@@ -1,0 +1,14 @@
+{
+    "id": "957b8b20-298e-41a9-9d73-87a237fb2fbd",
+    "page_id": "4b7680d4-4d98-48cc-85f2-5a8266772151",
+    "type": "hero",
+    "bg_type": "image",
+    "bg_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-background/9c2b0886-e0aa-4f29-9295-0f7bcfdbcbf4.jpeg",
+    "bg_alt": "Contact Us background image",
+    "title": "Contact Us",
+    "subtitle": "Have Any Questions?",
+    "description": "Have questions or need assistance? Our team is here to help! Whether you have inquiries about our services, need support, or just want to connect, feel free to reach out. We'd love to hear from you!",
+    "is_active": true,
+    "created_at": "2026-01-08T03:31:28.888Z",
+    "updated_at": null
+}

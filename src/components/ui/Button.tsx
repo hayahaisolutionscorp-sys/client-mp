@@ -46,25 +46,25 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // Dynamically apply theme settings colors using `style`
     const style: React.CSSProperties = {};
     if (themeSettings) {
-      if (variant === "default" && themeSettings.primaryColor) {
-        style.backgroundColor = themeSettings.primaryColor;
+      if (variant === "default" && themeSettings.primary) {
+        style.backgroundColor = themeSettings.primary;
       }
-      if (variant === "destructive" && themeSettings.buttonDestructiveColor) {
-        style.backgroundColor = themeSettings.buttonDestructiveColor;
+      if (variant === "destructive") {
+        style.backgroundColor = "#DC2626";
       }
-      if (variant === "outline" && themeSettings.primaryColor) {
-        style.borderColor = themeSettings.primaryColor;
-        style.color = themeSettings.primaryColor;
+      if (variant === "outline" && themeSettings.primary) {
+        style.borderColor = themeSettings.primary;
+        style.color = themeSettings.primary;
       }
-      if (variant === "secondary" && themeSettings.secondaryColor) {
-        style.backgroundColor = themeSettings.secondaryColor;
+      if (variant === "secondary" && themeSettings.secondary) {
+        style.backgroundColor = themeSettings.secondary;
         style.color = "white"; // Ensure text is visible on secondary color
       }
-      if (variant === "ghost" && themeSettings.primaryColor) {
-        style.color = themeSettings.primaryColor;
+      if (variant === "ghost" && themeSettings.primary) {
+        style.color = themeSettings.primary;
       }
-      if (variant === "link" && themeSettings.primaryColor) {
-        style.color = themeSettings.primaryColor;
+      if (variant === "link" && themeSettings.primary) {
+        style.color = themeSettings.primary;
       }
     }
 

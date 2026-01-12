@@ -61,7 +61,7 @@ const ScheduleItem = ({ item }: ScheduleItemProps) => {
                 <div className="text-sm sm:text-base text-muted-foreground">{fare.split(': ')[0]}</div>
                 <div
                   className="text-base sm:text-lg font-bold"
-                  style={{ color: themeSettings?.primaryColor || '#0369a1' }}
+                  style={{ color: themeSettings?.primary || '#0369a1' }}
                 >
                   {fare.split(': ')[1]}
                 </div>

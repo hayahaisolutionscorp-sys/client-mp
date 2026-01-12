@@ -1,18 +1,8 @@
 [
     {
-        "id": 1,
-        "shippingLineId": 3,
-        "fontStyle": "Inter",
-        "backgroundColor": "#000000",
-        "buttonDefaultColor": "#007BFF",
-        "buttonDestructiveColor": "#FF0000",
-        "buttonOutlineColor": "#007BFF",
-        "buttonSecondaryColor": "#6C757D",
-        "buttonGhostColor": "transparent",
-        "buttonLinkColor": "#007BFF",
-        "iconColor": "#007BFF",
-        "primaryColor": "#91363C",
-        "secondaryColor": "#d14b4e",
-        "accent": "#8C1F21"
+        "accent": "oklch(34.38% 0.118 262.34)",
+        "primary": "oklch(34.38% 0.118 262.34)",
+        "secondary": "oklch(83.66% 0.066 235.48)",
+        "fontStyle": "Inter"
     }
 ]

@@ -1,7 +1,6 @@
 import PhotoGrid from '@/components/landing/photogrid/PhotoGrid';
 import { Suspense } from 'react';
 import RoutesPhotoGridSkeleton from './skeletons/RoutesPhotoGridSkeleton';
-// import { getThumbnailsByShippingLineId } from '@/services';
 import { getDestinations } from '@/services/ui/destinations.service';
 
 

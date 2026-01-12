@@ -25,8 +25,7 @@ export const publicCacheKeys = <const>[
   'promos',
   'hero-sections',
   'footer-sections',
-  'partners',
-
+  'partners'
 ];
 
 export const cacheKeys = <const>[

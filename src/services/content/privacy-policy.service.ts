@@ -1,54 +1,39 @@
-import { IPrivacyPolicy } from '@/models';
 import { PRIVACY_POLICY_API } from 'constants/api';
-import { cacheItem, fetchItem } from 'helpers/cache.helpers';
-import axios from '@/services/core/axios';
+import { IS_CLIENT } from '../config';
 
-import privacyData from '@/data/privacy-policies.json';
+import privacyPolicyData from '@/data/privacy-policy.json';
 
-export const PrivacyPolicyService = {
-  async getAll(): Promise<IPrivacyPolicy[]> {
-    // const cached = fetchItem<IPrivacyPolicy[]>('privacy-policy');
-    // if (cached) return cached;
-    //
-    // try {
-    //   const { data } = await axios.get(PRIVACY_POLICY_API);
-    //   cacheItem('privacy-policy', data);
-    //   return data;
-    // } catch (e) {
-    //   console.error(e);
-    //   return [];
-    // }
+export interface IPrivacyPolicyTipTap {
+  id: string;
+  page_type: string;
+  title: string;
+  content: any; // TipTap JSON content
+  slug: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string | null;
+}
 
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return privacyData as any as IPrivacyPolicy[];
-  },
+export async function getPrivacyPolicy(): Promise<IPrivacyPolicyTipTap | undefined> {
+  try {
+    if (!IS_CLIENT) {
+      return privacyPolicyData as IPrivacyPolicyTipTap;
+    }
 
-  async getByShippingLineId(shippingLineId: number): Promise<IPrivacyPolicy[]> {
-    // try {
-    //   const { data } = await axios.get(`${PRIVACY_POLICY_API}/shippingLine/${shippingLineId}`);
-    //   return data;
-    // } catch (e) {
-    //   console.error(e);
-    //   return [];
-    // }
+    const res = await fetch(`${PRIVACY_POLICY_API}`, {
+      next: { tags: ['privacy-policy'], revalidate: 3600 }
+    });
 
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return (privacyData as any as IPrivacyPolicy[]).filter(p => p.shippingLineId === shippingLineId);
-  },
+    if (res.ok) {
+      const { data } = await res.json();
+      return data;
+    }
 
-  async getByTitleAndShippingLineId(
-    titleId: string,
-    shippingLineId: number
-  ): Promise<IPrivacyPolicy | null> {
-    // try {
-    //   const { data } = await axios.get(`${PRIVACY_POLICY_API}/title/${titleId}`, { params: { shippingLineId } });
-    //   return data;
-    // } catch (e) {
-    //   console.error(e);
-    //   return null;
-    // }
-
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return (privacyData as any as IPrivacyPolicy[]).find(p => p.shippingLineId === shippingLineId && p.titleId === titleId) || null;
-  },
-};
+    // Fallback to local data if API fails
+    return privacyPolicyData as IPrivacyPolicyTipTap;
+  } catch (e) {
+    console.error(e);
+    // Fallback to local data on error
+    return privacyPolicyData as IPrivacyPolicyTipTap;
+  }
+}

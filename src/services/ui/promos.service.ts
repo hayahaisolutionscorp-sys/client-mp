@@ -1,5 +1,7 @@
 import { PROMOS_API } from 'constants/api';
+import { IS_CLIENT } from '../config';
 
+import promosData from '@/data/promos.json';
 
 export interface IPromo {
     id: string;
@@ -22,6 +24,10 @@ export interface IPromosResponse {
 
 export async function getPromos(): Promise<IPromo[]> {
     try {
+        if (!IS_CLIENT) {
+            return promosData as IPromo[];
+        }
+
         const res = await fetch(PROMOS_API, {
             next: { tags: ['promos'], revalidate: 3600 }
         });

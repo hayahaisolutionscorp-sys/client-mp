@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/Button';
 import Info from '@/components/about-us/Info';
 import { getAboutUsSection, getCoreValues } from '@/services/content/about-us.service';
 import { getPageMetadata } from '@/services/content/seo.service';
+import { getThemeSettings } from '@/services/ui/theme-settings.service';
 import { Metadata } from 'next';
 import { IAboutUs } from '@/models';
-import themeSettings from '@/data/theme-settings.json';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('about-us');
@@ -35,21 +35,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-
-
-
-import Media from '@/components/landing/Media';
-
 export default async function AboutPage() {
   const [hero, welcome, story, expertise, coreValues] = await Promise.all([
     getAboutUsSection('hero'),
     getAboutUsSection('welcome'),
     getAboutUsSection('our_story'),
     getAboutUsSection('our_expertise'),
-    getAboutUsSection('core_values').then(() => getCoreValues()),
+    getCoreValues(),
   ]);
 
-  const theme = themeSettings[0];
+  const theme = await getThemeSettings();
 
   const aboutUsData: IAboutUs = {
     id: 0, // Placeholder
@@ -72,14 +67,14 @@ export default async function AboutPage() {
 
     // Defaults / Unused
     ourCoreValues: '[]',
-    tabsBackgroundColor: theme.primaryColor || '#0060df',
+    tabsBackgroundColor: theme?.primary || '#0060df',
   };
 
   return (
     <div
       className="container mx-auto px-4 py-8 max-w-6xl"
       style={{
-        '--primary-color': theme.primaryColor || '#91363C'
+        '--primary-color': theme?.primary || '#91363C'
       } as React.CSSProperties}
     >
       <h1 className="text-4xl font-bold mb-12">About Us</h1>

@@ -119,7 +119,6 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
                 aria-label={`View image ${image.label}`}
               >
                 <Image
-                  // src={`${CAROUSEL_IMAGES}${image.shippingLineId}/${image.filename}`}
                   src={image.filename}
                   alt={`${image.label}`}
                   fill
@@ -179,7 +178,6 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
         >
           <div className="relative max-w-[95vw] max-h-[95vh] rounded-lg overflow-hidden">
             <Image
-              // src={`${CAROUSEL_IMAGES}${modalImage.shippingLineId}/${modalImage.filename}`}
               src={modalImage.filename}
               alt="Enlarged view"
               width={1200}

@@ -1,38 +1,33 @@
 import { IThemeSettings } from '@/models';
+import { IBrandingResponse } from '@/models/branding.model';
 import { THEME_SETTINGS_API } from 'constants/api';
-import { cacheItem, fetchItem } from 'helpers/cache.helpers';
-import axios from '@/services/core/axios';
-
 import themeSettingsData from '@/data/theme-settings.json';
+import { IS_CLIENT } from '../config';
 
 export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
-  // const cached = fetchItem<IThemeSettings[]>('theme-settings');
-  // if (cached) return cached;
-  //
-  // try {
-  //   const { data } = await axios.get(THEME_SETTINGS_API);
-  //   cacheItem('theme-settings', data);
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return undefined;
-  // }
+  try {
+    if (!IS_CLIENT) {
+      console.log("isClient disabled")
+      return (themeSettingsData as IThemeSettings[])[0];
+    }
 
+    const res = await fetch(THEME_SETTINGS_API, {
+      next: { tags: ['theme-settings'], revalidate: 3600 }
+    });
 
-  return (themeSettingsData as IThemeSettings[])[0];
-}
+    if (res.ok) {
+      const response: IBrandingResponse = await res.json();
+      return {
+        primary: response.data.colors.primary,
+        secondary: response.data.colors.secondary,
+        accent: response.data.colors.accent,
+        fontStyle: 'Inter'
+      };
+    }
 
-export async function getThemeSettingsByShippingLineId(
-  shippingLineId: number
-): Promise<IThemeSettings | undefined> {
-  // try {
-  //   const { data } = await axios.get(`${THEME_SETTINGS_API}/shippingLine/${shippingLineId}`);
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return undefined;
-  // }
-
-
-  return (themeSettingsData as IThemeSettings[]).find(t => t.shippingLineId === shippingLineId);
+    return (themeSettingsData as IThemeSettings[])[0];
+  } catch (e) {
+    console.error('Error fetching theme settings:', e);
+    return (themeSettingsData as IThemeSettings[])[0];
+  }
 }

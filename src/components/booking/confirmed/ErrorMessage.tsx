@@ -27,7 +27,7 @@ export default function ErrorMessage({ errorCode }: { errorCode?: number }) {
             style={
               {
                 '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
-                '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+                '--bg-color': hexToRgb('#FFFFFF')
               } as React.CSSProperties
             }
           >
@@ -48,7 +48,7 @@ export default function ErrorMessage({ errorCode }: { errorCode?: number }) {
             style={
               {
                 '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
-                '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+                '--bg-color': hexToRgb('#FFFFFF')
               } as React.CSSProperties
             }
           >
@@ -69,7 +69,7 @@ export default function ErrorMessage({ errorCode }: { errorCode?: number }) {
             style={
               {
                 '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
-                '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+                '--bg-color': hexToRgb('#FFFFFF')
               } as React.CSSProperties
             }
           >

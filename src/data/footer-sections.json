@@ -1,20 +1,7 @@
-[
-    {
-        "id": 1,
-        "shippingLineId": 3,
-        "hasAboutUs": true,
-        "hasPress": true,
-        "hasFaq": true,
-        "hasPrivacyPolicy": true,
-        "hasTermsAndConditions": true,
-        "primaryContactNumber": "0917-123-4567",
-        "primaryContactNumberNetwork": "Globe",
-        "secondaryContactNumber": "0918-123-4567",
-        "secondaryContactNumberNetwork": "Smart",
-        "email": "support@ayahay.com",
-        "twitterUrl": "https://twitter.com/ayahay",
-        "facebookUrl": "https://facebook.com/ayahay",
-        "linkedInUrl": "https://linkedin.com/ayahay",
-        "instagramUrl": "https://instagram.com/ayahay"
-    }
-]
+{
+    "hasAboutUs": true,
+    "hasPress": true,
+    "hasFaq": true,
+    "hasPrivacyPolicy": true,
+    "hasTermsAndConditions": true
+}

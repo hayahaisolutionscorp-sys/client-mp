@@ -1,0 +1,41 @@
+[
+    {
+        "id": "0dfe7a14-2b0a-4c44-8bc5-b154975d1c59",
+        "page_id": "3e5da2dd-9d06-4971-9502-8862ef630da3",
+        "section_id": "43174e29-311f-4e9c-b8d6-403a8f227fc7",
+        "title": "Innovation Labs",
+        "description": "Constantly pushing boundaries in logistics technology",
+        "icon_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-cards/b91e14a7-3475-4b19-bdd0-55bd333d6ceb.svg",
+        "icon_alt": "Innovation icon",
+        "display_order": 1,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "81e53b27-08db-4632-b8c0-722a2bccd400",
+        "page_id": "3e5da2dd-9d06-4971-9502-8862ef630da3",
+        "section_id": "43174e29-311f-4e9c-b8d6-403a8f227fc7",
+        "title": "Reliability",
+        "description": "Delivering consistent and dependable solutions",
+        "icon_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-cards/98823c96-48b8-4d98-9311-a3911b0fa48a.svg",
+        "icon_alt": "Reliability icon",
+        "display_order": 2,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "74fcff46-e3d9-4019-b6ef-e5a071e9ef52",
+        "page_id": "3e5da2dd-9d06-4971-9502-8862ef630da3",
+        "section_id": "43174e29-311f-4e9c-b8d6-403a8f227fc7",
+        "title": "Customer-Centric",
+        "description": "Focusing on the unique needs of our clients",
+        "icon_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-cards/5b1cc337-7a09-4ef4-a8c1-24c94c0614c5.svg",
+        "icon_alt": "Customer-Centric icon",
+        "display_order": 3,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    }
+]

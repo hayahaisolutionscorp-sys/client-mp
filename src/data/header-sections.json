@@ -1,10 +1,8 @@
 [
     {
-        "id": 1,
-        "shippingLineId": 3,
-        "showPromos": false,
-        "showRoutes": false,
-        "showResources": false,
-        "showAboutUs": false
+        "showPromos": true,
+        "showRoutes": true,
+        "showResources": true,
+        "showAboutUs": true
     }
 ]

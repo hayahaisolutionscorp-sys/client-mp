@@ -16,13 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/Select"
 import { RegisterForm } from "@/models";
-import themeSettings from '@/data/theme-settings.json';
+import { useThemeSettings } from "@/hooks/theme-settings";
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();  // Remove sendEmailVerification
-  const theme = themeSettings[0];
-  const primaryColor = theme.primaryColor || '#91363C';
+  const theme = useThemeSettings();
+  const primaryColor = theme?.primaryColor || '#91363C';
 
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)

@@ -10,12 +10,12 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPassword";
 import { LoginForm } from "@/models";
-import themeSettings from '@/data/theme-settings.json';
+import { useThemeSettings } from "@/hooks/theme-settings";
 
 export default function LoginPage() {
   const router = useRouter();
-  const theme = themeSettings[0];
-  const primaryColor = theme.primaryColor || '#91363C';
+  const theme = useThemeSettings();
+  const primaryColor = theme?.primaryColor || '#91363C';
 
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false)

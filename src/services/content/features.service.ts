@@ -1,4 +1,8 @@
 import { WHY_CHOOSE_REASONS_API, WHY_CHOOSE_SECTION_API } from 'constants/api';
+import { IS_CLIENT } from '../config';
+
+import whyChooseSectionData from '@/data/why-choose-section.json';
+import whyChooseReasonsData from '@/data/why-choose-reasons.json';
 
 export interface IWhyChooseSection {
     id: string;
@@ -10,12 +14,15 @@ export interface IWhyChooseSection {
     title: string;
     subtitle: string | null;
     description: string;
+    is_active: boolean;
     created_at: string;
     updated_at: string | null;
 }
 
 export interface IWhyChooseReason {
     id: string;
+    page_id: string;
+    section_id: string;
     title: string;
     description: string;
     icon_url: string;
@@ -28,6 +35,10 @@ export interface IWhyChooseReason {
 
 export async function getWhyChooseSection(): Promise<IWhyChooseSection | undefined> {
     try {
+        if (!IS_CLIENT) {
+            return whyChooseSectionData as IWhyChooseSection;
+        }
+
         const res = await fetch(WHY_CHOOSE_SECTION_API, {
             next: { tags: ['why-choose-section'], revalidate: 3600 },
         });
@@ -46,6 +57,10 @@ export async function getWhyChooseSection(): Promise<IWhyChooseSection | undefin
 
 export async function getWhyChooseReasons(): Promise<IWhyChooseReason[] | undefined> {
     try {
+        if (!IS_CLIENT) {
+            return whyChooseReasonsData as IWhyChooseReason[];
+        }
+
         const res = await fetch(WHY_CHOOSE_REASONS_API, {
             next: { tags: ['why-choose-reasons'], revalidate: 3600 },
         });

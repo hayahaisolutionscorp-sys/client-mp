@@ -27,7 +27,7 @@ export function PressItemContent({ pressItem }: PressItemContentProps) {
     <div
       className="min-h-screen px-4 sm:px-6 py-8 sm:py-12 pb-32 sm:pb-60"
       style={{
-        background: `linear-gradient(180deg, rgba(${hexToRgb(primaryColor)}, 0.1) 0%, ${themeSettings?.backgroundColor || '#FFFFFF'} 100%)`,
+        background: `linear-gradient(180deg, rgba(${hexToRgb(primaryColor)}, 0.1) 0%, #FFFFFF 100%)`,
       }}
     >
       <div className="max-w-6xl mx-auto">
@@ -43,7 +43,7 @@ export function PressItemContent({ pressItem }: PressItemContentProps) {
         <Card className="border-none shadow-xl rounded-xl">
           <CardHeader
             className="p-6 sm:p-8 text-white rounded-xl rounded-b-none"
-            style={{ backgroundColor: themeSettings?.backgroundColor }}
+            style={{ backgroundColor: '#FFFFFF' }}
           >
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               {/* Fixed icon/Badge for standard press release */}

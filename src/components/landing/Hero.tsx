@@ -21,7 +21,6 @@ export default async function Hero() {
   } else if (heroSection?.bg_type?.toLowerCase() == 'image') {
     captionBackground = (
       <Media
-        // src={`${HERO_SECTION_IMAGES}${heroSection?.shippingLineId}/${heroSection?.filename}`}
         src={heroSection?.bg_url || ''}
         type="image"
         alt={heroSection?.bg_alt || ''}
@@ -32,7 +31,6 @@ export default async function Hero() {
   } else {
     captionBackground = (
       <Media
-        // src={`${HERO_SECTION_IMAGES}${heroSection?.shippingLineId}/${heroSection?.filename}`}
         src={heroSection?.bg_url || ''}
         type="video"
         autoPlay={true}

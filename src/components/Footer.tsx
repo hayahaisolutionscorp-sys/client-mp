@@ -66,7 +66,7 @@ const Footer = () => {
     <>
       <footer
         className="bg-[#13357B] text-white py-10 px-6 sm:px-10 lg:pt-48"
-        style={{ backgroundColor: themeSettings?.primaryColor }}
+        style={{ backgroundColor: themeSettings?.primary }}
       >
         {/* Main content area */}
         <div className="flex flex-col lg:flex-row lg:justify-between gap-8">
@@ -80,12 +80,7 @@ const Footer = () => {
               <Image
                 src={
                   branding?.logo
-                    ? branding.logo.light // Footer usually has dark background, so maybe light logo? 
-                    // Wait, `Navbar` used logic based on `shouldBeTransparent`.
-                    // The Footer background is `#13357B` (dark blue).
-                    // So we probably want the Light logo ("white-ish").
-                    // The existing code uses `ayahay_logo_white.png` for default. 
-                    // So `branding.logo.light` is appropriate.
+                    ? branding.logo.light
                     : (shippingLineId && shippingLineId !== "3")
                       ? `${SHIPPING_LINE_LOGO}${shippingLine?.logoFilename}?cache_buster=${cacheBuster}`
                       : "/assets/images/ayahay_logo_white.png"

@@ -1,5 +1,42 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+export const THEME_SETTINGS_API = `${BASE_URL}/gen_configs`;
+export const SEO_API = `${BASE_URL}/pages`;
+export const BRANDING_API = `${BASE_URL}/gen_configs`;
+
+export const HEADER_SECTION_API = `${BASE_URL}/pages/header-config`;
+export const FOOTER_SECTION_API = `${BASE_URL}/pages/footer-config`;
+
+export const HERO_SECTION_API = `${BASE_URL}/pages/home/page-sections/hero`;
+export const PROMOS_API = `${BASE_URL}/travel-promotions`;
+export const DESTINATIONS_API = `${BASE_URL}/route-recommendations`;
+
+export const WHY_CHOOSE_REASONS_API = `${BASE_URL}/home/why_choose/section-cards`;
+export const WHY_CHOOSE_SECTION_API = `${BASE_URL}/pages/home/page-sections/why_choose`;
+
+export const GET_TO_KNOW_API = `${BASE_URL}/pages/home/page-sections/get_to_know`;
+export const GET_TO_KNOW_MISSION_API = `${BASE_URL}/pages/home/page-sections/get_to_know_mission`;
+export const GET_TO_KNOW_VISION_API = `${BASE_URL}/pages/home/page-sections/get_to_know_vision`;
+
+export const OUR_PARTNERS_API = `${BASE_URL}/partners`;
+
+export const ABOUT_US_SECTION_API = `${BASE_URL}/pages/about-us/page-sections`;
+export const ABOUT_US_CORE_VALUES_API = `${BASE_URL}/about-us/core_values/section-cards`;
+
+export const CONTACT_INFORMATION_API = `${BASE_URL}/contact-information`;
+export const CONTACT_US_HERO_API = `${BASE_URL}/pages/contact-us/page-sections/hero`;
+
+export const PRIVACY_POLICY_API = `${BASE_URL}/pages/privacy-policy`;
+
+export const TERMS_AND_CONDITIONS_API = `${BASE_URL}/pages/terms-and-conditions`;
+
+export const PRESS_RELEASES_API = `${BASE_URL}/press-releases`;
+
+export const PRESS_API = `${BASE_URL}/press`;
+
+export const FAQS_API = `${BASE_URL}/faqs`;
+
+
 export const UPLOAD_API = `${BASE_URL}/uploads`;
 export const ACCOUNT_API = `${BASE_URL}/accounts`;
 export const VERIFICATION_API = `${BASE_URL}/verification`;
@@ -24,30 +61,3 @@ export const WEBHOOKS_API = `${BASE_URL}/webhooks`;
 export const RATE_TABLES_API = `${BASE_URL}/rate-tables`;
 export const RATE_TABLE_ROWS_API = `${BASE_URL}/rate-table-rows`;
 export const SEAT_PLAN_API = `${BASE_URL}/seat-plans`;
-export const THUMBNAIL_API = `${BASE_URL}/thumbnails`;
-export const HEADER_SECTION_API = `${BASE_URL}/pages/header-config`;
-export const HERO_SECTION_API = `${BASE_URL}/pages/home/page-sections/hero`;
-export const FOOTER_SECTION_API = `${BASE_URL}/pages/footer-config`;
-export const ABOUT_US_API = `${BASE_URL}/about-us`;
-export const CONTACT_INFORMATION_API = `${BASE_URL}/contact-information`;
-export const CONTACT_US_API = `${BASE_URL}/contact-us`; // Assumption for endpoint
-export const THEME_SETTINGS_API = `${BASE_URL}/theme-settings`;
-export const FAQ_API = `${BASE_URL}/faq`; // Keeping for backward compatibility if needed, or remove? Plan didn't explicitly say remove, but new one is /faqs
-export const FAQS_API = `${BASE_URL}/faqs`;
-export const PRESS_API = `${BASE_URL}/press`;
-export const PRESS_RELEASES_API = `${BASE_URL}/press-releases`;
-export const PRIVACY_POLICY_API = `${BASE_URL}/privacy-policy`;
-export const SEO_API = `${BASE_URL}/pages`;
-export const PROMOS_API = `${BASE_URL}/travel-promotions`;
-export const DESTINATIONS_API = `${BASE_URL}/route-recommendations`;
-export const BRANDING_API = `${BASE_URL}/gen_configs`;
-export const GET_TO_KNOW_API = `${BASE_URL}/pages/home/page-sections/get_to_know`;
-export const GET_TO_KNOW_MISSION_API = `${BASE_URL}/pages/home/page-sections/get_to_know_mission`;
-export const GET_TO_KNOW_VISION_API = `${BASE_URL}/pages/home/page-sections/get_to_know_vision`;
-export const WHY_CHOOSE_REASONS_API = `${BASE_URL}/home/why_choose/section-cards`;
-export const WHY_CHOOSE_SECTION_API = `${BASE_URL}/pages/home/page-sections/why_choose`;
-export const ABOUT_US_SECTION_API = `${BASE_URL}/pages/about-us/page-sections`;
-export const OUR_PARTNERS_API = `${BASE_URL}/partners`;
-export const ABOUT_US_CORE_VALUES_API = `${BASE_URL}/about-us/core_values/section-cards`;
-
-

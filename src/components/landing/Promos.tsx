@@ -1,9 +1,7 @@
 import { Suspense } from 'react';
 import Carousel from '@/components/landing/Carousel';
 import CarouselSkeleton from './skeletons/CarouselSkeleton';
-// import { getThumbnailsByShippingLineId } from '@/services';
 import { getPromos } from '@/services/ui/promos.service';
-import { IThumbnail } from '@/models';
 
 
 export default async function Promos() {

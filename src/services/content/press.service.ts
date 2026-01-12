@@ -2,11 +2,27 @@ import { IPress } from '@/models';
 import { PRESS_RELEASES_API } from 'constants/api';
 // import { cacheItem, fetchItem } from 'helpers/cache.helpers';
 import axios from '@/services/core/axios';
+import { IS_CLIENT } from '../config';
 
 import pressData from '@/data/press.json';
 
 export async function getPress(): Promise<IPress[]> {
   try {
+    if (!IS_CLIENT) {
+      return pressData.map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        content: p.content,
+        publish_date: p.publishedDate,
+        slug: p.id,
+        display_order: 0,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: null,
+        // map other properties if needed or allow partial if interface was looser, but sticking to required
+      })) as IPress[];
+    }
+
     const res = await fetch(PRESS_RELEASES_API, {
       next: { tags: ['press-releases'], revalidate: 3600 }
     });
@@ -23,27 +39,10 @@ export async function getPress(): Promise<IPress[]> {
   }
 }
 
-// export async function getPressByShippingLineId(
-//   shippingLineId: number
-// ): Promise<IPress[] | undefined> {
-//   // try {
-//   //   const { data } = await axios.get(`${PRESS_API}/shippingLine/${shippingLineId}`);
-//   //   return data;
-//   // } catch (e) {
-//   //   console.error(e);
-//   //   return undefined;
-//   // }
-//
-//   await new Promise(resolve => setTimeout(resolve, 100));
-//   const press = (pressData as any as IPress[]).filter(p => p.shippingLineId === shippingLineId);
-//
-//   return press
-//     .filter((item) => item.isPublish)
-//     .sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
-// }
+
 
 export async function getPressById(
-  id: number
+  id: number | string
 ): Promise<IPress | undefined> {
   const press = await getPress();
   return press.find(p => p.id === id);

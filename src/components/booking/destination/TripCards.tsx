@@ -248,7 +248,7 @@ export default function TripCards({
                     className="inline-flex items-center px-3 py-1 bg-[rgba(var(--bg-color),0.1)] font-semibold text-[rgba(var(--bg-color),1)] border rounded-full text-sm"
                     style={
                       {
-                        '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+                        '--bg-color': hexToRgb(themeSettings?.primaryColor || '#051036')
                       } as React.CSSProperties
                     }
                   >
@@ -404,7 +404,7 @@ export default function TripCards({
                   className="flex items-center mt-4 p-3 bg-[rgba(var(--bg-color),0.05)] rounded-lg text-sm text-customText"
                   style={
                     {
-                      '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+                      '--bg-color': hexToRgb('#FFFFFF')
                     } as React.CSSProperties
                   }
                 >

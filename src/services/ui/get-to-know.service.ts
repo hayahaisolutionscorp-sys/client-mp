@@ -1,4 +1,9 @@
 import { GET_TO_KNOW_API, GET_TO_KNOW_MISSION_API, GET_TO_KNOW_VISION_API } from "../../../constants/api";
+import { IS_CLIENT } from '../config';
+
+import getToKnowData from '@/data/get-to-know.json';
+import getToKnowMissionData from '@/data/get-to-know-mission.json';
+import getToKnowVisionData from '@/data/get-to-know-vision.json';
 
 export interface IGetToKnowData {
     id: string;
@@ -10,6 +15,7 @@ export interface IGetToKnowData {
     title: string;
     subtitle: string | null;
     description: string;
+    is_active: boolean;
     created_at: string;
     updated_at: string | null;
 }
@@ -20,6 +26,13 @@ export interface IGetToKnowResponse {
 }
 
 export const getGetToKnow = async (): Promise<IGetToKnowResponse> => {
+    if (!IS_CLIENT) {
+        return {
+            message: "Page section with ID get_to_know successfully fetched.",
+            data: getToKnowData as IGetToKnowData
+        };
+    }
+
     const response = await fetch(GET_TO_KNOW_API, {
         next: { tags: ['get-to-know'], revalidate: 3600 }
     });
@@ -31,6 +44,13 @@ export const getGetToKnow = async (): Promise<IGetToKnowResponse> => {
 };
 
 export const getGetToKnowMission = async (): Promise<IGetToKnowResponse> => {
+    if (!IS_CLIENT) {
+        return {
+            message: "Page section with ID get_to_know_mission successfully fetched.",
+            data: getToKnowMissionData as IGetToKnowData
+        };
+    }
+
     const response = await fetch(GET_TO_KNOW_MISSION_API, {
         next: { tags: ['get-to-know-mission'], revalidate: 3600 }
     });
@@ -41,6 +61,13 @@ export const getGetToKnowMission = async (): Promise<IGetToKnowResponse> => {
 };
 
 export const getGetToKnowVision = async (): Promise<IGetToKnowResponse> => {
+    if (!IS_CLIENT) {
+        return {
+            message: "Page section with ID get_to_know_vision successfully fetched.",
+            data: getToKnowVisionData as IGetToKnowData
+        };
+    }
+
     const response = await fetch(GET_TO_KNOW_VISION_API, {
         next: { tags: ['get-to-know-vision'], revalidate: 3600 }
     });

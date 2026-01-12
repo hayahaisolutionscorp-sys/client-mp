@@ -1,0 +1,660 @@
+{
+    "id": "cc407280-646e-45c9-9837-14f33282474a",
+    "page_type": "terms",
+    "title": "Terms and Conditions",
+    "content": {
+        "type": "doc",
+        "content": [
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "1. Introduction Yawa"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Welcome to Ayahay's online booking platform. By using this service, you agree to comply with the following terms and conditions. Please read them carefully before making a booking. Your continued use of this platform constitutes your acceptance of these terms."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "2. Booking Eligibility"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Passengers must be at least 18 years old to make a booking."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Passengers under 18 years must be accompanied by a parent or legal guardian during travel."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Passengers must provide accurate and complete information during the booking process."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "3. Ayahay Online Booking Conditions"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Before using this site to book ferry journeys, please read the following booking conditions."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 2
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "Application"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "These Booking Conditions apply to all passenger bookings for ferry journeys through this site. \"You\" refers to the person making the booking, and each person for whom the booking is made is a \"Customer.\""
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 2
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "Parties"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "These Booking Conditions apply to Ayahay's services. The contract forms with both Ayahay and the ferry operator. In case of conflict, the operator's terms prevail."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 2
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "Fares and General Information"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Fares are based on vessel type, number of passengers, routes, and travel dates. Special conditions may apply to promotional rates. Vehicle and passenger space are subject to availability. Promotional fares are subject to conditions, including potential additional charges for unused portions."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 2
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "Departure Schedules"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Departure/arrival times are estimates. Schedules may be interrupted or altered due to weather, tidal conditions, or other circumstances. Alternative ships or points of departure may be used."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 2
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "Animals"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Carriage of animals is permitted with prior notification, complying with legal requirements, and may incur additional charges."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 2
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "Freight and Commercial Passenger Vehicles"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Special conditions apply, and rates vary. Definitions are determined by the operator."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 2
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "Hazardous Materials"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Dangerous or hazardous materials are not accepted. Permission, if granted, may incur additional charges."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "4. Booking Process"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Bookings must be made through Ayahay's official website or mobile application."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Passengers are responsible for verifying the accuracy of all booking details before confirming their reservations."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "A booking confirmation will be sent via email or SMS upon successful payment."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "5. Payment and Fees"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "All bookings must be paid in full at the time of reservation."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Ayahay accepts various payment methods, including credit/debit cards, e-wallets, and bank transfers."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Additional service fees may apply depending on the selected payment method."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "The convenience fee is non-refundable."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "6. Ticket Validity"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Tickets are non-transferable and valid only for the specified passenger and travel date."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Passengers must present a valid ID matching the booking details at the time of boarding."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "7. Changes, Cancellations, and Refunds"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Change requests (e.g., rescheduling) are subject to the policies of the respective shipping line and may incur additional fees."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Cancellations and refund requests must be made in accordance with the shipping line's policies."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Refund processing times may vary depending on the payment method used."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Cancellation of trips is subject to change without prior notice."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "8. Boarding Requirements"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Passengers must arrive at the boarding point at least 1 hour before departure."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Passengers must present a valid ticket and identification for verification."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Ayahay and the shipping line reserve the right to refuse boarding if the passenger fails to meet the boarding requirements."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "9. Passenger Conduct"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Passengers are expected to behave responsibly and comply with the rules set by the shipping line."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Any disruptive or unlawful behavior may result in denied boarding or removal from the vessel."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "10. Liability"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Ayahay acts as a booking platform and is not responsible for the operations of the shipping lines. Passengers are advised to always read the terms and conditions of the respective shipping line."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Ayahay is not liable for delays, cancellations, or any incidents that occur during the trip."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Passengers agree to indemnify Ayahay from any claims or damages arising from their use of the platform."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "11. Privacy and Data Protection"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Ayahay is committed to protecting passenger privacy. Personal information collected during the booking process will be handled in accordance with Ayahay's Privacy Policy."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "12. Amendments to Terms"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Ayahay reserves the right to update these terms and conditions at any time."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "Passengers will be notified of any changes, and continued use of the platform constitutes acceptance of the updated terms."
+                    }
+                ]
+            },
+            {
+                "type": "heading",
+                "attrs": {
+                    "level": 1
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "bold"
+                            }
+                        ],
+                        "text": "13. Governing Law"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "These terms and conditions shall be governed by the laws of the Philippines."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
+                        "text": "By making a booking through Ayahay's online platform, you confirm that you have read, understood, and agreed to these terms and conditions."
+                    }
+                ]
+            }
+        ]
+    },
+    "slug": "terms-and-conditions",
+    "is_active": true,
+    "created_at": "2026-01-08T03:31:28.888Z",
+    "updated_at": null
+}

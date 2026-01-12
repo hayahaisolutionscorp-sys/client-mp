@@ -9,11 +9,10 @@ import { categories, faqData } from '@/app/faq/faq.data';
 import { IFaq } from '@/models';
 
 interface FAQProps {
-  shippingLineId: string;
   themeColor: string;
 }
 
-export default function FAQ({ shippingLineId, themeColor }: FAQProps) {
+export default function FAQ({ themeColor }: FAQProps) {
   const [faqs, setFaqs] = useState<IFaq[]>([]);
   const [faqCategories, setFaqCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -21,15 +20,6 @@ export default function FAQ({ shippingLineId, themeColor }: FAQProps) {
   useEffect(() => {
     const fetchFaqs = async () => {
       setIsLoading(true);
-      // const parsedId = parseInt(shippingLineId, 10);
-      // if (isNaN(parsedId)) {
-      //   console.error('Invalid shippingLineId:', shippingLineId);
-      //   // Fallback to local data
-      //   setFaqs(faqData as unknown as IFaq[]); // Type casting for fallback if needed
-      //   setFaqCategories(categories);
-      //   setIsLoading(false);
-      //   return;
-      // }
 
       try {
         const resFaqs = await getFaqs();
@@ -39,16 +29,11 @@ export default function FAQ({ shippingLineId, themeColor }: FAQProps) {
           setFaqs(resFaqs);
           setFaqCategories(resCategories);
         } else {
-          // setFaqs(faqData);
-          // setFaqCategories(categories);
           setFaqs([]);
           setFaqCategories([]);
         }
       } catch (error) {
         console.error('Error fetching FAQs:', error);
-        // Fallback to local data on error
-        // setFaqs(faqData);
-        // setFaqCategories(categories);
         setFaqs([]);
         setFaqCategories([]);
       } finally {

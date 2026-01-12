@@ -13,6 +13,7 @@ export const MailboxIcon: React.FC<MailboxIconProps> = ({
     accentColor = "#58DC88", // Default green (Flag)
     className,
 }) => {
+
     return (
         <svg
             width="333"

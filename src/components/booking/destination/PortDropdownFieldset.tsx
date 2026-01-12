@@ -140,7 +140,7 @@ const PortDropdownFieldset = ({
                 value={searchTerm}
                 onChange={handleSearch}
                 placeholder="Search port..."
-                className="w-full p-2 text-sm border border-gray-300 rounded-md focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2"
+                className="w-full p-2 text-sm border border-gray-300 rounded-md focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2 bg-white text-gray-900"
                 style={
                   {
                     "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
@@ -162,7 +162,7 @@ const PortDropdownFieldset = ({
                   [&::-webkit-scrollbar-thumb]:rounded-md"
               style={
                 {
-                  "--bg-color": hexToRgb(themeSettings?.backgroundColor || "#23abff"),
+                  "--bg-color": hexToRgb("#FFFFFF"),
                 } as React.CSSProperties
               }
             >
@@ -177,7 +177,7 @@ const PortDropdownFieldset = ({
                       }`}
                     style={
                       {
-                        "--bg-color": hexToRgb(themeSettings?.backgroundColor || "#23abff"),
+                        "--bg-color": hexToRgb("#FFFFFF"),
                       } as React.CSSProperties
                     }
                   >

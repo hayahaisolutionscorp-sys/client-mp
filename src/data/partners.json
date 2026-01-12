@@ -1,0 +1,34 @@
+[
+    {
+        "id": "1da0d1ab-fd63-47f2-964c-a18435828622",
+        "name": "Aznar Group of Companies",
+        "logo_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/partner-logo/Aznar_Group_of_Companies.png",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "8da20c68-96be-4a37-b28a-4b118a2ec986",
+        "name": "Jomalia Shipping Corporation",
+        "logo_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/partner-logo/Jomalia_Shipping_Corporation.png",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "0675c850-41aa-49ba-bebe-e5a6b6def87f",
+        "name": "Sunriser Cordova Inter-Island Shipping Lines INC.",
+        "logo_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/shipping_line_logo/Cordova_Inter_Island_Shipping_Lines_Inc.png",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "da8b7c75-5ee2-4b99-beef-e6175ffd5665",
+        "name": "Santa Clara Shipping Corporation",
+        "logo_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/partner-logo/santa_clara_shipping_line.png",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    }
+]

@@ -1,0 +1,41 @@
+[
+    {
+        "id": "c1b0e183-4eea-407a-8030-8b0de77803c0",
+        "page_id": "3ad149ca-4bd0-4794-87c7-1f7a8007ae2f",
+        "section_id": "35caec6d-9e85-4441-8f1d-86f154b57ede",
+        "title": "Best Price Guarantee",
+        "description": "Enjoy the lowest fares for your journey, with no hidden fees — guaranteed!",
+        "icon_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-cards/e47108ec-11c9-4ffd-954a-51f0fe0f5551.svg",
+        "icon_alt": "Best Price Guarantee icon",
+        "display_order": 1,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "ba60063e-cbf0-4cae-b7be-afccfadb78ee",
+        "page_id": "3ad149ca-4bd0-4794-87c7-1f7a8007ae2f",
+        "section_id": "35caec6d-9e85-4441-8f1d-86f154b57ede",
+        "title": "Easy & Quick Booking imy maen",
+        "description": "Book your trip in just a few steps and get ready to sail without the wait!",
+        "icon_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-cards/decb5c50-5e72-42d3-a359-ed8b856b9def.svg",
+        "icon_alt": "Easy & Quick Booking icon",
+        "display_order": 2,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "046d1566-2516-4628-b513-4f2dc587facb",
+        "page_id": "3ad149ca-4bd0-4794-87c7-1f7a8007ae2f",
+        "section_id": "35caec6d-9e85-4441-8f1d-86f154b57ede",
+        "title": "Customer Care 24/7",
+        "description": "We're here for you anytime, with round-the-clock support to assist you on your journey!",
+        "icon_url": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/section-cards/35054765-fee0-462c-8d5c-e33f536bc8d4.svg",
+        "icon_alt": "Customer Care 24/7 icon",
+        "display_order": 3,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    }
+]

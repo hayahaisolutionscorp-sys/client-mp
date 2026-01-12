@@ -66,12 +66,12 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
             <li
               onClick={() => handleSelection("Single Trip")}
               className={`px-4 py-2 cursor-pointer ${displayedValue === "Single Trip"
-                  ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
-                  : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
+                ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
+                : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
                 }`}
               style={
                 {
-                  "--bg-color": hexToRgb(themeSettings?.backgroundColor || "#23abff"),
+                  "--bg-color": hexToRgb("#FFFFFF"),
                 } as React.CSSProperties
               }
             >
@@ -80,12 +80,12 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
             <li
               onClick={() => handleSelection("Round Trip")}
               className={`px-4 py-2 cursor-pointer ${displayedValue === "Round Trip"
-                  ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
-                  : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
+                ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
+                : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
                 }`}
               style={
                 {
-                  "--bg-color": hexToRgb(themeSettings?.backgroundColor || "#23abff"),
+                  "--bg-color": hexToRgb("#FFFFFF"),
                 } as React.CSSProperties
               }
             >

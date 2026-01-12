@@ -4,7 +4,6 @@ import { use, useState, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './PhotoGrid.module.css';
 import { IoClose } from 'react-icons/io5';
-import { PHOTOGRID_IMAGES } from 'constants/storage';
 import { IThumbnail } from '@/models';
 
 export default function PhotoGrid({ images }: { images: Promise<IThumbnail[]> }) {

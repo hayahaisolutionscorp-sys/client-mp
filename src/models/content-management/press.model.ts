@@ -1,5 +1,5 @@
 export interface IPress {
-  id: number;
+  id: number | string;
   title: string;
   content: string;
   publish_date: string;

@@ -1,0 +1,65 @@
+[
+    {
+        "id": "729632ea-d24d-471e-9f38-d9d0ca81e1da",
+        "type": "phone",
+        "value": "+639123456798",
+        "label": "Smart/TNT",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "8278ef60-6cdc-4e35-9f7f-75e9f19dafd6",
+        "type": "phone",
+        "value": "+639123456789",
+        "label": "Globe",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "a1602c45-cbbd-493e-95d0-d9abde1f7ad4",
+        "type": "email",
+        "value": "admin@ayahay.com",
+        "label": "Need support?",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "267650c5-d914-4f09-84d5-f28458dc3b9d",
+        "type": "facebook",
+        "value": "https://www.facebook.com/profile.php?id=61551614079847",
+        "label": "Follow us on Facebook",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "065ccc86-f1d6-4f08-91aa-248465f7fd93",
+        "type": "instagram",
+        "value": "https://www.instagram.com/ayahayig/",
+        "label": "Follow us on Instagram",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "b4aa1ca6-3175-4398-9af2-b7e154f38695",
+        "type": "twitter",
+        "value": "https://x.com/ayahayX",
+        "label": "Follow us on X",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "55e8e753-32b9-4f67-9f2f-1dcd5bc857da",
+        "type": "linkedin",
+        "value": "https://linkedin.com/company/96973007",
+        "label": "Connect on LinkedIn",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    }
+]

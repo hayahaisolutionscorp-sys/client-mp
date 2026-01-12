@@ -44,7 +44,7 @@ export default function PassengerConfirmedTripCard({ booking }: PassengerConfirm
             className="bg-[rgba(var(--bg-color),0.1)] text-[rgba(var(--bg-color),1)] rounded-full text-xs sm:text-sm font-medium px-2 py-1"
             style={
               {
-                '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+                '--bg-color': hexToRgb('#FFFFFF')
               } as React.CSSProperties
             }
           >

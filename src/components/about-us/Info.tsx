@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { Card, CardContent } from '@/components/ui/Card';
-import { hexToRgb } from 'helpers/theme.helpers';
+
 import DOMPurify from 'isomorphic-dompurify';
 import { IAboutUs } from '@/models';
 
@@ -12,34 +12,28 @@ export default function Info({ aboutUs }: { aboutUs: IAboutUs }) {
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger
           value="welcome"
-          className="data-[state=active]:bg-[rgba(var(--bg-color),1)] data-[state=active]:text-primary-foreground"
-          style={
-            {
-              '--bg-color': hexToRgb(aboutUs?.tabsBackgroundColor || '#0060df')
-            } as React.CSSProperties
-          }
+          className="data-[state=active]:bg-[var(--active-tab-bg)] data-[state=active]:text-primary-foreground"
+          style={{
+            '--active-tab-bg': aboutUs?.tabsBackgroundColor || '#0060df'
+          } as React.CSSProperties}
         >
           Welcome
         </TabsTrigger>
         <TabsTrigger
           value="story"
-          className="data-[state=active]:bg-[rgba(var(--bg-color),1)] data-[state=active]:text-primary-foreground"
-          style={
-            {
-              '--bg-color': hexToRgb(aboutUs?.tabsBackgroundColor || '#0060df')
-            } as React.CSSProperties
-          }
+          className="data-[state=active]:bg-[var(--active-tab-bg)] data-[state=active]:text-primary-foreground"
+          style={{
+            '--active-tab-bg': aboutUs?.tabsBackgroundColor || '#0060df'
+          } as React.CSSProperties}
         >
           Our Story
         </TabsTrigger>
         <TabsTrigger
           value="expertise"
-          className="data-[state=active]:bg-[rgba(var(--bg-color),1)] data-[state=active]:text-primary-foreground"
-          style={
-            {
-              '--bg-color': hexToRgb(aboutUs?.tabsBackgroundColor || '#0060df')
-            } as React.CSSProperties
-          }
+          className="data-[state=active]:bg-[var(--active-tab-bg)] data-[state=active]:text-primary-foreground"
+          style={{
+            '--active-tab-bg': aboutUs?.tabsBackgroundColor || '#0060df'
+          } as React.CSSProperties}
         >
           Our Expertise
         </TabsTrigger>
