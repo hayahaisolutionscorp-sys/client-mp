@@ -39,6 +39,7 @@ export * from './user-management/passenger.model';
 export * from './user-management/travel-agency.model';
 export * from './user-management/travel-agency-shipping-line';
 export * from './user-management/client.model';
+export * from './user-management/dependent.model';
 
 // Content Management & CMS
 export * from './content-management/hero-section.model';

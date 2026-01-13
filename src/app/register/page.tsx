@@ -159,7 +159,7 @@ export default function RegisterPage() {
 
   const setBirthday: Dispatch<SetStateAction<Date | undefined>> = (value) => {
     if (value instanceof Date) {
-      setFormData((prev) => ({ ...prev, birthday: value.toISOString().split('T')[0] }));
+      setFormData((prev) => ({ ...prev, birthday: value.toISOString() }));
     }
   };
 

@@ -1,0 +1,157 @@
+"use client"
+
+import { useState } from "react"
+import { CheckCircle2, Eye, EyeOff } from "lucide-react"
+import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
+import { cn } from "@/lib/utils"
+import { AuthService } from "@/services/auth.service"
+import { SuccessModal } from "@/components/ui/SuccessModal"
+
+export default function SecuritySettingsForm() {
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [passwordStatus, setPasswordStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const isMatch = passwordData.newPassword && 
+                   passwordData.newPassword === passwordData.confirmPassword;
+
+    const hasNoChanges = !passwordData.currentPassword && 
+                        !passwordData.newPassword && 
+                        !passwordData.confirmPassword;
+
+    const handleChangePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setPasswordStatus({ type: 'error', message: "Passwords don't match" });
+            return;
+        }
+
+        setPasswordLoading(true);
+        setPasswordStatus(null);
+        
+        try {
+            await AuthService.changePassword({
+                current_password: passwordData.currentPassword,
+                new_password: passwordData.newPassword
+            });
+          
+            setShowSuccessModal(true);
+            setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+        } catch (error: any) {
+            setPasswordStatus({ 
+                type: 'error', 
+                message: error.response?.data?.message || "Failed to update password. Please check your current password." 
+            });
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
+
+    return (
+        <Card className="border-none shadow-none bg-transparent">
+            <CardHeader className="px-0 pb-7">
+                <CardTitle>Security Settings</CardTitle>
+                <CardDescription>Manage your account security and password.</CardDescription>
+            </CardHeader>
+            <CardContent className="px-0 space-y-6">
+                <form onSubmit={handleChangePassword} className="max-w-md space-y-4">
+                    {passwordStatus && passwordStatus.type === 'error' && (
+                        <div className="p-3 rounded-md text-sm bg-red-50 text-red-700 border border-red-200">
+                            {passwordStatus.message}
+                        </div>
+                    )}
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Current Password</label>
+                        <div className="relative">
+                            <Input
+                                type={showCurrentPassword ? "text" : "password"}
+                                required
+                                value={passwordData.currentPassword}
+                                onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                                className="pr-10"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            >
+                                {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">New Password</label>
+                        <div className="relative">
+                            <Input
+                                type={showNewPassword ? "text" : "password"}
+                                required
+                                value={passwordData.newPassword}
+                                onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                                className="pr-10"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            >
+                                {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium">Confirm New Password</label>
+                            {isMatch && (
+                                <div className="flex items-center gap-1 text-xs text-green-600 font-medium animate-in fade-in slide-in-from-right-2">
+                                    <CheckCircle2 className="h-3 w-3" />
+                                    Passwords match
+                                </div>
+                            )}
+                        </div>
+                        <div className="relative">
+                            <Input
+                                type={showConfirmPassword ? "text" : "password"}
+                                required
+                                className={cn(isMatch && "border-green-500 focus-visible:ring-green-500", "pr-10")}
+                                value={passwordData.confirmPassword}
+                                onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            >
+                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <Button 
+                        type="submit" 
+                        disabled={passwordLoading || hasNoChanges}
+                    >
+                        {passwordLoading ? "Updating..." : "Update Password"}
+                    </Button>
+                </form>
+            </CardContent>
+
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                title="Password Updated!"
+                description="Your account password has been changed successfully."
+            />
+        </Card>
+    );
+}

@@ -4,6 +4,7 @@ import { ITravelAgency } from './travel-agency.model';
 import { IClient } from './client.model';
 import { IShippingLine } from '../shipping-line/shipping-line.model';
 import { IVehicle } from '../vehicle/vehicle.model';
+import { IVerification } from './dependent.model';
 
 /**
  * An account can only be *one* of the following:
@@ -30,7 +31,6 @@ export interface IAccount {
   clientId?: number;
   client?: IClient;
   qr_code?: string;
-  profile_picture?: string;
 
   email: string;
   emailConsent: boolean;
@@ -41,6 +41,8 @@ export interface IAccount {
 
   passengers?: IPassenger[];
   vehicles?: IVehicle[];
+  verification?: IVerification;
+  verificationDetails?: IVerification[];
 }
 
 export interface LoginForm {

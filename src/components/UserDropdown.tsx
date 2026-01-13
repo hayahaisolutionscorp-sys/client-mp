@@ -37,10 +37,10 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
           className="flex items-center space-x-2 focus:outline-none"
           aria-label="User menu"
         >
-          {loggedInAccount?.profile_picture ? (
+          {loggedInAccount?.passenger?.profile_picture_url ? (
             <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-200">
               <Image
-                src={loggedInAccount.profile_picture}
+                src={loggedInAccount.passenger.profile_picture_url}
                 alt="Profile"
                 fill
                 className="object-cover"
@@ -67,13 +67,6 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
             />
           )}
 
-          {currentUser && (
-            <span
-              className={`text-sm font-medium hidden md:block ${shouldBeTransparent ? 'text-white' : 'text-gray-900'}`}
-            >
-              {loggedInAccount?.passenger?.firstName} {loggedInAccount?.passenger?.lastName}
-            </span>
-          )}
         </button>
 
         {/* Dropdown Menu */}
@@ -87,7 +80,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
                 <p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
               </div>
               <Link
-                href={`/profile/${loggedInAccount?.id}`}
+                href="/profile"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => setIsDropdownOpen(false)}
               >

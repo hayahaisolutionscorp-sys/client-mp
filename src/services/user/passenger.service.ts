@@ -30,26 +30,26 @@ export function mapPassengerToDto(values: RegisterForm): IPassenger {
 }
 
 export async function updatePassenger(
-  passengerId: number | string, // Relax type to allow usage if needed, though we ignore it for /me
   passengerData: Partial<IPassenger>
 ): Promise<IPassenger | undefined> {
   try {
-    // Map IPassenger fields to UpdateProfileDto fields expected by backend
-    // Backend expects: firstName, lastName, sex, birthday, address, nationality, occupation, mobile_number, civilStatus
     const payload = {
       firstName: passengerData.firstName,
       lastName: passengerData.lastName,
       sex: passengerData.sex,
-      birthday: passengerData.birthdayIso, // Backend UpdateProfileDto has birthday (string)
+      birthday: passengerData.birthdayIso,
       address: passengerData.address,
       nationality: passengerData.nationality,
       occupation: passengerData.occupation,
       mobile_number: passengerData.mobile_number,
-      civilStatus: passengerData.civilStatus
+      civilStatus: passengerData.civilStatus,
+      profile_picture_url: passengerData.profile_picture_url
     };
 
     const { data } = await axios.patch(`${AUTH_API}/me`, payload);
-    // Backend returns { ...user, passenger: { ... } }
+
+    console.log("updated: ", data);
+
     return data.data.passenger;
   } catch (e) {
     console.error('Error updating passenger:', e);
@@ -57,9 +57,7 @@ export async function updatePassenger(
   }
 }
 
-export async function getPassenger(
-  passengerId: number
-): Promise<IPassenger | undefined> {
+export async function getPassenger(): Promise<IPassenger | undefined> {
   try {
     const { data } = await axios.get(`${AUTH_API}/me`);
     return data.data.passenger;

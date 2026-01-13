@@ -11,13 +11,16 @@ const BirthDatePicker = ({
   date,
   setDate,
   validationErrors,
+  allowMinors = false,
 }: {
   date: Date | undefined;
   setDate: Dispatch<SetStateAction<Date | undefined>>;
   validationErrors: Record<string, string>;
+  allowMinors?: boolean;
   }) => {
   const displayDate = date && isValid(date) ? format(date, "yyyy-MM-dd") : "Select Date";
   const eighteenYearsAgo = subYears(new Date(), 18);
+  const maxDate = allowMinors ? new Date() : eighteenYearsAgo;
 
   return (
     <Popover>
@@ -46,10 +49,11 @@ const BirthDatePicker = ({
           required
           captionLayout="dropdown"
           fromDate={new Date("1900-01-01")}
-          toDate={eighteenYearsAgo}
+          toDate={maxDate}
+          defaultMonth={date && isValid(date) ? date : maxDate}
           disabled={(selectedDate) => {
-            // Disable dates for users under 18 and very old dates
-            return selectedDate > eighteenYearsAgo || selectedDate < new Date("1900-01-01");
+            // Disable dates in the future or very old dates
+            return selectedDate > maxDate || selectedDate < new Date("1900-01-01");
           }}
           initialFocus
         />

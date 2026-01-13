@@ -1,9 +1,12 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { IAccount, RegisterForm } from '@/models';
 import { AuthService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
+import { getCookie, eraseCookie } from 'helpers/cookie.helpers';
+import { invalidateItem } from 'helpers/cache.helpers';
+import { accountRelatedCacheKeys } from 'constants/cache';
 
 interface AuthContextType {
     currentUser: any | null; // Keeping loose type for compatibility
@@ -23,6 +26,7 @@ interface AuthContextType {
         type: 'success' | 'error' | null;
         message: string;
     } | null;
+    refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -38,8 +42,42 @@ export const useAuth = () => {
 export default function AuthContextProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const [currentUser, setCurrentUser] = useState<any | null>(null);
-    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(null);
+
+    // Initial state hydration from non-httpOnly 'user' cookie
+    const [currentUser, setCurrentUser] = useState<any | null>(() => {
+        if (typeof window === 'undefined') return null;
+        const userJson = getCookie('user');
+        if (userJson) {
+            try {
+                // Decode and parse the JSON user object from cookie
+                return JSON.parse(decodeURIComponent(userJson));
+            } catch (e) {
+                console.error('Failed to parse user cookie', e);
+                return null;
+            }
+        }
+        return null;
+    });
+
+    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(() => {
+        if (typeof window === 'undefined') return null;
+        const userJson = getCookie('user');
+        if (userJson) {
+            try {
+                const user = JSON.parse(decodeURIComponent(userJson));
+                return {
+                    id: user.id || user.accountId,
+                    email: user.email,
+                    role: user.role || 'Passenger',
+                    emailConsent: false,
+                } as IAccount;
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    });
+
     const [notification, setNotification] = useState<{
         type: 'success' | 'error' | null;
         message: string;
@@ -51,64 +89,48 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     };
 
     // Load user profile on mount
-    const loadProfile = async () => {
+    const loadProfile = useCallback(async () => {
         try {
             setLoading(true);
-            const { data } = await AuthService.getProfile();
-            // Map API response to Context state
-            // The API returns { data: { id, name, email, ... }, message } OR { id, name... } depending on DTO usage
-            // The controller: return { message: '...', data: result }
-            // So data is nested in data.data?
-            // Wait, axios response.data IS the body.
-            // Controller returns: { message: string, data: UserResponseDto }
-            // So response.data.data is the user.
-
-            // Let's verify the AuthService.getProfile implementation.
-            // It returns response.data. 
-            // So yes, we need to access result.data
-
-            // However, we should be careful about the structure.
-            // Let's assume response.data is the object returned by controller.
-
-            const user = data.data || data;
+            const result = await AuthService.getProfile();
+            // result is { message: string, data: UserResponseDto }
+            const user = result.data || result;
 
             setCurrentUser(user);
 
-            // Map to IAccount (partial)
-            // We need to parse name into first/last or just store it.
-            // IAccount doesn't have 'name', it has firstName, lastName?
-            // No, IAccount doesn't have firstName/lastName directly unless it implies Passenger?
-            // IAccount in account.model.ts has: passengerId, shippingLineId, ... 
-            // It does NOT have firstName/lastName at root. It has 'role', 'email'.
-            // The 'UserResponseDto' only has name.
-            // This is a disconnect. I will map what I can.
-
+            // Mapping from UserResponseDto (which has passenger object) to IAccount
             const account: IAccount = {
-                id: user.id,
+                id: user.id || user.accountId,
                 email: user.email,
-                role: 'Passenger', // Defaulting or we need to get it from API
+                role: user.role || (user.roles?.[0]?.name) || 'Passenger',
                 emailConsent: false,
-                // We'll leave other fields undefined as we don't have them
+                passenger: user.passenger || undefined,
+                verification: Array.isArray(user.verificationDetails) ? user.verificationDetails[0] : (user.verificationDetails || user.verification || undefined),
+                verificationDetails: Array.isArray(user.verificationDetails) 
+                    ? user.verificationDetails 
+                    : (user.verificationDetails ? [user.verificationDetails] : undefined)
             };
             setLoggedInAccount(account);
 
-        } catch (error) {
-            // Not logged in or error
-            console.log('Failed to load profile (likely not logged in)', error);
-            setCurrentUser(null);
-            setLoggedInAccount(null);
+        } catch (error: any) {
+            console.log('Failed to load profile', error);
+            // Only clear session if it's a 401 Unauthorized error
+            // This prevents logging out on network errors or server downtime
+            if (error.response?.status === 401) {
+                setCurrentUser(null);
+                setLoggedInAccount(null);
+                eraseCookie('user');
+                accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+            }
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     // Initial load
-    // We using useEffect to load profile on mount
-
-
     useEffect(() => {
         loadProfile();
-    }, []);
+    }, [loadProfile]);
 
     const register = async (email: string, password: string, values: RegisterForm) => {
         try {
@@ -226,15 +248,23 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     };
 
     const logout = async (): Promise<void> => {
-
         try {
             setLoading(true);
             await AuthService.logout();
             setCurrentUser(null);
             setLoggedInAccount(null);
+            eraseCookie('user');
+            // Clear account related cache
+            accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
             router.push('/');
         } catch (error) {
             console.error('Logout error', error);
+            // Clear local state anyway on failure
+            setCurrentUser(null);
+            setLoggedInAccount(null);
+            eraseCookie('user');
+            accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+            router.push('/');
         } finally {
             setLoading(false);
         }
@@ -254,7 +284,8 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         verifyResetCode,
         confirmResetPassword,
         sendEmailVerification,
-        notification
+        notification,
+        refreshProfile: loadProfile
     };
 
     return (

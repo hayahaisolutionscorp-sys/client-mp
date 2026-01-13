@@ -61,3 +61,5 @@ export const WEBHOOKS_API = `${BASE_URL}/webhooks`;
 export const RATE_TABLES_API = `${BASE_URL}/rate-tables`;
 export const RATE_TABLE_ROWS_API = `${BASE_URL}/rate-table-rows`;
 export const SEAT_PLAN_API = `${BASE_URL}/seat-plans`;
+
+export const PROFILES_API = `${BASE_URL}/profiles`;
