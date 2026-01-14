@@ -6,12 +6,12 @@ export interface IDependent {
   first_name: string;
   last_name: string;
   birthday: string;
-  gender: string;
+  sex: string;
   relationship: string;
   nationality: string;
   occupation: string;
   civil_status: string;
-  mobile_number: string;
+  phone: string;
   address: string;
   email?: string;
   category: string;
@@ -33,22 +33,28 @@ export interface IVerification {
   front_image_url: string;
   back_image_url: string;
   selfie_url: string;
-  rejection_reason?: string;
-  reviewed_at?: string;
-  created_at?: string;
-  updated_at?: string;
+  user_id: string;
+  dependent_id: string | null;
+  is_latest: boolean;
+  attempt_number: number;
+  requires_manual_approval: boolean;
+  review_notes: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  created_at: string;
+  updated_at: string | null;
 }
 
 export interface CreateDependentDto {
   first_name: string;
   last_name: string;
   birthday: string;
-  gender: string;
+  sex: string;
   relationship: string;
   nationality: string;
   occupation: string;
   civil_status: string;
-  mobile_number: string;
+  phone: string;
   address: string;
   email?: string;
   category: string;
@@ -58,12 +64,12 @@ export interface UpdateDependentDto {
   first_name?: string;
   last_name?: string;
   birthday?: string;
-  gender?: string;
+  sex?: string;
   relationship?: string;
   nationality?: string;
   occupation?: string;
   civil_status?: string;
-  mobile_number?: string;
+  phone?: string;
   address?: string;
   email?: string;
   category?: string;

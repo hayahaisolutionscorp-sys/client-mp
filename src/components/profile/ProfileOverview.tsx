@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/Button"
 import { Shield, ShieldCheck, AlertCircle, Users, ExternalLink, ArrowRight } from "lucide-react"
 import { IDependent, IVerification } from "@/models"
 import { cn } from "@/lib/utils"
+import { getStatusBadge, getStatusVariant, VerificationStatus } from "@/utils/verification/statusHelpers"
 
 interface ProfileOverviewProps {
-    verificationStatus: 'unverified' | 'pending' | 'verified';
+    verificationStatus: VerificationStatus;
     verificationDetails?: IVerification[];
     dependents: IDependent[];
     onTabChange: (tab: string) => void;
@@ -21,19 +22,6 @@ export default function ProfileOverview({
     onTabChange 
 }: ProfileOverviewProps) {
     
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case 'verified':
-            case 'approved':
-                return { label: "Verified", className: "bg-green-500 text-white", icon: <ShieldCheck className="h-3 w-3 mr-1" /> };
-            case 'pending':
-            case 'under_review':
-                return { label: "Pending", className: "bg-yellow-500 text-white", icon: <AlertCircle className="h-3 w-3 mr-1" /> };
-            default:
-                return { label: "Unverified", className: "bg-gray-500 text-white", icon: <Shield className="h-3 w-3 mr-1" /> };
-        }
-    };
-
     const accountStatus = getStatusBadge(verificationStatus);
 
     return (
@@ -46,7 +34,9 @@ export default function ProfileOverview({
                             <CardTitle className="text-lg">Account Verification</CardTitle>
                             <CardDescription>Your current identity status</CardDescription>
                         </div>
-                        <Badge className={cn("text-xs px-2 py-0.5", accountStatus.className)}>
+                        <Badge 
+                            variant={getStatusVariant(verificationStatus)}
+                        >
                             {accountStatus.icon}
                             {accountStatus.label}
                         </Badge>
@@ -70,7 +60,7 @@ export default function ProfileOverview({
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                <p className="text-sm text-muted-foreground">Verify your identity to unlock special discounts on ferry bookings.</p>
+                                <p className="text-sm text-muted-foreground">Verify your identity for faster check-ins and a smoother travel experience.</p>
                                 <Button variant="outline" size="sm" className="w-full">
                                     Get Verified
                                 </Button>
@@ -98,7 +88,9 @@ export default function ProfileOverview({
                                         {dependents.slice(0, 3).map((dep) => (
                                             <div key={dep.id} className="flex items-center justify-between text-sm">
                                                 <span className="font-medium">{dep.first_name} {dep.last_name}</span>
-                                                <Badge variant="outline" className={cn("text-[10px] h-5", getStatusBadge(dep.verificationStatus || 'unverified').className.replace('text-white', 'border-transparent text-white'))}>
+                                                <Badge 
+                                                    variant={getStatusVariant(dep.verificationStatus || 'unverified')}
+                                                >
                                                     {getStatusBadge(dep.verificationStatus || 'unverified').label}
                                                 </Badge>
                                             </div>
@@ -133,7 +125,7 @@ export default function ProfileOverview({
                     <div className="space-y-1">
                         <p className="text-sm font-medium text-slate-900">Why verify your account?</p>
                         <p className="text-xs text-slate-600 leading-relaxed">
-                            Verified passengers and dependents enjoy special discounted rates (Students, Seniors, PWD) and faster check-in at ports. 
+                            Verified passengers and dependents enjoy faster check-ins at ports and a smoother boarding process. 
                             Your data is securely stored and used only for terminal fee and boarding requirements.
                         </p>
                     </div>

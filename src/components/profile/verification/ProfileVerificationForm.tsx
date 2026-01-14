@@ -2,14 +2,14 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/Select"
-import { Input } from "../ui/Input"
-import { Button } from "../ui/Button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
+import { Input } from "@/components/ui/Input"
+import { Button } from "@/components/ui/Button"
 import { ImageIcon, Loader2, Camera, User, CheckCircle2, X, AlertCircle } from "lucide-react"
 import Image from "next/image"
 import { useAuth } from "@/contexts/AuthContexts"
 import { requestVerification } from "@/services"
-import CameraCapture from "./CameraCapture"
+import CameraCapture from "@/components/profile/verification/CameraCapture"
 import { UploadService } from "@/services/upload.service"
 
 const steps = [

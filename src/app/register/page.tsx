@@ -47,7 +47,7 @@ export default function RegisterPage() {
     agreement: false,
     occupation: "Unemployed",
     civilStatus: "Single",
-    mobile_number: "",
+    phone: "+63",
     emailConsent: false
   })
 
@@ -57,6 +57,25 @@ export default function RegisterPage() {
       ...prev,
       [name]: value,
     }))
+  }
+
+  const handlePhoneChange = (value: string) => {
+    // Always ensure it starts with +63
+    if (!value.startsWith('+63')) {
+      value = '+63';
+    }
+    
+    // Remove any non-digit characters after +63
+    const prefix = '+63';
+    const digitsOnly = value.slice(3).replace(/\D/g, '');
+    
+    // Limit to 10 digits after +63 (total 13 characters)
+    const limitedDigits = digitsOnly.slice(0, 10);
+    
+    setFormData(prev => ({
+      ...prev,
+      phone: prefix + limitedDigits
+    }));
   }
 
   const handleNext = (e: React.FormEvent) => {
@@ -369,16 +388,18 @@ export default function RegisterPage() {
               </div>
              </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium">Mobile Number</div>
+                <div className="text-sm font-medium">Phone Number</div>
                 <Input
-                  name="mobile_number"
-                  placeholder="+639123456789"
-                  value={formData.mobile_number}
-                  onChange={handleInputChange}
+                  name="phone"
+                  placeholder="+639171234567"
+                  value={formData.phone || '+63'}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
                   required
-                  className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.mobile_number ? "border-red-500" : ""}`}
+                  maxLength={13}
+                  className={validationErrors.phone ? "border-red-500" : ""}
+
                 />
-                {validationErrors.mobile_number && <p className="text-xs text-red-500">{validationErrors.mobile_number}</p>}
+                {validationErrors.phone && <p className="text-xs text-red-500">{validationErrors.phone}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Address</div>

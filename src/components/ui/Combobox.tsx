@@ -23,15 +23,25 @@ const Combobox = ({
   values,
   placeholder = "Select value...",
   defaultValue = "",
+  value: externalValue,
   onChange,
 }: {
   values: { value: string; label: string }[];
   placeholder?: string;
   defaultValue?: string;
+  value?: string;
   onChange?: (selectedValue: string) => void;
 }) => {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState(defaultValue);
+  const [value, setValue] = React.useState(externalValue || defaultValue);
+
+  React.useEffect(() => {
+    if (externalValue !== undefined) {
+      setValue(externalValue);
+    } else if (defaultValue !== undefined) {
+      setValue(defaultValue);
+    }
+  }, [externalValue, defaultValue]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -11,7 +11,7 @@ export function mapPassengerToDto(values: RegisterForm): IPassenger {
     civilStatus,
     birthday,
     address,
-    mobile_number,
+    phone,
     nationality,
   } = values;
 
@@ -24,7 +24,7 @@ export function mapPassengerToDto(values: RegisterForm): IPassenger {
     civilStatus,
     birthdayIso: new Date(birthday).toISOString(),
     address,
-    mobile_number,
+    phone,
     nationality,
   };
 }
@@ -41,14 +41,12 @@ export async function updatePassenger(
       address: passengerData.address,
       nationality: passengerData.nationality,
       occupation: passengerData.occupation,
-      mobile_number: passengerData.mobile_number,
+      phone: passengerData.phone,
       civilStatus: passengerData.civilStatus,
       profile_picture_url: passengerData.profile_picture_url
     };
 
     const { data } = await axios.patch(`${AUTH_API}/me`, payload);
-
-    console.log("updated: ", data);
 
     return data.data.passenger;
   } catch (e) {

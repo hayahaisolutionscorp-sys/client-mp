@@ -63,6 +63,6 @@ export interface RegisterForm {
   birthday: string;
   address: string;
   nationality: string;
-  mobile_number: string;
+  phone: string;
   emailConsent: boolean;
 }

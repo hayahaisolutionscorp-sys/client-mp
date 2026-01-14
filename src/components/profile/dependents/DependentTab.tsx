@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/Button"
 import {
     Card,
@@ -11,21 +11,39 @@ import {
 } from "@/components/ui/Card"
 import { Plus, Users, Check, Shield } from "lucide-react"
 import { IDependent, CreateDependentDto } from "@/models"
-import DependentForm from "@/components/profile/CreateDependentForm"
-import DependentCard from "@/components/profile/DependentCard"
-import DependentSkeleton from "@/components/profile/DependentSkeleton"
+import DependentForm from "@/components/profile/dependents/CreateDependentForm"
+import DependentCard from "@/components/profile/dependents/DependentCard"
+import DependentSkeleton from "@/components/profile/dependents/DependentSkeleton"
+import { getDependentsWithVerification } from "@/services"
 
 interface DependentComponentProps {
     userId: string;
-    dependents: IDependent[];
-    onRefresh: () => void;
     onRequestVerification: (dependent: IDependent) => void;
 }
 
-export default function DependentTab({ userId, dependents, onRefresh, onRequestVerification }: DependentComponentProps) {
+export default function DependentTab({ userId, onRequestVerification }: DependentComponentProps) {
     const [showAddForm, setShowAddForm] = useState(false);
     const [showAddSuccessPrompt, setShowAddSuccessPrompt] = useState(false);
     const [lastAddedDependent, setLastAddedDependent] = useState<IDependent | undefined>();
+    const [dependents, setDependents] = useState<IDependent[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const refreshDependents = async () => {
+        setIsLoading(true);
+
+        try {
+            const dependents = await getDependentsWithVerification(userId);
+            setDependents(dependents);
+        } catch (error) {
+            console.error("Error fetching dependents:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        refreshDependents();
+    }, [userId]);
 
     const handleAddDependent = () => {
         setShowAddForm(true);
@@ -35,7 +53,7 @@ export default function DependentTab({ userId, dependents, onRefresh, onRequestV
         setLastAddedDependent(created);
         setShowAddForm(false);
         setShowAddSuccessPrompt(true);
-        onRefresh();
+        refreshDependents();
     };
 
     const handleAddFormCancel = () => {
@@ -75,37 +93,44 @@ export default function DependentTab({ userId, dependents, onRefresh, onRequestV
                     </Button>
                 </CardHeader>
                 <CardContent>
-                    {dependents.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground space-y-3">
-                            <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                                <Users className="h-6 w-6 text-gray-400" />
-                            </div>
-                            <p>You haven't saved any dependents yet.</p>
-                            <p className="text-xs">Saving frequent travelers makes booking ferry tickets much faster!</p>
-                            <Button variant="outline" className="mt-4" onClick={handleAddDependent}>
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Your First Dependent
-                            </Button>
+                    {isLoading ? (
+                        <div className="flex flex-col gap-4">
+                            <DependentSkeleton />
+                            <DependentSkeleton />
+                            <DependentSkeleton />
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-4">
-                            {dependents.map((dependent) => (
-                                <DependentCard
-                                    key={dependent.id}
-                                    dependent={dependent}
-                                    onRefresh={onRefresh}
-                                    onRequestVerification={() => onRequestVerification(dependent)}
-                                />
-                            ))}
-                        </div>
-                    )}
+                        dependents.length === 0 ? (
+                            <div className="text-center py-12 text-muted-foreground space-y-3">
+                                <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                                    <Users className="h-6 w-6 text-gray-400" />
+                                </div>
+                                <p>You haven't saved any dependents yet.</p>
+                                <p className="text-xs">Saving frequent travelers makes booking ferry tickets much faster!</p>
+                                <Button variant="outline" className="mt-4" onClick={handleAddDependent}>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Your First Dependent
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-4">
+                                {dependents.map((dependent) => (
+                                    <DependentCard
+                                        key={dependent.id}
+                                        dependent={dependent}
+                                        onRefresh={refreshDependents}
+                                        onRequestVerification={() => onRequestVerification(dependent)}
+                                    />
+                                ))}
+                            </div>
+                        ))}
                 </CardContent>
             </Card>
 
             {/* Modal for Adding New Dependent */}
             {showAddForm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-                    <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <Card className="no-scrollbar w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                         <CardContent className="p-0">
                             <DependentForm
                                 userId={userId}
@@ -128,7 +153,7 @@ export default function DependentTab({ userId, dependents, onRefresh, onRequestV
                             <CardTitle className="text-green-700">Dependent Added!</CardTitle>
                             <CardDescription>
                                 <strong>{lastAddedDependent.first_name} {lastAddedDependent.last_name}</strong> has been added successfully.
-                                Would you like to verify their identity for discounts?
+                                Would you like to verify their identity for faster check-ins?
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-col gap-3 pt-4">

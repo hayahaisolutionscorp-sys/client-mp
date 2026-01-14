@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { cn } from "@/lib/utils"
-import { AuthService } from "@/services/auth.service"
 import { SuccessModal } from "@/components/ui/SuccessModal"
+import { AuthService } from "@/services/auth.service"
 
 export default function SecuritySettingsForm() {
     const [passwordData, setPasswordData] = useState({
@@ -18,6 +18,7 @@ export default function SecuritySettingsForm() {
     const [passwordLoading, setPasswordLoading] = useState(false);
     const [passwordStatus, setPasswordStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -26,12 +27,14 @@ export default function SecuritySettingsForm() {
                    passwordData.newPassword === passwordData.confirmPassword;
 
     const hasNoChanges = !passwordData.currentPassword && 
-                        !passwordData.newPassword && 
-                        !passwordData.confirmPassword;
+                         !passwordData.newPassword && 
+                         !passwordData.confirmPassword;
 
-    const handleChangePassword = async (e: React.FormEvent) => {
-        e.preventDefault();
-        
+    const updatePasswordData = (field: string, value: string) => {
+        setPasswordData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleChangePassword = async () => {
         if (passwordData.newPassword !== passwordData.confirmPassword) {
             setPasswordStatus({ type: 'error', message: "Passwords don't match" });
             return;
@@ -58,6 +61,11 @@ export default function SecuritySettingsForm() {
         }
     };
 
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        handleChangePassword();
+    };
+
     return (
         <Card className="border-none shadow-none bg-transparent">
             <CardHeader className="px-0 pb-7">
@@ -65,7 +73,7 @@ export default function SecuritySettingsForm() {
                 <CardDescription>Manage your account security and password.</CardDescription>
             </CardHeader>
             <CardContent className="px-0 space-y-6">
-                <form onSubmit={handleChangePassword} className="max-w-md space-y-4">
+                <form onSubmit={handleSubmit} className="max-w-md space-y-4">
                     {passwordStatus && passwordStatus.type === 'error' && (
                         <div className="p-3 rounded-md text-sm bg-red-50 text-red-700 border border-red-200">
                             {passwordStatus.message}
@@ -78,7 +86,7 @@ export default function SecuritySettingsForm() {
                                 type={showCurrentPassword ? "text" : "password"}
                                 required
                                 value={passwordData.currentPassword}
-                                onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                                onChange={(e) => updatePasswordData('currentPassword', e.target.value)}
                                 className="pr-10"
                             />
                             <button
@@ -97,7 +105,7 @@ export default function SecuritySettingsForm() {
                                 type={showNewPassword ? "text" : "password"}
                                 required
                                 value={passwordData.newPassword}
-                                onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                                onChange={(e) => updatePasswordData('newPassword', e.target.value)}
                                 className="pr-10"
                             />
                             <button
@@ -125,7 +133,7 @@ export default function SecuritySettingsForm() {
                                 required
                                 className={cn(isMatch && "border-green-500 focus-visible:ring-green-500", "pr-10")}
                                 value={passwordData.confirmPassword}
-                                onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                                onChange={(e) => updatePasswordData('confirmPassword', e.target.value)}
                             />
                             <button
                                 type="button"

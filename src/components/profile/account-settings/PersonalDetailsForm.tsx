@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { parseISO, isValid } from "date-fns"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
@@ -8,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import BirthDatePicker from "@/components/ui/BirthDatePicker"
 import Combobox from "@/components/ui/Combobox"
 import { NATIONALITIES } from "constants/default"
-import { parseISO, isValid } from "date-fns"
 import { IPassenger } from "@/models"
 import { updatePassenger } from "@/services"
 import { SuccessModal } from "@/components/ui/SuccessModal"
@@ -20,7 +20,7 @@ interface PersonalDetailsFormProps {
 }
 
 export default function PersonalDetailsForm({ passenger, email, onUpdate }: PersonalDetailsFormProps) {
-    const [isUploading, setIsUploading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState<Partial<IPassenger>>(passenger || {});
     const [error, setError] = useState<string | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -29,11 +29,10 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
         if (passenger) {
             setFormData({
                 ...passenger,
-                // Ensure mobile number always has +63 prefix
-                mobile_number: passenger.mobile_number && passenger.mobile_number.startsWith('+63') 
-                    ? passenger.mobile_number 
-                    : passenger.mobile_number 
-                        ? '+63' + passenger.mobile_number.replace(/^\+63/, '').replace(/\D/g, '').slice(0, 10)
+                phone: passenger.phone && passenger.phone.startsWith('+63') 
+                    ? passenger.phone 
+                    : passenger.phone 
+                        ? '+63' + passenger.phone.replace(/^\+63/, '').replace(/\D/g, '').slice(0, 10)
                         : ''
             });
         }
@@ -44,7 +43,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
         
         const fieldsToCompare: (keyof IPassenger)[] = [
             'firstName', 'lastName', 'sex', 'birthdayIso', 
-            'nationality', 'mobile_number', 'civilStatus', 'address'
+            'nationality', 'phone', 'civilStatus', 'address'
         ];
 
         return fieldsToCompare.every(field => {
@@ -61,22 +60,17 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
         }));
     };
 
-    const handleMobileChange = (value: string) => {
-        // Always ensure it starts with +63
+    const handlePhoneChange = (value: string) => {
         if (!value.startsWith('+63')) {
             value = '+63';
         }
-        
-        // Remove any non-digit characters after +63
         const prefix = '+63';
         const digitsOnly = value.slice(3).replace(/\D/g, '');
-        
-        // Limit to 10 digits after +63 (total 13 characters)
         const limitedDigits = digitsOnly.slice(0, 10);
         
         setFormData(prev => ({
             ...prev,
-            mobile_number: prefix + limitedDigits
+            phone: prefix + limitedDigits
         }));
     };
 
@@ -92,19 +86,19 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
             !formData.birthdayIso ||
             !formData.nationality
         ) {
-            setError("All fields except Mobile Number are required.");
+            setError("All fields except Phone Number are required.");
             return;
         }
 
-        if (formData.mobile_number) {
-            const mobileRegex = /^\+63\d{10}$/;
-            if (!mobileRegex.test(formData.mobile_number)) {
-                setError("Mobile number must start with +63 and be 13 characters long (e.g., +639171234567).");
+        if (formData.phone) {
+            const phoneRegex = /^\+63\d{10}$/;
+            if (!phoneRegex.test(formData.phone)) {
+                setError("Phone number must start with +63 and be 13 characters long.");
                 return;
             }
         }
 
-        setIsUploading(true);
+        setIsSaving(true);
         try {
             setError(null);
             const updatedPassenger = await updatePassenger(formData);
@@ -116,7 +110,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
             console.error('Failed to update personal details:', err);
             setError(err.response?.data?.message || err.message || 'An unexpected error occurred while saving.');
         } finally {
-            setIsUploading(false);
+            setIsSaving(false);
         }
     };
 
@@ -164,6 +158,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Sex <span className="text-red-500">*</span></label>
+                            <span className="sr-only">Sex selection</span>
                             <Select
                                 value={formData.sex || ''}
                                 onValueChange={(value) => handleInputChange('sex', value)}
@@ -201,10 +196,10 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Mobile Number</label>
+                            <label className="text-sm font-medium">Phone Number</label>
                             <Input
-                                value={formData.mobile_number || '+63'}
-                                onChange={(e) => handleMobileChange(e.target.value)}
+                                value={formData.phone || '+63'}
+                                onChange={(e) => handlePhoneChange(e.target.value)}
                                 placeholder="+639171234567"
                                 maxLength={13}
                             />
@@ -237,8 +232,8 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                         </div>
                     </div>
                     <div className="flex justify-end pt-4">
-                        <Button type="submit" disabled={isUploading || hasNoChanges}>
-                            {isUploading ? 'Saving...' : 'Save Changes'}
+                        <Button type="submit" disabled={isSaving || hasNoChanges}>
+                            {isSaving ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>
                 </form>
