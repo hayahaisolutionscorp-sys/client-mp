@@ -293,8 +293,10 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             {children}
             {notification && (
                 <div
-                    className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-opacity duration-300 ${notification?.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-black'
-                        }`}
+                    className="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-opacity duration-300 text-white"
+                    style={{
+                        backgroundColor: notification.type === 'success' ? '#22c55e' : '#ef4444'
+                    }}
                 >
                     {notification?.message}
                 </div>

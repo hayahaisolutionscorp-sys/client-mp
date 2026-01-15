@@ -24,7 +24,9 @@ interface DependentComponentProps {
 export default function DependentTab({ userId, onRequestVerification }: DependentComponentProps) {
     const [showAddForm, setShowAddForm] = useState(false);
     const [showAddSuccessPrompt, setShowAddSuccessPrompt] = useState(false);
+    const [showUpdateSuccessPrompt, setShowUpdateSuccessPrompt] = useState(false);
     const [lastAddedDependent, setLastAddedDependent] = useState<IDependent | undefined>();
+    const [lastUpdatedDependent, setLastUpdatedDependent] = useState<IDependent | undefined>();
     const [dependents, setDependents] = useState<IDependent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -79,6 +81,17 @@ export default function DependentTab({ userId, onRequestVerification }: Dependen
         setLastAddedDependent(undefined);
     };
 
+    const handleUpdateSuccess = (updated: IDependent) => {
+        setLastUpdatedDependent(updated);
+        setShowUpdateSuccessPrompt(true);
+        refreshDependents();
+    };
+
+    const handleUpdateSuccessDone = () => {
+        setShowUpdateSuccessPrompt(false);
+        setLastUpdatedDependent(undefined);
+    };
+
     return (
         <div>
             <Card>
@@ -120,6 +133,7 @@ export default function DependentTab({ userId, onRequestVerification }: Dependen
                                         dependent={dependent}
                                         onRefresh={refreshDependents}
                                         onRequestVerification={() => onRequestVerification(dependent)}
+                                        onUpdateSuccess={handleUpdateSuccess}
                                     />
                                 ))}
                             </div>
@@ -166,6 +180,27 @@ export default function DependentTab({ userId, onRequestVerification }: Dependen
                                 Add Another Dependent
                             </Button>
                             <Button onClick={handleAddSuccessDone}>
+                                Done
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            {showUpdateSuccessPrompt && lastUpdatedDependent && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                    <Card className="w-full max-w-md">
+                        <CardHeader className="text-center">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Check className="h-8 w-8 text-green-600" />
+                            </div>
+                            <CardTitle className="text-green-700">Updated Successfully!</CardTitle>
+                            <CardDescription>
+                                <strong>{lastUpdatedDependent.first_name} {lastUpdatedDependent.last_name}</strong>'s information has been updated.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex justify-center pt-4">
+                            <Button onClick={handleUpdateSuccessDone} className="w-full">
                                 Done
                             </Button>
                         </CardContent>

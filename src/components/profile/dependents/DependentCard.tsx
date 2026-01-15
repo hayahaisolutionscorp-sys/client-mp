@@ -27,6 +27,7 @@ interface DependentCardProps {
     dependent: IDependent;
     onRequestVerification: (dependent: IDependent) => void;
     onRefresh: () => void;
+    onUpdateSuccess: (dependent: IDependent) => void;
 }
 
 const calculateAge = (birthday: string): number => {
@@ -51,7 +52,8 @@ const formatDate = (dateString: string): string => {
 export default function DependentCard({ 
     dependent, 
     onRequestVerification,
-    onRefresh
+    onRefresh,
+    onUpdateSuccess
 }: DependentCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
@@ -70,9 +72,9 @@ export default function DependentCard({
     
     const canResubmitIfStuck = (status === 'pending' || status === 'under_review') && !isUnderCooldown;
 
-    const handleUpdateSuccess = () => {
+    const handleUpdateSuccess = (updated: IDependent) => {
         setShowEditForm(false);
-        onRefresh();
+        onUpdateSuccess(updated);
     };
 
     const age = calculateAge(dependent.birthday);
