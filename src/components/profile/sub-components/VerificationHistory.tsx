@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { cn } from '@/lib/utils'
 import { IVerification } from '@/models'
 import { getStatusBadge, getStatusVariant, VerificationStatus } from '@/utils/verification/statusHelpers'
+import { useThemeSettings } from "@/hooks/theme-settings"
 
 interface VerificationHistoryProps {
     verifications: IVerification[];
@@ -18,6 +19,9 @@ export const VerificationHistory: React.FC<VerificationHistoryProps> = ({
     title = "Verification History",
     maxHeight = "400px"
 }) => {
+    const themeSettings = useThemeSettings();
+    const primaryColor = themeSettings?.primary || '#2563eb';
+    
     if (!verifications || verifications.length === 0) return null;
 
     const formatDate = (dateString: string): string => {
@@ -31,7 +35,7 @@ export const VerificationHistory: React.FC<VerificationHistoryProps> = ({
     return (
         <div className="mt-6 pt-6 border-t border-slate-100">
             <div className="flex items-center gap-2 mb-6 text-slate-900">
-                <History className="h-4 w-4 text-blue-600" />
+                <History className="h-4 w-4" style={{ color: primaryColor }} />
                 <h3 className="text-sm font-semibold">{title}</h3>
             </div>
             <div className={cn("space-y-3 pr-2 no-scrollbar overflow-y-auto")} style={{ maxHeight }}>

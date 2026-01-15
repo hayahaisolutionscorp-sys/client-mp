@@ -30,14 +30,11 @@ export function ForgotPasswordModal({ isOpen, onClose, email }: ForgotPasswordMo
     }
 
     setLoading(true);
-    if (!email) {
-      return false;
-    }
 
     try {
-      await forgotPassword(email);
+      await forgotPassword(emailInput);
 
-      sessionStorage.setItem('reset_email', email);
+      sessionStorage.setItem('reset_email', emailInput);
 
       // set expiry timestamp for timer
       sessionStorage.setItem('resend_otp', (Date.now() + 300000).toString());

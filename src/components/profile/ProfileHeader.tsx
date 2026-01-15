@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Badge } from "@/components/ui/Badge"
 import { cn } from "@/lib/utils"
+import { useThemeSettings } from "@/hooks/theme-settings"
 import { 
     VerificationStatus, 
     getStatusColor, 
@@ -46,8 +47,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     fileInputRef,
     onImageChange
 }) => {
+    const themeSettings = useThemeSettings();
+    const primaryColor = themeSettings?.primary || '#2563eb';
     return (
-        <Card className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border-none shadow-md">
+        <Card className="w-full border-none shadow-md" style={{
+            background: `linear-gradient(to right, ${primaryColor}15, ${primaryColor}10)`
+        }}>
             <CardContent className="pt-6">
                 <div className="flex flex-col md:flex-row items-center gap-6">
                     <div className="relative">
@@ -60,7 +65,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                             className="hidden"
                         />
                         <div
-                            className="relative h-24 w-24 md:h-32 md:w-32 rounded-full ring-4 ring-white shadow-lg overflow-hidden cursor-pointer group bg-blue-600 flex items-center justify-center"
+                            className="relative h-24 w-24 md:h-32 md:w-32 rounded-full ring-4 ring-white shadow-lg overflow-hidden cursor-pointer group flex items-center justify-center"
+                            style={{ backgroundColor: primaryColor }}
                             onClick={onImageClick}
                         >
                             {profileImageUrl ? (
@@ -87,7 +93,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                         <div className="absolute -bottom-2 -right-2">
                             <Badge 
                                 variant={getStatusVariant(verificationStatus)}
-                                className="cursor-pointer hover:opacity-90 transition-all" 
+                                className="cursor-pointer hover:opacity-90 transition-all bg-white" 
                                 onClick={onVerificationClick}
                             >
                                 {getStatusIcon(verificationStatus)}

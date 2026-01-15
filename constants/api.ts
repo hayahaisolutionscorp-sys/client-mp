@@ -37,7 +37,7 @@ export const PRESS_API = `${BASE_URL}/press`;
 export const FAQS_API = `${BASE_URL}/faqs`;
 
 
-export const UPLOAD_API = `${BASE_URL}/uploads`;
+export const UPLOAD_API = `${BASE_URL}/upload`;
 export const ACCOUNT_API = `${BASE_URL}/accounts`;
 export const VERIFICATION_API = `${BASE_URL}/verification`;
 export const AUTH_API = `${BASE_URL}/auth`;

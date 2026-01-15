@@ -107,7 +107,7 @@ export const getStatusBadge = (status: VerificationStatus): StatusConfig => {
     },
     unverified: {
       label: 'Unverified',
-      color: 'bg-gray-400 text-white',
+      color: 'bg-gray-500 text-white',
       icon: <Shield className="h-3 w-3 mr-1" />
     }
   }

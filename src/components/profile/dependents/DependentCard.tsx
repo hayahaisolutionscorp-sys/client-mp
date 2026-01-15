@@ -22,6 +22,7 @@ import DependentForm from "./CreateDependentForm"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../ui/Card"
 import { DependentDetailsGrid } from "../sub-components/DependentDetailsGrid"
 import { VerificationHistory } from "../sub-components/VerificationHistory"
+import { useThemeSettings } from "@/hooks/theme-settings"
 
 interface DependentCardProps {
     dependent: IDependent;
@@ -55,6 +56,10 @@ export default function DependentCard({
     onRefresh,
     onUpdateSuccess
 }: DependentCardProps) {
+    const themeSettings = useThemeSettings();
+    const primaryColor = themeSettings?.primary || '#2563eb';
+    const accentColor = themeSettings?.accent || '#60a5fa';
+    
     const [isExpanded, setIsExpanded] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -116,8 +121,8 @@ export default function DependentCard({
                     <div className="flex items-start justify-between gap-4">
                         {/* Left: Avatar and Info */}
                         <div className="flex items-start gap-4 flex-1">
-                            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                <User className="h-6 w-6 text-blue-600" />
+                            <div className="h-12 w-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${primaryColor}20` }}>
+                                <User className="h-6 w-6" style={{ color: primaryColor }} />
                             </div>
                             <div className="space-y-1 min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
@@ -130,7 +135,11 @@ export default function DependentCard({
                                             {statusConfig.label}
                                         </Badge>
                                         {dependent.category && (
-                                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-blue-200 text-blue-700 bg-blue-50">
+                                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4" style={{
+                                                borderColor: `${accentColor}40`,
+                                                color: primaryColor,
+                                                backgroundColor: `${primaryColor}10`
+                                            }}>
                                                 {dependent.category}
                                             </Badge>
                                         )}
@@ -158,7 +167,7 @@ export default function DependentCard({
                         {dependent.verification && status !== 'unverified' && (
                             <div className="mt-6 p-4 bg-slate-50 rounded-lg border">
                                 <p className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                                    <ShieldCheck className="h-4 w-4 text-blue-600" />
+                                    <ShieldCheck className="h-4 w-4" style={{ color: primaryColor }} />
                                     Verification Details
                                 </p>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -187,7 +196,12 @@ export default function DependentCard({
 
                                 {(status === 'pending' || status === 'under_review') && (
                                     <div className="mt-4 flex flex-col gap-3">
-                                        <div className="p-2 bg-blue-50 border border-blue-100 rounded text-[11px] text-blue-700 italic">
+                                        <div className="p-2 rounded text-[11px] italic" style={{
+                                            backgroundColor: `${primaryColor}10`,
+                                            borderColor: `${primaryColor}20`,
+                                            color: primaryColor,
+                                            border: '1px solid'
+                                        }}>
                                             {isUnderCooldown ? (
                                                 "Your request is being reviewed. Please wait at least 48 hours before resubmitting if you encounter issues."
                                             ) : (
@@ -210,7 +224,11 @@ export default function DependentCard({
                         <Button 
                             variant="outline" 
                             size="sm" 
-                            className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 h-8 font-medium transition-colors"
+                            className="h-8 font-medium transition-colors"
+                            style={{
+                                color: primaryColor,
+                                borderColor: `${accentColor}40`
+                            }}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setShowEditForm(true);
@@ -236,12 +254,10 @@ export default function DependentCard({
                     {canRequestVerification && (
                         <Button 
                             size="sm" 
-                            className={cn(
-                                "h-8 font-medium shadow-sm transition-all",
-                                status === 'rejected' 
-                                    ? "bg-red-600 hover:bg-red-700 text-white" 
-                                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                            )}
+                            className="h-8 font-medium shadow-sm transition-all text-white"
+                            style={{
+                                backgroundColor: status === 'rejected' ? '#dc2626' : primaryColor
+                            }}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onRequestVerification(dependent);
@@ -256,7 +272,11 @@ export default function DependentCard({
                         <Button 
                             size="sm" 
                             variant="outline"
-                            className="h-8 border-blue-200 text-blue-700 hover:bg-blue-50 font-medium transition-all"
+                            className="h-8 font-medium transition-all"
+                            style={{
+                                borderColor: `${accentColor}40`,
+                                color: primaryColor
+                            }}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleCancelVerification().then(() => onRequestVerification(dependent));

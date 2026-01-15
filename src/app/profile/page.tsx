@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContexts"
 import { IDependent, IVerification, IPassenger } from "@/models"
 import { VerificationStatus } from "@/utils/verification/statusHelpers"
 import { UploadService } from "@/services/upload.service"
+import { updatePassenger } from "@/services"
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -57,8 +58,6 @@ export default function ProfilePage() {
             ]);
 
             const profileData = profileResult.data;
-
-            console.log("profileData", profileData);
             
             setAccount({
                 id: loggedInAccount.id,
@@ -179,16 +178,17 @@ export default function ProfilePage() {
 
         try {
             const file = new File([croppedBlob], "profile-picture.jpg", { type: "image/jpeg" });
-            const result = await UploadService.uploadKYCProfilePicture(file);
+            const upload = await UploadService.uploadKYCProfilePicture(file);
             
             if (imagePreview && imagePreview.startsWith('blob:')) {
                 URL.revokeObjectURL(imagePreview);
             }
             
-            setImagePreview(URL.createObjectURL(croppedBlob));
+            await updatePassenger({ profile_picture_url: upload.url });
+            setImagePreview(upload.url);
             fetchProfileData();
-        } catch (error) {
-            console.error("Upload failed:", error);
+        } catch (error: any) {
+            console.error("Updating profile picture failed:", error.message);
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) {

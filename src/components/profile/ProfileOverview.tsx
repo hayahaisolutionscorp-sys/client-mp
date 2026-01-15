@@ -7,6 +7,7 @@ import { Shield, ShieldCheck, AlertCircle, Users, ExternalLink, ArrowRight } fro
 import { IDependent, IVerification } from "@/models"
 import { cn } from "@/lib/utils"
 import { getStatusBadge, getStatusVariant, VerificationStatus } from "@/utils/verification/statusHelpers"
+import { useThemeSettings } from "@/hooks/theme-settings"
 
 interface ProfileOverviewProps {
     verificationStatus: VerificationStatus;
@@ -21,6 +22,8 @@ export default function ProfileOverview({
     dependents,
     onTabChange 
 }: ProfileOverviewProps) {
+    const themeSettings = useThemeSettings();
+    const primaryColor = themeSettings?.primary || '#2563eb';
     
     const accountStatus = getStatusBadge(verificationStatus);
 
@@ -54,7 +57,7 @@ export default function ProfileOverview({
                                         <p className="text-sm font-medium">{verificationDetails[0].id_number}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center text-blue-600 text-sm font-medium group-hover:underline">
+                                <div className="flex items-center text-sm font-medium group-hover:underline" style={{ color: primaryColor }}>
                                     View verification details <ArrowRight className="ml-1 h-3 w-3" />
                                 </div>
                             </div>
@@ -76,8 +79,8 @@ export default function ProfileOverview({
                             <CardTitle className="text-lg">Dependents</CardTitle>
                             <CardDescription>Travel companions managed by you</CardDescription>
                         </div>
-                        <div className="h-8 w-8 bg-blue-50 rounded-full flex items-center justify-center">
-                            <Users className="h-4 w-4 text-blue-600" />
+                        <div className="h-8 w-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${primaryColor}20` }}>
+                            <Users className="h-4 w-4" style={{ color: primaryColor }} />
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -99,7 +102,7 @@ export default function ProfileOverview({
                                             <p className="text-xs text-muted-foreground">and {dependents.length - 3} more...</p>
                                         )}
                                     </div>
-                                    <div className="flex items-center text-blue-600 text-sm font-medium group-hover:underline">
+                                    <div className="flex items-center text-sm font-medium group-hover:underline" style={{ color: primaryColor }}>
                                         Manage all dependents <ArrowRight className="ml-1 h-3 w-3" />
                                     </div>
                                 </>
@@ -120,7 +123,7 @@ export default function ProfileOverview({
             <Card className="bg-slate-50 border-slate-200">
                 <CardContent className="p-4 flex items-start gap-3">
                     <div className="mt-0.5">
-                        <AlertCircle className="h-5 w-5 text-blue-500" />
+                        <AlertCircle className="h-5 w-5" style={{ color: primaryColor }} />
                     </div>
                     <div className="space-y-1">
                         <p className="text-sm font-medium text-slate-900">Why verify your account?</p>

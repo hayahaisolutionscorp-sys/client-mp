@@ -7,7 +7,7 @@ import { IS_CLIENT } from '../config';
 export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
   try {
     if (!IS_CLIENT) {
-      console.log("isClient disabled")
+      // console.log("isClient disabled")
       return (themeSettingsData as IThemeSettings[])[0];
     }
 

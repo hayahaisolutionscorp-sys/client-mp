@@ -5,6 +5,7 @@ import { Shield, AlertCircle, ShieldCheck, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { VerificationStatus } from '@/utils/verification/statusHelpers'
+import { useThemeSettings } from "@/hooks/theme-settings"
 
 interface VerificationStatusBannerProps {
     status: VerificationStatus;
@@ -19,6 +20,9 @@ export const VerificationStatusBanner: React.FC<VerificationStatusBannerProps> =
     onResubmit,
     rejectionReason
 }) => {
+    const themeSettings = useThemeSettings();
+    const primaryColor = themeSettings?.primary || '#2563eb';
+    
     if (status === 'unverified') {
         return (
             <div className="text-center py-6 space-y-4">
@@ -48,7 +52,7 @@ export const VerificationStatusBanner: React.FC<VerificationStatusBannerProps> =
                     </Button>
                 )}
                 {isUnderCooldown && (
-                    <p className="text-[11px] text-blue-600 italic">
+                    <p className="text-[11px] italic" style={{ color: primaryColor }}>
                         Please wait at least 48 hours before resubmitting a request.
                     </p>
                 )}
@@ -79,25 +83,24 @@ export const VerificationStatusBanner: React.FC<VerificationStatusBannerProps> =
         const isUnderReview = status === 'under_review';
         return (
             <div className={cn(
-                "rounded-lg p-6 flex items-start gap-4 mb-6 border", 
-                isUnderReview ? "bg-blue-50 border-blue-200" : "bg-yellow-50 border-yellow-200"
-            )}>
+                "rounded-lg p-6 flex items-start gap-4 mb-6 border"
+            )} style={isUnderReview ? {
+                backgroundColor: `${primaryColor}10`,
+                borderColor: `${primaryColor}40`
+            } : {
+                backgroundColor: '#fef9c3',
+                borderColor: '#fde047'
+            }}>
                 {isUnderReview ? (
-                    <Shield className="h-6 w-6 text-blue-600 mt-0.5" />
+                    <Shield className="h-6 w-6 mt-0.5" style={{ color: primaryColor }} />
                 ) : (
                     <AlertCircle className="h-6 w-6 text-yellow-600 mt-0.5" />
                 )}
                 <div className="flex-1">
-                    <p className={cn(
-                        "font-semibold", 
-                        isUnderReview ? "text-blue-900" : "text-yellow-900"
-                    )}>
+                    <p className="font-semibold" style={isUnderReview ? { color: primaryColor } : { color: '#713f12' }}>
                         {isUnderReview ? "Verification Under Review" : "Verification Pending"}
                     </p>
-                    <p className={cn(
-                        "text-sm mt-1", 
-                        isUnderReview ? "text-blue-700" : "text-yellow-700"
-                    )}>
+                    <p className="text-sm mt-1" style={isUnderReview ? { color: primaryColor } : { color: '#a16207' }}>
                         {isUnderCooldown ? (
                             "We are currently reviewing your documents. This usually takes 24-48 hours. You'll be able to enjoy faster check-ins once approved."
                         ) : (
