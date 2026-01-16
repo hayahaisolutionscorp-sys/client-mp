@@ -72,6 +72,27 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isSelfieDone, setIsSelfieDone] = useState(false)
+    const [expiryDateError, setExpiryDateError] = useState("");
+
+    // Get today's date in YYYY-MM-DD format for validation
+    const getTodayDate = () => {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+    };
+
+    // Validate expiry date is after today and has valid 4-digit year
+    const isExpiryDateValid = (date: string) => {
+        if (!date) return false;
+        
+        // Check format is YYYY-MM-DD with exactly 4-digit year
+        const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+        if (!datePattern.test(date)) return false;
+        
+        const selectedDate = new Date(date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day
+        return selectedDate > today;
+    };
 
     const handleFileChange = (field: 'idFront' | 'idBack', e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null
@@ -264,8 +285,21 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                             <Input
                                 type="date"
                                 value={formData.expiryDate}
-                                onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                                min={getTodayDate()}
+                                onChange={(e) => {
+                                    const newDate = e.target.value;
+                                    setFormData({ ...formData, expiryDate: newDate });
+                                    if (newDate && !isExpiryDateValid(newDate)) {
+                                        setExpiryDateError("ID expiry date must be in the future with a valid 4-digit year");
+                                    } else {
+                                        setExpiryDateError("");
+                                    }
+                                }}
+                                className={expiryDateError ? "border-red-500" : ""}
                             />
+                            {expiryDateError && (
+                                <p className="text-xs text-red-600">{expiryDateError}</p>
+                            )}
                             <p className="text-[11px] text-slate-500 italic leading-relaxed">
                                 If your ID only shows Month and Year, you may select the 1st day or the last day of that month.
                             </p>
@@ -275,7 +309,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                     <div className="flex justify-end pt-4">
                         <Button
                             onClick={handleNext}
-                            disabled={!formData.governmentId || !formData.documentCountry || !formData.idNumber || !formData.expiryDate}
+                            disabled={!formData.governmentId || !formData.documentCountry || !formData.idNumber || !formData.expiryDate || !isExpiryDateValid(formData.expiryDate) || !!expiryDateError}
                         >
                             Next: Document Upload
                         </Button>

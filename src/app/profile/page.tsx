@@ -281,8 +281,7 @@ export default function ProfilePage() {
 
                 <TabsContent value="dependents">
                     <DependentTab 
-                        userId={loggedInAccount.id} 
-                        onRequestVerification={handleRequestVerificationForDependent} 
+                        userId={loggedInAccount.id}
                     />
                 </TabsContent>
             </Tabs>

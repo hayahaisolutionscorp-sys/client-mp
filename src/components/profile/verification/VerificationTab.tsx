@@ -11,7 +11,7 @@ import {
     CardTitle,
 } from "@/components/ui/Card"
 import Image from "next/image"
-import { cancelVerificationRequest } from "@/services"
+import { cancelVerificationRequest, getVerificationsByUser } from "@/services"
 import ProfileVerificationForm from "../verification/ProfileVerificationForm"
 import { IDependent, IVerification } from "@/models"
 import { cn } from "@/lib/utils"
@@ -38,10 +38,11 @@ interface VerificationComponentProps {
     accountId: string;
     verificationDetails?: IVerification[];
     onStatusChange?: (status: VerificationStatus) => void;
-    onRefresh?: () => void;
+    onRefresh?: () => void; // Optional now since we can handle it locally
 }
 
-export default function VerificationTab({ accountId, verificationDetails = [], onStatusChange, onRefresh }: VerificationComponentProps) {
+export default function VerificationTab({ accountId, verificationDetails: initialVerificationDetails = [], onStatusChange, onRefresh }: VerificationComponentProps) {
+    const [verificationDetails, setVerificationDetails] = useState<IVerification[]>(initialVerificationDetails);
     const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("unverified");
     const [activeDetails, setActiveDetails] = useState<VerificationDetails>({
         govId: '',
@@ -81,10 +82,27 @@ export default function VerificationTab({ accountId, verificationDetails = [], o
         }
     }, [verificationDetails]);
 
-    const handleVerificationFormSubmit = (formData: any) => {
+    // Local refresh handler
+    const refreshVerifications = async () => {
+        try {
+            const freshVerifications = await getVerificationsByUser(accountId);
+            setVerificationDetails(freshVerifications);
+            // Also call parent refresh if provided
+            onRefresh?.();
+        } catch (error) {
+            console.error("Failed to refresh verifications:", error);
+        }
+    };
+
+    const handleVerificationFormSubmit = async (formData: any) => {
         setVerificationStatus("pending");
         onStatusChange?.("pending");
-        onRefresh?.();
+        await refreshVerifications();
+        
+        // Close modal after a delay to show success message
+        setTimeout(() => {
+            setShowVerificationForm(false);
+        }, 2000);
     };
 
     const handleCancelVerification = async () => {
@@ -93,7 +111,7 @@ export default function VerificationTab({ accountId, verificationDetails = [], o
         setIsCanceling(true);
         try {
             await cancelVerificationRequest(lastVerification.id);
-            onRefresh?.();
+            await refreshVerifications();
         } catch (error) {
             console.error("Failed to cancel verification:", error);
         } finally {

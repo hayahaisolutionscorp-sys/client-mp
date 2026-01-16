@@ -79,14 +79,9 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
         
         if (
             !formData.firstName?.trim() || 
-            !formData.lastName?.trim() || 
-            !formData.address?.trim() || 
-            !formData.civilStatus ||
-            !formData.sex ||
-            !formData.birthdayIso ||
-            !formData.nationality
+            !formData.lastName?.trim()
         ) {
-            setError("All fields except Phone Number are required.");
+            setError("First Name and Last Name are required.");
             return;
         }
 
@@ -131,16 +126,6 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                 <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Email Address (Read-only)</label>
-                            <Input
-                                value={email || ''}
-                                readOnly
-                                className="bg-slate-50 text-muted-foreground"
-                            />
-                        </div>
-                        <div className="space-y-2 hidden md:block" /> {/* Spacer */}
-                        
-                        <div className="space-y-2">
                             <label className="text-sm font-medium">First Name <span className="text-red-500">*</span></label>
                             <Input
                                 value={formData.firstName || ''}
@@ -156,8 +141,28 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                                 required
                             />
                         </div>
+                        
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Sex <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-medium">Email Address <span className="text-red-500">*</span></label>
+                            <Input
+                                value={email || ''}
+                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                type="email"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Phone Number <span className="text-red-500">*</span></label>
+                            <Input
+                                value={formData.phone || '+63'}
+                                onChange={(e) => handlePhoneChange(e.target.value)}
+                                placeholder="+639171234567"
+                                maxLength={13}
+                            />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Sex</label>
                             <span className="sr-only">Sex selection</span>
                             <Select
                                 value={formData.sex || ''}
@@ -173,7 +178,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Date of Birth <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-medium">Date of Birth</label>
                             <BirthDatePicker
                                 date={formData.birthdayIso ? parseISO(formData.birthdayIso) : undefined}
                                 setDate={(dateAction) => {
@@ -187,7 +192,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Nationality <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-medium">Nationality</label>
                             <Combobox
                                 values={NATIONALITIES}
                                 defaultValue={formData.nationality || ''}
@@ -196,16 +201,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Phone Number</label>
-                            <Input
-                                value={formData.phone || '+63'}
-                                onChange={(e) => handlePhoneChange(e.target.value)}
-                                placeholder="+639171234567"
-                                maxLength={13}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Civil Status <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-medium">Civil Status</label>
                             <Select
                                 value={formData.civilStatus || ''}
                                 onValueChange={(value) => handleInputChange('civilStatus', value)}
@@ -223,11 +219,10 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             </Select>
                         </div>
                         <div className="md:col-span-2 space-y-2">
-                            <label className="text-sm font-medium">Address <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-medium">Address</label>
                             <Input
                                 value={formData.address || ''}
                                 onChange={(e) => handleInputChange('address', e.target.value)}
-                                required
                             />
                         </div>
                     </div>

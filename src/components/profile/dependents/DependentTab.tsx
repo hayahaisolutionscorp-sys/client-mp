@@ -14,14 +14,14 @@ import { IDependent, CreateDependentDto } from "@/models"
 import DependentForm from "@/components/profile/dependents/CreateDependentForm"
 import DependentCard from "@/components/profile/dependents/DependentCard"
 import DependentSkeleton from "@/components/profile/dependents/DependentSkeleton"
+import ProfileVerificationForm from "@/components/profile/verification/ProfileVerificationForm"
 import { getDependentsWithVerification } from "@/services"
 
 interface DependentComponentProps {
     userId: string;
-    onRequestVerification: (dependent: IDependent) => void;
 }
 
-export default function DependentTab({ userId, onRequestVerification }: DependentComponentProps) {
+export default function DependentTab({ userId }: DependentComponentProps) {
     const [showAddForm, setShowAddForm] = useState(false);
     const [showAddSuccessPrompt, setShowAddSuccessPrompt] = useState(false);
     const [showUpdateSuccessPrompt, setShowUpdateSuccessPrompt] = useState(false);
@@ -29,6 +29,10 @@ export default function DependentTab({ userId, onRequestVerification }: Dependen
     const [lastUpdatedDependent, setLastUpdatedDependent] = useState<IDependent | undefined>();
     const [dependents, setDependents] = useState<IDependent[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    
+    // Verification modal state
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
+    const [dependentToVerify, setDependentToVerify] = useState<IDependent | null>(null);
 
     const refreshDependents = async () => {
         setIsLoading(true);
@@ -71,7 +75,9 @@ export default function DependentTab({ userId, onRequestVerification }: Dependen
     const handleAddSuccessVerify = () => {
         setShowAddSuccessPrompt(false);
         if (lastAddedDependent) {
-            onRequestVerification(lastAddedDependent);
+            // Use local modal instead of parent callback
+            setDependentToVerify(lastAddedDependent);
+            setShowVerificationModal(true);
         }
         setLastAddedDependent(undefined);
     };
@@ -90,6 +96,28 @@ export default function DependentTab({ userId, onRequestVerification }: Dependen
     const handleUpdateSuccessDone = () => {
         setShowUpdateSuccessPrompt(false);
         setLastUpdatedDependent(undefined);
+    };
+
+    // Verification modal handlers
+    const handleRequestVerification = (dependent: IDependent) => {
+        setDependentToVerify(dependent);
+        setShowVerificationModal(true);
+    };
+
+    const handleVerificationSubmit = async (formData: any) => {
+        // Auto-refresh dependents after verification submission
+        await refreshDependents();
+        
+        // Close modal after a delay to show success message
+        setTimeout(() => {
+            setShowVerificationModal(false);
+            setDependentToVerify(null);
+        }, 2000);
+    };
+
+    const handleVerificationCancel = () => {
+        setShowVerificationModal(false);
+        setDependentToVerify(null);
     };
 
     return (
@@ -132,7 +160,7 @@ export default function DependentTab({ userId, onRequestVerification }: Dependen
                                         key={dependent.id}
                                         dependent={dependent}
                                         onRefresh={refreshDependents}
-                                        onRequestVerification={() => onRequestVerification(dependent)}
+                                        onRequestVerification={() => handleRequestVerification(dependent)}
                                         onUpdateSuccess={handleUpdateSuccess}
                                     />
                                 ))}
@@ -203,6 +231,22 @@ export default function DependentTab({ userId, onRequestVerification }: Dependen
                             <Button onClick={handleUpdateSuccessDone} className="w-full">
                                 Done
                             </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            {/* Verification Modal for Dependents */}
+            {showVerificationModal && dependentToVerify && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                    <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+                        <CardContent className="p-0">
+                            <ProfileVerificationForm
+                                onSubmit={handleVerificationSubmit}
+                                onCancel={handleVerificationCancel}
+                                dependentId={dependentToVerify.id}
+                                dependentName={`${dependentToVerify.first_name} ${dependentToVerify.last_name}`}
+                            />
                         </CardContent>
                     </Card>
                 </div>

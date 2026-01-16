@@ -340,7 +340,7 @@ export default function RegisterPage() {
                 </div>
               )}
               <div className="space-y-2">
-                <div className="text-sm font-medium">First Name</div>
+                <div className="text-sm font-medium">First Name <span className="text-red-500">*</span></div>
                 <Input
                   name="firstName"
                   placeholder="First Name"
@@ -352,7 +352,7 @@ export default function RegisterPage() {
                 {validationErrors.firstName && <p className="text-xs text-red-500">{validationErrors.firstName}</p>}
               </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium">Last Name</div>
+                <div className="text-sm font-medium">Last Name <span className="text-red-500">*</span></div>
                 <Input
                   name="lastName"
                   placeholder="Last Name"
@@ -362,6 +362,20 @@ export default function RegisterPage() {
                   className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.lastName ? "border-red-500" : ""}`}
                 />
                 {validationErrors.lastName && <p className="text-xs text-red-500">{validationErrors.lastName}</p>}
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Phone Number <span className="text-red-500">*</span></div>
+                <Input
+                  name="phone"
+                  placeholder="+639171234567"
+                  value={formData.phone || '+63'}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  required
+                  maxLength={13}
+                  className={validationErrors.phone ? "border-red-500" : ""}
+
+                />
+                {validationErrors.phone && <p className="text-xs text-red-500">{validationErrors.phone}</p>}
               </div>
                 <div className="gap-3 flex w-full">
                    <div className="space-y-2 flex-1">
@@ -388,27 +402,12 @@ export default function RegisterPage() {
               </div>
              </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium">Phone Number</div>
-                <Input
-                  name="phone"
-                  placeholder="+639171234567"
-                  value={formData.phone || '+63'}
-                  onChange={(e) => handlePhoneChange(e.target.value)}
-                  required
-                  maxLength={13}
-                  className={validationErrors.phone ? "border-red-500" : ""}
-
-                />
-                {validationErrors.phone && <p className="text-xs text-red-500">{validationErrors.phone}</p>}
-              </div>
-              <div className="space-y-2">
                 <div className="text-sm font-medium">Address</div>
                 <Input
                   name="address"
                   placeholder="Region, Province, Municipality"
                   value={formData.address}
                   onChange={handleInputChange}
-                  required
                   className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.address ? "border-red-500" : ""}`}
                 />
                 {validationErrors.address && <p className="text-xs text-red-500">{validationErrors.address}</p>}
@@ -471,7 +470,7 @@ export default function RegisterPage() {
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/login" className="text-blue-600 hover:underline">
+              <Link href="/login" className="hover:underline" style={{ color: primaryColor }}>
                 Sign in
               </Link>
             </p>
