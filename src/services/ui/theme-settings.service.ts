@@ -18,8 +18,8 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
     if (res.ok) {
       const response: IBrandingResponse = await res.json();
       return {
-        primary: response.data.colors.primary,
-        secondary: response.data.colors.secondary,
+        primary: response.data.colors.primaryColor,
+        secondary: response.data.colors.secondaryColor,
         accent: response.data.colors.accent,
         fontStyle: 'Inter'
       };
