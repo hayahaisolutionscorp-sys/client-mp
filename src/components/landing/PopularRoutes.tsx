@@ -1,11 +1,21 @@
 import PhotoGrid from '@/components/landing/photogrid/PhotoGrid';
 import { Suspense } from 'react';
 import RoutesPhotoGridSkeleton from './skeletons/RoutesPhotoGridSkeleton';
-import { getThumbnailsByShippingLineId } from '@/services';
+import { getDestinations } from '@/services/ui/destinations.service';
+
 
 export default async function PopularRoutes() {
-  const shippingLineId = parseInt(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3');
-  const routeImages = getThumbnailsByShippingLineId('Photogrid', shippingLineId);
+  const shippingLineId = 3; // Default to Ayahay
+  const routeImages = getDestinations().then(destinations =>
+    destinations.map(dest => ({
+      id: 0, // Mock ID
+      shippingLineId: shippingLineId,
+      label: dest.route,
+      filename: dest.image_url,
+      location: dest.route,
+      imageOrder: dest.display_order
+    }))
+  );
 
   return (
     <div id="Routes" className="container max-w-7xl mx-auto px-6 mt-16 sm:px-8 lg:px-10 pb-5">

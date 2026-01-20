@@ -20,9 +20,9 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         {...props}
         style={
           {
-            "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff"),
+            "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
           } as React.CSSProperties
-          }
+        }
       />
     )
   }

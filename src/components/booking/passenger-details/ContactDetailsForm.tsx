@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/Select";
 import { PassengerData } from "@/types/booking/passenger-data";
 import { ContactData } from "@/types/booking/contact-data";
+import { useThemeSettings } from "@/hooks/theme-settings"; // Added import
 
 
 interface ContactDetailsFormProps {
@@ -24,6 +25,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
   passengerDetails,
   onChange,
 }) => {
+  const themeSettings = useThemeSettings(); // Added hook call
   const [usePassengerDetails, setUsePassengerDetails] = useState(false);
   const [contactDetails, setContactDetails] = useState<ContactData>({
     firstname: "",
@@ -100,7 +102,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
   useEffect(() => {
     const validateAllFields = () => {
       const errors: { [key: string]: string } = {};
-  
+
       // Validate all fields in contactDetails
       if (!contactDetails.firstname) {
         errors.firstname = "First Name is required";
@@ -119,13 +121,13 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
       ) {
         errors.email = "Please enter a valid email address";
       }
-  
+
       // Update the errors state with all fields' errors
       setFormErrors(errors);
     };
-  
+
     validateAllFields();
-  }, [contactDetails]); 
+  }, [contactDetails]);
 
   return (
     <div className="border rounded-lg shadow-md bg-white p-6 mt-6">
@@ -136,10 +138,12 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
         </div>
         <label className="flex items-center space-x-2">
           <input
+            title="Use passenger's details"
             type="checkbox"
             checked={usePassengerDetails}
             onChange={handleCheckboxChange}
             className="h-4 w-4 border-gray-300 rounded"
+            style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
           />
           <span className="text-sm">Use passenger&apos;s details</span>
         </label>

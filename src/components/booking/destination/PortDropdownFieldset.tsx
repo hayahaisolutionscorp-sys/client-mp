@@ -104,11 +104,11 @@ const PortDropdownFieldset = ({
   };
 
   return (
-    <fieldset 
+    <fieldset
       className="border rounded-md bg-white w-full h-[55px] focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2"
       style={
         {
-          "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff"),
+          "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
         } as React.CSSProperties
       }
     >
@@ -118,14 +118,13 @@ const PortDropdownFieldset = ({
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
-          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${
-            disabled || !isDelayedEnabled ? "cursor-not-allowed" : ""
-          }`}
+          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${disabled || !isDelayedEnabled ? "cursor-not-allowed" : ""
+            }`}
           disabled={disabled || !isDelayedEnabled}
         >
-          <BiSolidShip 
+          <BiSolidShip
             className="w-5 h-5 mr-3"
-            style={{ color: themeSettings?.iconColor || "#051036" }}
+            style={{ color: themeSettings?.accent || "#051036" }}
           />
           <span className="text-customText font-natural">
             {isHydrated ? (selectedPort ? selectedPort.name : "Select Port") : "Loading..."}
@@ -141,10 +140,10 @@ const PortDropdownFieldset = ({
                 value={searchTerm}
                 onChange={handleSearch}
                 placeholder="Search port..."
-                className="w-full p-2 text-sm border border-gray-300 rounded-md focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2"
+                className="w-full p-2 text-sm border border-gray-300 rounded-md focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2 bg-white text-gray-900"
                 style={
                   {
-                    "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff"),
+                    "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
                   } as React.CSSProperties
                 }
               />
@@ -161,32 +160,31 @@ const PortDropdownFieldset = ({
                   [&::-webkit-scrollbar-track]:bg-gray-100 
                   [&::-webkit-scrollbar-thumb]:bg-[rgba(var(--bg-color),1)] 
                   [&::-webkit-scrollbar-thumb]:rounded-md"
-                style={
-                  {
-                    "--bg-color": hexToRgb(themeSettings?.backgroundColor || "#23abff"),
-                  } as React.CSSProperties
-                }
+              style={
+                {
+                  "--bg-color": hexToRgb("#FFFFFF"),
+                } as React.CSSProperties
+              }
             >
               {filteredPorts.length > 0 ? (
                 filteredPorts.map((port) => (
                   <li
                     key={port.id}
                     onClick={() => handleSelection(port)}
-                    className={`group flex items-center px-4 py-2 cursor-pointer ${
-                      selectedPort?.id === port.id 
-                        ? "bg-[rgba(var(--bg-color),0.2)]"
-                        : "hover:bg-[rgba(var(--bg-color),0.1)]"
-                    }`}
+                    className={`group flex items-center px-4 py-2 cursor-pointer ${selectedPort?.id === port.id
+                      ? "bg-[rgba(var(--bg-color),0.2)]"
+                      : "hover:bg-[rgba(var(--bg-color),0.1)]"
+                      }`}
                     style={
                       {
-                        "--bg-color": hexToRgb(themeSettings?.backgroundColor || "#23abff"),
+                        "--bg-color": hexToRgb("#FFFFFF"),
                       } as React.CSSProperties
                     }
                   >
                     <IoMdPin
                       className="w-4 h-4 mr-3 text-gray-400 group-hover:text-[rgba(var(--icon-color),1)]"
                       style={{
-                        "--icon-color": hexToRgb(themeSettings?.iconColor || "#23abff"),
+                        "--icon-color": hexToRgb(themeSettings?.accent || "#23abff"),
                         color: selectedPort?.id === port.id
                           ? "rgba(var(--icon-color),1)"
                           : "",
@@ -195,8 +193,8 @@ const PortDropdownFieldset = ({
                     <span
                       className="text-sm font-medium group-hover:text-[rgba(var(--icon-color),1)]"
                       style={{
-                        "--icon-color": hexToRgb(themeSettings?.iconColor || "#23abff"),
-                        color: selectedPort?.id === port.id 
+                        "--icon-color": hexToRgb(themeSettings?.accent || "#23abff"),
+                        color: selectedPort?.id === port.id
                           ? "rgba(var(--icon-color),1)"
                           : "",
                       } as React.CSSProperties}

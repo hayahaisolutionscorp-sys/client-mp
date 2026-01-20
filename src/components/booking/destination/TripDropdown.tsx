@@ -52,7 +52,7 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
         className="flex text-sm justify-between items-center w-full h-full px-4 py-2 bg-white border rounded-md focus:outline-none focus:border-[rgba(var(--border-color),1)] focus:border-2"
         style={
           {
-            "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff"),
+            "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
           } as React.CSSProperties
         }
       >
@@ -65,14 +65,13 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
           <ul className="py-1">
             <li
               onClick={() => handleSelection("Single Trip")}
-              className={`px-4 py-2 cursor-pointer ${
-                displayedValue === "Single Trip"
-                  ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
-                  : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
-              }`}
+              className={`px-4 py-2 cursor-pointer ${displayedValue === "Single Trip"
+                ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
+                : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
+                }`}
               style={
                 {
-                  "--bg-color": hexToRgb(themeSettings?.backgroundColor || "#23abff"),
+                  "--bg-color": hexToRgb("#FFFFFF"),
                 } as React.CSSProperties
               }
             >
@@ -80,14 +79,13 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
             </li>
             <li
               onClick={() => handleSelection("Round Trip")}
-              className={`px-4 py-2 cursor-pointer ${
-                displayedValue === "Round Trip"
-                  ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
-                  : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
-              }`}
+              className={`px-4 py-2 cursor-pointer ${displayedValue === "Round Trip"
+                ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
+                : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
+                }`}
               style={
                 {
-                  "--bg-color": hexToRgb(themeSettings?.backgroundColor || "#23abff"),
+                  "--bg-color": hexToRgb("#FFFFFF"),
                 } as React.CSSProperties
               }
             >

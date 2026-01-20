@@ -18,12 +18,12 @@ export default async function PressItem({ params }: { params: Promise<{ id: stri
 
   const formattedPressItem = {
     ...press,
-    formattedDate: press.publishedDate
-      ? new Date(press.publishedDate).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
+    formattedDate: press.publish_date
+      ? new Date(press.publish_date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
       : "",
   };
 

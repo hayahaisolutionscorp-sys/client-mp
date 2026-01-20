@@ -44,7 +44,7 @@ export default function PassengerConfirmedTripCard({ booking }: PassengerConfirm
             className="bg-[rgba(var(--bg-color),0.1)] text-[rgba(var(--bg-color),1)] rounded-full text-xs sm:text-sm font-medium px-2 py-1"
             style={
               {
-                '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+                '--bg-color': hexToRgb('#FFFFFF')
               } as React.CSSProperties
             }
           >
@@ -60,7 +60,7 @@ export default function PassengerConfirmedTripCard({ booking }: PassengerConfirm
         <div className="flex items-center gap-2 text-customText">
           <FaShip
             className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
-            style={{ color: themeSettings?.iconColor || '#23abff' }}
+            style={{ color: themeSettings?.accent || '#23abff' }}
           />
           <div className="flex flex-wrap items-center gap-1 sm:gap-2">
             <span className="text-xs sm:text-sm font-medium max-w-[120px] sm:max-w-[150px] truncate">
@@ -68,7 +68,7 @@ export default function PassengerConfirmedTripCard({ booking }: PassengerConfirm
             </span>
             <span className="px-1 sm:px-2 text-gray-400">|</span>
             <span className="text-xs sm:text-sm font-medium max-w-[80px] sm:max-w-[100px] truncate">
-              {getShipDetailsById(booking?.bookingTrips?.[tripIndex]?.trip?.shipId || 0)?.name}
+              {getShipDetailsById(booking?.bookingTrips?.[tripIndex]?.trip?.shipId || 0)?.name || booking?.bookingTrips?.[tripIndex]?.trip?.ship?.name}
             </span>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function PassengerConfirmedTripCard({ booking }: PassengerConfirm
           {booking?.bookingTrips?.[tripIndex]?.trip?.destPort?.name}
         </span>
       </div>
-    </div>
+    </div >
   );
 
   return (

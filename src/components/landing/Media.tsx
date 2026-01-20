@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import React from "react";
-import ReactPlayer from "react-player";
+import dynamic from 'next/dynamic';
+
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface MediaProps {
   src: string;
@@ -14,6 +16,8 @@ interface MediaProps {
   loop?: boolean;
   muted?: boolean;
   className?: string;
+  priority?: boolean;
+  playsInline?: boolean;
 }
 
 export default function Media({
@@ -26,9 +30,21 @@ export default function Media({
   loop = false,
   muted = false,
   className = "",
+  priority = false,
+  playsInline = false,
 }: MediaProps) {
   if (type === "image") {
-    return <Image src={src} alt={alt} layout="fill" className={className} />;
+    if (!src) return null;
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className={className}
+        priority={priority}
+        sizes="100vw"
+      />
+    );
   }
 
   if (type === "youtube") {
@@ -37,7 +53,7 @@ export default function Media({
 
   if (type === "video") {
     return (
-      <video src={src} autoPlay={autoPlay} loop={loop} muted={muted} playsInline className={className}></video>
+      <video src={src} autoPlay={autoPlay} loop={loop} muted={muted} playsInline={playsInline} className={className}></video>
     );
   }
 

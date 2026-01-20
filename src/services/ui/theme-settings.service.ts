@@ -1,37 +1,33 @@
 import { IThemeSettings } from '@/models';
+import { IBrandingResponse } from '@/models/branding.model';
 import { THEME_SETTINGS_API } from 'constants/api';
+import themeSettingsData from '@/data/theme-settings.json';
+import { IS_CLIENT } from '../config';
 
-export async function getThemeSettings(): Promise<IThemeSettings[] | undefined> {
+export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
   try {
-    const response = await fetch(THEME_SETTINGS_API);
-    
-    if (!response.ok) {
-        throw new Error(`Failed to fetch theme settings: ${response.status} ${response.statusText}`);
+    if (!IS_CLIENT) {
+      // console.log("isClient disabled")
+      return (themeSettingsData as IThemeSettings[])[0];
     }
 
-    const data: IThemeSettings[] = await response.json();
-    return data;
+    const res = await fetch(THEME_SETTINGS_API, {
+      next: { tags: ['theme-settings'], revalidate: 3600 }
+    });
 
+    if (res.ok) {
+      const response: IBrandingResponse = await res.json();
+      return {
+        primary: response.data.colors.primaryColor,
+        secondary: response.data.colors.secondaryColor,
+        accent: response.data.colors.accent,
+        fontStyle: 'Inter'
+      };
+    }
+
+    return (themeSettingsData as IThemeSettings[])[0];
   } catch (e) {
     console.error('Error fetching theme settings:', e);
-    throw e;
-  }
-}
-
-export async function getThemeSettingsByShippingLineId(
-  shippingLineId: number
-): Promise<IThemeSettings | undefined> { 
-  try {
-    const response = await fetch(`${THEME_SETTINGS_API}/${shippingLineId}`, { next: { revalidate: 3600 }});
-
-    if (!response.ok) {
-        throw new Error(`Error fetching theme settings by shipping line id: ${response.statusText}`);
-    }
-
-    const themeSettings: IThemeSettings = await response.json();
-    return themeSettings;
-
-  } catch (e) {
-    return undefined;
+    return (themeSettingsData as IThemeSettings[])[0];
   }
 }

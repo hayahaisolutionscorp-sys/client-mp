@@ -1,0 +1,14 @@
+{
+    "id": "010ba552-92dd-42b3-bffc-50952971fb84",
+    "page_id": "3ad149ca-4bd0-4794-87c7-1f7a8007ae2f",
+    "type": "get_to_know_mission",
+    "bg_type": null,
+    "bg_url": null,
+    "bg_alt": "Background of section.",
+    "title": "Mission",
+    "subtitle": null,
+    "description": "Our mission is to empower businesses in the shipping line industry to adapt to advanced technology and digitization. We aim to make it easier for businesses to manage their fleets and enhance the sea travel experience for passengers, saving them time and ensuring a hassle-free journey. tester testing test",
+    "is_active": true,
+    "created_at": "2026-01-08T03:31:28.888Z",
+    "updated_at": null
+}

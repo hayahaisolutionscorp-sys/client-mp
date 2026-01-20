@@ -57,7 +57,7 @@ export default function ContactUsForm() {
           ></Textarea>
         </div>
 
-        <Button variant="destructive" type="submit">
+        <Button variant="default" type="submit">
           Send Us <FaArrowRight />
         </Button>
       </form>

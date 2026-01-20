@@ -1,0 +1,200 @@
+[
+    {
+        "id": 9,
+        "shippingLineId": 3,
+        "name": "PERSEVERANCE",
+        "recommendedVehicleCapacity": 0,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 10,
+        "shippingLineId": 1,
+        "name": "Melrivic 2",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 13,
+        "shippingLineId": 1,
+        "name": "WaterTaxi 1",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 12,
+        "shippingLineId": 2,
+        "name": "DanCon RoRo",
+        "recommendedVehicleCapacity": 0,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 11,
+        "shippingLineId": 2,
+        "name": "Maica 7",
+        "recommendedVehicleCapacity": 15,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 1,
+        "shippingLineId": 1,
+        "name": "Melrivic 1",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 3,
+        "shippingLineId": 1,
+        "name": "Manoling 1",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 16,
+        "shippingLineId": 2,
+        "name": "Maica 8",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 4,
+        "shippingLineId": 2,
+        "name": "Maica 5",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 14,
+        "shippingLineId": 4,
+        "name": "Sunriser Fastcraft",
+        "recommendedVehicleCapacity": 5,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 15,
+        "shippingLineId": 4,
+        "name": "Sunriser LCT",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": true,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 2,
+        "shippingLineId": 1,
+        "name": "Melrivic 7",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 17,
+        "shippingLineId": 1,
+        "name": "Manoling 6",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": true,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 7,
+        "shippingLineId": 1,
+        "name": "Manoling 2",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 8,
+        "shippingLineId": 1,
+        "name": "Manoling 3",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 18,
+        "shippingLineId": 1,
+        "name": "Manoling 5",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 19,
+        "shippingLineId": 5,
+        "name": "SantaClara1",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    },
+    {
+        "id": 20,
+        "shippingLineId": 5,
+        "name": "SantaClara2",
+        "recommendedVehicleCapacity": 10,
+        "cargoRequired": false,
+        "crt": null,
+        "nrt": null,
+        "vesselCode": null,
+        "drydockCounting": null
+    }
+]

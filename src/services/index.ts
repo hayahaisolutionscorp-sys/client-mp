@@ -4,6 +4,7 @@ export * from './core';
 
 // User management
 export * from './user';
+export * from './auth.service';
 
 // Booking and payments
 export * from './booking';

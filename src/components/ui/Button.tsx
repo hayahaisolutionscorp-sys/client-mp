@@ -8,7 +8,7 @@ import { useThemeSettings } from "@/hooks/theme-settings";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
@@ -39,31 +39,32 @@ const buttonVariants = cva(
 );
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, disabled, ...props }, ref) => {
+  ({ className, variant = "default", size, asChild = false, disabled, ...props }, ref) => {
     const themeSettings = useThemeSettings();
     const Comp = asChild ? Slot : "button";
 
     // Dynamically apply theme settings colors using `style`
     const style: React.CSSProperties = {};
     if (themeSettings) {
-      if (variant === "default" && themeSettings.buttonDefaultColor) {
-        style.backgroundColor = themeSettings.buttonDefaultColor;
+      if (variant === "default" && themeSettings.primary) {
+        style.backgroundColor = themeSettings.primary;
       }
-      if (variant === "destructive" && themeSettings.buttonDestructiveColor) {
-        style.backgroundColor = themeSettings.buttonDestructiveColor;
+      if (variant === "destructive") {
+        style.backgroundColor = "#DC2626";
       }
-      if (variant === "outline" && themeSettings.buttonOutlineColor) {
-        style.borderColor = themeSettings.buttonOutlineColor;
-        style.color = themeSettings.buttonOutlineColor;
+      if (variant === "outline" && themeSettings.primary) {
+        style.borderColor = themeSettings.primary;
+        style.color = themeSettings.primary;
       }
-      if (variant === "secondary" && themeSettings.buttonSecondaryColor) {
-        style.backgroundColor = themeSettings.buttonSecondaryColor;
+      if (variant === "secondary" && themeSettings.secondary) {
+        style.backgroundColor = themeSettings.secondary;
+        style.color = "white"; // Ensure text is visible on secondary color
       }
-      if (variant === "ghost" && themeSettings.buttonGhostColor) {
-        style.color = themeSettings.buttonGhostColor;
+      if (variant === "ghost" && themeSettings.primary) {
+        style.color = themeSettings.primary;
       }
-      if (variant === "link" && themeSettings.buttonLinkColor) {
-        style.color = themeSettings.buttonLinkColor;
+      if (variant === "link" && themeSettings.primary) {
+        style.color = themeSettings.primary;
       }
     }
 
@@ -72,7 +73,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       style.backgroundColor = "gray";
       style.color = "white";
       style.opacity = "0.25";
-      style.cursor = "not-allowed"; 
+      style.cursor = "not-allowed";
     }
 
     return (

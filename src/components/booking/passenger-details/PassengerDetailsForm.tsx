@@ -131,6 +131,7 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
               checked={passenger.discountType === null}
               onChange={() => handleDiscountTypeChange(null, passenger.id, isCompanion)}
               className="w-4 h-4 cursor-pointer"
+              style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
             />
             <span className="text-sm capitalize">Regular</span>
           </label>
@@ -143,6 +144,7 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                 checked={passenger.discountType === type.discountType}
                 onChange={() => handleDiscountTypeChange(type.discountType || null, passenger.id, isCompanion)}
                 className="w-4 h-4 cursor-pointer"
+                style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
               />
               <span className="text-sm capitalize">{type.discountType}</span>
             </label>
@@ -250,6 +252,7 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                   id={`same-lastname-${companion.id}`}
                   onChange={(e) => handleChange('lastname', e.target.checked ? passenger.lastname : '', companion.id)}
                   className="mr-2 cursor-pointer"
+                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
                 />
                 <label
                   htmlFor={`same-lastname-${companion.id}`}
@@ -283,6 +286,7 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                   checked={companion.sex === 'Male'}
                   onChange={(e) => handleChange('sex', e.target.value, companion.id)}
                   className="w-4 h-4 mr-2 cursor-pointer"
+                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
                 />
                 Male
               </label>
@@ -294,6 +298,7 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                   checked={companion.sex === 'Female'}
                   onChange={(e) => handleChange('sex', e.target.value, companion.id)}
                   className="w-4 h-4 mr-2 cursor-pointer"
+                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
                 />
                 Female
               </label>
@@ -343,10 +348,10 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
               </label>
               <div className="flex items-center mt-2 sm:mt-0">
                 <input
-                  type="checkbox"
                   id={`same-address-${companion.id}`}
                   onChange={(e) => handleChange('address', e.target.checked ? passenger.address : '', companion.id)}
                   className="mr-2 cursor-pointer"
+                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
                 />
                 <label
                   htmlFor={`same-address-${companion.id}`}
@@ -462,10 +467,10 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
             </div>
           </div>
           <div className="flex items-center">
-            <GiCheckMark className="w-5 h-5 mr-1" style={{ color: themeSettings?.iconColor || '#23abff' }} />
+            <GiCheckMark className="w-5 h-5 mr-1" style={{ color: themeSettings?.accent || '#23abff' }} />
             <span
               className="text-sm sm:text-base font-semibold"
-              style={{ color: themeSettings?.iconColor || '#23abff' }}
+              style={{ color: themeSettings?.accent || '#23abff' }}
             >
               Login
             </span>
@@ -478,13 +483,13 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
           className="flex flex-col items-center border border-[rgba(var(--border-color),1)] bg-[rgba(var(--bg-color),0.05)] p-4 mb-6 rounded-md sm:flex-row"
           style={
             {
-              '--border-color': hexToRgb(themeSettings?.borderColor || '#23abff'),
-              '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+              '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
+              '--bg-color': hexToRgb('#FFFFFF')
             } as React.CSSProperties
           }
         >
           <div className="flex items-start">
-            <PiInfo className="mr-2 mt-[3px] flex-shrink-0" style={{ color: themeSettings?.iconColor || '#23abff' }} />
+            <PiInfo className="mr-2 mt-[3px] flex-shrink-0" style={{ color: themeSettings?.accent || '#23abff' }} />
             <p className="text-sm text-customText leading-relaxed">
               Use all given names and last names{' '}
               <strong className="font-semibold">exactly as they appear in your ID</strong> to avoid boarding
@@ -538,6 +543,7 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                   checked={passenger.sex === 'Male'}
                   onChange={(e) => handleChange('sex', e.target.value, passenger.id)}
                   className="w-4 h-4 mr-2 cursor-pointer"
+                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
                 />
                 Male
               </label>
@@ -549,6 +555,7 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                   checked={passenger.sex === 'Female'}
                   onChange={(e) => handleChange('sex', e.target.value, passenger.id)}
                   className="w-4 h-4 mr-2 cursor-pointer"
+                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
                 />
                 Female
               </label>
@@ -610,7 +617,9 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
         <Button variant="outline" className="border-2 w-full md:w-auto" onClick={handleAddCompanion}>
           <FiPlus className="w-4 h-4" />
           Add Companion
-          {companions.length > 0 && <Badge>{companions.length}</Badge>}
+          {companions.length > 0 && (
+            <Badge style={{ backgroundColor: themeSettings?.accent || '#23abff' }}>{companions.length}</Badge>
+          )}
         </Button>
       </div>
     </div>

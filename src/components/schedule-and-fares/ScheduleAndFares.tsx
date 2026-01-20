@@ -10,14 +10,21 @@ import ScheduleTable from './ScheduleTable';
 import { ScheduleItem } from './ScheduleItem';
 import { IShip, ITrip } from '@/models';
 
-const ScheduleAndFares = () => {
+interface ScheduleAndFaresProps {
+  srcPortId?: number;
+  destPortId?: number;
+  themeColor?: string;
+  accentColor?: string;
+}
+
+const ScheduleAndFares = ({ srcPortId, destPortId, themeColor = '#0060df', accentColor = '#23abff' }: ScheduleAndFaresProps) => {
   const [allShips, setAllShips] = useState<IShip[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const shippingLineId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '0';
+
 
   useEffect(() => {
     const fetchAllShips = async () => {
@@ -48,7 +55,7 @@ const ScheduleAndFares = () => {
           throw new Error('Invalid date format');
         }
 
-        const trips: ITrip[] = await getScheduleAndFares(selectedDate, parseInt(shippingLineId));
+        const trips: ITrip[] = await getScheduleAndFares(selectedDate, undefined, srcPortId, destPortId);
 
         const formatted = trips.map((trip) => ({
           time: `${toPhilippinesTime(trip.departureDateIso, DATE_SECONDARY_DEFAULT_FORMAT)} - (${toPhilippinesTime(
@@ -60,10 +67,10 @@ const ScheduleAndFares = () => {
           fare:
             Array.isArray(trip.availableCabins) && trip.availableCabins.length
               ? trip.availableCabins
-                  .map(
-                    (cabin) => `${cabin.cabin?.cabinType?.name ?? 'Unknown'}: ${formatCurrency(cabin.adultFare, 'Php')}`
-                  )
-                  .join(', ')
+                .map(
+                  (cabin) => `${cabin.cabin?.cabinType?.name ?? 'Unknown'}: ${formatCurrency(cabin.adultFare, 'Php')}`
+                )
+                .join(', ')
               : 'No fares available'
         }));
 
@@ -71,8 +78,7 @@ const ScheduleAndFares = () => {
       } catch (error) {
         console.error('Schedule fetch error:', {
           error,
-          selectedDate,
-          shippingLineId
+          selectedDate
         });
 
         const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
@@ -85,12 +91,12 @@ const ScheduleAndFares = () => {
     };
 
     fetchSchedule();
-  }, [selectedDate, shippingLineId, allShips]);
+  }, [selectedDate, allShips, srcPortId, destPortId]);
 
   return (
     <div className="space-y-6">
-      <div className="px-2">
-        <DateSelection onDateChange={setSelectedDate} />
+      <div className="px-2" style={{ '--primary-color': themeColor } as React.CSSProperties}>
+        <DateSelection onDateChange={setSelectedDate} accentColor={accentColor} />
       </div>
 
       {error && (

@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import FAQCategoryTabs from './FAQCategoryTabs';
-import { FAQItem } from '@/app/faq/faq.data';
+import { IFaq } from '@/models';
 import FAQItemComponent from './FAQItemComponent';
 
 interface FAQContentProps {
-  faqs: FAQItem[];
+  faqs: IFaq[];
   categories: string[];
   themeColor: string;
 }
@@ -18,7 +18,12 @@ export default function FAQContent({ faqs, categories, themeColor }: FAQContentP
 
   return (
     <>
-      <FAQCategoryTabs categories={categories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+      <FAQCategoryTabs
+        categories={categories}
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+        themeColor={themeColor}
+      />
 
       {/* FAQ Items */}
       <div className="space-y-3 md:space-y-4">

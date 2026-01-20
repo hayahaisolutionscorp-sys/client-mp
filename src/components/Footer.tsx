@@ -7,70 +7,90 @@ import Image from "next/image";
 import Link from "next/link";
 import { v4 as uuidv4 } from 'uuid';
 
-import { SHIPPING_LINE_LOGO } from "constants/storage"
-import { useShippingLineForWhiteLabel } from '@/hooks/shipping-line';
-import { getFooterSectionByShippingLineId } from "@/services";
+
+import { getContactUs, getFooterSections } from "@/services";
 import { IFooterSection } from "@/models";
+import { useThemeSettings } from "@/hooks/theme-settings";
+import { getBrandingConfig } from "@/services/ui/branding.service";
 
 const Footer = () => {
   const [footerSection, setFooterSection] = useState<IFooterSection | undefined>(undefined);
-  const shippingLineId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || "3"; // Default to Ayahay "3"
+
   const [cacheBuster, setCacheBuster] = useState("");
-  const shippingLine = useShippingLineForWhiteLabel();
+  // const shippingLine = useShippingLineForWhiteLabel();
+  const themeSettings = useThemeSettings();
 
   useEffect(() => {
     setCacheBuster(uuidv4());
   }, []);
 
   useEffect(() => {
-      const fetchHeroSection = async () => {
-        const parsedId = parseInt(shippingLineId, 10);
-        if (isNaN(parsedId)) {
-          console.error("Invalid shippingLineId:", shippingLineId);
-          return;
-        }
-    
-        const footerSection = await getFooterSectionByShippingLineId(parsedId);
-        if (footerSection) {
-          setFooterSection(footerSection);
-        }
-      };
-    
-      fetchHeroSection();
-    }, [shippingLineId])
+    const fetchFooterSection = async () => {
+      const footerSection = await getFooterSections();
+      if (footerSection) {
+        setFooterSection(footerSection);
+      }
+    };
+
+    fetchFooterSection();
+  }, []);
+
+  const [branding, setBranding] = useState<any>(null);
+  const [contactInfo, setContactInfo] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      const config = await getBrandingConfig();
+      setBranding(config);
+    };
+    const fetchContactInfo = async () => {
+      const info = await getContactUs();
+      setContactInfo(info);
+    }
+    fetchBranding();
+    fetchContactInfo();
+  }, []);
+
+  const socialLinks = {
+    facebook: contactInfo.find(c => c.type === 'facebook' && c.is_active),
+    instagram: contactInfo.find(c => c.type === 'instagram' && c.is_active),
+    twitter: contactInfo.find(c => c.type === 'twitter' && c.is_active),
+    linkedin: contactInfo.find(c => c.type === 'linkedin' && c.is_active),
+  };
+
+  const phoneNumbers = contactInfo.filter(c => c.type === 'phone' && c.is_active);
+  const emails = contactInfo.filter(c => c.type === 'email' && c.is_active);
 
   return (
     <>
-      <footer className="bg-[#13357B] text-white py-10 px-6 
-        sm:px-10 lg:pt-48"
+      <footer
+        className="bg-[#13357B] text-white py-10 px-6 sm:px-10 lg:pt-48"
+        style={{ backgroundColor: themeSettings?.primary }}
       >
         {/* Main content area */}
         <div className="flex flex-col lg:flex-row lg:justify-between gap-8">
-            
+
           {/* Logo and Tagline */}
           <div className="flex flex-col items-center mb-2 lg:mb-0 lg:items-start">
             <div
-              className={`flex justify-center items-center overflow-hidden 
-                ${(shippingLineId && shippingLineId !== "3") ? "rounded-lg bg-white p-2" : ""}`}
+              className={`flex justify-center items-center overflow-hidden`}
             >
               <Image
                 src={
-                  (shippingLineId && shippingLineId !== "3")
-                    ? `${SHIPPING_LINE_LOGO}${shippingLine?.logoFilename}?cache_buster=${cacheBuster}`
+                  branding?.logo
+                    ? branding.logo.light
                     : "/assets/images/ayahay_logo_white.png"
                 }
                 alt="Ayahay Logo"
                 width={200}
                 height={500}
-                className={`w-auto h-[100px] object-contain ${shippingLineId ? "rounded-full" : ""}`}
+                className={`w-auto h-[100px] object-contain`}
               />
             </div>
 
-            {(shippingLineId && shippingLineId === "3") && (
-              <p className="mt-4 text-center lg:text-left text-sm sm:text-base">
-                Kay Ang Pagsakay, Dapat AYAHAY!
-              </p>
-            )}
+            <p className="mt-4 text-center lg:text-left text-sm sm:text-base">
+              {branding?.slogan}
+            </p>
           </div>
 
           {/* Company Links */}
@@ -78,7 +98,7 @@ const Footer = () => {
             {(footerSection?.hasAboutUs || footerSection?.hasPress) && (
               <div>
                 <h3 className="font-semibold mb-5">Company</h3>
-                <ul className="space-y-3 text-sm sm:text-base opacity-50">
+                <ul className="space-y-3 text-sm sm:text-base opacity-80">
                   {footerSection?.hasAboutUs && (
                     <li><Link href="/about-us" className="hover:underline">About us</Link></li>
                   )}
@@ -92,7 +112,7 @@ const Footer = () => {
             {(footerSection?.hasFaq) && (
               <div>
                 <h3 className="font-semibold mb-5">Support</h3>
-                <ul className="space-y-3 text-sm sm:text-base opacity-50">
+                <ul className="space-y-3 text-sm sm:text-base opacity-80">
                   {footerSection?.hasFaq && (
                     <li><Link href="/faq" className="hover:underline">FAQ</Link></li>
                   )}
@@ -103,7 +123,7 @@ const Footer = () => {
             {(footerSection?.hasPrivacyPolicy || footerSection?.hasTermsAndConditions) && (
               <div>
                 <h3 className="font-semibold mb-5">Legal Docs</h3>
-                <ul className="space-y-3 text-sm sm:text-base opacity-50">
+                <ul className="space-y-3 text-sm sm:text-base opacity-80">
                   {footerSection?.hasPrivacyPolicy && (
                     <li><Link href="/privacy-policy" className="hover:underline">Privacy Policy</Link></li>
                   )}
@@ -118,70 +138,50 @@ const Footer = () => {
           {/* Contact Details */}
           <div>
             <h3 className="font-semibold mb-5">Customer Care</h3>
-            {(footerSection?.primaryContactNumberNetwork && footerSection?.primaryContactNumber) && (
-              <p className="mb-5 text-sm sm:text-base opacity-50">
-                {footerSection.primaryContactNumberNetwork}: {footerSection.primaryContactNumber}
+            {phoneNumbers.map(phone => (
+              <p key={phone.id} className="mb-5 text-sm sm:text-base opacity-80 whitespace-nowrap">
+                {phone.label}: {phone.value}
               </p>
-            )}
-            {(footerSection?.secondaryContactNumberNetwork && footerSection?.secondaryContactNumber) && (
-              <p className="mb-5 text-sm sm:text-base opacity-50">
-                {footerSection.secondaryContactNumberNetwork}: {footerSection.secondaryContactNumber}
-              </p>
-            )}
+            ))}
 
             <h4 className="font-semibold mt-8 mb-5">Need support?</h4>
-            {footerSection?.email && (
-              <a href={`mailto:${footerSection.email}`} className="text-sm sm:text-base opacity-50 hover:underline">
-                {footerSection.email}
+            {emails.map(email => (
+              <a key={email.id} href={`mailto:${email.value}`} className="block mb-2 text-sm sm:text-base opacity-80 hover:underline">
+                {email.value}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="mt-8 pt-6 border-t border-white opacity-80 flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm">
+          <p className="mb-4 sm:mb-0 text-center sm:text-left">
+            © 2025 {branding?.brand_name}. All rights reserved.
+          </p>
+          <div className="flex space-x-4">
+            {socialLinks.twitter && (
+              <a href={`${socialLinks.twitter.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Twitter">
+                <FaXTwitter className="opacity-80 w-5 h-5" />
+              </a>
+            )}
+            {socialLinks.linkedin && (
+              <a href={`${socialLinks.linkedin.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on LinkedIn">
+                <FaLinkedin className="opacity-80 w-5 h-5" />
+              </a>
+            )}
+            {socialLinks.facebook && (
+              <a href={`${socialLinks.facebook.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Facebook">
+                <FaFacebook className="opacity-80 w-5 h-5" />
+              </a>
+            )}
+            {socialLinks.instagram && (
+              <a href={`${socialLinks.instagram.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Instagram">
+                <FaInstagram className="opacity-80 w-5 h-5" />
               </a>
             )}
           </div>
         </div>
-
-      {/* Bottom Section */}
-      <div className="mt-8 pt-6 border-t border-white opacity-50 flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm">
-        {(shippingLineId && shippingLineId !== "3") ? (
-          <div className="flex items-center justify-center mb-4 sm:mb-0">
-            <p className="mr-2 text-center sm:text-left">
-              © 2025 Powered by Ayahay.
-            </p>
-            <Image
-              src="/assets/images/ayahay_logo_only.png"
-              alt="Ayahay Logo"
-              width={70}
-              height={70}
-              className="h-[35px] w-[35px] object-contain"
-            />
-          </div>
-        ) : (
-          <p className="mb-4 sm:mb-0 text-center sm:text-left">
-            © 2025 Ayahay. All rights reserved.
-          </p>
-        )}
-        <div className="flex space-x-4">
-          {footerSection?.twitterUrl && (
-            <a href={`${footerSection.twitterUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">
-              <FaXTwitter className="opacity-50 w-5 h-5" />
-            </a>
-          )}
-          {footerSection?.linkedInUrl && (
-            <a href={`${footerSection.linkedInUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">
-              <FaLinkedin className="opacity-50 w-5 h-5" />
-            </a>
-          )}
-          {footerSection?.facebookUrl && (
-            <a href={`${footerSection.facebookUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">
-              <FaFacebook className="opacity-50 w-5 h-5" />
-            </a>
-          )}
-          {footerSection?.instagramUrl && (
-            <a href={`${footerSection.instagramUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400">
-              <FaInstagram className="opacity-50 w-5 h-5" />
-            </a>
-          )}
-        </div>
-      </div>
-    </footer>
+      </footer>
     </>
   );
 };

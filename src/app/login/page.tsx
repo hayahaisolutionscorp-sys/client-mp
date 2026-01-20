@@ -9,17 +9,21 @@ import { Input } from "@/components/ui/Input"
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPassword";
+import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import { LoginForm } from "@/models";
+import { useThemeSettings } from "@/hooks/theme-settings";
 
 export default function LoginPage() {
   const router = useRouter();
+  const theme = useThemeSettings();
+  const primaryColor = theme?.primaryColor || '#91363C';
 
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false)
-  const [currentSlide, setCurrentSlide] = useState(0)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+
 
 
   // Import auth context functions
@@ -27,37 +31,26 @@ export default function LoginPage() {
     signIn,
     signInWithGoogle,
     signInWithFacebook,
-    resetPassword,
   } = useAuth();
 
-  const slides = [
-    { image: '/assets/photogrid/palompon.png', title: 'Palompon, Leyte' },
-    { image: '/assets/photogrid/camotes.jpg', title: 'Camotes Island, Cebu' },
-    { image: '/assets/photogrid/coron.png', title: 'Coron, Palawan' },
-    { image: '/assets/photogrid/el-nido.png', title: 'El Nido, Palawan' },
-    { image: '/assets/photogrid/isabel.png', title: 'Isabel, Leyte' },
-    { image: '/assets/photogrid/mactan.png', title: 'Mactan, Cebu' },
-    { image: '/assets/photogrid/santa-fe.png', title: 'Santa Fe, Bantayan' },
-    { image: '/assets/photogrid/kawit.png', title: 'Kawit Medellin' },
-  ]
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [slides.length])
+
+  const [error, setError] = useState<string | null>(null);
 
   // Handle email/password login
   const handleLogin = async (values: LoginForm) => {
     const { email, password } = values;
     setLoading(true);
+    setError(null);
 
     try {
       await signIn(email, password);
       router.push('/');
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      console.error(err);
+      // Extract error message similar to how AuthContext does it, or rely on what's thrown
+      const msg = err.response?.data?.message || err.message || "Invalid email or password";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -92,21 +85,6 @@ export default function LoginPage() {
     }
   };
 
-  // Handle forgot password
-  const handleForgotPassword = async (email: string) => {
-    if (!email) {
-      return false;
-    }
-
-    try {
-        await resetPassword(email);
-        return true;
-    } catch (error) {
-      console.error('Error sending reset email:', error);
-      return false;
-    }
-  };
-
   return (
     <main className="grid min-h-screen md:grid-cols-2">
       <div className="flex items-center justify-center p-6 lg:p-8">
@@ -118,6 +96,7 @@ export default function LoginPage() {
           <ArrowLeft className="h-6 w-6" />
         </Link>
         <div className="w-full max-w-md space-y-6">
+          <h1 className="sr-only">Login</h1>
           <div className="flex justify-center">
             <Image
               src="/assets/icons/Ayahay_blue_vertical.svg"
@@ -130,6 +109,11 @@ export default function LoginPage() {
           <div className="text-center">
             <p className="text-sm text-muted-foreground">Enter your Email and Password to Continue</p>
           </div>
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm text-center">
+              {error}
+            </div>
+          )}
           <form className="space-y-4" onSubmit={(e: FormEvent) => {
             e.preventDefault();
             handleLogin({ email, password });
@@ -143,23 +127,24 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-400"
               />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="text-sm font-medium">Password</div>
                 <button
-                    type="button"
-                    onClick={() => setShowForgotPassword(true)}
-                    className="text-xs text-blue-500 hover:underline"
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-xs hover:underline"
+                  style={{ color: primaryColor }}
                 >
-                    Forgot password?
+                  Forgot password?
                 </button>
                 <ForgotPasswordModal
-                    isOpen={showForgotPassword}
-                    onClose={() => setShowForgotPassword(false)}
-                    onSubmit={handleForgotPassword}
-                    email={email}
+                  isOpen={showForgotPassword}
+                  onClose={() => setShowForgotPassword(false)}
+                  email={email}
                 />
               </div>
               <div className="relative">
@@ -170,6 +155,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-400"
                 />
                 <Button
                   type="button"
@@ -177,6 +163,7 @@ export default function LoginPage() {
                   size="icon"
                   className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Toggle password visibility"
                 >
                   {showPassword ? (
                     <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
@@ -188,7 +175,8 @@ export default function LoginPage() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600"
+              className="w-full text-white"
+              style={{ backgroundColor: primaryColor }}
               disabled={loading}
             >
               {loading ? "Signing in..." : "Sign In"}
@@ -223,49 +211,25 @@ export default function LoginPage() {
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-blue-500 hover:underline">
+              <Link href="/register" className="hover:underline" style={{ color: primaryColor }}>
                 Register now
               </Link>
             </p>
           </div>
           <p className="text-center text-sm text-muted-foreground">
             By signing up, you agree to our{" "}
-            <Link href="/terms" className="text-blue-500 hover:underline">
+            <Link href="/terms" className="hover:underline" style={{ color: primaryColor }}>
               Terms of Use
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-blue-500 hover:underline">
+            <Link href="/privacy" className="hover:underline" style={{ color: primaryColor }}>
               Privacy Policy
             </Link>
           </p>
         </div>
       </div>
-      <div className="relative hidden bg-blue-500 md:block md:rounded-l-3xl overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src={slides[currentSlide].image || "/placeholder.svg"}
-            alt={slides[currentSlide].title}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-blue-500/20" />
-        </div>
-        <div className="relative flex h-full flex-col items-center justify-center p-6 text-center text-white">
-          <h2 className="mb-2 text-2xl font-bold">{slides[currentSlide].title}</h2>
-          <p className="mb-6 text-3xl font-bold">Quick, Easy Booking & Reach Your Destination with Ease</p>
-          <p className="text-xl">Kay Ang Pagsakay, Dapat AYAHAY!</p>
-          <div className="mt-8 flex gap-2">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                className={`h-2 w-2 rounded-full ${currentSlide === index ? "bg-white" : "bg-white/50"}`}
-                onClick={() => setCurrentSlide(index)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      <AuthSidebar />
     </main>
   )
 }
+

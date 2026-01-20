@@ -8,3 +8,13 @@ export interface IContactUs {
   address: string;
   backgroundImageFilename: string;
 }
+
+export interface IContactInformation {
+  id: string;
+  type: string;
+  value: string;
+  label: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string | null;
+}

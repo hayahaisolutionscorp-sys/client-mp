@@ -1,214 +1,309 @@
 'use client';
-import {
-  FacebookAuthProvider,
-  GoogleAuthProvider,
-  User,
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signInWithRedirect,
-  signOut
-} from 'firebase/auth';
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { firebase } from 'utils/firebaseConfig';
-import { useIdToken } from 'react-firebase-hooks/auth';
-import { cacheItem, invalidateItem } from 'helpers/cache.helpers';
-import { accountRelatedCacheKeys } from 'constants/cache';
+
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { IAccount, RegisterForm } from '@/models';
-import { mapPassengerToDto, getAccountInformation, createPassengerAccount } from '@/services';
+import { AuthService } from '@/services/auth.service';
+import { useRouter } from 'next/navigation';
+import { getCookie, eraseCookie } from 'helpers/cookie.helpers';
+import { invalidateItem } from 'helpers/cache.helpers';
+import { accountRelatedCacheKeys } from 'constants/cache';
 
 interface AuthContextType {
-  currentUser: User | null | undefined;
-  loggedInAccount: IAccount | undefined | null;
-  hasPrivilegedAccess: boolean;
-  loading: boolean;
-  register: (email: string, password: string, values: RegisterForm) => Promise<string>;
-  signIn: (email: string, password: string) => Promise<string>;
-  signInWithGoogle: () => Promise<{ user: User } | null>;
-  signInWithFacebook: () => Promise<{ user: User } | null>;
-  logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<boolean>;
-  sendEmailVerification: (user: User) => Promise<void>;
-  notification: {
-    type: 'success' | 'error' | null;
-    message: string;
-  } | null;
+    currentUser: any | null; // Keeping loose type for compatibility
+    loggedInAccount: IAccount | undefined | null;
+    hasPrivilegedAccess: boolean;
+    loading: boolean;
+    register: (email: string, password: string, values: RegisterForm) => Promise<string>;
+    signIn: (email: string, password: string) => Promise<string>;
+    signInWithGoogle: () => Promise<any | null>;
+    signInWithFacebook: () => Promise<any | null>;
+    logout: () => Promise<void>;
+    forgotPassword: (email: string) => Promise<boolean>;
+    verifyResetCode: (email: string, code: string) => Promise<boolean>;
+    confirmResetPassword: (data: any) => Promise<boolean>;
+    sendEmailVerification: (user: any) => Promise<void>;
+    notification: {
+        type: 'success' | 'error' | null;
+        message: string;
+    } | null;
+    refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthContextProvider');
-  }
-  return context;
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthContextProvider');
+    }
+    return context;
 };
 
-const PRIVILEGED_ROLES = [
-  'ShippingLineStaff',
-  'ShippingLineAdmin',
-  'TravelAgencyStaff',
-  'TravelAgencyAdmin',
-  'SuperAdmin'
-] as const;
-
-type AccountRole = (typeof PRIVILEGED_ROLES)[number];
-
-interface AuthError extends Error {
-  code?: string;
-}
-
 export default function AuthContextProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, loading] = useIdToken(firebase);
-  const [loggedInAccount, setLoggedInAccount] = useState<IAccount | undefined | null>(null);
-  const [hasPrivilegedAccess, setHasPrivilegedAccess] = useState(false);
-  const [notification, setNotification] = useState<{
-    type: 'success' | 'error' | null;
-    message: string;
-  } | null>(null);
+    const router = useRouter();
+    const [loading, setLoading] = useState(true);
 
-  const fetchAccountInformation = useCallback(async () => {
-    try {
-      if (currentUser) {
-        const jwt = await currentUser.getIdToken(true);
-        cacheItem('jwt', jwt);
-        const myAccountInformation = await getAccountInformation();
-        setLoggedInAccount(myAccountInformation);
+    // Initial state hydration from non-httpOnly 'user' cookie
+    const [currentUser, setCurrentUser] = useState<any | null>(() => {
+        if (typeof window === 'undefined') return null;
+        const userJson = getCookie('user');
+        if (userJson) {
+            try {
+                // Decode and parse the JSON user object from cookie
+                return JSON.parse(decodeURIComponent(userJson));
+            } catch (e) {
+                console.error('Failed to parse user cookie', e);
+                return null;
+            }
+        }
+        return null;
+    });
 
-        const _hasPrivilegedAccess = PRIVILEGED_ROLES.includes(myAccountInformation?.role as AccountRole);
-        setHasPrivilegedAccess(_hasPrivilegedAccess);
-      } else {
-        invalidateItem('jwt');
-        setLoggedInAccount(undefined);
-        setHasPrivilegedAccess(false);
-      }
-    } catch (error: unknown) {
-      const err = error as AuthError;
-      console.error('Error fetching account information:', err.message);
-      setLoggedInAccount(undefined);
-      setHasPrivilegedAccess(false);
-    }
-  }, [currentUser]);
+    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(() => {
+        if (typeof window === 'undefined') return null;
+        const userJson = getCookie('user');
+        if (userJson) {
+            try {
+                const user = JSON.parse(decodeURIComponent(userJson));
+                return {
+                    id: user.id || user.accountId,
+                    email: user.email,
+                    role: user.role || 'Passenger',
+                    emailConsent: false,
+                } as IAccount;
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    });
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message });
-    setTimeout(() => setNotification(null), 3000);
-  };
+    const [notification, setNotification] = useState<{
+        type: 'success' | 'error' | null;
+        message: string;
+    } | null>(null);
 
-  const register = async (email: string, password: string, values: RegisterForm) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(firebase, email, password);
-      const user = userCredential.user;
-      const token = await user.getIdToken();
+    const showNotification = (type: 'success' | 'error', message: string) => {
+        setNotification({ type, message });
+        setTimeout(() => setNotification(null), 3000);
+    };
 
-      const mappedPassenger = mapPassengerToDto(values);
-      await createPassengerAccount(token, mappedPassenger);
-      await sendEmailVerification(user);
+    // Load user profile on mount
+    const loadProfile = useCallback(async () => {
+        try {
+            setLoading(true);
+            const result = await AuthService.getProfile();
+            // result is { message: string, data: UserResponseDto }
+            const user = result.data || result;
 
-      showNotification('success', 'Registration successful! Please check your email for verification.');
-      return token;
-    } catch (error: unknown) {
-      const err = error as AuthError;
-      const errorMessage =
-        err.code === 'auth/email-already-in-use'
-          ? 'Email is already registered'
-          : 'Registration failed. Please try again.';
-      showNotification('error', errorMessage);
-      throw new Error(errorMessage);
-    }
-  };
+            setCurrentUser(user);
 
-  const signIn = async (email: string, password: string): Promise<string> => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(firebase, email, password);
-      showNotification('success', 'Login successful!');
-      return userCredential.user.uid;
-    } catch (error: unknown) {
-      const err = error as AuthError;
-      const errorMessage =
-        err.code === 'auth/wrong-password' ? 'Invalid email or password' : 'Login failed. Please try again.';
-      showNotification('error', errorMessage);
-      throw new Error(errorMessage);
-    }
-  };
+            // Mapping from UserResponseDto (which has passenger object) to IAccount
+            const account: IAccount = {
+                id: user.id || user.accountId,
+                email: user.email,
+                role: user.role || (user.roles?.[0]?.name) || 'Passenger',
+                emailConsent: false,
+                passenger: user.passenger || undefined,
+                verification: Array.isArray(user.verificationDetails) ? user.verificationDetails[0] : (user.verificationDetails || user.verification || undefined),
+                verificationDetails: Array.isArray(user.verificationDetails) 
+                    ? user.verificationDetails 
+                    : (user.verificationDetails ? [user.verificationDetails] : undefined)
+            };
+            setLoggedInAccount(account);
 
-  const signInWithGoogle = () => {
-    const provider = new GoogleAuthProvider();
-    return signInWithPopup(firebase, provider);
-  };
+        } catch (error: any) {
+            console.log('Failed to load profile', error);
+            // Only clear session if it's a 401 Unauthorized error
+            // This prevents logging out on network errors or server downtime
+            if (error.response?.status === 401) {
+                setCurrentUser(null);
+                setLoggedInAccount(null);
+                eraseCookie('user');
+                accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-  const signInWithFacebook = () => {
-    const provider = new FacebookAuthProvider();
-    return signInWithRedirect(firebase, provider);
-  };
+    // Initial load
+    useEffect(() => {
+        loadProfile();
+    }, [loadProfile]);
 
-  const resetPassword = async (email: string): Promise<boolean> => {
-    try {
-      await sendPasswordResetEmail(firebase, email, {
-        url: (process.env.NEXT_PUBLIC_WEB_URL || 'https://www.ayahay.com') + '/login'
-      });
-      showNotification('success', 'Password reset email sent successfully!');
-      return true;
-    } catch (error: unknown) {
-      const err = error as AuthError;
-      const errorMessage =
-        err.code === 'auth/user-not-found'
-          ? 'No account found with this email'
-          : 'Failed to reset password. Please try again.';
-      showNotification('error', errorMessage);
-      throw new Error(errorMessage);
-    }
-  };
+    const register = async (email: string, password: string, values: RegisterForm) => {
+        try {
+            setLoading(true);
+            // Map values to API DTO (BaseUserDto: name, email, password)
+            // Destructure to remove fields that shouldn't be sent to API
+            const { confirm, agreement, ...cleanValues } = values;
 
-  const logout = async (): Promise<void> => {
-    try {
-      await signOut(firebase);
-      accountRelatedCacheKeys.forEach(invalidateItem);
-      showNotification('success', 'Logged out successfully');
-    } catch (error: unknown) {
-      const err = error as AuthError;
-      const errorMessage = err.message || 'Failed to sign out. Please try again.';
-      showNotification('error', errorMessage);
-      throw new Error(errorMessage);
-    }
-  };
+            const payload = {
+                name: `${values.firstName} ${values.lastName}`.trim(),
+                ...cleanValues,
+                email, // Ensure email from argument is used
+                password, // Ensure password from argument is used
+            };
 
-  const value: AuthContextType = {
-    currentUser,
-    loggedInAccount,
-    hasPrivilegedAccess,
-    loading,
-    register,
-    signIn,
-    logout,
-    signInWithGoogle,
-    signInWithFacebook,
-    resetPassword,
-    sendEmailVerification,
-    notification
-  };
+            await AuthService.register(payload as any);
+            // 'as any' because AuthService register expects RegisterForm but API expects RegisterDto logic. 
+            // Wait, I defined AuthService.register to take RegisterForm.
+            // But the API call uses that object.
+            // The API will strip extra fields.
+            // Ideally I should construct the object that matches the API expectation.
 
-  useEffect(() => {
-    if (!loading) {
-      void fetchAccountInformation();
-    }
-  }, [currentUser, loading, fetchAccountInformation]);
+            showNotification('success', 'Registration successful!');
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-      {notification && (
-        <div
-          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-opacity duration-300 ${
-            notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-          }`}
-        >
-          {notification.message}
-        </div>
-      )}
-    </AuthContext.Provider>
-  );
+            // Auto login? The API register does NOT automatically login usually, 
+            // but the controller implementation sets cookies?
+            // Controller register: sets cookies.
+            // So we ARE logged in.
+
+            await loadProfile();
+
+            return 'success';
+        } catch (error: any) {
+            console.error('Registration error:', error);
+            const msg = error.response?.data?.message || 'Registration failed';
+            // showNotification('error', msg); // Handled by component
+            throw new Error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const signIn = async (email: string, password: string): Promise<string> => {
+        try {
+            setLoading(true);
+            await AuthService.login({ email, password });
+            showNotification('success', 'Login successful!');
+            await loadProfile();
+            return 'success';
+        } catch (error: any) {
+            console.error('Login error:', error);
+            const msg = error.response?.data?.message || 'Login failed';
+            showNotification('error', msg);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const signInWithGoogle = async () => {
+        showNotification('error', 'Google Sign-In not implemented yet');
+        return null;
+    };
+
+    const signInWithFacebook = async () => {
+        showNotification('error', 'Facebook Sign-In not implemented yet');
+        return null;
+    };
+
+    const forgotPassword = async (email: string): Promise<boolean> => {
+        try {
+            setLoading(true);
+            await AuthService.forgotPassword(email);
+            showNotification('success', 'Password reset email sent (if account exists)');
+            return true;
+        } catch (error: any) {
+            const msg = error.response?.data?.message || 'Failed to request password reset';
+            throw new Error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const verifyResetCode = async (email: string, code: string): Promise<boolean> => {
+        try {
+            setLoading(true);
+            await AuthService.verifyResetCode(email, code);
+            showNotification('success', 'Password reset code verified successfully!');
+            return true;
+        } catch (error: any) {
+            const msg = error.response?.data?.message || 'Failed to verify password reset code';
+            throw new Error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const sendEmailVerification = async (user: any) => {
+        // No endpoint for this in current API
+        console.warn('sendEmailVerification not supported by API');
+    };
+
+    const confirmResetPassword = async (data: any): Promise<boolean> => {
+        try {
+            setLoading(true);
+            await AuthService.resetPassword(data);
+            showNotification('success', 'Password reset successful!');
+            return true;
+        } catch (error: any) {
+            const msg = error.response?.data?.message || 'Failed to reset password';
+            throw new Error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const logout = async (): Promise<void> => {
+        try {
+            setLoading(true);
+            await AuthService.logout();
+            setCurrentUser(null);
+            setLoggedInAccount(null);
+            eraseCookie('user');
+            // Clear account related cache
+            accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+            router.push('/');
+        } catch (error) {
+            console.error('Logout error', error);
+            // Clear local state anyway on failure
+            setCurrentUser(null);
+            setLoggedInAccount(null);
+            eraseCookie('user');
+            accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+            router.push('/');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const value: AuthContextType = {
+        currentUser,
+        loggedInAccount,
+        hasPrivilegedAccess: loggedInAccount?.role === 'SuperAdmin' || loggedInAccount?.role === 'ShippingLineAdmin' || loggedInAccount?.role === 'TravelAgencyAdmin' || loggedInAccount?.role === 'ClientAdmin',
+        loading,
+        register,
+        signIn,
+        logout,
+        signInWithGoogle,
+        signInWithFacebook,
+        forgotPassword,
+        verifyResetCode,
+        confirmResetPassword,
+        sendEmailVerification,
+        notification,
+        refreshProfile: loadProfile
+    };
+
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+            {notification && (
+                <div
+                    className="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-opacity duration-300 text-white"
+                    style={{
+                        backgroundColor: notification.type === 'success' ? '#22c55e' : '#ef4444'
+                    }}
+                >
+                    {notification?.message}
+                </div>
+            )}
+        </AuthContext.Provider>
+    );
+
+
 }
+

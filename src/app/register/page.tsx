@@ -1,13 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Link from "next/link"
 import Image from "next/image"
-import { EyeIcon, EyeOffIcon, ArrowLeft, UserIcon, UserPlusIcon } from "lucide-react"
+import { EyeIcon, EyeOffIcon, ArrowLeft, UserIcon, UserPlusIcon, CalendarIcon } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
+import { AuthSidebar } from "@/components/auth/AuthSidebar";
+
 import {
   Select,
   SelectContent,
@@ -16,16 +18,22 @@ import {
   SelectValue,
 } from "@/components/ui/Select"
 import { RegisterForm } from "@/models";
+import BirthDatePicker from "@/components/ui/BirthDatePicker";
+import Combobox from "@/components/ui/Combobox";
+import { NATIONALITIES } from "constants/default";
+import { useThemeSettings } from "@/hooks/theme-settings";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuth();  // Remove sendEmailVerification
+  const theme = useThemeSettings();
+  const primaryColor = theme?.primaryColor || '#91363C';
+  const dateToday = new Date();
+  const { register, signInWithGoogle, signInWithFacebook } = useAuth();
 
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
-  const [currentSlide, setCurrentSlide] = useState(0)
-  
+
   const [formData, setFormData] = useState<RegisterForm>({
     email: "",
     password: "",
@@ -33,33 +41,15 @@ export default function RegisterPage() {
     firstName: "",
     lastName: "",
     sex: "Male",
-    birthday: "",
+    birthday: dateToday.toISOString().split('T')[0],
     address: "",
     nationality: "",
     agreement: false,
     occupation: "Unemployed",
     civilStatus: "Single",
-    mobile_number: "",
+    phone: "+63",
     emailConsent: false
   })
-
-  const slides = [
-    { image: '/assets/photogrid/palompon.png', title: 'Palompon, Leyte' },
-    { image: '/assets/photogrid/camotes.jpg', title: 'Camotes Island, Cebu' },
-    { image: '/assets/photogrid/coron.png', title: 'Coron, Palawan' },
-    { image: '/assets/photogrid/el-nido.png', title: 'El Nido, Palawan' },
-    { image: '/assets/photogrid/isabel.png', title: 'Isabel, Leyte' },
-    { image: '/assets/photogrid/mactan.png', title: 'Mactan, Cebu' },
-    { image: '/assets/photogrid/santa-fe.png', title: 'Santa Fe, Bantayan' },
-    { image: '/assets/photogrid/kawit.png', title: 'Kawit Medellin' },
-  ]
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [slides.length])  // Add slides.length to dependencies
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -69,8 +59,54 @@ export default function RegisterPage() {
     }))
   }
 
+  const handlePhoneChange = (value: string) => {
+    // Always ensure it starts with +63
+    if (!value.startsWith('+63')) {
+      value = '+63';
+    }
+    
+    // Remove any non-digit characters after +63
+    const prefix = '+63';
+    const digitsOnly = value.slice(3).replace(/\D/g, '');
+    
+    // Limit to 10 digits after +63 (total 13 characters)
+    const limitedDigits = digitsOnly.slice(0, 10);
+    
+    setFormData(prev => ({
+      ...prev,
+      phone: prefix + limitedDigits
+    }));
+  }
+
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
+    const errors: Record<string, string> = {}
+
+    // Simple email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      errors.email = "Please enter a valid email address"
+    }
+
+    if (!formData.password || formData.password.length < 8) {
+      errors.password = "Password must be at least 8 characters"
+    } else {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/
+      if (!passwordRegex.test(formData.password)) {
+        errors.password = "Password must have at least 1 uppercase, lowercase, number, and special character"
+      }
+    }
+
+    if (formData.password !== formData.confirm) {
+      errors.confirm = "Passwords do not match"
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+
+    setValidationErrors({})
     setStep(2)
   }
 
@@ -78,19 +114,73 @@ export default function RegisterPage() {
     setStep(1)
   }
 
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [generalError, setGeneralError] = useState<string | null>(null);
+
   const handleRegister = async (values: RegisterForm) => {
-      const { email, password } = values;
-      setLoading(true);
-  
-      try {
-        await register(email, password, values);
-        router.push('/');
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
+    const { email, password } = values;
+    setLoading(true);
+    setValidationErrors({}); // Clear previous errors
+    setGeneralError(null); // Clear previous general errors
+
+    try {
+      await register(email, password, values);
+      router.push('/');
+    } catch (error: any) {
+      console.error(error);
+      // Construct validation errors object if the error message is comma-separated list of validations
+      if (error.message && typeof error.message === 'string' && error.message.includes(',')) {
+        const errors: Record<string, string> = {};
+        error.message.split(',').forEach((err: string) => {
+          const [field] = err.trim().split(' ');
+          if (field) {
+            // Map error message to field name if possible, simple heuristic
+            // The API returns "firstName should not be empty", so field is "firstName"
+            errors[field] = err.trim();
+          }
+        });
+        setValidationErrors(errors);
+      } else {
+        // Handle general errors like "User already exists"
+        setGeneralError(error.message || "An unexpected error occurred. Please try again.");
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    try {
+      setLoading(true);
+      const result = await signInWithGoogle();
+      if (result?.user) {
+        router.push('/');
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error && 'code' in error && error.code === 'auth/popup-closed-by-user') {
+        console.log('Google sign-in cancelled by user');
+      } else {
+        console.error('Google sign-in error:', error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookRegister = async () => {
+    try {
+      await signInWithFacebook();
+      router.push('/');
+    } catch (error: unknown) {
+      console.error('Facebook sign-in error:', error);
+    }
+  };
+
+  const setBirthday: Dispatch<SetStateAction<Date | undefined>> = (value) => {
+    if (value instanceof Date) {
+      setFormData((prev) => ({ ...prev, birthday: value.toISOString() }));
+    }
+  };
 
   return (
     <main className="grid min-h-screen md:grid-cols-2">
@@ -103,6 +193,7 @@ export default function RegisterPage() {
           <ArrowLeft className="h-6 w-6" />
         </Link>
         <div className="w-full max-w-md space-y-6">
+          <h1 className="sr-only">Register</h1>
           <div className="flex justify-center">
             <Image
               src="/assets/icons/Ayahay_blue_vertical.svg"
@@ -120,37 +211,38 @@ export default function RegisterPage() {
             <div className="flex items-center">
               <div className="flex items-center space-x-2">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300 ${
-                    step === 1 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-500"
-                  }`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300`}
+                  style={{
+                    backgroundColor: step === 1 ? primaryColor : '#E5E7EB',
+                    color: step === 1 ? '#FFFFFF' : '#6B7280'
+                  }}
                 >
                   <UserIcon className="h-4 w-4" />
                 </div>
                 <span
-                  className={`text-sm font-medium transition-colors duration-300 ${
-                    step === 1 ? "text-blue-500" : "text-gray-500"
-                  }`}
+                  className={`text-sm font-medium transition-colors duration-300`}
+                  style={{ color: step === 1 ? primaryColor : '#374151' }}
                 >
                   Account Info
                 </span>
               </div>
               <div
-                className={`mx-4 h-[2px] w-16 transition-colors duration-300 ${
-                  step === 2 ? "bg-blue-500" : "bg-gray-200"
-                }`}
+                className={`mx-4 h-[2px] w-16 transition-colors duration-300`}
+                style={{ backgroundColor: step === 2 ? primaryColor : '#E5E7EB' }}
               />
               <div className="flex items-center space-x-2">
                 <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300 ${
-                    step === 2 ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-500"
-                  }`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-300`}
+                  style={{
+                    backgroundColor: step === 2 ? primaryColor : '#E5E7EB',
+                    color: step === 2 ? '#FFFFFF' : '#6B7280'
+                  }}
                 >
                   <UserPlusIcon className="h-4 w-4" />
                 </div>
                 <span
-                  className={`text-sm font-medium transition-colors duration-300 ${
-                    step === 2 ? "text-blue-500" : "text-gray-500"
-                  }`}
+                  className={`text-sm font-medium transition-colors duration-300`}
+                  style={{ color: step === 2 ? primaryColor : '#374151' }}
                 >
                   Passenger Info
                 </span>
@@ -159,7 +251,12 @@ export default function RegisterPage() {
           </div>
 
           {step === 1 ? (
-            <form onSubmit={handleNext} className="space-y-4">
+            <form onSubmit={handleNext} className="space-y-4" noValidate>
+              {generalError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <span className="block sm:inline">{generalError}</span>
+                </div>
+              )}
               <div className="space-y-2">
                 <div className="text-sm font-medium">Email</div>
                 <Input
@@ -169,7 +266,9 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
+                  className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.email ? "border-red-500" : ""}`}
                 />
+                {validationErrors.email && <p className="text-xs text-red-500">{validationErrors.email}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Password</div>
@@ -181,6 +280,7 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={handleInputChange}
                     required
+                    className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.password ? "border-red-500" : ""}`}
                   />
                   <Button
                     type="button"
@@ -188,6 +288,7 @@ export default function RegisterPage() {
                     size="icon"
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
                   >
                     {showPassword ? (
                       <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
@@ -196,6 +297,7 @@ export default function RegisterPage() {
                     )}
                   </Button>
                 </div>
+                {validationErrors.password && <p className="text-xs text-red-500">{validationErrors.password}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Repeat Password</div>
@@ -207,6 +309,7 @@ export default function RegisterPage() {
                     value={formData.confirm}
                     onChange={handleInputChange}
                     required
+                    className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.confirm ? "border-red-500" : ""}`}
                   />
                   <Button
                     type="button"
@@ -214,6 +317,7 @@ export default function RegisterPage() {
                     size="icon"
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
                   >
                     {showPassword ? (
                       <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
@@ -222,41 +326,66 @@ export default function RegisterPage() {
                     )}
                   </Button>
                 </div>
+                {validationErrors.confirm && <p className="text-xs text-red-500">{validationErrors.confirm}</p>}
               </div>
-              <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600">
+              <Button type="submit" className="w-full text-white" style={{ backgroundColor: primaryColor }}>
                 Next
               </Button>
             </form>
           ) : (
             <form onSubmit={(e) => { e.preventDefault(); handleRegister(formData); }} className="space-y-4">
+              {generalError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <span className="block sm:inline">{generalError}</span>
+                </div>
+              )}
               <div className="space-y-2">
-                <div className="text-sm font-medium">First Name</div>
+                <div className="text-sm font-medium">First Name <span className="text-red-500">*</span></div>
                 <Input
                   name="firstName"
                   placeholder="First Name"
                   value={formData.firstName}
                   onChange={handleInputChange}
                   required
+                  className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.firstName ? "border-red-500" : ""}`}
                 />
+                {validationErrors.firstName && <p className="text-xs text-red-500">{validationErrors.firstName}</p>}
               </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium">Last Name</div>
+                <div className="text-sm font-medium">Last Name <span className="text-red-500">*</span></div>
                 <Input
                   name="lastName"
                   placeholder="Last Name"
                   value={formData.lastName}
                   onChange={handleInputChange}
                   required
+                  className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.lastName ? "border-red-500" : ""}`}
                 />
+                {validationErrors.lastName && <p className="text-xs text-red-500">{validationErrors.lastName}</p>}
               </div>
               <div className="space-y-2">
+                <div className="text-sm font-medium">Phone Number <span className="text-red-500">*</span></div>
+                <Input
+                  name="phone"
+                  placeholder="+639171234567"
+                  value={formData.phone || '+63'}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  required
+                  maxLength={13}
+                  className={validationErrors.phone ? "border-red-500" : ""}
+
+                />
+                {validationErrors.phone && <p className="text-xs text-red-500">{validationErrors.phone}</p>}
+              </div>
+                <div className="gap-3 flex w-full">
+                   <div className="space-y-2 flex-1">
                 <div className="text-sm font-medium">Sex</div>
                 <Select
                   name="sex"
                   value={formData.sex}
                   onValueChange={(value: "Male" | "Female") => setFormData((prev) => ({ ...prev, sex: value }))}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className={`w-full bg-white text-gray-900 border-gray-300 ${validationErrors.sex ? "border-red-500" : ""}`}>
                     <SelectValue placeholder="Select your sex" />
                   </SelectTrigger>
                   <SelectContent>
@@ -264,17 +393,14 @@ export default function RegisterPage() {
                     <SelectItem value="Female">Female</SelectItem>
                   </SelectContent>
                 </Select>
+                {validationErrors.sex && <p className="text-xs text-red-500">{validationErrors.sex}</p>}
               </div>
-              <div className="space-y-2">
-                <div className="text-sm font-medium">Date of Birth</div>
-                <Input
-                  name="birthday"
-                  type="date"
-                  value={formData.birthday}
-                  onChange={handleInputChange}
-                  required
-                />
+              <div className="space-y-2 flex-1">
+                <div className="text-sm font-medium">Date of Birth</div>  
+                  <BirthDatePicker date={new Date(formData.birthday)} setDate={setBirthday} validationErrors={validationErrors} />
+                {validationErrors.birthday && <p className="text-xs text-red-500">{validationErrors.birthday}</p>}
               </div>
+             </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Address</div>
                 <Input
@@ -282,26 +408,28 @@ export default function RegisterPage() {
                   placeholder="Region, Province, Municipality"
                   value={formData.address}
                   onChange={handleInputChange}
-                  required
+                  className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.address ? "border-red-500" : ""}`}
                 />
+                {validationErrors.address && <p className="text-xs text-red-500">{validationErrors.address}</p>}
               </div>
               <div className="space-y-2">
                 <div className="text-sm font-medium">Nationality</div>
-                <Input
-                  name="nationality"
-                  placeholder="Filipino, Chinese, American, etc."
-                  value={formData.nationality}
-                  onChange={handleInputChange}
-                  required
+                <Combobox
+                  values={NATIONALITIES}
+                  placeholder="Select nationality"
+                  defaultValue={formData.nationality}
+                  onChange={(value) => setFormData((prev) => ({ ...prev, nationality: value }))}
                 />
+                {validationErrors.nationality && <p className="text-xs text-red-500">{validationErrors.nationality}</p>}
               </div>
               <div className="flex space-x-4">
                 <Button type="button" variant="outline" className="w-full" onClick={handleBack}>
                   Back
                 </Button>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-blue-500 hover:bg-blue-600"
+                <Button
+                  type="submit"
+                  className="w-full text-white"
+                  style={{ backgroundColor: primaryColor }}
                   disabled={loading}
                 >
                   {loading ? "Registering..." : "Submit"}
@@ -310,44 +438,59 @@ export default function RegisterPage() {
             </form>
           )}
 
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or register with</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              onClick={handleGoogleRegister}
+              variant="outline"
+              className="w-full"
+              disabled={loading}
+            >
+              <Image src="/assets/icons/google_logo.svg" alt="Google" width={20} height={20} className="mr-2" />
+              Google
+            </Button>
+            <Button
+              onClick={handleFacebookRegister}
+              variant="outline"
+              className="w-full"
+              disabled={loading}
+            >
+              <Image src="/assets/icons/facebook_logo.svg" alt="Facebook" width={20} height={20} className="mr-2" />
+              Facebook
+            </Button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <Link href="/login" className="hover:underline" style={{ color: primaryColor }}>
+                Sign in
+              </Link>
+            </p>
+          </div>
+
           <p className="text-center text-sm text-muted-foreground">
             By signing up, you agree to our{" "}
-            <Link href="/terms" className="text-blue-500 hover:underline">
+            <Link href="/terms" className="hover:underline" style={{ color: primaryColor }}>
               Terms of Use
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-blue-500 hover:underline">
+            <Link href="/privacy" className="hover:underline" style={{ color: primaryColor }}>
               Privacy Policy
             </Link>
           </p>
         </div>
       </div>
-      <div className="relative hidden bg-blue-500 md:block">
-        <div className="absolute inset-0">
-          <Image
-            src={slides[currentSlide].image || "/placeholder.svg"}
-            alt={slides[currentSlide].title}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-blue-500/20" />
-        </div>
-        <div className="relative flex h-full flex-col items-center justify-center p-6 text-center text-white">
-          <h2 className="mb-2 text-2xl font-bold">{slides[currentSlide].title}</h2>
-          <p className="mb-6 text-3xl font-bold">Quick, Easy Booking & Reach Your Destination with Ease</p>
-          <p className="text-xl">Kay Ang Pagsakay, Dapat AYAHAY!</p>
-          <div className="mt-8 flex gap-2">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                className={`h-2 w-2 rounded-full ${currentSlide === index ? "bg-white" : "bg-white/50"}`}
-                onClick={() => setCurrentSlide(index)}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      <AuthSidebar />
     </main>
   )
 }
+
+

@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "name": "Sedan",
+        "description": "Standard sedan car"
+    },
+    {
+        "id": 2,
+        "name": "SUV",
+        "description": "Sports Utility Vehicle"
+    },
+    {
+        "id": 3,
+        "name": "Motorcycle",
+        "description": "Two-wheeled motorcycle"
+    }
+]

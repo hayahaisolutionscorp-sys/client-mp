@@ -20,8 +20,9 @@ export interface IPassenger {
   birthdayIso: string;
   address: string;
   nationality: string;
-  mobile_number?: string;
+  phone?: string;
   discountType?: keyof typeof DISCOUNT_TYPE;
+  profile_picture_url?: string;
 
   companions?: IPassenger[];
 }

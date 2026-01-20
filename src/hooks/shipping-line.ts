@@ -1,35 +1,16 @@
-import { useState, useEffect } from "react";
-import { whiteLabelLinks } from 'constants/nav';
-import { redirect } from 'next/navigation';
-import { getShippingLine } from "@/services/shipping-line/shipping-line.service";
+import { useState } from "react";
 import { IShippingLine } from "@/models";
 
 export function useShippingLineForWhiteLabel() {
   const [shippingLine, setShippingLine] = useState<IShippingLine | undefined>();
 
-  useEffect(() => {
-    if (process.env.NEXT_PUBLIC_SHIPPING_LINE_ID) {
-      fetchShippingLine();
-    }
-  }, []);
-
-  const fetchShippingLine = async () => {
-    const shippingLine = await getShippingLine(
-      Number(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID)
-    );
-    setShippingLine(shippingLine);
-  };
+  // UseEffect removed as NEXT_PUBLIC_SHIPPING_LINE_ID is deprecated (white label mode disabled)
+  // This hook now effectively returns undefined, defaulting to Marketplace behavior.
 
   return shippingLine;
 }
 
 export function useShippingLineToRestrictAccess(link: string) {
-  useEffect(() => {
-    if (
-      process.env.NEXT_PUBLIC_SHIPPING_LINE_ID &&
-      !whiteLabelLinks.some((e) => e.label === link)
-    ) {
-      redirect('/404');
-    }
-  }, []);
+  // Access restriction based on NEXT_PUBLIC_SHIPPING_LINE_ID is removed.
+  // This hook is now a no-op.
 }

@@ -1,5 +1,5 @@
 import axios from '../core/axios';
-import { PASSENGER_API } from 'constants/api';
+import { AUTH_API } from 'constants/api'; // Changed from PASSENGER_API
 import { RegisterForm, IPassenger } from '@/models';
 
 export function mapPassengerToDto(values: RegisterForm): IPassenger {
@@ -11,7 +11,7 @@ export function mapPassengerToDto(values: RegisterForm): IPassenger {
     civilStatus,
     birthday,
     address,
-    mobile_number,
+    phone,
     nationality,
   } = values;
 
@@ -24,35 +24,41 @@ export function mapPassengerToDto(values: RegisterForm): IPassenger {
     civilStatus,
     birthdayIso: new Date(birthday).toISOString(),
     address,
-    mobile_number,
+    phone,
     nationality,
   };
 }
 
 export async function updatePassenger(
-  passengerId: number,
   passengerData: Partial<IPassenger>
 ): Promise<IPassenger | undefined> {
   try {
-    const { data: updatedPassenger } = await axios.patch<IPassenger>(
-      `${PASSENGER_API}/${passengerId}`,
-      passengerData
-    );
-    return updatedPassenger;
+    const payload = {
+      firstName: passengerData.firstName,
+      lastName: passengerData.lastName,
+      sex: passengerData.sex,
+      birthday: passengerData.birthdayIso,
+      address: passengerData.address,
+      nationality: passengerData.nationality,
+      occupation: passengerData.occupation,
+      phone: passengerData.phone,
+      civilStatus: passengerData.civilStatus,
+      profile_picture_url: passengerData.profile_picture_url
+    };
+
+    const { data } = await axios.patch(`${AUTH_API}/me`, payload);
+
+    return data.data.passenger;
   } catch (e) {
     console.error('Error updating passenger:', e);
     throw e;
   }
 }
 
-export async function getPassenger(
-  passengerId: number
-): Promise<IPassenger | undefined> {
+export async function getPassenger(): Promise<IPassenger | undefined> {
   try {
-    const { data: passenger } = await axios.get<IPassenger>(
-      `${PASSENGER_API}/${passengerId}`
-    );
-    return passenger;
+    const { data } = await axios.get(`${AUTH_API}/me`);
+    return data.data.passenger;
   } catch (e) {
     console.error(e);
   }

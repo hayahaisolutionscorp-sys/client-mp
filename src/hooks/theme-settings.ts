@@ -1,25 +1,36 @@
 import { useState, useEffect } from "react";
-import { getThemeSettingsByShippingLineId } from "@/services/ui/theme-settings.service";
+import { getThemeSettings } from "@/services/ui/theme-settings.service";
 import { IThemeSettings } from "@/models";
 
-const shippingLineId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || "3";
+const THEME_CACHE_KEY = "ayahay_theme_settings";
 
 export const useThemeSettings = () => {
+  // Start with null to avoid hydration mismatch
+  // Don't read from localStorage during initial render
   const [themeSettings, setThemeSettings] = useState<IThemeSettings | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    const parsedId = parseInt(shippingLineId, 10);
-    if (isNaN(parsedId)) {
-      console.error("Invalid shippingLineId:", shippingLineId);
-      return;
+    // Mark as hydrated
+    setIsHydrated(true);
+    
+    // Try to get cached theme first for instant display
+    const cached = localStorage.getItem(THEME_CACHE_KEY);
+    if (cached) {
+      try {
+        setThemeSettings(JSON.parse(cached));
+      } catch (e) {
+        console.error("Failed to parse cached theme:", e);
+      }
     }
 
-    getThemeSettingsByShippingLineId(parsedId)
-      .then((data: IThemeSettings | null | undefined) => {
-        if (data && Object.keys(data).length > 0) {
+    // Then fetch fresh theme in background
+    getThemeSettings()
+      .then((data) => {
+        if (data) {
           setThemeSettings(data);
-        } else {
-          console.warn("Theme settings are null, undefined, or empty");
+          // Cache the theme for next time
+          localStorage.setItem(THEME_CACHE_KEY, JSON.stringify(data));
         }
       })
       .catch((error) => console.error("Error fetching theme settings:", error));

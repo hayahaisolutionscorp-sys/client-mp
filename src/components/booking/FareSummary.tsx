@@ -729,9 +729,8 @@ const FareSummary: FC<FareSummaryProps> = ({
 
   return (
     <div
-      className={`bg-white border shadow rounded-lg w-full min-w-[300px] sm:min-w-[400px] sm:max-w-[500px] h-auto p-4 sm:p-6 mb-10 ${
-        pathname === '/booking/confirmed' ? 'border-2 border-green-500' : ''
-      }`}
+      className={`bg-white border shadow rounded-lg w-full min-w-[300px] sm:min-w-[400px] sm:max-w-[500px] h-auto p-4 sm:p-6 mb-10 ${pathname === '/booking/confirmed' ? 'border-2 border-green-500' : ''
+        }`}
     >
       <h1 className="text-lg font-bold text-customText">Fare Summary</h1>
 
@@ -784,61 +783,61 @@ const FareSummary: FC<FareSummaryProps> = ({
 
         {(Number(vehicleDepartureRateTableRows?.length ?? 0) > 0 ||
           Number(vehicleDeparturePrices?.length ?? 0) > 0) && (
-          <>
-            {passengerDepartureData.length > 0 && <hr className="border-t-2 border-dashed border-gray-300" />}
+            <>
+              {passengerDepartureData.length > 0 && <hr className="border-t-2 border-dashed border-gray-300" />}
 
-            {/* Departure - Driver Fare */}
-            <div className="flex justify-between items-center">
-              <span className="text-customText">Driver Fare</span>
-              <span className="text-customText">{formatCurrency(driverFare)}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-customText">Driver Service Charge</span>
-              <span className="text-customText">{formatCurrency(driverServiceCharge)}</span>
-            </div>
-
-            <hr className="border-t-2 border-dashed border-gray-300" />
-
-            {/* Departure - Vehicle Fare Section */}
-            <div>
-              <div
-                className="flex justify-between items-center cursor-pointer"
-                onClick={() => setIsVehicleDepartureFareExpanded((prev) => !prev)}
-              >
-                <span className="flex items-center gap-2 text-customText">
-                  Vehicle Fare ({vehicleDepartureRateTableRows?.length || vehicleDeparturePrices?.length || 0})
-                  {isVehicleDepartureFareExpanded ? <FiChevronUp /> : <FiChevronDown />}
-                </span>
-                <span className="flex items-center text-customText">{formatCurrency(vehicleDepartureTotalFare)}</span>
+              {/* Departure - Driver Fare */}
+              <div className="flex justify-between items-center">
+                <span className="text-customText">Driver Fare</span>
+                <span className="text-customText">{formatCurrency(driverFare)}</span>
               </div>
-              {isVehicleDepartureFareExpanded && (
-                <div>
-                  {vehicleDepartureRateTableRows?.map((row) => (
-                    <div key={uuidv4()} className="flex justify-between items-center mt-2 text-sm text-gray-500">
-                      <p className="break-words overflow-wrap w-[200px]">
-                        {row.vehicleType?.name || 'Unknown Vehicle Type'}
-                      </p>
-                      <p>{formatCurrency(row.fare || 0)}</p>
-                    </div>
-                  ))}
+              <div className="flex justify-between items-center">
+                <span className="text-customText">Driver Service Charge</span>
+                <span className="text-customText">{formatCurrency(driverServiceCharge)}</span>
+              </div>
 
-                  {vehicleDeparturePrices?.map((row) => (
-                    <div key={uuidv4()} className="flex justify-between items-center mt-2 text-sm text-gray-500">
-                      <p className="break-words overflow-wrap w-[200px]">{row.name || 'Unknown Vehicle Type'}</p>
-                      <p>{formatCurrency(row.priceWithoutMarkup || 0)}</p>
-                    </div>
-                  ))}
+              <hr className="border-t-2 border-dashed border-gray-300" />
+
+              {/* Departure - Vehicle Fare Section */}
+              <div>
+                <div
+                  className="flex justify-between items-center cursor-pointer"
+                  onClick={() => setIsVehicleDepartureFareExpanded((prev) => !prev)}
+                >
+                  <span className="flex items-center gap-2 text-customText">
+                    Vehicle Fare ({vehicleDepartureRateTableRows?.length || vehicleDeparturePrices?.length || 0})
+                    {isVehicleDepartureFareExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                  </span>
+                  <span className="flex items-center text-customText">{formatCurrency(vehicleDepartureTotalFare)}</span>
                 </div>
-              )}
-            </div>
+                {isVehicleDepartureFareExpanded && (
+                  <div>
+                    {vehicleDepartureRateTableRows?.map((row) => (
+                      <div key={uuidv4()} className="flex justify-between items-center mt-2 text-sm text-gray-500">
+                        <p className="break-words overflow-wrap w-[200px]">
+                          {row.vehicleType?.name || 'Unknown Vehicle Type'}
+                        </p>
+                        <p>{formatCurrency(row.fare || 0)}</p>
+                      </div>
+                    ))}
 
-            {/* Departure - Vehicle Service Charge */}
-            <div className="flex justify-between items-center">
-              <span className="text-customText">Vehicle Service Charge</span>
-              <span className="text-customText">{formatCurrency(vehicleDepartureServiceCharge || 0)}</span>
-            </div>
-          </>
-        )}
+                    {vehicleDeparturePrices?.map((row) => (
+                      <div key={uuidv4()} className="flex justify-between items-center mt-2 text-sm text-gray-500">
+                        <p className="break-words overflow-wrap w-[200px]">{row.name || 'Unknown Vehicle Type'}</p>
+                        <p>{formatCurrency(row.priceWithoutMarkup || 0)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Departure - Vehicle Service Charge */}
+              <div className="flex justify-between items-center">
+                <span className="text-customText">Vehicle Service Charge</span>
+                <span className="text-customText">{formatCurrency(vehicleDepartureServiceCharge || 0)}</span>
+              </div>
+            </>
+          )}
 
         {returnCabinId > 0 && (
           <>
@@ -900,63 +899,63 @@ const FareSummary: FC<FareSummaryProps> = ({
 
               {(Number(vehicleReturnRateTableRows?.length ?? 0) > 0 ||
                 Number(vehicleReturnPrices?.length ?? 0) > 0) && (
-                <>
-                  {passengerReturnData.length > 0 && <hr className="border-t-2 border-dashed border-gray-300" />}
+                  <>
+                    {passengerReturnData.length > 0 && <hr className="border-t-2 border-dashed border-gray-300" />}
 
-                  {/* Return - Driver Fare */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-customText">Driver Fare</span>
-                    <span className="text-customText">{formatCurrency(driverFare)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-customText">Driver Service Charge</span>
-                    <span className="text-customText">{formatCurrency(driverServiceCharge)}</span>
-                  </div>
-
-                  <hr className="border-t-2 border-dashed border-gray-300" />
-
-                  {/* Return - Vehicle Fare Section */}
-                  <div>
-                    <div
-                      className="flex justify-between items-center cursor-pointer"
-                      onClick={() => setIsVehicleReturnFareExpanded((prev) => !prev)}
-                    >
-                      <span className="flex items-center gap-2 text-customText">
-                        Vehicle Fare ({vehicleReturnRateTableRows?.length || vehicleReturnPrices?.length || 0})
-                        {isVehicleReturnFareExpanded ? <FiChevronUp /> : <FiChevronDown />}
-                      </span>
-                      <span className="flex items-center text-customText">
-                        {formatCurrency(vehicleReturnTotalFare)}
-                      </span>
+                    {/* Return - Driver Fare */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-customText">Driver Fare</span>
+                      <span className="text-customText">{formatCurrency(driverFare)}</span>
                     </div>
-                    {isVehicleReturnFareExpanded && (
-                      <div>
-                        {vehicleReturnRateTableRows?.map((row) => (
-                          <div key={uuidv4()} className="flex justify-between items-center mt-2 text-sm text-gray-500">
-                            <p className="break-words overflow-wrap w-[200px]">
-                              {row.vehicleType?.name || 'Unknown Vehicle Type'}
-                            </p>
-                            <p>{formatCurrency(row.fare || 0)}</p>
-                          </div>
-                        ))}
+                    <div className="flex justify-between items-center">
+                      <span className="text-customText">Driver Service Charge</span>
+                      <span className="text-customText">{formatCurrency(driverServiceCharge)}</span>
+                    </div>
 
-                        {vehicleReturnPrices?.map((row) => (
-                          <div key={uuidv4()} className="flex justify-between items-center mt-2 text-sm text-gray-500">
-                            <p className="break-words overflow-wrap w-[200px]">{row.name || 'Unknown Vehicle Type'}</p>
-                            <p>{formatCurrency(row.priceWithoutMarkup || 0)}</p>
-                          </div>
-                        ))}
+                    <hr className="border-t-2 border-dashed border-gray-300" />
+
+                    {/* Return - Vehicle Fare Section */}
+                    <div>
+                      <div
+                        className="flex justify-between items-center cursor-pointer"
+                        onClick={() => setIsVehicleReturnFareExpanded((prev) => !prev)}
+                      >
+                        <span className="flex items-center gap-2 text-customText">
+                          Vehicle Fare ({vehicleReturnRateTableRows?.length || vehicleReturnPrices?.length || 0})
+                          {isVehicleReturnFareExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                        </span>
+                        <span className="flex items-center text-customText">
+                          {formatCurrency(vehicleReturnTotalFare)}
+                        </span>
                       </div>
-                    )}
-                  </div>
+                      {isVehicleReturnFareExpanded && (
+                        <div>
+                          {vehicleReturnRateTableRows?.map((row) => (
+                            <div key={uuidv4()} className="flex justify-between items-center mt-2 text-sm text-gray-500">
+                              <p className="break-words overflow-wrap w-[200px]">
+                                {row.vehicleType?.name || 'Unknown Vehicle Type'}
+                              </p>
+                              <p>{formatCurrency(row.fare || 0)}</p>
+                            </div>
+                          ))}
 
-                  {/* Return - Vehicle Service Charge */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-customText">Vehicle Service Charge</span>
-                    <span className="text-customText">{formatCurrency(vehicleReturnServiceCharge || 0)}</span>
-                  </div>
-                </>
-              )}
+                          {vehicleReturnPrices?.map((row) => (
+                            <div key={uuidv4()} className="flex justify-between items-center mt-2 text-sm text-gray-500">
+                              <p className="break-words overflow-wrap w-[200px]">{row.name || 'Unknown Vehicle Type'}</p>
+                              <p>{formatCurrency(row.priceWithoutMarkup || 0)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Return - Vehicle Service Charge */}
+                    <div className="flex justify-between items-center">
+                      <span className="text-customText">Vehicle Service Charge</span>
+                      <span className="text-customText">{formatCurrency(vehicleReturnServiceCharge || 0)}</span>
+                    </div>
+                  </>
+                )}
             </div>
 
             <hr className="border-t-2 border-dashed border-gray-300" />
@@ -993,7 +992,7 @@ const FareSummary: FC<FareSummaryProps> = ({
           ) : (
             <>
               <span>Total Amount</span>
-              <span className="text-customBlue">{formatCurrency(totalAmount)}</span>
+              <span style={{ color: themeSettings?.accent || '#23abff' }}>{formatCurrency(totalAmount)}</span>
             </>
           )}
         </div>
@@ -1018,7 +1017,7 @@ const FareSummary: FC<FareSummaryProps> = ({
         <>
           {showMessge ? (
             <div className="mt-6">
-              <p className="text-sm text-customBlue font-semibold mb-4">
+              <p className="text-sm font-semibold mb-4" style={{ color: themeSettings?.accent || '#23abff' }}>
                 You will be redirected to the secure PayMongo Payment Gateway to pay for your booking.
               </p>
               <p className="text-sm text-customText">
@@ -1030,8 +1029,8 @@ const FareSummary: FC<FareSummaryProps> = ({
                   className="inline-flex items-center px-2 py-1 text-sm font-medium text-[rgba(var(--bg-color),1)] bg-transparent border border-[rgba(var(--border-color),1)] rounded hover:bg-[rgba(var(--bg-color),1)] hover:text-white focus:outline-none focus:ring-2 focus:ring-customBlue focus:ring-offset-2"
                   style={
                     {
-                      '--border-color': hexToRgb(themeSettings?.borderColor || '#23abff'),
-                      '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+                      '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
+                      '--bg-color': hexToRgb(themeSettings?.primaryColor || '#23abff')
                     } as React.CSSProperties
                   }
                 >
@@ -1052,8 +1051,8 @@ const FareSummary: FC<FareSummaryProps> = ({
                     className="inline-flex items-center px-2 py-1 text-sm font-medium text-[rgba(var(--bg-color),1)] bg-transparent border border-[rgba(var(--border-color),1)] rounded hover:bg-[rgba(var(--bg-color),1)] hover:text-white focus:outline-none focus:ring-2 focus:ring-[rgba(var(--icon-color),1)] focus:ring-offset-2"
                     style={
                       {
-                        '--border-color': hexToRgb(themeSettings?.borderColor || '#23abff'),
-                        '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
+                        '--border-color': hexToRgb(themeSettings?.accent || '#8C1F21'),
+                        '--bg-color': hexToRgb(themeSettings?.primaryColor || '#23abff')
                       } as React.CSSProperties
                     }
                   >
@@ -1066,7 +1065,7 @@ const FareSummary: FC<FareSummaryProps> = ({
                 <a
                   href="/booking/destination"
                   className="inline-flex items-center px-4 py-2 text-sm font-medium text-white rounded-lg hover:bg-blue-500"
-                  style={{ backgroundColor: themeSettings?.buttonDefaultColor || '#23abff' }}
+                  style={{ backgroundColor: themeSettings?.primaryColor || '#23abff' }}
                 >
                   Book Again
                 </a>
@@ -1081,6 +1080,7 @@ const FareSummary: FC<FareSummaryProps> = ({
                   checked={marketingConsent}
                   onChange={(e) => setMarketingConsent(e.target.checked)}
                   className="mt-1 mr-2"
+                  style={{ colorScheme: 'light', accentColor: themeSettings?.primaryColor }}
                 />
                 <label htmlFor="marketing" className="text-xs text-gray-600">
                   Yes, I would like to receive emails about promotions, updates, and special offers from Ayahay and
@@ -1094,14 +1094,23 @@ const FareSummary: FC<FareSummaryProps> = ({
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
                   className="mt-1 mr-2"
+                  style={{ colorScheme: 'light', accentColor: themeSettings?.primaryColor }}
                 />
                 <label htmlFor="terms" className="text-xs text-gray-600">
                   I agree to the{' '}
-                  <a href="/terms" className="text-customBlue hover:underline">
+                  <a
+                    href="/terms"
+                    className="hover:underline"
+                    style={{ color: themeSettings?.primaryColor || '#000000' }}
+                  >
                     Terms and Conditions
                   </a>{' '}
                   and{' '}
-                  <a href="/privacy" className="text-customBlue hover:underline">
+                  <a
+                    href="/privacy"
+                    className="hover:underline"
+                    style={{ color: themeSettings?.primaryColor || '#000000' }}
+                  >
                     Privacy Policy
                   </a>
                 </label>
@@ -1140,7 +1149,7 @@ const FareSummary: FC<FareSummaryProps> = ({
                           onClick={handleModalConfirm}
                           className="min-w-[100px]"
                           style={{
-                            backgroundColor: themeSettings?.buttonDefaultColor || '#23abff',
+                            backgroundColor: themeSettings?.primaryColor || '#23abff',
                             color: 'white'
                           }}
                         >

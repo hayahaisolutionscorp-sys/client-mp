@@ -18,7 +18,7 @@ const VehicleDropdown: React.FC<VehicleDropdownProps> = ({ value = DEFAULT_NUM_V
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const toggleDropdown = () => setIsOpen(!isOpen);
   const themeSettings = useThemeSettings();
-  
+
   const increment = () => {
     onChange(value + 1);
   };
@@ -56,14 +56,14 @@ const VehicleDropdown: React.FC<VehicleDropdownProps> = ({ value = DEFAULT_NUM_V
         className="flex text-sm items-center justify-between w-full h-full px-4 py-2 bg-white border rounded-md focus:outline-none focus:border-[rgba(var(--border-color),1)] focus:border-2"
         style={
           {
-            "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff"),
+            "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
           } as React.CSSProperties
         }
       >
         <div className="flex items-center space-x-3">
           <GrCar
             className="h-5 w-5"
-            style={{ color: themeSettings?.iconColor || "#051036" }}
+            style={{ color: themeSettings?.accent || "#051036" }}
           />
           <span className="text-customText font-natural">{value} Vehicle{value !== 1 ? 's' : ''}</span>
         </div>

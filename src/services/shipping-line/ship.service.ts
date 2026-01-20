@@ -1,43 +1,44 @@
 import { IShip } from '@/models';
 import { SHIPS_API } from 'constants/api';
+import axios from '@/services/core/axios';
+
+import shipsData from '@/data/ships.json';
 
 export async function getAllShips(): Promise<IShip[] | undefined> {
-  try {
-    const response = await fetch(SHIPS_API);
-    
-    // Check if the response is ok (status in the range 200-299)
-    if (!response.ok) {
-      throw new Error(`Error fetching ships: ${response.statusText}`);
-    }
+  // try {
+  //   const { data } = await axios.get(SHIPS_API);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
 
-    // Parse the JSON response
-    const data: IShip[] = await response.json();
-    return data;
-
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return shipsData as any as IShip[];
 }
 
 export async function getShips(): Promise<IShip[] | undefined> {
-  try {
-    const response = await fetch(`${SHIPS_API}/my-shipping-line`);
-    
-    if (!response.ok) {
-      throw new Error(`Error fetching ships: ${response.statusText}`);
-    }
+  // try {
+  //   const { data } = await axios.get(SHIPS_API);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
 
-    const data: IShip[] = await response.json();
-    return data;
-
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return (shipsData as any as IShip[]).filter(s => s.shippingLineId === 3);
 }
 
 export async function getShip(shipId: number): Promise<IShip | undefined> {
-  const ships = await getShips();
-  return ships?.find((ship) => ship.id === shipId);
+  // try {
+  //   const { data } = await axios.get(`${SHIPS_API}/${shipId}`);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
+
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return (shipsData as any as IShip[]).find(s => s.id === shipId);
 }

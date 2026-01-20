@@ -1,14 +1,8 @@
 export interface IThemeSettings {
-  id: number;
-  shippingLineId: number;
+  primaryColor?: string;
+  secondaryColor?: string;
+  primary: string;
+  secondary: string;
+  accent: string;
   fontStyle: string;
-  backgroundColor: string;
-  buttonDefaultColor: string;
-  buttonDestructiveColor: string;
-  buttonOutlineColor: string;
-  buttonSecondaryColor: string;
-  buttonGhostColor: string;
-  buttonLinkColor: string;
-  borderColor: string;
-  iconColor: string;
 }

@@ -1,38 +1,27 @@
 import { IHeaderSection } from '@/models';
 import { HEADER_SECTION_API } from 'constants/api';
+import { IS_CLIENT } from '../config';
 
-export async function getHeadersSections(): Promise<IHeaderSection[] | undefined> {
+import headerSectionsData from '@/data/header-sections.json';
+
+export async function getHeadersSections(): Promise<IHeaderSection | undefined> {
   try {
-    const response = await fetch(HEADER_SECTION_API);
-    
-    if (!response.ok) {
-        throw new Error(`Failed to fetch header sections: ${response.status} ${response.statusText}`);
+    if (!IS_CLIENT) {
+      return headerSectionsData[0] as IHeaderSection | undefined;
     }
 
-    const data: IHeaderSection[] = await response.json();
-    return data;
+    const res = await fetch(HEADER_SECTION_API, {
+      next: { tags: ['header-sections'], revalidate: 3600 }
+    });
 
-  } catch (e) {
-    console.error('Error fetching header sections:', e);
-    throw e;
-  }
-}
-
-export async function getHeaderSectionByShippingLineId(
-  shippingLineId: number
-): Promise<IHeaderSection | undefined> { 
-  try {
-    const response = await fetch(`${HEADER_SECTION_API}/${shippingLineId}`);
-
-    if (!response.ok) {
-        throw new Error(`Error fetching header section by shipping line id: ${response.statusText}`);
+    if (res.ok) {
+      const { data } = await res.json();
+      return data;
     }
 
-    const headerSection: IHeaderSection = await response.json();
-    return headerSection;
-
+    return undefined;
   } catch (e) {
     console.error(e);
-    throw e;
+    return undefined;
   }
 }

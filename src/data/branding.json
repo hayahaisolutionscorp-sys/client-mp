@@ -1,0 +1,21 @@
+{
+    "id": "f6e18726-5559-4901-8bc5-82925fdb5313",
+    "brand_name": "Ayahay",
+    "domain_name": "ayahay",
+    "subdomain_name": "ayahay",
+    "favicon_url": "https://ayahay-v2-assets.s3.amazonaws.com/whitelabel/1/favicon/a884b5b6-981e-46f7-b3c7-b29662f604a1.ico",
+    "colors": {
+        "accent": "oklch(34.38% 0.118 262.34)",
+        "primary": "oklch(34.38% 0.118 262.34)",
+        "secondary": "oklch(83.66% 0.066 235.48)"
+    },
+    "logo": {
+        "dark": "https://uat.ayahay.com/assets/images/ayahay_logo_blue.png",
+        "light": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/logo/96a4764d-a7c4-4f7d-b95c-6c74452268d3.png"
+    },
+    "slogan": "Kay Ang Pagsakay, Dapat AYAHAY!",
+    "motto": null,
+    "tagline": null,
+    "created_at": "2026-01-08T03:31:28.888Z",
+    "updated_at": "2026-01-12T02:14:27.655Z"
+}

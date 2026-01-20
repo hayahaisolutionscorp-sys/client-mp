@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "shippingLineId": 3,
+        "headingText": "Get in Touch",
+        "headingDescription": "We are here to help you.",
+        "contactNumber": "0917-000-0000",
+        "email": "contact@ayahay.com",
+        "address": "Ayahay HQ, Cebu City",
+        "backgroundImageFilename": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVT9s6YRT35lzgtNKNLfaRWrTjkRQVgA0Juw&s"
+    }
+]

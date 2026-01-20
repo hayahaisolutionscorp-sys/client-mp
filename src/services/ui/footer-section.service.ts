@@ -1,38 +1,27 @@
 import { IFooterSection } from '@/models';
 import { FOOTER_SECTION_API } from 'constants/api';
+import { IS_CLIENT } from '../config';
 
-export async function getFooterSections(): Promise<IFooterSection[] | undefined> {
+import footerSectionsData from '@/data/footer-sections.json';
+
+export async function getFooterSections(): Promise<IFooterSection | undefined> {
   try {
-    const response = await fetch(FOOTER_SECTION_API);
-    
-    if (!response.ok) {
-        throw new Error(`Failed to fetch footer sections: ${response.status} ${response.statusText}`);
+    if (!IS_CLIENT) {
+      return footerSectionsData as IFooterSection;
     }
 
-    const data: IFooterSection[] = await response.json();
-    return data;
+    const res = await fetch(FOOTER_SECTION_API, {
+      next: { tags: ['footer-sections'], revalidate: 3600 }
+    });
 
-  } catch (e) {
-    console.error('Error fetching footer sections:', e);
-    throw e;
-  }
-}
-
-export async function getFooterSectionByShippingLineId(
-  shippingLineId: number
-): Promise<IFooterSection | undefined> { 
-  try {
-    const response = await fetch(`${FOOTER_SECTION_API}/${shippingLineId}`);
-
-    if (!response.ok) {
-        throw new Error(`Error fetching footer section by shipping line id: ${response.statusText}`);
+    if (res.ok) {
+      const { data } = await res.json();
+      return data;
     }
 
-    const footerSection: IFooterSection = await response.json();
-    return footerSection;
-
+    return undefined;
   } catch (e) {
     console.error(e);
-    throw e;
+    return undefined;
   }
 }

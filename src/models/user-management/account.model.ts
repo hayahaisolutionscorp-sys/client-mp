@@ -4,6 +4,7 @@ import { ITravelAgency } from './travel-agency.model';
 import { IClient } from './client.model';
 import { IShippingLine } from '../shipping-line/shipping-line.model';
 import { IVehicle } from '../vehicle/vehicle.model';
+import { IVerification } from './dependent.model';
 
 /**
  * An account can only be *one* of the following:
@@ -19,7 +20,7 @@ import { IVehicle } from '../vehicle/vehicle.model';
  * tables/models (e.g. TravelAgencyShippingLine)
  */
 export interface IAccount {
-  // firebase user ID
+  // user ID
   id: string;
   passengerId?: number;
   passenger?: IPassenger;
@@ -30,17 +31,18 @@ export interface IAccount {
   clientId?: number;
   client?: IClient;
   qr_code?: string;
-  profile_picture?: string;
 
   email: string;
   emailConsent: boolean;
   role: keyof typeof ACCOUNT_ROLE;
-  // TODO: properly save isEmailVerified from Firebase next time
+
   isEmailVerified?: boolean;
   apiKey?: string;
 
   passengers?: IPassenger[];
   vehicles?: IVehicle[];
+  verification?: IVerification;
+  verificationDetails?: IVerification[];
 }
 
 export interface LoginForm {
@@ -61,6 +63,6 @@ export interface RegisterForm {
   birthday: string;
   address: string;
   nationality: string;
-  mobile_number: string;
+  phone: string;
   emailConsent: boolean;
 }

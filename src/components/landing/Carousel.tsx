@@ -5,8 +5,6 @@ import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { BsDot } from 'react-icons/bs';
 import { IoClose } from 'react-icons/io5';
 import Image from 'next/image';
-
-import { CAROUSEL_IMAGES } from 'constants/storage';
 import { IThumbnail } from '@/models';
 
 const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
@@ -19,6 +17,22 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const totalImages = allImages.length;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setModalImage(null);
+      }
+    };
+
+    if (modalImage) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [modalImage]);
 
   useEffect(() => {
     const updateImagesToShow = () => {
@@ -91,14 +105,25 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
                 flex: `0 0 ${100 / imagesToShow}%`
               }}
             >
-              <div className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+              <div
+                className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
+                role="button"
+                tabIndex={0}
+                onClick={() => setModalImage(image)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setModalImage(image);
+                  }
+                }}
+                aria-label={`View image ${image.label}`}
+              >
                 <Image
-                  src={`${CAROUSEL_IMAGES}${image.shippingLineId}/${image.filename}`}
+                  src={image.filename}
                   alt={`${image.label}`}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33.33vw"
                   className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105 cursor-pointer"
-                  onClick={() => setModalImage(image)}
                   priority={index === currentIndex}
                 />
               </div>
@@ -111,9 +136,8 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
       <button
         onClick={handlePrevious}
         disabled={currentIndex === 0 || isTransitioning}
-        className={`absolute top-1/2 -left-2 sm:-left-4 transform -translate-y-1/2 p-2 sm:p-3 bg-white/90 text-gray-800 rounded-full shadow-lg backdrop-blur-sm z-10 ${
-          currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110 hover:bg-white active:scale-95'
-        }`}
+        className={`absolute top-1/2 -left-2 sm:-left-4 transform -translate-y-1/2 p-2 sm:p-3 bg-white/90 text-gray-800 rounded-full shadow-lg backdrop-blur-sm z-10 ${currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110 hover:bg-white active:scale-95'
+          }`}
         aria-label="Previous slide"
       >
         <FaArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -122,11 +146,10 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
       <button
         onClick={handleNext}
         disabled={currentIndex >= totalImages - imagesToShow || isTransitioning}
-        className={`absolute top-1/2 -right-2 sm:-right-4 transform -translate-y-1/2 p-2 sm:p-3 bg-white/90 text-gray-800 rounded-full shadow-lg backdrop-blur-sm z-10 ${
-          currentIndex >= totalImages - imagesToShow
-            ? 'opacity-50 cursor-not-allowed'
-            : 'hover:scale-110 hover:bg-white active:scale-95'
-        }`}
+        className={`absolute top-1/2 -right-2 sm:-right-4 transform -translate-y-1/2 p-2 sm:p-3 bg-white/90 text-gray-800 rounded-full shadow-lg backdrop-blur-sm z-10 ${currentIndex >= totalImages - imagesToShow
+          ? 'opacity-50 cursor-not-allowed'
+          : 'hover:scale-110 hover:bg-white active:scale-95'
+          }`}
         aria-label="Next slide"
       >
         <FaArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -138,9 +161,8 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`transition-all duration-300 ${
-              currentIndex === index ? 'text-customBlue scale-150' : 'text-gray-400 hover:text-gray-600'
-            }`}
+            className={`transition-all duration-300 ${currentIndex === index ? 'text-customBlue scale-150' : 'text-gray-400 hover:text-gray-600'
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           >
             <BsDot className="w-6 h-6" />
@@ -156,7 +178,7 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
         >
           <div className="relative max-w-[95vw] max-h-[95vh] rounded-lg overflow-hidden">
             <Image
-              src={`${CAROUSEL_IMAGES}${modalImage.shippingLineId}/${modalImage.filename}`}
+              src={modalImage.filename}
               alt="Enlarged view"
               width={1200}
               height={800}
@@ -169,6 +191,7 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
                 setModalImage(null);
               }}
               className="absolute top-4 right-4 text-white bg-black/50 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-black/70 transition-all duration-300"
+              aria-label="Close modal"
             >
               <IoClose className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>

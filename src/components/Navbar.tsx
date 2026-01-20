@@ -5,8 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { NAV_ITEMS, SHIPPING_LINE_LOGO } from 'constants/index';
-import { useShippingLineForWhiteLabel } from '@/hooks/shipping-line';
+import { NAV_ITEMS } from 'constants/index';
 
 type NavItem = {
   id: string;
@@ -15,41 +14,29 @@ type NavItem = {
   redirect_url: string;
 };
 import UserDropdown from './UserDropdown';
-import { getHeaderSectionByShippingLineId } from '@/services';
+import { getHeadersSections } from '@/services';
+import { getBrandingConfig } from '@/services/ui/branding.service';
 
 const Navbar = () => {
   const pathname = usePathname();
   const [activeNav, setActiveNav] = useState('Book');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [shippingLineId, setShippingLineId] = useState('3'); // Default to Ayahay
   const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
-  const shippingLine = useShippingLineForWhiteLabel();
-
-  useEffect(() => {
-    const envId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3';
-    setShippingLineId(envId);
-  }, []);
 
   useEffect(() => {
     const fetchHeaderSection = async () => {
-      const parsedId = parseInt(shippingLineId, 10);
-      if (isNaN(parsedId)) {
-        console.error('Invalid shippingLineId:', shippingLineId);
-        return;
-      }
-
       let itemsToRemove: string[] = [];
 
-      if (parsedId !== 3) {
-        itemsToRemove = ['WhyChooseUs', 'Partner'];
-      }
+      const headerSection = await getHeadersSections();
 
-      const headerSection = await getHeaderSectionByShippingLineId(parsedId);
       if (headerSection) {
         if (!headerSection.showPromos) itemsToRemove.push('Promos');
         if (!headerSection.showRoutes) itemsToRemove.push('Routes');
         if (!headerSection.showResources) itemsToRemove.push('Resources');
         if (!headerSection.showAboutUs) itemsToRemove.push('AboutUs');
+        // prep lng
+        // if (!headerSection.showWhyChooseUs) itemsToRemove.push('WhyChooseUs');
+        // if (!headerSection.showPartner) itemsToRemove.push('Partner');
       }
 
       const tempFilteredNavItems = NAV_ITEMS.filter((item) => !itemsToRemove.includes(item.id));
@@ -57,7 +44,17 @@ const Navbar = () => {
     };
 
     fetchHeaderSection();
-  }, [shippingLineId]);
+  }, []);
+
+  const [branding, setBranding] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      const config = await getBrandingConfig();
+      setBranding(config);
+    };
+    fetchBranding();
+  }, []);
 
   // Handle scroll lock when menu is open
   useEffect(() => {
@@ -89,17 +86,14 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  if (!branding) return null;
+
   const isHome = pathname === '/';
   const shouldBeTransparent = isHome && !isMenuOpen;
   const position = isHome ? 'absolute' : 'relative';
   const backgroundColor = shouldBeTransparent ? 'text-white bg-black bg-opacity-35' : 'text-black bg-white';
 
-  const logoSrc =
-    shippingLineId && shippingLineId !== '3'
-      ? `${SHIPPING_LINE_LOGO}${shippingLine?.logoFilename}`
-      : shouldBeTransparent
-      ? '/assets/images/ayahay_logo_white.png'
-      : '/assets/images/ayahay_logo_blue.png';
+  const logoSrc = isHome ? branding.logo.light : branding.logo.dark;
 
   return (
     <>
@@ -133,11 +127,10 @@ const Navbar = () => {
                         setActiveNav(item.id);
                         scrollToElement(item.id);
                       }}
-                      className={`text-md font-medium transition-all duration-300 ${
-                        activeNav === item.id
-                          ? 'border-b-2 border-current'
-                          : 'hover:border-b-2 border-transparent hover:border-current'
-                      }`}
+                      className={`text-md font-medium transition-all duration-300 ${activeNav === item.id
+                        ? 'border-b-2 border-current'
+                        : 'hover:border-b-2 border-transparent hover:border-current'
+                        }`}
                     >
                       {item.name}
                     </button>
@@ -145,11 +138,10 @@ const Navbar = () => {
                     <Link
                       key={item.id}
                       href={item.redirect_url}
-                      className={`text-md font-medium transition-all duration-300 ${
-                        activeNav === item.id
-                          ? 'border-b-2 border-current'
-                          : 'hover:border-b-2 border-transparent hover:border-current'
-                      }`}
+                      className={`text-md font-medium transition-all duration-300 ${activeNav === item.id
+                        ? 'border-b-2 border-current'
+                        : 'hover:border-b-2 border-transparent hover:border-current'
+                        }`}
                     >
                       {item.name}
                     </Link>
@@ -168,19 +160,16 @@ const Navbar = () => {
                 >
                   <div className="relative w-6 h-6">
                     <span
-                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${
-                        isMenuOpen ? 'rotate-45 translate-y-0' : '-translate-y-2'
-                      }`}
+                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? 'rotate-45 translate-y-0' : '-translate-y-2'
+                        }`}
                     />
                     <span
-                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${
-                        isMenuOpen ? 'opacity-0' : 'opacity-100'
-                      }`}
+                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? 'opacity-0' : 'opacity-100'
+                        }`}
                     />
                     <span
-                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${
-                        isMenuOpen ? '-rotate-45 translate-y-0' : 'translate-y-2'
-                      }`}
+                      className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? '-rotate-45 translate-y-0' : 'translate-y-2'
+                        }`}
                     />
                   </div>
                 </button>
@@ -192,9 +181,8 @@ const Navbar = () => {
         {/* Mobile menu overlay */}
         {isHome && (
           <div
-            className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${
-              isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
+            className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
             style={{ zIndex: 40 }}
           >
             <div className="h-full w-full px-4 pt-[100px] overflow-y-auto">
@@ -202,9 +190,8 @@ const Navbar = () => {
                 {/* Mobile menu overlay */}
                 {isHome && (
                   <div
-                    className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${
-                      isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
+                    className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                      }`}
                     style={{ zIndex: 40 }}
                   >
                     <div className="h-full w-full px-4 pt-[100px] overflow-y-auto">
@@ -217,9 +204,8 @@ const Navbar = () => {
                                 setActiveNav(item.id);
                                 scrollToElement(item.id);
                               }}
-                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${
-                                isMenuOpen ? 'opacity-100' : 'opacity-0'
-                              } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
+                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                                } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
                             >
                               {item.name}
                             </button>
@@ -228,9 +214,8 @@ const Navbar = () => {
                               key={item.id}
                               href={item.redirect_url}
                               onClick={() => setIsMenuOpen(false)}
-                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${
-                                isMenuOpen ? 'opacity-100' : 'opacity-0'
-                              } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
+                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                                } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
                             >
                               {item.name}
                             </Link>
@@ -249,9 +234,8 @@ const Navbar = () => {
       {/* Mobile backdrop */}
       {isHome && (
         <div
-          className={`fixed inset-0 bg-black transition-opacity duration-300 md:hidden ${
-            isMenuOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
-          }`}
+          className={`fixed inset-0 bg-black transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
+            }`}
           style={{ zIndex: 30 }}
           onClick={() => setIsMenuOpen(false)}
         />

@@ -1,4 +1,4 @@
-import { hexToRgb } from 'helpers/theme.helpers';
+
 
 interface HeroSectionProps {
   backgroundColor: string;
@@ -7,12 +7,8 @@ interface HeroSectionProps {
 export default function FAQHeroSection({ backgroundColor }: HeroSectionProps) {
   return (
     <div
-      className="bg-[rgba(var(--bg-color),1)] text-white py-4 sm:py-6 md:py-8 relative mt-[-0rem] md:mt-[-3rem] lg:mt-[-2.5rem]"
-      style={
-        {
-          '--bg-color': hexToRgb(backgroundColor)
-        } as React.CSSProperties
-      }
+      className="text-white py-4 sm:py-6 md:py-8 relative mt-[-0rem] md:mt-[-3rem] lg:mt-[-2.5rem]"
+      style={{ backgroundColor }}
     >
       <div className="container mx-auto px-2 sm:px-4 lg:px-6">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4 animate-fade-in">

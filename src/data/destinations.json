@@ -1,0 +1,82 @@
+[
+    {
+        "id": "48b1838e-5d83-4347-bca2-c94935c2c8bd",
+        "route": "Palompon, Leyte",
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/photogrid/3/6e890e5f-50ca-4a7b-91a2-1c154afc2ec4.png?cache_buster=b5e7a4b2-edbf-4668-bf55-5b6de65d712c",
+        "image_alt": "Palompon, Leyte",
+        "is_active": true,
+        "display_order": 1,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "c32cce78-e0b2-41f6-9cf5-1e4f843867ef",
+        "route": "Camotes Island, Cebu",
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/photogrid/3/5704e840-894d-4945-b7df-317d652ad6ec.jpg?cache_buster=b5e7a4b2-edbf-4668-bf55-5b6de65d712c",
+        "image_alt": "Camotes Island, Cebu",
+        "is_active": true,
+        "display_order": 2,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "81f1f07a-002f-4209-9d8b-47bee095c76a",
+        "route": "Coron, Palawan",
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/photogrid/3/fc1eb53b-1720-4c83-9a22-6a29a983b3f0.png?cache_buster=b5e7a4b2-edbf-4668-bf55-5b6de65d712c",
+        "image_alt": "Coron, Palawan",
+        "is_active": true,
+        "display_order": 3,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "7db66edb-84c1-4af1-be51-61d3008b49de",
+        "route": "El Nido, Palawan",
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/photogrid/3/6d30f6dc-f3cd-43fd-89c3-91d01738c110.png?cache_buster=b5e7a4b2-edbf-4668-bf55-5b6de65d712c",
+        "image_alt": "El Nido, Palawan",
+        "is_active": true,
+        "display_order": 4,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "52bdb840-f6d4-4a35-b2cd-39cc7aba6ca3",
+        "route": "Isabel, Leyte",
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/photogrid/3/daa9f155-8bec-4752-92f4-0f9051158c56.png?cache_buster=b5e7a4b2-edbf-4668-bf55-5b6de65d712c",
+        "image_alt": "Isabel Leyte",
+        "is_active": true,
+        "display_order": 5,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "a19cad4e-1784-4fd7-b941-9768c99efc21",
+        "route": "Mactan, Cebu",
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/photogrid/3/0be0194b-be59-43d8-a1a6-8490d9762063.png?cache_buster=b5e7a4b2-edbf-4668-bf55-5b6de65d712c",
+        "image_alt": "Mactan, Cebu",
+        "is_active": true,
+        "display_order": 6,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "284ea08d-1fcd-4dc3-aa9c-3c85b3cb643b",
+        "route": "Santa Fe, Bantayan",
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/photogrid/3/a3aa7bae-750f-404c-bdb5-4b822c1e2759.png?cache_buster=b5e7a4b2-edbf-4668-bf55-5b6de65d712c",
+        "image_alt": "Santa Fe, Bantayan",
+        "is_active": true,
+        "display_order": 7,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "aa1e8ef5-6b2e-4af7-a6e3-09f02acaeaaf",
+        "route": "Kawit Medellin",
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/photogrid/3/cbc52210-59c9-4499-a1a0-b4b82632314f.png?cache_buster=b5e7a4b2-edbf-4668-bf55-5b6de65d712c",
+        "image_alt": "Kawit Medellin",
+        "is_active": true,
+        "display_order": 8,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    }
+]

@@ -24,6 +24,8 @@ import {
 } from 'constants/index';
 import { IPort } from '@/models';
 import { getPorts, getTripsDestinationByPortId } from '@/services';
+import { getBrandingConfig } from '@/services/ui/branding.service';
+import { IBrandingConfig } from '@/models/branding.model';
 
 interface SearchHeaderProps {
   isScroll?: boolean;
@@ -36,8 +38,8 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const shippingLineId = process.env.NEXT_PUBLIC_SHIPPING_LINE_ID;
-  const shippingLine = useShippingLineForWhiteLabel();
+
+  const [branding, setBranding] = useState<IBrandingConfig | null>(null);
 
   // Utility to check if a date string is valid
   const isValidDate = (dateString: string | null) => {
@@ -97,6 +99,15 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
   }, [searchParams]);
 
   useEffect(() => {
+    const fetchBranding = async () => {
+      const config = await getBrandingConfig();
+      setBranding(config);
+    };
+
+    fetchBranding();
+  }, []);
+
+  useEffect(() => {
     const fetchDestinationPorts = async () => {
       if (selectedOriginPort) {
         try {
@@ -131,8 +142,8 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
       isValidDate(searchParams.get('returnDate'))
         ? new Date(searchParams.get('returnDate')!)
         : isValidDate(searchParams.get('departureDate'))
-        ? new Date(searchParams.get('departureDate')!)
-        : new Date()
+          ? new Date(searchParams.get('departureDate')!)
+          : new Date()
     );
   }, [searchParams]);
 
@@ -284,7 +295,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
                 selectedPort={selectedOriginPort}
               />
               <div className="hidden lg:flex items-center justify-center h-[55px]">
-                <LuArrowRightLeft className="w-5 h-5" style={{ color: themeSettings?.iconColor || '#23abff' }} />
+                <LuArrowRightLeft className="w-5 h-5" style={{ color: themeSettings?.accent || '#23abff' }} />
               </div>
               <PortDropdownFieldset
                 legendText="Destination Port"
@@ -331,18 +342,16 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
       {/* Logo and Tagline */}
       <div className="flex flex-col items-center justify-center w-[280px]">
         <div className={isScroll ? 'block' : 'hidden'}>
-          <Image
+          {/* <Image
             src={
-              shippingLineId
-                ? `${SHIPPING_LINE_LOGO}${shippingLine?.logoFilename}`
-                : '/assets/images/ayahay_logo_blue.png'
+              branding?.logo?.dark || '/assets/images/ayahay_logo_blue.png'
             }
-            alt={'Ayahay Logo'}
+            alt={branding?.brand_name || 'Ayahay Logo'}
             height={500}
             width={800}
-            className={`w-auto object-contain ${shippingLineId ? 'h-[150px]' : 'h-[100px]'}`}
-          />
-          {!shippingLineId && <p className="mt-2 text-center">Kay Ang Pagsakay, Dapat AYAHAY!</p>}
+            className={`w-auto object-contain h-[100px]`}
+          /> */}
+          <p className="mt-2 text-center">Kay Ang Pagsakay, Dapat AYAHAY!</p>
         </div>
       </div>
 
@@ -365,7 +374,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
               selectedPort={selectedOriginPort}
             />
             <div className="hidden lg:flex items-center justify-center h-[55px]">
-              <LuArrowRightLeft className="w-5 h-5" style={{ color: themeSettings?.iconColor || '#23abff' }} />
+              <LuArrowRightLeft className="w-5 h-5" style={{ color: themeSettings?.accent || '#23abff' }} />
             </div>
             <PortDropdownFieldset
               legendText="Destination Port"
@@ -386,17 +395,15 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
               )}
             </div>
             <div
-              className={`flex items-center justify-center sm:justify-start h-[55px] pt-2 ${
-                !isFormValid ? 'cursor-not-allowed' : ''
-              }`}
+              className={`flex items-center justify-center sm:justify-start h-[55px] pt-2 ${!isFormValid ? 'cursor-not-allowed' : ''
+                }`}
             >
               <Button
                 variant="default"
                 onClick={handleSearchClick}
                 disabled={!isFormValid || isLoading}
-                className={`${
-                  !isFormValid ? 'cursor-not-allowed' : ''
-                } w-full h-full text-sm flex items-center justify-center gap-2`}
+                className={`${!isFormValid ? 'cursor-not-allowed' : ''
+                  } w-full h-full text-sm flex items-center justify-center gap-2`}
               >
                 <BiSolidShip className="h-5 w-5 text-white" />
                 <span className="whitespace-nowrap">Search Trip</span>

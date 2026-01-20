@@ -19,7 +19,7 @@ export default function PassengerList({ booking }: PassengerListProps) {
           className="text-sm sm:text-md font-semibold rounded-t-lg bg-[rgba(var(--bg-color),0.05)] border-b border-b-gray-300 text-customText px-3 sm:px-4 py-2"
           style={
             {
-              '--bg-color': hexToRgb(themeSettings?.borderColor || '#23abff')
+              '--bg-color': hexToRgb(themeSettings?.accent || '#8C1F21')
             } as React.CSSProperties
           }
         >
@@ -48,7 +48,13 @@ export default function PassengerList({ booking }: PassengerListProps) {
                 )}
                 {/* Air-conditioned Badge */}
                 {passenger?.cabin?.cabinType && (
-                  <div className="flex items-center px-2 py-1 text-xs font-medium bg-orange-100 text-green-700 border rounded-full">
+                  <div
+                    className="flex items-center px-2 py-1 text-xs font-medium rounded-full"
+                    style={{
+                      backgroundColor: `${themeSettings?.accent || '#23abff'}15`,
+                      color: themeSettings?.accent || '#23abff'
+                    }}
+                  >
                     <TbPointFilled className="mr-1" />
                     {passenger?.cabin?.cabinType?.name}
                   </div>
@@ -86,7 +92,13 @@ export default function PassengerList({ booking }: PassengerListProps) {
                   )}
                   {/* Air-conditioned Badge */}
                   {passenger?.cabin?.cabinType && (
-                    <div className="flex items-center px-2 py-1 text-xs font-medium bg-orange-100 text-green-700 rounded-full">
+                    <div
+                      className="flex items-center px-2 py-1 text-xs font-medium rounded-full"
+                      style={{
+                        backgroundColor: `${themeSettings?.accent || '#23abff'}15`,
+                        color: themeSettings?.accent || '#23abff'
+                      }}
+                    >
                       <TbPointFilled className="mr-1" />
                       {passenger?.cabin?.cabinType?.name}
                     </div>

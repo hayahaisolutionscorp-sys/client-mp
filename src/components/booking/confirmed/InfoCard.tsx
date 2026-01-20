@@ -10,7 +10,7 @@ interface InfoCardProps {
   linkText: string;
   linkHref: string;
 }
-  
+
 const InfoCard = ({
   imgSrc,
   altText,
@@ -22,9 +22,9 @@ const InfoCard = ({
   const themeSettings = useThemeSettings();
 
   return (
-    <div 
+    <div
       className="flex flex-col sm:flex-row items-center border-2 rounded-lg shadow-sm bg-white gap-3 sm:gap-4 w-full min-w-[280px] sm:min-w-[350px] lg:min-w-[400px] max-w-[500px] p-3 sm:p-4 mb-5"
-      style={{ borderColor: themeSettings?.iconColor || "#23abff" }}
+      style={{ borderColor: themeSettings?.accent || "#23abff" }}
     >
       <Image
         src={imgSrc}
@@ -38,7 +38,8 @@ const InfoCard = ({
         <p className="text-xs sm:text-sm text-gray-600">{description}</p>
         <a
           href={linkHref}
-          className="inline-block text-xs sm:text-sm text-customBlue font-medium hover:underline"
+          className="inline-block text-xs sm:text-sm font-medium hover:underline"
+          style={{ color: themeSettings?.accent || '#23abff' }}
         >
           {linkText}
         </a>
@@ -46,6 +47,5 @@ const InfoCard = ({
     </div>
   );
 };
-  
+
 export default InfoCard;
-  

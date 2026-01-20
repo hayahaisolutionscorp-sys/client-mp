@@ -34,11 +34,11 @@ const DatePickerFieldset = ({
   };
 
   return (
-    <fieldset 
+    <fieldset
       className="border rounded-md bg-white w-full min-w-[165px] h-[55px] focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2"
       style={
         {
-          "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff"),
+          "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
         } as React.CSSProperties
       }
     >
@@ -56,10 +56,10 @@ const DatePickerFieldset = ({
             >
               <CalendarIcon
                 className="mr-3 h-5 w-5"
-                style={{ color: themeSettings?.iconColor || "#051036" }}
+                style={{ color: themeSettings?.accent || "#051036" }}
               />
-              {isClient && date && isValidDate(date) 
-                ? toPhilippinesTime(date.toISOString(), DATE_PRIMARY_DEFAULT_FORMAT) 
+              {isClient && date && isValidDate(date)
+                ? toPhilippinesTime(date.toISOString(), DATE_PRIMARY_DEFAULT_FORMAT)
                 : <span>Select Date</span>}
             </button>
           </PopoverTrigger>

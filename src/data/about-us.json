@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "shippingLineId": 3,
+        "imageFilename": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVT9s6YRT35lzgtNKNLfaRWrTjkRQVgA0Juw&s",
+        "imageLabel": "Our Team",
+        "imageCaption": "Tangina mo",
+        "welcomeTitle": "Welcome to Ayahay",
+        "welcomeDescription": "The best way to travel by sea.",
+        "ourStoryTitle": "Our Story",
+        "ourStoryDescription": "Started in 2024...",
+        "ourExpertiseTitle": "Expertise",
+        "ourExpertiseDescription": "Safety and comfort.",
+        "ourCoreValues": "[]",
+        "tabsBackgroundColor": "#153677"
+    }
+]

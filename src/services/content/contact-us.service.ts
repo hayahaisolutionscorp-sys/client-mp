@@ -1,38 +1,65 @@
-import { IContactUs } from '@/models';
-import { CONTACT_US_API } from 'constants/api';
+import { IContactInformation } from '@/models';
+import { CONTACT_INFORMATION_API, CONTACT_US_HERO_API } from 'constants/api';
+import { IS_CLIENT } from '../config';
 
-export async function getContactUs(): Promise<IContactUs[] | undefined> {
+import contactInformationData from '@/data/contact-information.json';
+import contactUsHeroData from '@/data/contact-us-hero.json';
+
+export interface IContactUsHero {
+  id: string;
+  page_id: string;
+  type: string;
+  bg_type: 'image' | 'video' | null;
+  bg_url: string | null;
+  bg_alt: string | null;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export async function getContactUs(): Promise<IContactInformation[]> {
   try {
-    const response = await fetch(CONTACT_US_API);
-    
-    if (!response.ok) {
-        throw new Error(`Failed to fetch contact us: ${response.status} ${response.statusText}`);
+    if (!IS_CLIENT) {
+      return contactInformationData as IContactInformation[];
     }
 
-    const data: IContactUs[] = await response.json();
-    return data;
+    const res = await fetch(CONTACT_INFORMATION_API, {
+      next: { tags: ['contact-us'], revalidate: 3600 }
+    });
 
+    if (res.ok) {
+      const { data } = await res.json();
+      return data;
+    }
+
+    return [];
   } catch (e) {
-    console.error('Error fetching contact us:', e);
-    throw e;
+    console.error(e);
+    return [];
   }
 }
 
-export async function getContactUsByShippingLineId(
-  shippingLineId: number
-): Promise<IContactUs | undefined> { 
+export async function getContactUsHero(): Promise<IContactUsHero | undefined> {
   try {
-    const response = await fetch(`${CONTACT_US_API}/${shippingLineId}`, { next: { revalidate: 3600 }});
-
-    if (!response.ok) {
-        throw new Error(`Error fetching contact us by shipping line id: ${response.statusText}`);
+    if (!IS_CLIENT) {
+      return contactUsHeroData as IContactUsHero;
     }
 
-    const contactUs: IContactUs = await response.json();
-    return contactUs;
+    const res = await fetch(CONTACT_US_HERO_API, {
+      next: { tags: ['contact-us-hero'], revalidate: 3600 }
+    });
 
+    if (res.ok) {
+      const { data } = await res.json();
+      return data;
+    }
+
+    return undefined;
   } catch (e) {
     console.error(e);
-    throw e;
+    return undefined;
   }
 }

@@ -1,48 +1,39 @@
-import { IPrivacyPolicy } from '@/models';
 import { PRIVACY_POLICY_API } from 'constants/api';
+import { IS_CLIENT } from '../config';
 
-export const PrivacyPolicyService = {
-  async getAll(): Promise<IPrivacyPolicy[]> {
-    try {
-      const response = await fetch(PRIVACY_POLICY_API);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch privacy policies: ${response.statusText}`);
-      }
-      return await response.json();
-    } catch (e) {
-      console.error('Error fetching privacy policies:', e);
-      throw e;
-    }
-  },
+import privacyPolicyData from '@/data/privacy-policy.json';
 
-  async getByShippingLineId(shippingLineId: number): Promise<IPrivacyPolicy[]> {
-    try {
-      const response = await fetch(`${PRIVACY_POLICY_API}/${shippingLineId}`);
-      if (!response.ok) {
-        throw new Error(`Error fetching privacy policies by shipping line ID: ${response.statusText}`);
-      }
-      return await response.json();
-    } catch (e) {
-      console.error('Error fetching privacy policies by shipping line ID:', e);
-      throw e;
-    }
-  },
+export interface IPrivacyPolicyTipTap {
+  id: string;
+  page_type: string;
+  title: string;
+  content: any; // TipTap JSON content
+  slug: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string | null;
+}
 
-  async getByTitleAndShippingLineId(
-    titleId: string,
-    shippingLineId: number
-  ): Promise<IPrivacyPolicy | null> {
-    try {
-      const response = await fetch(
-        `${PRIVACY_POLICY_API}/section?titleId=${titleId}&shippingLineId=${shippingLineId}`
-      );
-      if (!response.ok) {
-        throw new Error(`Error fetching section: ${response.statusText}`);
-      }
-      return await response.json();
-    } catch (e) {
-      console.error('Error fetching section by titleId and shippingLineId:', e);
-      throw e;
+export async function getPrivacyPolicy(): Promise<IPrivacyPolicyTipTap | undefined> {
+  try {
+    if (!IS_CLIENT) {
+      return privacyPolicyData as IPrivacyPolicyTipTap;
     }
-  },
-};
+
+    const res = await fetch(`${PRIVACY_POLICY_API}`, {
+      next: { tags: ['privacy-policy'], revalidate: 3600 }
+    });
+
+    if (res.ok) {
+      const { data } = await res.json();
+      return data;
+    }
+
+    // Fallback to local data if API fails
+    return privacyPolicyData as IPrivacyPolicyTipTap;
+  } catch (e) {
+    console.error(e);
+    // Fallback to local data on error
+    return privacyPolicyData as IPrivacyPolicyTipTap;
+  }
+}

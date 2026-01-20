@@ -1,0 +1,58 @@
+{
+    "hero": {
+        "id": "b62ad8de-9b10-451f-815e-122ed6737df0",
+        "page_id": "3e5da2dd-9d06-4971-9502-8862ef630da3",
+        "type": "hero",
+        "bg_type": "image",
+        "bg_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/about_us/3/ayahay-team.webp?cache_buster=15c888b8-4053-42fb-9c20-139b346745ef",
+        "bg_alt": "Ayahay Team image",
+        "title": "Meet the Ayahay Team!",
+        "subtitle": null,
+        "description": null,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    "welcome": {
+        "id": "6410eeda-2192-4d4d-8f24-944ab4a7d470",
+        "page_id": "3e5da2dd-9d06-4971-9502-8862ef630da3",
+        "type": "welcome",
+        "bg_type": null,
+        "bg_url": null,
+        "bg_alt": "Background of section.",
+        "title": "Welcome",
+        "subtitle": null,
+        "description": "At Ayahay, we bring together innovation and expertise in the world of logistics and technology. We are a dynamic and forward-thinking company founded by individuals with a wealth of experience in the IT and logistics industry. \n\nOur journey began with a shared vision: to revolutionize the way logistics and transportation are managed and experienced in the Philippines.",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    "our_story": {
+        "id": "c61cb133-524a-4e8f-a25d-9c5af725c90e",
+        "page_id": "3e5da2dd-9d06-4971-9502-8862ef630da3",
+        "type": "our_story",
+        "bg_type": null,
+        "bg_url": null,
+        "bg_alt": "Background of section.",
+        "title": "Our Story",
+        "subtitle": null,
+        "description": "Ayahay was born out of a deep understanding of the challenges faced by the shipping and logistics industry in adapting to the digital age.\n\nThe founders of Ayahay brought together their extensive knowledge and experience in IT and logistics to create a solution that would bridge the gap between traditional practices and modern technology.",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    "our_expertise": {
+        "id": "d6234dbc-dfe0-4c86-8845-5f2948e54251",
+        "page_id": "3e5da2dd-9d06-4971-9502-8862ef630da3",
+        "type": "our_expertise",
+        "bg_type": null,
+        "bg_url": null,
+        "bg_alt": "Background of section.",
+        "title": "Our expertise",
+        "subtitle": null,
+        "description": "Our team comprises experts who have spent years working at the intersection of information technology and logistics. We understand the intricacies of supply chain management, fleet operations, and passenger services.\n\nThis expertise has allowed us to design and develop innovative solutions that address the unique needs of the logistics and shipping industry.",
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    }
+}

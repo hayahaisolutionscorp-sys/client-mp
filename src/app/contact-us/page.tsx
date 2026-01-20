@@ -1,62 +1,90 @@
-import { FaMobileAlt, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaMobileAlt } from 'react-icons/fa';
 import { MdOutlineMail } from 'react-icons/md';
-import { CONTACT_US_IMAGES } from 'constants/storage';
-import { hexToRgb } from 'helpers/theme.helpers';
 import ContactUsForm from '@/components/contact-us/ContactUsForm';
-import { getContactUsByShippingLineId, getThemeSettingsByShippingLineId } from '@/services';
+import { getContactUs, getContactUsHero } from '@/services/content/contact-us.service';
+import { getThemeSettings } from '@/services/ui/theme-settings.service';
+import { getPageMetadata } from '@/services/content/seo.service';
+import { Metadata } from 'next';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageMetadata('contact-us');
+
+  return {
+    title: seo?.title,
+    description: seo?.description,
+    keywords: seo?.keywords,
+    robots: seo?.robots,
+    alternates: seo?.alternates,
+    openGraph: seo?.openGraph ? {
+      title: seo.openGraph.title || seo.title,
+      description: seo.openGraph.description || seo.description,
+      images: seo.openGraph.images,
+      type: seo.openGraph.type,
+      siteName: seo.openGraph.siteName,
+      locale: seo.openGraph.locale,
+      url: seo.openGraph.url,
+    } : undefined,
+    twitter: seo?.twitter,
+  };
+}
 
 export default async function ContactUs() {
-  const shippingLineId = parseInt(process.env.NEXT_PUBLIC_SHIPPING_LINE_ID || '3');
-  const contactUs = await getContactUsByShippingLineId(shippingLineId);
-  const themeSettings = await getThemeSettingsByShippingLineId(shippingLineId);
+  const [themeSettings, contactInfo, contactUsHero] = await Promise.all([
+    getThemeSettings(),
+    getContactUs(),
+    getContactUsHero(),
+  ]);
+
+  const phoneNumbers = contactInfo.filter(c => c.type === 'phone' && c.is_active);
+  const emails = contactInfo.filter(c => c.type === 'email' && c.is_active);
+
+  const primary = themeSettings?.primary || '#91363C';
+  const secondary = themeSettings?.secondary || '#d14b4e';
 
   return (
     <section
       className="relative bg-cover bg-no-repeat bg-center min-h-screen flex items-center"
       style={{
-        backgroundImage: `url('${CONTACT_US_IMAGES}${contactUs?.shippingLineId}/${contactUs?.backgroundImageFilename}')`
-      }}
+        backgroundImage: `url('${contactUsHero?.bg_url || ''}')`,
+        '--primary-color': primary,
+        '--secondary-color': secondary
+      } as React.CSSProperties}
     >
       <div
-        className="absolute inset-0 bg-gradient-to-r from-[rgba(var(--bg-color),1)]/80 to-[rgba(var(--bg-color),1)]/80"
-        style={
-          {
-            '--bg-color': hexToRgb(themeSettings?.backgroundColor || '#23abff')
-          } as React.CSSProperties
-        }
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(to right, color-mix(in srgb, var(--primary-color) 80%, transparent), color-mix(in srgb, var(--secondary-color) 80%, transparent))`
+        }}
       ></div>
 
       <div className="container mx-auto p-6 relative z-10">
         {/* Centered Heading */}
-        <h1 className="text-2xl font-bold text-white text-center mb-6 sm:text-4xl sm:mb-16">Contact Us</h1>
+        <h1 className="text-2xl font-bold text-white text-center mb-6 sm:text-4xl sm:mb-16">
+          {contactUsHero?.title || 'Contact Us'}
+        </h1>
 
         <div className="grid md:grid-cols-2 gap-10">
           {/* Left Side - Contact Info */}
           <div className="space-y-4 text-white sm:space-y-6">
-            <h2 className="text-xl font-bold sm:text-2xl">{contactUs?.headingText}</h2>
-            <p className="text-md text-white">{contactUs?.headingDescription}</p>
+            <h2 className="text-xl font-bold sm:text-2xl text-white">
+              {contactUsHero?.subtitle || 'Have Any Questions?'}
+            </h2>
+            <p className="text-md text-white">{contactUsHero?.description}</p>
 
             <ul className="space-y-4">
-              {contactUs?.contactNumber && (
-                <li className="flex items-center space-x-4">
-                  <FaMobileAlt className="text-2xl" />
-                  <h4>{contactUs.contactNumber}</h4>
+              {phoneNumbers.map(phone => (
+                <li key={phone.id} className="flex items-center space-x-4">
+                  <FaMobileAlt className="text-2xl text-white" />
+                  <h3>{phone.label}: {phone.value}</h3>
                 </li>
-              )}
+              ))}
 
-              {contactUs?.email && (
-                <li className="flex items-center space-x-4">
-                  <MdOutlineMail className="text-2xl" />
-                  <h4>{contactUs.email}</h4>
+              {emails.map(email => (
+                <li key={email.id} className="flex items-center space-x-4">
+                  <MdOutlineMail className="text-2xl text-white" />
+                  <h3>{email.value}</h3>
                 </li>
-              )}
-
-              {contactUs?.address && (
-                <li className="flex items-center space-x-4">
-                  <FaMapMarkerAlt className="text-2xl" />
-                  <h4>{contactUs.address}</h4>
-                </li>
-              )}
+              ))}
             </ul>
           </div>
 

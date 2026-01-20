@@ -10,7 +10,7 @@ import PassengerTripCard from '@/components/booking/PassengerTripCard';
 import FareSummary from '@/components/booking/FareSummary';
 import { cacheItem, fetchItem, invalidateItem } from 'helpers/cache.helpers';
 import { useThemeSettings } from '@/hooks/theme-settings';
-import { getTrips, createTentativeBooking  } from '@/services';
+import { getTrips, createTentativeBooking } from '@/services';
 import { ITrip, IBooking } from '@/models';
 
 interface Props {
@@ -102,7 +102,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
             >
               <IoArrowBack
                 className="w-6 h-6 sm:w-8 sm:h-8 mr-2"
-                style={{ color: themeSettings?.iconColor || '#23abff' }}
+                style={{ color: themeSettings?.accent || '#23abff' }}
               />
             </a>
             <h4 className="font-semibold text-base sm:text-2xl text-customText my-4 mr-2">Payment Confirmation</h4>

@@ -1,45 +1,33 @@
 import { IShippingLine } from '@/models';
 import { SHIPPING_LINE_API } from 'constants/api';
 import { cacheItem, fetchItem } from 'helpers/cache.helpers';
+import axios from '@/services/core/axios';
+
+import shippingLinesData from '@/data/shipping-lines.json';
 
 export async function getAllShippingLines(): Promise<IShippingLine[] | undefined> {
-  const cachedShippingLines = fetchItem<IShippingLine[]>('shipping-lines');
-  if (cachedShippingLines) return cachedShippingLines;
+  // const cached = fetchItem<IShippingLine[]>('shipping-lines');
+  // if (cached) return cached;
+  //
+  // try {
+  //   const { data } = await axios.get(SHIPPING_LINE_API);
+  //   cacheItem('shipping-lines', data);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
 
-  try {
-    const response = await fetch(SHIPPING_LINE_API);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch shipping lines: ${response.status} ${response.statusText}`);
-    }
-
-    const data: IShippingLine[] = await response.json();
-    cacheItem('shipping-lines', data, 1);
-    return data;
-
-  } catch (e) {
-    console.error('Error fetching shipping lines:', e);
-    throw e;
-  }
+  // Simulate delay
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return shippingLinesData as any as IShippingLine[];
 }
 
 export async function getAllShippingLinesServer(): Promise<IShippingLine[] | undefined> {
-  try {
-    const response = await fetch(SHIPPING_LINE_API, {
-      next: { revalidate: 3600 }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch shipping lines: ${response.status} ${response.statusText}`);
-    }
-
-    const data: IShippingLine[] = await response.json();
-    return data;
-
-  } catch (e) {
-    console.error('Error fetching shipping lines:', e);
-    throw e;
-  }
+  // return getAllShippingLines();
+  // Simulate delay
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return shippingLinesData as any as IShippingLine[];
 }
 
 export async function getShippingLineServer(

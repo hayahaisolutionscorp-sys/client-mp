@@ -1,0 +1,42 @@
+[
+    {
+        "id": "bcf8b41c-abf0-48b5-854c-2ecf8638b92b",
+        "category": "Booking & Reservation",
+        "question": "How do I book?",
+        "answer": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Go to the website\"}]}]}",
+        "display_order": 1,
+        "is_active": true,
+        "created_at": "2026-01-10T03:50:44.700Z",
+        "updated_at": null
+    },
+    {
+        "id": "78df472c-d831-4433-bda2-74945ed534d3",
+        "category": "Booking & Reservation",
+        "question": "Sample Question",
+        "answer": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"fasdfasdfasdf\"}]}]}",
+        "display_order": 2,
+        "is_active": true,
+        "created_at": "2026-01-11T03:41:09.171Z",
+        "updated_at": null
+    },
+    {
+        "id": "bcf8b41c-abf0-48b5-854c-2ecf8638b92b",
+        "category": "Shipping",
+        "question": "How do I book?",
+        "answer": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Go to the website\"}]}]}",
+        "display_order": 1,
+        "is_active": true,
+        "created_at": "2026-01-10T03:50:44.700Z",
+        "updated_at": null
+    },
+    {
+        "id": "78df472c-d831-4433-bda2-74945ed534d3",
+        "category": "Test",
+        "question": "Sample Question",
+        "answer": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"fasdfasdfasdf\"}]}]}",
+        "display_order": 2,
+        "is_active": true,
+        "created_at": "2026-01-11T03:41:09.171Z",
+        "updated_at": null
+    }
+]

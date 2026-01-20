@@ -22,10 +22,10 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
   const [windowSize, setWindowSize] = useState(6);
 
   useEffect(() => {
-    const queryKey = label === "Departure" 
-      ? "filterSpecificDepartureDate" 
+    const queryKey = label === "Departure"
+      ? "filterSpecificDepartureDate"
       : "filterSpecificReturnDate";
-    
+
     const dateFromParams = searchParams.get(queryKey);
     const paramsDate = dateFromParams ? new Date(dateFromParams).toISOString() : null;
     setSelectedDate(paramsDate);
@@ -35,7 +35,7 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
       const baseDate = new Date();
       const selected = new Date(paramsDate);
       // Calculate the difference in days between baseDate and selected
-      const diffTime = selected.setHours(0,0,0,0) - baseDate.setHours(0,0,0,0);
+      const diffTime = selected.setHours(0, 0, 0, 0) - baseDate.setHours(0, 0, 0, 0);
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
       // If selected date is in the future, set windowStart so selected is first
       setWindowStart(diffDays >= 0 ? diffDays : 0);
@@ -103,19 +103,19 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
     const localDate = new Date(date);
     localDate.setHours(12, 0, 0, 0);
     const isoString = localDate.toISOString();
-    
+
     // Update state immediately for visual feedback
     setSelectedDate(isoString);
-    
+
     const queryParams = new URLSearchParams(window.location.search);
     const isDeparture = label === "Departure";
     const departureKey = "filterSpecificDepartureDate";
     const returnKey = "filterSpecificReturnDate";
-    
+
     // Get current departure and return dates
     const currentDeparture = queryParams.get(departureKey);
     const currentReturn = queryParams.get(returnKey);
-    
+
     if (isDeparture) {
       queryParams.set(departureKey, isoString);
       // If return date exists and is before the new departure date, adjust it
@@ -130,18 +130,18 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
         queryParams.set(departureKey, isoString);
       }
     }
-    
+
     if (onDateChange) {
       onDateChange(isoString);
     }
-    
+
     router.push(`/booking/destination?${queryParams.toString()}`);
   };
 
   return (
     <div className="flex items-center bg-white p-2 mb-5 border rounded-lg shadow-md w-full overflow-hidden lg:mt-6">
       {/* Left Arrow */}
-      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handlePrevious} disabled={windowStart === 0}>
+      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handlePrevious} disabled={windowStart === 0} aria-label="Previous dates">
         <FiChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
@@ -151,7 +151,7 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
       {/* Loading Indicator or Dates */}
       {loading ? (
         <div className="flex justify-center items-center w-full">
-          <FiLoader className="animate-spin text-2xl sm:text-4xl" style={{ color: themeSettings?.iconColor || "#23abff" }} />
+          <FiLoader className="animate-spin text-2xl sm:text-4xl" style={{ color: themeSettings?.accent || "#23abff" }} />
         </div>
       ) : (
         <div className="flex items-center justify-between w-full overflow-x-hidden no-scrollbar hide-scrollbar">
@@ -159,9 +159,9 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
             const itemDate = new Date(item.date);
             itemDate.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
             const itemISOString = itemDate.toISOString();
-            
+
             // Compare ISO strings for highlighting
-            const isSelected = selectedDate && 
+            const isSelected = selectedDate &&
               new Date(selectedDate).toDateString() === new Date(itemISOString).toDateString();
 
             return (
@@ -173,7 +173,7 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
                     transition-all duration-300 ease-in-out
                     ${isSelected ? "border-b-4 border-[rgba(var(--border-color),1)]" : ""}
                     hover:border-b-4 hover:border-[rgba(var(--border-color),0.5)]`}
-                  style={{ "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff") } as React.CSSProperties}
+                  style={{ "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21") } as React.CSSProperties}
                 >
                   <span className="text-sm sm:text-base font-medium">{item.day}</span>
                   <span className="text-xs sm:text-sm font-bold">{item.date}</span>
@@ -189,7 +189,7 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
       <div className="h-[60px] sm:h-[76px] w-[1px] bg-gray-300 mx-1 sm:mx-2"></div>
 
       {/* Right Arrow */}
-      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handleNext} disabled={uniqueDates.length < windowSize}>
+      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handleNext} disabled={uniqueDates.length < windowSize} aria-label="Next dates">
         <FiChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
     </div>

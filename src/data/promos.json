@@ -1,0 +1,41 @@
+[
+    {
+        "id": "7352a4d7-8098-4da0-8b4b-466d3184b2a5",
+        "title": null,
+        "description": null,
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/carousel/3/6e4ff2bb-3ebd-4e63-a372-85b8978e69b7.png?cache_buster=1fc1760c-4e7a-4a53-bb3a-a45e740ea483",
+        "image_alt": "Travel promotions image",
+        "start_date": null,
+        "end_date": null,
+        "display_order": 2,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "f2f9b2e8-74f6-405e-b55d-4431adb05680",
+        "title": null,
+        "description": null,
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/carousel/3/ef44125f-91ab-4993-bd75-7665753485b6.png?cache_buster=1fc1760c-4e7a-4a53-bb3a-a45e740ea483",
+        "image_alt": "Travel promotions image",
+        "start_date": null,
+        "end_date": null,
+        "display_order": 1,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    },
+    {
+        "id": "4a768996-104e-4c61-a6b7-ff571651f95b",
+        "title": null,
+        "description": null,
+        "image_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/carousel/3/9ff9c67f-72f3-4db0-914d-f7033b0399e5.jpg?cache_buster=1fc1760c-4e7a-4a53-bb3a-a45e740ea483",
+        "image_alt": "Travel promotions image",
+        "start_date": null,
+        "end_date": null,
+        "display_order": 3,
+        "is_active": true,
+        "created_at": "2026-01-08T03:31:28.888Z",
+        "updated_at": null
+    }
+]

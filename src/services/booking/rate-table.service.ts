@@ -1,126 +1,83 @@
 import { cacheItem, fetchItem } from 'helpers/cache.helpers';
 import { RATE_TABLES_API } from 'constants/api';
 import { IRateTable, IRateTableMarkup } from '@/models';
+import axios from '@/services/core/axios';
 
 export async function getRateTableById(
   rateTableId: number
 ): Promise<IRateTable | undefined> {
-  const cachedRateTables =
-    fetchItem<{ [rateTableId: number]: IRateTable }>('rate-tables-by-id') ?? {};
+  // try {
+  //   const { data } = await axios.get(`${RATE_TABLES_API}/${rateTableId}`);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
 
-  if (cachedRateTables[rateTableId]) {
-    return cachedRateTables[rateTableId];
-  }
-
-  try {
-    const response = await fetch(`${RATE_TABLES_API}/${rateTableId}`);
-    if (!response.ok) {
-      throw new Error(`Error fetching rate table: ${response.statusText}`);
-    }
-
-    const rateTable: IRateTable = await response.json();
-    cachedRateTables[rateTableId] = rateTable;
-    cacheItem('rate-tables-by-id', cachedRateTables, 60);
-    return rateTable;
-
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return {
+    id: rateTableId,
+    shippingLineId: 3,
+    name: 'Dummy Rate Table',
+    description: 'Dummy Description'
+  } as any as IRateTable;
 }
 
 export async function getRateTables(): Promise<IRateTable[] | undefined> {
-  try {
-    const response = await fetch(RATE_TABLES_API);
+  // try {
+  //   const { data } = await axios.get(RATE_TABLES_API);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
 
-    if (!response.ok) {
-      throw new Error(`Error fetching rate tables: ${response.statusText}`);
-    }
-
-    return await response.json();
-
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return [];
 }
 
 export async function getFullRateTableById(
   id: number
 ): Promise<IRateTable | undefined> {
-  try {
-    const response = await fetch(`${RATE_TABLES_API}/${id}/full`);
+  // try {
+  //   const { data } = await axios.get(`${RATE_TABLES_API}/${id}/full`);
+  //   return data;
+  // } catch (e) {
+  //   console.error(e);
+  //   return undefined;
+  // }
 
-    if (!response.ok) {
-      throw new Error(`Error fetching full rate table: ${response.statusText}`);
-    }
-
-    return await response.json();
-
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return {
+    id: id,
+    shippingLineId: 3,
+    name: 'Dummy Full Rate Table',
+    description: 'Dummy Description'
+  } as any as IRateTable;
 }
-
-// export function buildRateTableMarkupFromForm(
-//   form: FormInstance
-// ): IRateTableMarkup {
-//   return {
-//     id: form.getFieldValue('id'),
-//     rateTableId: form.getFieldValue('rateTableId'),
-//     travelAgencyId: form.getFieldValue('travelAgencyId'),
-//     clientId: form.getFieldValue('clientId'),
-
-//     markupFlat: form.getFieldValue('markupFlat'),
-//     markupPercent: form.getFieldValue('markupPercent') / 100.0,
-//     markupMaxFlat: form.getFieldValue('markupMaxFlat'),
-//   };
-// }
 
 export async function createRateMarkup(
   rateTableId: number,
   rateMarkup: IRateTableMarkup
 ): Promise<void> {
-  try {
-    const response = await fetch(`${RATE_TABLES_API}/${rateTableId}/markups`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(rateMarkup),
-    });
+  // try {
+  //   await axios.post(`${RATE_TABLES_API}/${rateTableId}/markup`, rateMarkup);
+  // } catch (e) {
+  //   console.error(e);
+  // }
 
-    if (!response.ok) {
-      throw new Error(`Error creating rate markup: ${response.statusText}`);
-    }
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  await new Promise(resolve => setTimeout(resolve, 100));
 }
 
 export async function updateRateMarkup(
   rateTableId: number,
   rateMarkup: IRateTableMarkup
 ): Promise<void> {
-  try {
-    const response = await fetch(
-      `${RATE_TABLES_API}/${rateTableId}/markups/${rateMarkup.id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(rateMarkup),
-      }
-    );
+  // try {
+  //   await axios.put(`${RATE_TABLES_API}/${rateTableId}/markup/${rateMarkup.id}`, rateMarkup);
+  // } catch (e) {
+  //   console.error(e);
+  // }
 
-    if (!response.ok) {
-      throw new Error(`Error updating rate markup: ${response.statusText}`);
-    }
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
+  await new Promise(resolve => setTimeout(resolve, 100));
 }
