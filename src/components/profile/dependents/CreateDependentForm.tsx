@@ -101,10 +101,10 @@ export default function DependentForm({
                 occupation: dependent.occupation || "",
                 address: dependent.address || "",
                 civil_status: validCivilStatus,
-                phone: dependent.phone && dependent.phone.startsWith('+63')
+                phone: dependent.phone && dependent.phone.startsWith('+639')
                     ? dependent.phone
                     : dependent.phone
-                        ? '+63' + dependent.phone.replace(/^\+63/, '').replace(/\D/g, '').slice(0, 10)
+                        ? '+639' + dependent.phone.replace(/^\+639/, '').replace(/\D/g, '').slice(0, 9)
                         : '',
                 email: dependent.email || "",
                 category: validCategory,
@@ -129,9 +129,9 @@ export default function DependentForm({
     };
 
     const handlePhoneChange = (value: string) => {
-        if (!value.startsWith('+63')) value = '+63';
-        const digitsOnly = value.slice(3).replace(/\D/g, '').slice(0, 10);
-        setFormData(prev => ({ ...prev, phone: '+63' + digitsOnly }));
+        if (!value.startsWith('+639')) value = '+639';
+        const digitsOnly = value.slice(4).replace(/\D/g, '').slice(0, 9);
+        setFormData(prev => ({ ...prev, phone: '+639' + digitsOnly }));
     };
 
     const handleAccountContactToggle = (checked: boolean) => {
@@ -170,9 +170,9 @@ export default function DependentForm({
         e.preventDefault();
         setError(null);
 
-        const phoneRegex = /^\+63\d{10}$/;
+        const phoneRegex = /^\+639\d{9}$/;
         if (!phoneRegex.test(formData.phone)) {
-            setError("Phone number must start with +63 and be 13 characters long.");
+            setError("Phone number must start with +639 and be 13 characters long.");
             return;
         }
 
@@ -352,7 +352,7 @@ export default function DependentForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Phone Number *</label>
-                        <Input value={formData.phone || '+63'} onChange={(e) => handlePhoneChange(e.target.value)} maxLength={13} required />
+                        <Input value={formData.phone || '+639'} onChange={(e) => handlePhoneChange(e.target.value)} maxLength={13} required />
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Email (optional)</label>

@@ -32,7 +32,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                 phone: passenger.phone && passenger.phone.startsWith('+63') 
                     ? passenger.phone 
                     : passenger.phone 
-                        ? '+63' + passenger.phone.replace(/^\+63/, '').replace(/\D/g, '').slice(0, 10)
+                        ? '+639' + passenger.phone.replace(/^\+639/, '').replace(/\D/g, '').slice(0, 9)
                         : ''
             });
         }
@@ -61,12 +61,12 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
     };
 
     const handlePhoneChange = (value: string) => {
-        if (!value.startsWith('+63')) {
-            value = '+63';
+        if (!value.startsWith('+639')) {
+            value = '+639';
         }
-        const prefix = '+63';
-        const digitsOnly = value.slice(3).replace(/\D/g, '');
-        const limitedDigits = digitsOnly.slice(0, 10);
+        const prefix = '+639';
+        const digitsOnly = value.slice(4).replace(/\D/g, '');
+        const limitedDigits = digitsOnly.slice(0, 9);
         
         setFormData(prev => ({
             ...prev,
@@ -79,16 +79,21 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
         
         if (
             !formData.firstName?.trim() || 
-            !formData.lastName?.trim()
+            !formData.lastName?.trim() ||
+            !formData.sex ||
+            !formData.birthdayIso ||
+            !formData.nationality ||
+            !formData.civilStatus ||
+            !formData.address?.trim()
         ) {
-            setError("First Name and Last Name are required.");
+            setError("All fields marked with an asterisk (*) are required.");
             return;
         }
 
         if (formData.phone) {
-            const phoneRegex = /^\+63\d{10}$/;
+            const phoneRegex = /^\+639\d{9}$/;
             if (!phoneRegex.test(formData.phone)) {
-                setError("Phone number must start with +63 and be 13 characters long.");
+                setError("Phone number must start with +639 and be 13 characters long.");
                 return;
             }
         }
@@ -154,7 +159,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Phone Number <span className="text-red-500">*</span></label>
                             <Input
-                                value={formData.phone || '+63'}
+                                value={formData.phone || '+639'}
                                 onChange={(e) => handlePhoneChange(e.target.value)}
                                 placeholder="+639171234567"
                                 maxLength={13}
@@ -162,23 +167,24 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                         </div>
                         
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Sex</label>
+                            <label className="text-sm font-medium">Sex <span className="text-red-500">*</span></label>
                             <span className="sr-only">Sex selection</span>
                             <Select
                                 value={formData.sex || ''}
                                 onValueChange={(value) => handleInputChange('sex', value)}
+                                required
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select sex" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="male">Male</SelectItem>
-                                    <SelectItem value="female">Female</SelectItem>
+                                    <SelectItem value="female">Female</SelectItem> 
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Date of Birth</label>
+                            <label className="text-sm font-medium">Date of Birth <span className="text-red-500">*</span></label>
                             <BirthDatePicker
                                 date={formData.birthdayIso ? parseISO(formData.birthdayIso) : undefined}
                                 setDate={(dateAction) => {
@@ -192,7 +198,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Nationality</label>
+                            <label className="text-sm font-medium">Nationality <span className="text-red-500">*</span></label>
                             <Combobox
                                 values={NATIONALITIES}
                                 defaultValue={formData.nationality || ''}
@@ -201,10 +207,11 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Civil Status</label>
+                            <label className="text-sm font-medium">Civil Status <span className="text-red-500">*</span></label>
                             <Select
                                 value={formData.civilStatus || ''}
                                 onValueChange={(value) => handleInputChange('civilStatus', value)}
+                                required
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select civil status" />
@@ -219,10 +226,11 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             </Select>
                         </div>
                         <div className="md:col-span-2 space-y-2">
-                            <label className="text-sm font-medium">Address</label>
+                            <label className="text-sm font-medium">Address <span className="text-red-500">*</span></label>
                             <Input
                                 value={formData.address || ''}
                                 onChange={(e) => handleInputChange('address', e.target.value)}
+                                required
                             />
                         </div>
                     </div>

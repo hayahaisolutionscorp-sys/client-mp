@@ -32,7 +32,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
     lastname: "",
     mobileNumber: "",
     email: "",
-    countryCode: "+63",
+    countryCode: "+639",
   });
 
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -86,7 +86,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
         lastname: passengerDetails.lastname,
         mobileNumber: "",
         email: "",
-        countryCode: "+63",
+        countryCode: "+639",
       });
     } else {
       setContactDetails({
@@ -94,7 +94,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
         lastname: "",
         mobileNumber: "",
         email: "",
-        countryCode: "+63",
+        countryCode: "+639",
       });
     }
   };
@@ -194,10 +194,10 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
           <div className="flex flex-row items-center">
             <Select value={contactDetails.countryCode} onValueChange={handleCountryCodeChange}>
               <SelectTrigger className="pointer-events-none w-20 mr-2">
-                <SelectValue placeholder="+63" />
+                <SelectValue placeholder="+639" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="+63">+63</SelectItem>
+                <SelectItem value="+639">+63</SelectItem>
                 {/* Add more country codes as needed */}
               </SelectContent>
             </Select>

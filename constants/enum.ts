@@ -1,6 +1,6 @@
 export enum SEX {
   Male = 'Male',
-  Female = 'Female',
+  Female = 'Female'
 }
 
 export enum CIVIL_STATUS {

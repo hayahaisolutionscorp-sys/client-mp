@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FAQPage() {
 
   const theme = await getThemeSettings();
-  const backgroundColor = theme?.primaryColor || '#91363C';
+  const backgroundColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#EEF8FC]">

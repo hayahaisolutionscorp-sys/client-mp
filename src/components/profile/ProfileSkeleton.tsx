@@ -7,7 +7,10 @@ export default function ProfileSkeleton() {
     return (
         <div className="container mx-auto pb-10 px-4 sm:px-6 lg:px-8">
             {/* Header Card Skeleton */}
-            <Card className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border-none shadow-md">
+            <Card 
+                className="w-full border-none shadow-md"
+                style={{ backgroundColor: 'var(--theme-skeleton, hsl(var(--muted)))' }}
+            >
                 <CardContent className="pt-6">
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <Skeleton className="h-24 w-24 md:h-32 md:w-32 rounded-full ring-4 ring-white shadow-lg shrink-0" />

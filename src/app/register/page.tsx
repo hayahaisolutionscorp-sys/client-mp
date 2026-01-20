@@ -26,7 +26,7 @@ import { useThemeSettings } from "@/hooks/theme-settings";
 export default function RegisterPage() {
   const router = useRouter();
   const theme = useThemeSettings();
-  const primaryColor = theme?.primaryColor || '#91363C';
+  const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
   const dateToday = new Date();
   const { register, signInWithGoogle, signInWithFacebook } = useAuth();
 
@@ -47,7 +47,7 @@ export default function RegisterPage() {
     agreement: false,
     occupation: "Unemployed",
     civilStatus: "Single",
-    phone: "+63",
+    phone: "+639",
     emailConsent: false
   })
 
@@ -60,17 +60,17 @@ export default function RegisterPage() {
   }
 
   const handlePhoneChange = (value: string) => {
-    // Always ensure it starts with +63
-    if (!value.startsWith('+63')) {
-      value = '+63';
+    // Always ensure it starts with +639
+    if (!value.startsWith('+639')) {
+      value = '+639';
     }
     
-    // Remove any non-digit characters after +63
-    const prefix = '+63';
-    const digitsOnly = value.slice(3).replace(/\D/g, '');
+    // Remove any non-digit characters after +639
+    const prefix = '+639';
+    const digitsOnly = value.slice(4).replace(/\D/g, '');
     
-    // Limit to 10 digits after +63 (total 13 characters)
-    const limitedDigits = digitsOnly.slice(0, 10);
+    // Limit to 9 digits after +639 (total 13 characters)
+    const limitedDigits = digitsOnly.slice(0, 9);
     
     setFormData(prev => ({
       ...prev,
@@ -134,15 +134,23 @@ export default function RegisterPage() {
         error.message.split(',').forEach((err: string) => {
           const [field] = err.trim().split(' ');
           if (field) {
-            // Map error message to field name if possible, simple heuristic
-            // The API returns "firstName should not be empty", so field is "firstName"
             errors[field] = err.trim();
           }
         });
         setValidationErrors(errors);
-      } else {
-        // Handle general errors like "User already exists"
+      } else if (error.message && typeof error.message === 'string') {
+        const errors: Record<string, string> = {};
+        if (error.message.includes('firstName')) errors.firstName = error.message;
+        if (error.message.includes('lastName')) errors.lastName = error.message;
+        if (error.message.includes('birthday')) errors.birthday = error.message;
+        if (error.message.includes('sex')) errors.sex = error.message;
+        if (error.message.includes('address')) errors.address = error.message;
+        if (error.message.includes('nationality')) errors.nationality = error.message;
+        
+        setValidationErrors(errors);
         setGeneralError(error.message || "An unexpected error occurred. Please try again.");
+      } else {
+        setGeneralError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -368,7 +376,7 @@ export default function RegisterPage() {
                 <Input
                   name="phone"
                   placeholder="+639171234567"
-                  value={formData.phone || '+63'}
+                  value={formData.phone || '+639'}
                   onChange={(e) => handlePhoneChange(e.target.value)}
                   required
                   maxLength={13}
@@ -379,9 +387,10 @@ export default function RegisterPage() {
               </div>
                 <div className="gap-3 flex w-full">
                    <div className="space-y-2 flex-1">
-                <div className="text-sm font-medium">Sex</div>
+                <div className="text-sm font-medium">Sex <span className="text-red-500">*</span></div>
                 <Select
                   name="sex"
+                  required
                   value={formData.sex}
                   onValueChange={(value: "Male" | "Female") => setFormData((prev) => ({ ...prev, sex: value }))}
                 >
@@ -390,35 +399,36 @@ export default function RegisterPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
+                    <SelectItem value="Female">Female</SelectItem>  
                   </SelectContent>
                 </Select>
                 {validationErrors.sex && <p className="text-xs text-red-500">{validationErrors.sex}</p>}
               </div>
               <div className="space-y-2 flex-1">
-                <div className="text-sm font-medium">Date of Birth</div>  
+                <div className="text-sm font-medium">Date of Birth <span className="text-red-500">*</span></div>  
                   <BirthDatePicker date={new Date(formData.birthday)} setDate={setBirthday} validationErrors={validationErrors} />
                 {validationErrors.birthday && <p className="text-xs text-red-500">{validationErrors.birthday}</p>}
               </div>
              </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium">Address</div>
+                <div className="text-sm font-medium">Address <span className="text-red-500">*</span></div>
                 <Input
                   name="address"
                   placeholder="Region, Province, Municipality"
                   value={formData.address}
                   onChange={handleInputChange}
+                  required
                   className={`bg-white text-gray-900 border-gray-300 placeholder:text-gray-400 ${validationErrors.address ? "border-red-500" : ""}`}
                 />
                 {validationErrors.address && <p className="text-xs text-red-500">{validationErrors.address}</p>}
               </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium">Nationality</div>
+                <div className="text-sm font-medium">Nationality <span className="text-red-500">*</span></div>
                 <Combobox
-                  values={NATIONALITIES}
-                  placeholder="Select nationality"
-                  defaultValue={formData.nationality}
-                  onChange={(value) => setFormData((prev) => ({ ...prev, nationality: value }))}
+                    values={NATIONALITIES}
+                    placeholder="Select nationality"
+                    defaultValue={formData.nationality}
+                    onChange={(value) => setFormData((prev) => ({ ...prev, nationality: value }))}
                 />
                 {validationErrors.nationality && <p className="text-xs text-red-500">{validationErrors.nationality}</p>}
               </div>

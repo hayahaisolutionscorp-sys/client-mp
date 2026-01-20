@@ -16,7 +16,7 @@ import { useThemeSettings } from "@/hooks/theme-settings";
 export default function LoginPage() {
   const router = useRouter();
   const theme = useThemeSettings();
-  const primaryColor = theme?.primaryColor || '#91363C';
+  const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
 
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false)
