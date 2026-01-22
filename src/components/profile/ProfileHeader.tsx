@@ -2,12 +2,13 @@
 
 import React from 'react'
 import Image from "next/image"
-import { Camera, Check, Copy } from "lucide-react"
+import { Camera, Check, Copy, LogOut } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Badge } from "@/components/ui/Badge"
 import { cn } from "@/lib/utils"
 import { useThemeSettings } from "@/hooks/theme-settings"
+import { useAuth } from "@/contexts/AuthContexts"
 import { 
     VerificationStatus, 
     getStatusColor, 
@@ -47,13 +48,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     fileInputRef,
     onImageChange
 }) => {
+    const { logout } = useAuth();
     const themeSettings = useThemeSettings();
     const primaryColor = themeSettings?.primary || '#2563eb';
     return (
         <Card className="w-full border-none shadow-md" style={{
             background: `linear-gradient(to right, ${primaryColor}15, ${primaryColor}10)`
         }}>
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 relative">
                 <div className="flex flex-col md:flex-row items-center gap-6">
                     <div className="relative">
                         <input
@@ -103,11 +105,23 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     </div>
 
                     <div className="flex-1 text-center md:text-left space-y-2">
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            {firstName ? `${firstName} ${lastName || ''}` : 'No Name'}
-                        </h1>
-                        <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
-                            <span className="font-mono text-sm">{email}</span>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900">
+                                    {firstName ? `${firstName} ${lastName || ''}` : 'No Name'}
+                                </h1>
+                                <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                                    <span className="font-mono text-sm">{email}</span>
+                                </div>
+                            </div>
+                            <Button 
+                                variant="outline" 
+                                className="md:self-start gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300 transition-colors"
+                                onClick={() => logout()}
+                            >
+                                <LogOut className="h-4 w-4" />
+                                Logout
+                            </Button>
                         </div>
                         <div className="flex items-center justify-center md:justify-start gap-2 text-sm text-muted-foreground">
                             <span>ID: {accountId ?? '...'}</span>

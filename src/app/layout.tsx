@@ -7,6 +7,7 @@ import BodyWrapper from '@/components/BodyWrapper';
 import ServiceWorkerRegistry from '@/components/ServiceWorkerRegistry';
 import ThemeProvider from '@/components/ThemeProvider';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
+import { getHeadersSections } from '@/services/ui/header-section.service';
 
 export { generateMetadata };
 
@@ -22,9 +23,10 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Fetch theme on server-side
+  // Fetch theme and header sections on server-side
   const themeSettings = await getThemeSettings();
-
+  const headerSections = await getHeadersSections();
+    
   return (
     <html lang="en">
       <head>
@@ -49,8 +51,11 @@ export default async function RootLayout({
                   (function() {
                     try {
                       localStorage.setItem('ayahay_theme_settings', JSON.stringify(${JSON.stringify(themeSettings)}));
+                      if (${JSON.stringify(headerSections)}) {
+                        localStorage.setItem('ayahay_header_sections', JSON.stringify(${JSON.stringify(headerSections)}));
+                      }
                     } catch (e) {
-                      console.error('Failed to cache theme:', e);
+                      console.error('Failed to cache theme or header sections:', e);
                     }
                   })();
                 `,
