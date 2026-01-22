@@ -191,13 +191,37 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     };
 
     const signInWithGoogle = async () => {
-        showNotification('error', 'Google Sign-In not implemented yet');
-        return null;
+        try {
+            setLoading(true);
+            await AuthService.signInWithGoogle();
+            showNotification('success', 'Welcome to Ayahay!');
+            await loadProfile();
+            return 'success';
+        } catch (error: any) {
+            console.error('Google sign-in error:', error);
+            const msg = error.message || 'Google sign-in failed';
+            showNotification('error', msg);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const signInWithFacebook = async () => {
-        showNotification('error', 'Facebook Sign-In not implemented yet');
-        return null;
+        try {
+            setLoading(true);
+            await AuthService.signInWithFacebook();
+            showNotification('success', 'Welcome to Ayahay!');
+            await loadProfile();
+            return 'success';
+        } catch (error: any) {
+            console.error('Facebook sign-in error:', error);
+            const msg = error.message || 'Facebook sign-in failed';
+            showNotification('error', msg);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const forgotPassword = async (email: string): Promise<boolean> => {

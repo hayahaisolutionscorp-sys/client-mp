@@ -160,10 +160,8 @@ export default function RegisterPage() {
   const handleGoogleRegister = async () => {
     try {
       setLoading(true);
-      const result = await signInWithGoogle();
-      if (result?.user) {
-        router.push('/');
-      }
+      await signInWithGoogle();
+      router.push('/');
     } catch (error: unknown) {
       if (error instanceof Error && 'code' in error && error.code === 'auth/popup-closed-by-user') {
         console.log('Google sign-in cancelled by user');
@@ -177,10 +175,13 @@ export default function RegisterPage() {
 
   const handleFacebookRegister = async () => {
     try {
+      setLoading(true);
       await signInWithFacebook();
       router.push('/');
     } catch (error: unknown) {
       console.error('Facebook sign-in error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -453,27 +454,27 @@ export default function RegisterPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or register with</span>
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Button
               onClick={handleGoogleRegister}
               variant="outline"
-              className="w-full"
+              className="w-full border-[var(--theme-primary)] text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/10"
               disabled={loading}
             >
               <Image src="/assets/icons/google_logo.svg" alt="Google" width={20} height={20} className="mr-2" />
-              Google
+              Continue with Google
             </Button>
             <Button
               onClick={handleFacebookRegister}
               variant="outline"
-              className="w-full"
+              className="w-full border-[var(--theme-primary)] text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/10"
               disabled={loading}
             >
               <Image src="/assets/icons/facebook_logo.svg" alt="Facebook" width={20} height={20} className="mr-2" />
-              Facebook
+              Continue with Facebook
             </Button>
           </div>
 

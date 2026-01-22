@@ -33,9 +33,12 @@ export function SessionExpiredModal() {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => {
-            // Prevent closing by clicking outside or pressing escape
-            // if we want to force login
-            if (!open) return;
+            if (!open) {
+                // Allow closing and redirect to login
+                setIsOpen(false);
+                router.replace('/');
+                return;
+            }
             setIsOpen(open)
         }}>
             <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
