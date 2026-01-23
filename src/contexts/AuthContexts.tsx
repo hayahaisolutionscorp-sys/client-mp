@@ -108,7 +108,8 @@ export default function AuthContextProvider({ children }: { children: React.Reac
                 verification: Array.isArray(user.verificationDetails) ? user.verificationDetails[0] : (user.verificationDetails || user.verification || undefined),
                 verificationDetails: Array.isArray(user.verificationDetails) 
                     ? user.verificationDetails 
-                    : (user.verificationDetails ? [user.verificationDetails] : undefined)
+                    : (user.verificationDetails ? [user.verificationDetails] : undefined),
+                hasPassword: user.hasPassword
             };
             setLoggedInAccount(account);
 

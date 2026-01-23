@@ -43,6 +43,7 @@ export interface IAccount {
   vehicles?: IVehicle[];
   verification?: IVerification;
   verificationDetails?: IVerification[];
+  hasPassword?: boolean;
 }
 
 export interface LoginForm {

@@ -54,7 +54,7 @@ export const AuthService = {
         const response = await axios.post(`${AUTH_API}/change-password`, data);
         return response.data;
     },
-
+    
     refreshToken: async () => {
         const response = await axios.post(`${AUTH_API}/refresh`);
         return response.data;
