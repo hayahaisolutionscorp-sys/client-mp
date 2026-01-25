@@ -44,6 +44,7 @@ export interface IAccount {
   verification?: IVerification;
   verificationDetails?: IVerification[];
   hasPassword?: boolean;
+  providers?: string[];
 }
 
 export interface LoginForm {

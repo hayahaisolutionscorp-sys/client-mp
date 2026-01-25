@@ -109,7 +109,8 @@ export default function AuthContextProvider({ children }: { children: React.Reac
                 verificationDetails: Array.isArray(user.verificationDetails) 
                     ? user.verificationDetails 
                     : (user.verificationDetails ? [user.verificationDetails] : undefined),
-                hasPassword: user.hasPassword
+                hasPassword: user.hasPassword,
+                providers: user.providers
             };
             setLoggedInAccount(account);
 
@@ -279,7 +280,10 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             setCurrentUser(null);
             setLoggedInAccount(null);
             eraseCookie('user');
+            eraseCookie('access_token');
+            eraseCookie('refresh_token');
             // Clear account related cache
+            invalidateItem('logged-in-user-profile' as any);
             accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
             router.push('/');
         } catch (error) {
@@ -288,6 +292,9 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             setCurrentUser(null);
             setLoggedInAccount(null);
             eraseCookie('user');
+            eraseCookie('access_token');
+            eraseCookie('refresh_token');
+            invalidateItem('logged-in-user-profile' as any);
             accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
             router.push('/');
         } finally {

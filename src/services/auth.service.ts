@@ -156,5 +156,10 @@ export const AuthService = {
                 }
             }, 1000);
         });
+    },
+
+    disconnectSocialProvider: async (provider: 'google' | 'facebook') => {
+        const response = await axios.delete(`${AUTH_API}/disconnect/${provider}`);
+        return response.data;
     }
 };

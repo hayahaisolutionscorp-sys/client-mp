@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContexts"
 export default function SecuritySettingsForm() {
     const { loggedInAccount, refreshProfile } = useAuth();
     const hasPassword = loggedInAccount?.hasPassword;
-
+    
     const [passwordData, setPasswordData] = useState({
         currentPassword: "",
         newPassword: "",
