@@ -6,7 +6,7 @@ import { IS_CLIENT } from '../config';
 export const getBrandingConfig = async (): Promise<IBrandingConfig | null> => {
     try {
         if (!IS_CLIENT) {
-            return brandingData as IBrandingConfig;
+            return brandingData as unknown as IBrandingConfig;
         }
 
         const res = await fetch(`${BRANDING_API}`, {

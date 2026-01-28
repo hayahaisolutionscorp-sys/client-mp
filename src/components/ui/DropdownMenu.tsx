@@ -57,8 +57,8 @@ const DropdownMenuSubContent = React.forwardRef<
       )}
       style={
         {
-          "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff"),
-          borderColor: themeSettings?.borderColor ? `rgba(${hexToRgb(themeSettings.borderColor)}, 1)` : undefined,
+          "--border-color": hexToRgb(themeSettings?.primary || "#23abff"),
+          borderColor: themeSettings?.primary ? `rgba(${hexToRgb(themeSettings.primary)}, 1)` : undefined,
         } as React.CSSProperties
       }
       {...props}
@@ -85,8 +85,8 @@ const DropdownMenuContent = React.forwardRef<
         )}
         style={
           {
-            "--border-color": hexToRgb(themeSettings?.borderColor || "#23abff"),
-            borderColor: themeSettings?.borderColor ? `rgba(${hexToRgb(themeSettings.borderColor)}, 1)` : undefined,
+            "--border-color": hexToRgb(themeSettings?.primary || "#23abff"),
+            borderColor: themeSettings?.primary ? `rgba(${hexToRgb(themeSettings.primary)}, 1)` : undefined,
           } as React.CSSProperties
         }
         {...props}
@@ -114,7 +114,7 @@ const DropdownMenuItem = React.forwardRef<
       )}
       style={
         {
-          "--accent": hexToRgb(themeSettings?.borderColor || "#23abff"),
+          "--accent": hexToRgb(themeSettings?.primary || "#23abff"),
         } as React.CSSProperties
       }
       {...props}
