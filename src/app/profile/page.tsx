@@ -7,6 +7,7 @@ import ProfileSkeleton from "@/components/profile/ProfileSkeleton"
 import ProfileOverview from "@/components/profile/ProfileOverview"
 import PersonalDetailsForm from "@/components/profile/account-settings/PersonalDetailsForm"
 import SecuritySettingsForm from "@/components/profile/account-settings/SecuritySettingsForm"
+import ConnectedAccounts from "@/components/profile/account-settings/ConnectedAccounts"
 import VerificationTab from "@/components/profile/verification/VerificationTab"
 import DependentTab from "@/components/profile/dependents/DependentTab"
 import ProfileVerificationForm from "@/components/profile/verification/ProfileVerificationForm"
@@ -259,11 +260,18 @@ export default function ProfilePage() {
                             />
                         </CardContent>
                     </Card>
-                    <Card className="w-full lg:w-[400px]">
-                        <CardContent>
-                            <SecuritySettingsForm />
-                        </CardContent>
-                    </Card>
+                    <div className="w-full lg:w-[400px] space-y-6">
+                        <Card>
+                            <CardContent>
+                                <SecuritySettingsForm />
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent>
+                                <ConnectedAccounts />
+                            </CardContent>
+                        </Card>
+                    </div>
                 </TabsContent>
 
                 <TabsContent value="booking-history">

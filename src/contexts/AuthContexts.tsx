@@ -108,7 +108,9 @@ export default function AuthContextProvider({ children }: { children: React.Reac
                 verification: Array.isArray(user.verificationDetails) ? user.verificationDetails[0] : (user.verificationDetails || user.verification || undefined),
                 verificationDetails: Array.isArray(user.verificationDetails) 
                     ? user.verificationDetails 
-                    : (user.verificationDetails ? [user.verificationDetails] : undefined)
+                    : (user.verificationDetails ? [user.verificationDetails] : undefined),
+                hasPassword: user.hasPassword,
+                providers: user.providers
             };
             setLoggedInAccount(account);
 
@@ -191,13 +193,37 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     };
 
     const signInWithGoogle = async () => {
-        showNotification('error', 'Google Sign-In not implemented yet');
-        return null;
+        try {
+            setLoading(true);
+            await AuthService.signInWithGoogle();
+            showNotification('success', 'Welcome to Ayahay!');
+            await loadProfile();
+            return 'success';
+        } catch (error: any) {
+            console.error('Google sign-in error:', error);
+            const msg = error.message || 'Google sign-in failed';
+            showNotification('error', msg);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const signInWithFacebook = async () => {
-        showNotification('error', 'Facebook Sign-In not implemented yet');
-        return null;
+        try {
+            setLoading(true);
+            await AuthService.signInWithFacebook();
+            showNotification('success', 'Welcome to Ayahay!');
+            await loadProfile();
+            return 'success';
+        } catch (error: any) {
+            console.error('Facebook sign-in error:', error);
+            const msg = error.message || 'Facebook sign-in failed';
+            showNotification('error', msg);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const forgotPassword = async (email: string): Promise<boolean> => {
@@ -254,7 +280,10 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             setCurrentUser(null);
             setLoggedInAccount(null);
             eraseCookie('user');
+            eraseCookie('access_token');
+            eraseCookie('refresh_token');
             // Clear account related cache
+            invalidateItem('logged-in-user-profile' as any);
             accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
             router.push('/');
         } catch (error) {
@@ -263,6 +292,9 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             setCurrentUser(null);
             setLoggedInAccount(null);
             eraseCookie('user');
+            eraseCookie('access_token');
+            eraseCookie('refresh_token');
+            invalidateItem('logged-in-user-profile' as any);
             accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
             router.push('/');
         } finally {
