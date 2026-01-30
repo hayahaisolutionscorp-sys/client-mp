@@ -1,0 +1,12 @@
+# dependencies
+.next
+node_modules
+
+# Editors
+.idea
+.vscode
+*.iml
+.next
+
+
+next-env.d.ts
