@@ -10,7 +10,7 @@
         "secondary": "oklch(83.66% 0.066 235.48)"
     },
     "logo": {
-        "dark": "https://uat.ayahay.com/assets/images/ayahay_logo_blue.png",
+        "dark": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/logo/ayahay_logo_blue.webp",
         "light": "https://ayahay-v2-assets.s3.ap-southeast-2.amazonaws.com/whitelabel/1/logo/96a4764d-a7c4-4f7d-b95c-6c74452268d3.png"
     },
     "slogan": "Kay Ang Pagsakay, Dapat AYAHAY!",

@@ -21,7 +21,9 @@ export async function getFooterSections(): Promise<IFooterSection | undefined> {
 
     return undefined;
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching footer sections:', e);
+    }
     return undefined;
   }
 }

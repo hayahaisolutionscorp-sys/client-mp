@@ -9,8 +9,6 @@ export interface IDependent {
   sex: string;
   relationship: string;
   nationality: string;
-  occupation: string;
-  civil_status: string;
   phone: string;
   address: string;
   email?: string;
@@ -52,8 +50,6 @@ export interface CreateDependentDto {
   sex: string;
   relationship: string;
   nationality: string;
-  occupation: string;
-  civil_status: string;
   phone: string;
   address: string;
   email?: string;
@@ -67,8 +63,6 @@ export interface UpdateDependentDto {
   sex?: string;
   relationship?: string;
   nationality?: string;
-  occupation?: string;
-  civil_status?: string;
   phone?: string;
   address?: string;
   email?: string;

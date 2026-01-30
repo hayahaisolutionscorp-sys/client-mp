@@ -161,13 +161,15 @@ export async function fetchFilters(): Promise<Filters | undefined> {
       cabinTypes: uniqueCabinTypes,
       shippingLines: filteredShippingLines
     };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error fetching filters:', error.message);
-    } else {
-      console.error('Unknown error fetching filters:', error);
+    } catch (error) {
+      if (typeof window === 'undefined') {
+        if (error instanceof Error) {
+          console.error('Error fetching filters:', error.message);
+        } else {
+          console.error('Unknown error fetching filters:', error);
+        }
+      }
     }
-  }
 }
 
 // TODO: Move

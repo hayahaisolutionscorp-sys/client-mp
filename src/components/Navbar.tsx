@@ -14,8 +14,8 @@ type NavItem = {
   redirect_url: string;
 };
 import UserDropdown from './UserDropdown';
-import { getHeadersSections } from '@/services';
-import { getBrandingConfig } from '@/services/ui/branding.service';
+import { useBranding } from '@/hooks/branding';
+import { useHeaders } from '@/hooks/headers';
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -23,38 +23,27 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
 
-  useEffect(() => {
-    const fetchHeaderSection = async () => {
-      let itemsToRemove: string[] = [];
+  const branding = useBranding();
+  const headerSection = useHeaders();
 
-      const headerSection = await getHeadersSections();
+
+  useEffect(() => {
+    const organizeHeaders = () => {
+      const itemsToRemove: string[] = [];
 
       if (headerSection) {
         if (!headerSection.showPromos) itemsToRemove.push('Promos');
         if (!headerSection.showRoutes) itemsToRemove.push('Routes');
         if (!headerSection.showResources) itemsToRemove.push('Resources');
         if (!headerSection.showAboutUs) itemsToRemove.push('AboutUs');
-        // prep lng
-        // if (!headerSection.showWhyChooseUs) itemsToRemove.push('WhyChooseUs');
-        // if (!headerSection.showPartner) itemsToRemove.push('Partner');
       }
 
       const tempFilteredNavItems = NAV_ITEMS.filter((item) => !itemsToRemove.includes(item.id));
       setFilteredNavItems(tempFilteredNavItems);
-    };
+    }
 
-    fetchHeaderSection();
-  }, []);
-
-  const [branding, setBranding] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchBranding = async () => {
-      const config = await getBrandingConfig();
-      setBranding(config);
-    };
-    fetchBranding();
-  }, []);
+    organizeHeaders();
+  }, [headerSection]);
 
   // Handle scroll lock when menu is open
   useEffect(() => {

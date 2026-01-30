@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getThemeSettings } from "@/services/ui/theme-settings.service";
 import { IThemeSettings } from "@/models";
 
-const THEME_CACHE_KEY = "ayahay_theme_settings";
+const THEME_CACHE_KEY = "theme_settings";
 
 export const useThemeSettings = () => {
   // Start with null to avoid hydration mismatch

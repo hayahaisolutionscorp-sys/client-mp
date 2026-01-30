@@ -27,12 +27,14 @@ export default function SecuritySettingsForm() {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const isMatch = passwordData.newPassword && 
+    const isMatch = !!passwordData.newPassword && 
                    passwordData.newPassword === passwordData.confirmPassword;
 
-    const hasNoChanges = (hasPassword ? !passwordData.currentPassword : false) || 
-                         !passwordData.newPassword || 
-                         !passwordData.confirmPassword;
+    const isFormIncomplete = hasPassword 
+        ? (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword)
+        : (!passwordData.newPassword || !passwordData.confirmPassword);
+
+    const hasNoChanges = isFormIncomplete || !isMatch;
 
     const updatePasswordData = (field: string, value: string) => {
         setPasswordData(prev => ({ ...prev, [field]: value }));
@@ -91,7 +93,7 @@ export default function SecuritySettingsForm() {
                     
                     {hasPassword && (
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Current Password</label>
+                            <label className="text-sm font-medium">Current Password <span className="text-red-500">*</span></label>
                             <div className="relative">
                                 <Input
                                     type={showCurrentPassword ? "text" : "password"}
@@ -112,7 +114,7 @@ export default function SecuritySettingsForm() {
                     )}
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">{hasPassword ? "New Password" : "Password"}</label>
+                        <label className="text-sm font-medium">{hasPassword ? "New Password" : "Password"} <span className="text-red-500">*</span></label>
                         <div className="relative">
                             <Input
                                 type={showNewPassword ? "text" : "password"}
@@ -132,7 +134,7 @@ export default function SecuritySettingsForm() {
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium">Confirm {hasPassword ? "New " : ""}Password</label>
+                            <label className="text-sm font-medium">Confirm {hasPassword ? "New " : ""}Password <span className="text-red-500">*</span></label>
                             {isMatch && (
                                 <div className="flex items-center gap-1 text-xs text-green-600 font-medium animate-in fade-in slide-in-from-right-2">
                                     <CheckCircle2 className="h-3 w-3" />

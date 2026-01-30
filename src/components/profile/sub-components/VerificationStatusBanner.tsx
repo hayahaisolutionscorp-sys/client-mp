@@ -9,19 +9,59 @@ import { useThemeSettings } from "@/hooks/theme-settings"
 
 interface VerificationStatusBannerProps {
     status: VerificationStatus;
-    isUnderCooldown: boolean;
     onResubmit?: () => void;
     rejectionReason?: string;
+    lastSubmissionDate?: string;
 }
 
 export const VerificationStatusBanner: React.FC<VerificationStatusBannerProps> = ({ 
     status, 
-    isUnderCooldown,
     onResubmit,
-    rejectionReason
+    rejectionReason,
+    lastSubmissionDate
 }) => {
     const themeSettings = useThemeSettings();
     const primaryColor = themeSettings?.primary || '#2563eb';
+    const [currentTime, setCurrentTime] = React.useState(new Date());
+
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 10000); // Update every 10 seconds
+        return () => clearInterval(timer);
+    }, []);
+
+    const getRemainingTime = () => {
+        // Only apply 24-hour check for pending and under_review
+        const needsTimingCheck = status === 'pending' || status === 'under_review';
+        if (!lastSubmissionDate || !needsTimingCheck) return { canResubmit: true, message: "" };
+        
+        const lastDate = new Date(lastSubmissionDate);
+        const diffMs = currentTime.getTime() - lastDate.getTime();
+        const diffHrs = diffMs / (1000 * 60 * 60);
+        
+        if (diffHrs >= 24) return { canResubmit: true, message: "" };
+        
+        const totalRemainingMs = (24 * 60 * 60 * 1000) - diffMs;
+        const remainingHrs = Math.floor(totalRemainingMs / (1000 * 60 * 60));
+        const remainingMins = Math.floor((totalRemainingMs % (1000 * 60 * 60)) / (1000 * 60));
+        const remainingSecs = Math.floor((totalRemainingMs % (1000 * 60)) / 1000);
+        
+        // Show seconds if less than a minute remaining
+        if (remainingHrs === 0 && remainingMins === 0) {
+            return {
+                canResubmit: false,
+                message: `You can resubmit in ${remainingSecs}s.`
+            };
+        }
+
+        return { 
+            canResubmit: false, 
+            message: `You can resubmit in ${remainingHrs}h ${remainingMins}m.` 
+        };
+    };
+
+    const { canResubmit, message: timingMessage } = getRemainingTime();
     
     if (status === 'unverified') {
         return (
@@ -43,19 +83,16 @@ export const VerificationStatusBanner: React.FC<VerificationStatusBannerProps> =
                 <XCircle className="h-12 w-12 text-red-500 mx-auto" />
                 <p className="text-muted-foreground">Your verification request was rejected.</p>
                 {onResubmit && (
-                    <Button 
-                        onClick={onResubmit} 
-                        disabled={isUnderCooldown}
-                        variant="destructive"
-                    >
-                        Resubmit Verification
-                    </Button>
+                    <div className="space-y-2">
+                        <Button 
+                            onClick={onResubmit} 
+                            variant="destructive"
+                        >
+                            Resubmit Verification
+                        </Button>
+                    </div>
                 )}
-                {isUnderCooldown && (
-                    <p className="text-[11px] italic" style={{ color: primaryColor }}>
-                        Please wait at least 48 hours before resubmitting a request.
-                    </p>
-                )}
+
                 {rejectionReason && (
                     <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 max-w-md mx-auto">
                         <strong>Rejection Reason:</strong> {rejectionReason}
@@ -72,7 +109,7 @@ export const VerificationStatusBanner: React.FC<VerificationStatusBannerProps> =
                 <div>
                     <p className="font-semibold text-green-900">Account Verified</p>
                     <p className="text-sm text-green-700 mt-1">
-                        Your identity has been verified. You can now enjoy faster check-ins and a smoother booking process.
+                        Your identity has been verified. You can now enjoy faster check-ins and a smoother travel experience.
                     </p>
                 </div>
             </div>
@@ -100,22 +137,28 @@ export const VerificationStatusBanner: React.FC<VerificationStatusBannerProps> =
                     <p className="font-semibold" style={isUnderReview ? { color: primaryColor } : { color: '#713f12' }}>
                         {isUnderReview ? "Verification Under Review" : "Verification Pending"}
                     </p>
+                    
+                    { canResubmit && (
                     <p className="text-sm mt-1" style={isUnderReview ? { color: primaryColor } : { color: '#a16207' }}>
-                        {isUnderCooldown ? (
-                            "We are currently reviewing your documents. This usually takes 24-48 hours. You'll be able to enjoy faster check-ins once approved."
-                        ) : (
-                            "Review is taking longer than expected. You may resubmit if you need to update your info."
-                        )}
+                        Review is taking longer than expected. You may resubmit if you need to update your info.
                     </p>
-                    {!isUnderCooldown && onResubmit && (
-                        <div className="mt-4 flex gap-3">
+                    )}
+                    
+                    {onResubmit && (
+                        <div className="mt-4 flex flex-col gap-2 items-start">
                             <Button 
                                 size="sm" 
                                 className="h-8 text-xs font-medium"
                                 onClick={onResubmit}
+                                disabled={!canResubmit}
                             >
                                 Resubmit Request
                             </Button>
+                            {!canResubmit && (
+                                <p className="text-[11px] font-medium" style={isUnderReview ? { color: primaryColor } : { color: '#a16207' }}>
+                                    {timingMessage}
+                                </p>
+                            )}
                         </div>
                     )}
                 </div>

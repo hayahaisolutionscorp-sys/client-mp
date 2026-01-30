@@ -19,10 +19,18 @@ export const AuthService = {
     },
 
     getProfile: async () => {
-        const response = await axios.get(`${AUTH_API}/me`);
-        const { cacheItem } = await import('helpers/cache.helpers');
-        cacheItem('logged-in-user-profile', response.data.data || response.data);
-        return response.data;
+        try {
+            const response = await axios.get(`${AUTH_API}/me`);
+            const { cacheItem } = await import('helpers/cache.helpers');
+            cacheItem('logged-in-user-profile', response.data.data || response.data);
+            return response.data;
+        } catch (error: any) {
+            // Silently handle 401 as it's expected for unauthenticated users
+            if (error.response?.status === 401) {
+                return null;
+            }
+            throw error;
+        }
     },
 
     updateProfile: async (data: any) => {

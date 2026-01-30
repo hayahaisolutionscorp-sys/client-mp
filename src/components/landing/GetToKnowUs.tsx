@@ -38,7 +38,9 @@ export default function GetToKnowUs() {
         setMissionData(missionRes.data);
         setVisionData(visionRes.data);
       } catch (error) {
-        console.error('Error fetching GetToKnowUs data:', error);
+        if (typeof window === 'undefined') {
+          console.error('Error fetching GetToKnowUs data:', error);
+        }
       } finally {
         setLoading(false);
       }

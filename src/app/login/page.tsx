@@ -12,9 +12,11 @@ import { ForgotPasswordModal } from "@/components/auth/ForgotPassword";
 import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import { LoginForm } from "@/models";
 import { useThemeSettings } from "@/hooks/theme-settings";
+import { useBranding } from "@/hooks/branding";
 
 export default function LoginPage() {
   const router = useRouter();
+  const branding = useBranding();
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
 
@@ -24,8 +26,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
-
-
   // Import auth context functions
   const {
     signIn,
@@ -33,9 +33,8 @@ export default function LoginPage() {
     signInWithFacebook,
   } = useAuth();
 
-
-
   const [error, setError] = useState<string | null>(null);
+
 
   // Handle email/password login
   const handleLogin = async (values: LoginForm) => {
@@ -76,7 +75,7 @@ export default function LoginPage() {
   // Handle Facebook SSO login
   const handleFacebookLogin = async () => {
     try {
-      setLoading(true);
+      setLoading(false);
       await signInWithFacebook();
       router.push('/');
     } catch (error: unknown) {
@@ -100,8 +99,8 @@ export default function LoginPage() {
           <h1 className="sr-only">Login</h1>
           <div className="flex justify-center">
             <Image
-              src="/assets/icons/Ayahay_blue_vertical.svg"
-              alt="Ayahay Logo"
+              src={branding?.logo.dark || branding?.logo.light || "/assets/icons/Ayahay_blue_vertical.svg"}
+              alt={`${branding?.brand_name || "Hayahai"} Logo`}
               width={210}
               height={210}
               className="h-15 w-15"

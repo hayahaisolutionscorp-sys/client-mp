@@ -12,7 +12,9 @@ export async function createDependents(
     const { data } = await axios.post(`${PROFILES_API}/${userId}/dependents`, dependents);
     return data.data;
   } catch (error: any) {
-    console.error('Error creating dependents:', error);
+    if (typeof window === 'undefined') {
+      console.error('Error creating dependents:', error);
+    }
     throw error;
   }
 }
@@ -22,7 +24,9 @@ export async function getDependents(userId: string): Promise<IDependent[]> {
     const { data } = await axios.get(`${PROFILES_API}/${userId}/dependents`);
     return data.data || [];
   } catch (error: any) {
-    console.error('Error fetching dependents:', error);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching dependents:', error);
+    }
     return [];
   }
 }
@@ -35,7 +39,9 @@ export async function updateDependent(
     const { data } = await axios.patch(`${PROFILES_API}/dependents/${id}`, updateData);
     return data.data;
   } catch (error: any) {
-    console.error('Error updating dependent:', error);
+    if (typeof window === 'undefined') {
+      console.error('Error updating dependent:', error);
+    }
     throw error;
   }
 }
@@ -44,7 +50,9 @@ export async function deleteDependent(id: string): Promise<void> {
   try {
     await axios.delete(`${PROFILES_API}/dependents/${id}`);
   } catch (error: any) {
-    console.error('Error deleting dependent:', error);
+    if (typeof window === 'undefined') {
+      console.error('Error deleting dependent:', error);
+    }
     throw error;
   }
 }
@@ -62,7 +70,9 @@ export async function requestVerification(
     );
     return data.data;
   } catch (error: any) {
-    console.error('Error submitting verification request:', error);
+    if (typeof window === 'undefined') {
+      console.error('Error submitting verification request:', error);
+    }
     throw error;
   }
 }
@@ -72,7 +82,9 @@ export async function getVerificationsByUser(userId: string): Promise<IVerificat
     const { data } = await axios.get(`${PROFILES_API}/${userId}/verifications`);
     return data.data || [];
   } catch (error: any) {
-    console.error('Error fetching verifications:', error);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching verifications:', error);
+    }
     throw error;
   }
 }
@@ -82,7 +94,9 @@ export async function getVerificationDetails(id: string): Promise<IVerification>
     const { data } = await axios.get(`${PROFILES_API}/verification/${id}`);
     return data.data;
   } catch (error: any) {
-    console.error('Error fetching verification details:', error);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching verification details:', error);
+    }
     throw error;
   }
 }
@@ -92,7 +106,9 @@ export async function getDependentsWithVerification(userId: string): Promise<IDe
     const { data } = await axios.get(`${PROFILES_API}/${userId}/dependents-with-verifications`);
     return data.data;
   } catch (error: any) {
-    console.error('Error fetching dependents with verification:', error);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching dependents with verification:', error);
+    }
     throw error;
   }
 }
@@ -101,7 +117,9 @@ export async function cancelVerificationRequest(verificationId: string): Promise
   try {
     await axios.post(`${PROFILES_API}/verification/${verificationId}/cancel`);
   } catch (error: any) {
-    console.error('Error canceling verification request:', error);
+    if (typeof window === 'undefined') {
+      console.error('Error canceling verification request:', error);
+    }
     throw error;
   }
 }

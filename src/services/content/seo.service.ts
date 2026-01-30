@@ -64,24 +64,7 @@ function buildMetadataFromConfig(config: any): SeoMetadata {
 }
 
 export async function getGlobalMetadata(): Promise<SeoMetadata> {
-    try {
-        if (!IS_CLIENT) {
-            return seoData.global as any as SeoMetadata;
-        }
-
-        const res = await fetch(`${SEO_API}/global`, {
-            next: { tags: ['seo-global'], revalidate: 3600 },
-        });
-
-        if (res.ok) {
-            const { data } = await res.json();
-            return data;
-        }
-    } catch (e) {
-        console.error(e);
-    }
-
-    return seoData.global as any as SeoMetadata;
+    return getPageMetadata('home');
 }
 
 export async function getPageMetadata(pageKey: PageKey): Promise<SeoMetadata> {
@@ -110,7 +93,9 @@ export async function getPageMetadata(pageKey: PageKey): Promise<SeoMetadata> {
             return buildMetadataFromConfig(config);
         }
     } catch (e) {
-        console.error(e);
+        if (typeof window === 'undefined') {
+            console.error(`Error fetching page metadata for ${pageKey}:`, e);
+        }
     }
 
     // Fallback if API fails or returns error

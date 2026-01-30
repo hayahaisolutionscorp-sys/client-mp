@@ -21,7 +21,9 @@ export async function getFaqs(): Promise<IFaq[]> {
 
     return [];
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching FAQs:', e);
+    }
     return [];
   }
 }

@@ -23,7 +23,6 @@ interface DependentFormProps {
     isEditing?: boolean;
 }
 
-const civilStatuses = ["Single", "Married", "Widowed", "Separated", "Divorced"];
 const categoryOptions = ["Regular", "Student", "Senior", "PWD", "Infant", "Child"];
 const relationshipOptions = [
     "Spouse",
@@ -48,24 +47,21 @@ export default function DependentForm({
     const { loggedInAccount } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [useAccountContact, setUseAccountContact] = useState(false);
-    const [isUnemployed, setIsUnemployed] = useState(false);
     
     const [formData, setFormData] = useState<CreateDependentDto>({
         first_name: "",
         last_name: "",
         birthday: "",
         sex: "Female",
-        relationship: "Son",
+        relationship: "Relative",
         nationality: "Filipino",
-        occupation: "",
         address: "",
-        civil_status: "Single",
         phone: "",
         email: "",
         category: "Regular",
     });
 
-    const [selectedRelationship, setSelectedRelationship] = useState("Son");
+    const [selectedRelationship, setSelectedRelationship] = useState("Relative");
     const [customRelationship, setCustomRelationship] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [initialState, setInitialState] = useState<any>(null);
@@ -73,9 +69,6 @@ export default function DependentForm({
     useEffect(() => {
         if (dependent) {
             // 1. Prepare all values first
-            const rawCivil = (dependent.civil_status || "Single").toString().trim().toLowerCase();
-            const validCivilStatus = civilStatuses.find(s => s.toLowerCase() === rawCivil) || "Single";
-
             const rawCategory = (dependent.category || "Regular").toString().trim().toLowerCase();
             const validCategory = categoryOptions.find(c => c.toLowerCase() === rawCategory) || "Regular";
 
@@ -98,9 +91,7 @@ export default function DependentForm({
                 sex: dependent.sex || "Female",
                 relationship: initialRel === "Other" ? initialCustomRel : initialRel,
                 nationality: dependent.nationality || "Filipino",
-                occupation: dependent.occupation || "",
                 address: dependent.address || "",
-                civil_status: validCivilStatus,
                 phone: dependent.phone && dependent.phone.startsWith('+639')
                     ? dependent.phone
                     : dependent.phone
@@ -111,8 +102,6 @@ export default function DependentForm({
             };
 
             // 2. Apply all updates together
-            
-            setIsUnemployed(dependent.occupation === "Unemployed");
             setSelectedRelationship(initialRel);
             setCustomRelationship(initialCustomRel);
             setFormData(data);
@@ -144,11 +133,6 @@ export default function DependentForm({
                 email: loggedInAccount.email || prev.email,
             }));
         }
-    };
-
-    const handleUnemployedToggle = (checked: boolean) => {
-        setIsUnemployed(checked);
-        handleChange("occupation", checked ? "Unemployed" : "");
     };
 
     const handleRelationshipChange = (value: string) => {
@@ -200,10 +184,8 @@ export default function DependentForm({
         relationship: Boolean(selectedRelationship === "Other" ? customRelationship?.trim() : selectedRelationship),
         nationality: Boolean(formData.nationality),
         address: Boolean(formData.address?.trim()),
-        civil_status: Boolean(formData.civil_status),
         phone: Boolean(formData.phone),
         category: Boolean(formData.category),
-        occupation: Boolean(formData.occupation)
     };
     
     const isFormValid = Object.values(validationChecks).every(check => check === true);
@@ -225,7 +207,7 @@ export default function DependentForm({
                 <Button variant="ghost" size="icon" onClick={onCancel} className="h-10 w-10 !text-black"><X className="h-6 w-6" /></Button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-4 space-y-2">
                 {error && <div className="p-4 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -239,24 +221,18 @@ export default function DependentForm({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Birth Date *</label>
                         <BirthDatePicker
                             date={formData.birthday ? parseISO(formData.birthday) : undefined}
-                            setDate={(val) => {
-                                let newDate: Date | undefined;
-                                if (typeof val === 'function') {
+                            setDate={(dateAction) => {
                                     const current = formData.birthday ? parseISO(formData.birthday) : undefined;
-                                    newDate = (val as any)(current);
-                                } else {
-                                    newDate = val;
-                                }
-                                
-                                if (newDate && isValid(newDate)) {
-                                    handleChange("birthday", newDate.toISOString().split("T")[0]);
-                                }
-                            }}
+                                    const newDate = typeof dateAction === 'function' ? dateAction(current) : dateAction;
+                                    if (newDate && isValid(newDate)) {
+                                        handleChange('birthday', newDate.toISOString());
+                                    }
+                                }}
                             validationErrors={{}}
                             allowMinors={true}
                         />
@@ -277,26 +253,32 @@ export default function DependentForm({
                             </SelectContent>
                         </Select>
                     </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Nationality *</label>
+                        <Combobox values={NATIONALITIES} value={formData.nationality} onChange={(v) => handleChange("nationality", v)} />
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Relationship *</label>
-                        <Select 
-                            value={selectedRelationship} 
-                            onValueChange={(v) => {
-                                if (!v) return;
-                                handleRelationshipChange(v);
-                            }}
-                        >
-                            <SelectTrigger><SelectValue placeholder="Select relationship" /></SelectTrigger>
-                            <SelectContent>
-                                {relationshipOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                        {selectedRelationship === "Other" && (
-                            <Input placeholder="Specify..." value={customRelationship} onChange={(e) => handleCustomRelationshipChange(e.target.value)} className="mt-2" required />
-                        )}
+                        <div className="flex gap-3">
+                            <Select 
+                                value={selectedRelationship} 
+                                onValueChange={(v) => {
+                                    if (!v) return;
+                                    handleRelationshipChange(v);
+                                }}
+                            >
+                                <SelectTrigger><SelectValue placeholder="Select relationship" /></SelectTrigger>
+                                <SelectContent>
+                                    {relationshipOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            {selectedRelationship === "Other" && (
+                                <Input placeholder="Specify..." value={customRelationship} onChange={(e) => handleCustomRelationshipChange(e.target.value)} className="w-full" required />
+                            )}
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Category *</label>
@@ -315,37 +297,10 @@ export default function DependentForm({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Nationality *</label>
-                        <Combobox values={NATIONALITIES} value={formData.nationality} onChange={(v) => handleChange("nationality", v)} />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Civil Status *</label>
-                        <Select 
-                            value={formData.civil_status} 
-                            onValueChange={(v) => {
-                                if (!v) return;
-                                handleChange("civil_status", v);
-                            }} 
-                            required
-                        >
-                            <SelectTrigger><SelectValue placeholder="Select civil status" /></SelectTrigger>
-                            <SelectContent>
-                                {civilStatuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-
                 <div className="flex flex-col gap-4 p-4 bg-slate-50 rounded-lg border">
                     <div className="flex items-center space-x-2">
                         <Checkbox id="use-account-contact" checked={useAccountContact} onCheckedChange={handleAccountContactToggle} />
                         <label htmlFor="use-account-contact" className="text-sm font-medium">Same as my account contact info</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Checkbox id="is-unemployed" checked={isUnemployed} onCheckedChange={handleUnemployedToggle} />
-                        <label htmlFor="is-unemployed" className="text-sm font-medium">Dependent is currently unemployed</label>
                     </div>
                 </div>
 
@@ -358,11 +313,6 @@ export default function DependentForm({
                         <label className="text-sm font-medium">Email (optional)</label>
                         <Input value={formData.email} onChange={(e) => handleChange("email", e.target.value)} />
                     </div>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">Occupation *</label>
-                    <Input value={formData.occupation} onChange={(e) => handleChange("occupation", e.target.value)} required disabled={isUnemployed} />
                 </div>
 
                 <div className="space-y-2">

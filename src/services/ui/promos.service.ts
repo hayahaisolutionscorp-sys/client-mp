@@ -39,7 +39,9 @@ export async function getPromos(): Promise<IPromo[]> {
 
         return [];
     } catch (e) {
-        console.error(e);
+        if (typeof window === 'undefined') {
+            console.error('Error fetching promos:', e);
+        }
         return [];
     }
 }

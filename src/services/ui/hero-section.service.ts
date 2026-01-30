@@ -35,7 +35,9 @@ export async function getHeroSections(): Promise<IHeroSection | undefined> {
 
     return undefined;
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching hero sections:', e);
+    }
     return undefined;
   }
 }

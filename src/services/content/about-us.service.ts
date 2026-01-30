@@ -42,7 +42,9 @@ export async function getAboutUsSection(sectionType: AboutUsSectionType): Promis
     const { data } = await res.json();
     return data;
   } catch (e) {
-    console.error(`Error fetching about-us section ${sectionType}:`, e);
+    if (typeof window === 'undefined') {
+      console.error(`Error fetching about-us section ${sectionType}:`, e);
+    }
     return undefined;
   }
 }
@@ -66,7 +68,9 @@ export async function getCoreValues(): Promise<ICoreValue[]> {
     const { data } = await res.json();
     return data;
   } catch (e) {
-    console.error(`Error fetching about-us core values:`, e);
+    if (typeof window === 'undefined') {
+      console.error(`Error fetching about-us core values:`, e);
+    }
     return [];
   }
 }

@@ -34,7 +34,9 @@ export async function getPress(): Promise<IPress[]> {
 
     return [];
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching press:', e);
+    }
     return [];
   }
 }

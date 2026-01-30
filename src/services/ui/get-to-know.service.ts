@@ -33,14 +33,24 @@ export const getGetToKnow = async (): Promise<IGetToKnowResponse> => {
         };
     }
 
-    const response = await fetch(GET_TO_KNOW_API, {
-        next: { tags: ['get-to-know'], revalidate: 3600 }
-    });
+    try {
+        const response = await fetch(GET_TO_KNOW_API, {
+            next: { tags: ['get-to-know'], revalidate: 3600 }
+        });
 
-    if (!response.ok) {
-        throw new Error("Failed to fetch Get To Know data");
+        if (!response.ok) {
+            throw new Error("Failed to fetch Get To Know data");
+        }
+        return response.json();
+    } catch (error) {
+        if (typeof window === 'undefined') {
+            console.error('Error fetching Get To Know data:', error);
+        }
+        return {
+            message: "Fallback to local data due to fetch error.",
+            data: getToKnowData as IGetToKnowData
+        };
     }
-    return response.json();
 };
 
 export const getGetToKnowMission = async (): Promise<IGetToKnowResponse> => {
@@ -51,13 +61,23 @@ export const getGetToKnowMission = async (): Promise<IGetToKnowResponse> => {
         };
     }
 
-    const response = await fetch(GET_TO_KNOW_MISSION_API, {
-        next: { tags: ['get-to-know-mission'], revalidate: 3600 }
-    });
-    if (!response.ok) {
-        throw new Error("Failed to fetch Get To Know Mission data");
+    try {
+        const response = await fetch(GET_TO_KNOW_MISSION_API, {
+            next: { tags: ['get-to-know-mission'], revalidate: 3600 }
+        });
+        if (!response.ok) {
+            throw new Error("Failed to fetch Get To Know Mission data");
+        }
+        return response.json();
+    } catch (error) {
+        if (typeof window === 'undefined') {
+            console.error('Error fetching Get To Know Mission data:', error);
+        }
+        return {
+            message: "Fallback to local data due to fetch error.",
+            data: getToKnowMissionData as IGetToKnowData
+        };
     }
-    return response.json();
 };
 
 export const getGetToKnowVision = async (): Promise<IGetToKnowResponse> => {
@@ -68,11 +88,21 @@ export const getGetToKnowVision = async (): Promise<IGetToKnowResponse> => {
         };
     }
 
-    const response = await fetch(GET_TO_KNOW_VISION_API, {
-        next: { tags: ['get-to-know-vision'], revalidate: 3600 }
-    });
-    if (!response.ok) {
-        throw new Error("Failed to fetch Get To Know Vision data");
+    try {
+        const response = await fetch(GET_TO_KNOW_VISION_API, {
+            next: { tags: ['get-to-know-vision'], revalidate: 3600 }
+        });
+        if (!response.ok) {
+            throw new Error("Failed to fetch Get To Know Vision data");
+        }
+        return response.json();
+    } catch (error) {
+        if (typeof window === 'undefined') {
+            console.error('Error fetching Get To Know Vision data:', error);
+        }
+        return {
+            message: "Fallback to local data due to fetch error.",
+            data: getToKnowVisionData as IGetToKnowData
+        };
     }
-    return response.json();
 };

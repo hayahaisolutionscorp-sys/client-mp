@@ -37,7 +37,9 @@ export async function getContactUs(): Promise<IContactInformation[]> {
 
     return [];
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching contact information:', e);
+    }
     return [];
   }
 }
@@ -59,7 +61,9 @@ export async function getContactUsHero(): Promise<IContactUsHero | undefined> {
 
     return undefined;
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching contact-us hero section:', e);
+    }
     return undefined;
   }
 }

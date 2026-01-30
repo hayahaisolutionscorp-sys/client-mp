@@ -20,7 +20,9 @@ export async function getAccountInformation(forceRefresh = false): Promise<IAcco
 
     return data.data;
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching account information:', e);
+    }
     return undefined;
   }
 }
@@ -32,7 +34,9 @@ export async function getAccount(
     const { data: account } = await axios.get(`${ACCOUNT_API}/${accountId}`);
     return account;
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching account:', e);
+    }
   }
 }
 
@@ -40,7 +44,9 @@ export async function updateAccount(data: any): Promise<void> {
   try {
     await axios.patch(ACCOUNT_API, data);
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error updating account:', e);
+    }
   }
 }
 
@@ -54,7 +60,9 @@ export async function createPassengerAccount(
     });
     return data;
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error creating passenger account:', e);
+    }
     return undefined;
   }
 }

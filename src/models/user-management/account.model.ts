@@ -1,5 +1,5 @@
 import { IPassenger } from './passenger.model';
-import { ACCOUNT_ROLE, CIVIL_STATUS, OCCUPATION, SEX } from 'constants/index';
+import { ACCOUNT_ROLE, SEX } from 'constants/index';
 import { ITravelAgency } from './travel-agency.model';
 import { IClient } from './client.model';
 import { IShippingLine } from '../shipping-line/shipping-line.model';
@@ -59,9 +59,7 @@ export interface RegisterForm {
   agreement: boolean;
   firstName: string;
   lastName: string;
-  occupation: keyof typeof OCCUPATION;
   sex: keyof typeof SEX;
-  civilStatus: keyof typeof CIVIL_STATUS;
   birthday: string;
   address: string;
   nationality: string;

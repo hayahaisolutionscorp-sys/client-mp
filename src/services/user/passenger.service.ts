@@ -6,9 +6,7 @@ export function mapPassengerToDto(values: RegisterForm): IPassenger {
   const {
     firstName,
     lastName,
-    occupation,
     sex,
-    civilStatus,
     birthday,
     address,
     phone,
@@ -19,9 +17,7 @@ export function mapPassengerToDto(values: RegisterForm): IPassenger {
     id: -1,
     firstName,
     lastName,
-    occupation,
     sex,
-    civilStatus,
     birthdayIso: new Date(birthday).toISOString(),
     address,
     phone,
@@ -40,9 +36,7 @@ export async function updatePassenger(
       birthday: passengerData.birthdayIso,
       address: passengerData.address,
       nationality: passengerData.nationality,
-      occupation: passengerData.occupation,
       phone: passengerData.phone,
-      civilStatus: passengerData.civilStatus,
       profile_picture_url: passengerData.profile_picture_url
     };
 
@@ -50,7 +44,9 @@ export async function updatePassenger(
 
     return data.data.passenger;
   } catch (e) {
-    console.error('Error updating passenger:', e);
+    if (typeof window === 'undefined') {
+      console.error('Error updating passenger:', e);
+    }
     throw e;
   }
 }
@@ -60,6 +56,8 @@ export async function getPassenger(): Promise<IPassenger | undefined> {
     const { data } = await axios.get(`${AUTH_API}/me`);
     return data.data.passenger;
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching passenger:', e);
+    }
   }
 }

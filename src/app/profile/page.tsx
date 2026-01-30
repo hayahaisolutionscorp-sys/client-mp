@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton"
 import ProfileOverview from "@/components/profile/ProfileOverview"
@@ -26,7 +26,10 @@ export default function ProfilePage() {
     const router = useRouter();
     const { loggedInAccount, loading, currentUser } = useAuth();
     
-    const [activeTab, setActiveTab] = useState("overview");
+    const searchParams = useSearchParams();
+    const tabParam = searchParams.get('tab');
+    
+    const [activeTab, setActiveTab] = useState(tabParam || "overview");
     const [isPageLoading, setIsPageLoading] = useState(true);
     const [isCopied, setIsCopied] = useState(false);
     
@@ -103,6 +106,13 @@ export default function ProfilePage() {
             setIsPageLoading(false);
         }
     }, [loggedInAccount, loading, fetchProfileData, router]);
+
+    // Handle initial tab from query param
+    useEffect(() => {
+        if (tabParam) {
+            setActiveTab(tabParam);
+        }
+    }, [tabParam]);
 
     // Update image preview when passenger or currentUser profile picture changes
     useEffect(() => {
@@ -225,7 +235,6 @@ export default function ProfilePage() {
                 onCopyClick={copyToClipboard}
                 onVerificationClick={() => setActiveTab("verification")}
                 fileInputRef={fileInputRef}
-                onImageChange={handleImageChange}
             />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">

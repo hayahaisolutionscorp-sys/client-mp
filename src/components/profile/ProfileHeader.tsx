@@ -6,12 +6,10 @@ import { Camera, Check, Copy, LogOut } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Badge } from "@/components/ui/Badge"
-import { cn } from "@/lib/utils"
 import { useThemeSettings } from "@/hooks/theme-settings"
 import { useAuth } from "@/contexts/AuthContexts"
 import { 
     VerificationStatus, 
-    getStatusColor, 
     getStatusIcon, 
     getStatusDisplayText,
     getStatusVariant
@@ -95,7 +93,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                         <div className="absolute -bottom-2 -right-2">
                             <Badge 
                                 variant={getStatusVariant(verificationStatus)}
-                                className="cursor-pointer hover:opacity-90 transition-all bg-white" 
+                                className="cursor-pointer hover:opacity-90 transition-all" 
                                 onClick={onVerificationClick}
                             >
                                 {getStatusIcon(verificationStatus)}

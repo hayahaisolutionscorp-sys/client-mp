@@ -12,10 +12,6 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
   const dropdownRef = useRef<HTMLDivElement>(null);
   const themeSettings = useThemeSettings();
 
-  const logOut = () => {
-    logout();
-  };
-
   // Add useEffect for clicking outside dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -89,7 +85,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
               <div className="border-t border-gray-100">
                 <button
                   onClick={() => {
-                    logOut();
+                    logout();
                     setIsDropdownOpen(false);
                   }}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"

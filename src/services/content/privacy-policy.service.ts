@@ -32,7 +32,9 @@ export async function getPrivacyPolicy(): Promise<IPrivacyPolicyTipTap | undefin
     // Fallback to local data if API fails
     return privacyPolicyData as IPrivacyPolicyTipTap;
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching privacy policy:', e);
+    }
     // Fallback to local data on error
     return privacyPolicyData as IPrivacyPolicyTipTap;
   }

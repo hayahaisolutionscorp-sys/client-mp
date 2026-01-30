@@ -3,24 +3,10 @@ export enum SEX {
   Female = 'Female'
 }
 
-export enum CIVIL_STATUS {
-  Single = 'Single',
-  Married = 'Married',
-  Divorced = 'Divorced',
-  Widowed = 'Widowed',
-}
-
 export enum BOOKING_TYPE {
   Single = 'Single Trip',
   Round = 'Round Trip',
   // Multiple = 'Multiple Trips',
-}
-
-export enum OCCUPATION {
-  Student = 'Student',
-  Employed = 'Employed',
-  SelfEmployed = 'Self-Employed',
-  Unemployed = 'Unemployed',
 }
 
 export enum ACCOUNT_ROLE {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { IDependent } from "@/models"
 import { Badge } from "../../ui/Badge"
 import { Button } from "../../ui/Button"
@@ -13,7 +13,8 @@ import {
     History,
     Shield,
     ShieldCheck,
-    Clock
+    Clock,
+    Loader2
 } from "lucide-react"
 import { getStatusBadge, getStatusVariant, VerificationStatus } from "@/utils/verification/statusHelpers"
 import { cn } from "@/lib/utils"
@@ -66,16 +67,52 @@ export default function DependentCard({
     const [isSaving, setIsSaving] = useState(false);
     const [isCanceling, setIsCanceling] = useState(false);
     
-    const status = (dependent.verificationStatus || 'unverified') as VerificationStatus;
-    
-    // Check if 48 hours have passed since the last verification request
-    const lastVerification = dependent.verification || (dependent.verifications && dependent.verifications[0]);
-    const isUnderCooldown = lastVerification?.created_at && 
-        (new Date().getTime() - new Date(lastVerification.created_at).getTime()) < 48 * 60 * 60 * 1000;
-    
+    const status = (dependent.verificationStatus || dependent.verification?.status || 'unverified') as VerificationStatus;
+  
     const canRequestVerification = (status === 'unverified' || status === 'rejected' || status === 'expired') 
     
-    const canResubmitIfStuck = (status === 'pending' || status === 'under_review') && !isUnderCooldown;
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 10000); // Update every 10 seconds
+        return () => clearInterval(timer);
+    }, []);
+
+    const getRemainingTime = () => {
+        const needsTimingCheck = status === 'pending' || status === 'under_review';
+        const lastSubmissionDate = dependent.verifications?.[0]?.created_at || dependent.verifications?.[0]?.updated_at;
+        
+        if (!lastSubmissionDate || !needsTimingCheck) return { canResubmit: true, message: "" };
+        
+        const lastDate = new Date(lastSubmissionDate);
+        const diffMs = currentTime.getTime() - lastDate.getTime();
+        const diffHrs = diffMs / (1000 * 60 * 60);
+        
+        if (diffHrs >= 24) return { canResubmit: true, message: "" };
+        
+        const totalRemainingMs = (24 * 60 * 60 * 1000) - diffMs;
+        const remainingHrs = Math.floor(totalRemainingMs / (1000 * 60 * 60));
+        const remainingMins = Math.floor((totalRemainingMs % (1000 * 60 * 60)) / (1000 * 60));
+        const remainingSecs = Math.floor((totalRemainingMs % (1000 * 60)) / 1000);
+        
+        if (remainingHrs === 0 && remainingMins === 0) {
+            return {
+                canResubmit: false,
+                message: `Resubmit in ${remainingSecs}s`
+            };
+        }
+
+        return { 
+            canResubmit: false, 
+            message: `Resubmit in ${remainingHrs}h ${remainingMins}m` 
+        };
+    };
+
+    const { canResubmit, message: timingMessage } = getRemainingTime();
+    
+    const canResubmitIfStuck = (status === 'pending' || status === 'under_review');
 
     const handleUpdateSuccess = (updated: IDependent) => {
         setShowEditForm(false);
@@ -193,23 +230,6 @@ export default function DependentCard({
                                         <strong>Reason:</strong> {dependent.verification.review_notes}
                                     </div>
                                 )}
-
-                                {(status === 'pending' || status === 'under_review') && (
-                                    <div className="mt-4 flex flex-col gap-3">
-                                        <div className="p-2 rounded text-[11px] italic" style={{
-                                            backgroundColor: `${primaryColor}10`,
-                                            borderColor: `${primaryColor}20`,
-                                            color: primaryColor,
-                                            border: '1px solid'
-                                        }}>
-                                            {isUnderCooldown ? (
-                                                "Your request is being reviewed. Please wait at least 48 hours before resubmitting if you encounter issues."
-                                            ) : (
-                                            "Review is taking longer than expected. You may resubmit if necessary."
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         )}
 
@@ -269,22 +289,39 @@ export default function DependentCard({
                     )}
 
                     {canResubmitIfStuck && (
-                        <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="h-8 font-medium transition-all"
-                            style={{
-                                borderColor: `${accentColor}40`,
-                                color: primaryColor
-                            }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleCancelVerification().then(() => onRequestVerification(dependent));
-                            }}
-                        >
-                            <History className="h-3.5 w-3.5 mr-1.5" />
-                            Resubmit Request
-                        </Button>
+                        <div className="flex flex-col items-end gap-1">
+                            <Button 
+                                size="sm" 
+                                variant="outline"
+                                className="h-8 font-medium transition-all"
+                                style={{
+                                    borderColor: `${accentColor}40`,
+                                    color: primaryColor
+                                }}
+                                disabled={!canResubmit || isCanceling}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCancelVerification().then(() => onRequestVerification(dependent));
+                                }}
+                            >
+                                {isCanceling ? (
+                                    <>
+                                        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                        Processing...
+                                    </>
+                                ) : (
+                                    <>
+                                        <History className="h-3.5 w-3.5 mr-1.5" />
+                                        Resubmit Request
+                                    </>
+                                )}
+                            </Button>
+                            {!canResubmit && (
+                                <span className="text-[10px] font-medium" style={{ color: primaryColor }}>
+                                    {timingMessage}
+                                </span>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>
@@ -292,7 +329,7 @@ export default function DependentCard({
             {/* Modals */}
             {showEditForm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
-                    <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+                    <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar">
                         <CardContent className="p-0">
                             <DependentForm
                                 userId={dependent.user_id}

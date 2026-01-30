@@ -38,12 +38,23 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
         }
     }, [passenger]);
 
+    const isFormIncomplete = useMemo(() => {
+        return !formData.firstName?.trim() || 
+               !formData.lastName?.trim() ||
+               !email?.trim() ||
+               !formData.phone?.trim() ||
+               !formData.sex ||
+               !formData.birthdayIso ||
+               !formData.nationality ||
+               !formData.address?.trim();
+    }, [formData, email]);
+
     const hasNoChanges = useMemo(() => {
         if (!passenger) return true;
         
         const fieldsToCompare: (keyof IPassenger)[] = [
             'firstName', 'lastName', 'sex', 'birthdayIso', 
-            'nationality', 'phone', 'civilStatus', 'address'
+            'nationality', 'phone', 'address'
         ];
 
         return fieldsToCompare.every(field => {
@@ -83,7 +94,6 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
             !formData.sex ||
             !formData.birthdayIso ||
             !formData.nationality ||
-            !formData.civilStatus ||
             !formData.address?.trim()
         ) {
             setError("All fields marked with an asterisk (*) are required.");
@@ -206,25 +216,6 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                                 onChange={(value) => handleInputChange('nationality', value)}
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Civil Status <span className="text-red-500">*</span></label>
-                            <Select
-                                value={formData.civilStatus || ''}
-                                onValueChange={(value) => handleInputChange('civilStatus', value)}
-                                required
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select civil status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Single">Single</SelectItem>
-                                    <SelectItem value="Married">Married</SelectItem>
-                                    <SelectItem value="Widowed">Widowed</SelectItem>
-                                    <SelectItem value="Separated">Separated</SelectItem>
-                                    <SelectItem value="Divorced">Divorced</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
                         <div className="md:col-span-2 space-y-2">
                             <label className="text-sm font-medium">Address <span className="text-red-500">*</span></label>
                             <Input
@@ -235,7 +226,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                         </div>
                     </div>
                     <div className="flex justify-end pt-4">
-                        <Button type="submit" disabled={isSaving || hasNoChanges}>
+                        <Button type="submit" disabled={isSaving || hasNoChanges || isFormIncomplete}>
                             {isSaving ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>

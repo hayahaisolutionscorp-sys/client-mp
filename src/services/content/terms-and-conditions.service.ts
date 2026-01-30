@@ -31,7 +31,9 @@ export async function getTermsAndConditions(): Promise<ITermsAndConditions | und
 
         return undefined;
     } catch (e) {
-        console.error(e);
+        if (typeof window === 'undefined') {
+            console.error('Error fetching terms and conditions:', e);
+        }
         return undefined;
     }
 }

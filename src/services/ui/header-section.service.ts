@@ -21,7 +21,9 @@ export async function getHeadersSections(): Promise<IHeaderSection | undefined> 
 
     return undefined;
   } catch (e) {
-    console.error(e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching header sections:', e);
+    }
     return undefined;
   }
 }

@@ -22,9 +22,11 @@ import BirthDatePicker from "@/components/ui/BirthDatePicker";
 import Combobox from "@/components/ui/Combobox";
 import { NATIONALITIES } from "constants/default";
 import { useThemeSettings } from "@/hooks/theme-settings";
+import { useBranding } from "@/hooks/branding";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const branding = useBranding();
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
   const dateToday = new Date();
@@ -45,8 +47,6 @@ export default function RegisterPage() {
     address: "",
     nationality: "",
     agreement: false,
-    occupation: "Unemployed",
-    civilStatus: "Single",
     phone: "+639",
     emailConsent: false
   })
@@ -205,8 +205,8 @@ export default function RegisterPage() {
           <h1 className="sr-only">Register</h1>
           <div className="flex justify-center">
             <Image
-              src="/assets/icons/Ayahay_blue_vertical.svg"
-              alt="Ayahay Logo"
+              src={branding?.logo.dark || branding?.logo.light || "/assets/icons/Ayahay_blue_vertical.svg"}
+              alt={`${branding?.brand_name || "Hayahai"} Logo`}
               width={210}
               height={210}
               className="h-15 w-15"
@@ -439,7 +439,7 @@ export default function RegisterPage() {
                 </Button>
                 <Button
                   type="submit"
-                  className="w-full text-white"
+                  className="w-full text-white hover:scale-[1.02] active:scale-[0.98] transition-transform"
                   style={{ backgroundColor: primaryColor }}
                   disabled={loading}
                 >

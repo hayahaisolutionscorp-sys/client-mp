@@ -12,13 +12,16 @@ import {
 } from "../ui/Dialog"
 import { Button } from "../ui/Button"
 import { LogOut } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContexts"
 
 export function SessionExpiredModal() {
     const [isOpen, setIsOpen] = useState(false)
     const router = useRouter()
+    const { logout } = useAuth();
 
     useEffect(() => {
         const handleSessionExpired = () => {
+            logout();
             setIsOpen(true)
         }
 
@@ -53,9 +56,9 @@ export function SessionExpiredModal() {
                 </DialogHeader>
                 <DialogFooter className="sm:justify-center mt-6">
                     <Button 
-                        type="button" 
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 rounded-lg transition-colors" 
-                        onClick={handleLogin}
+                        type="button"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 rounded-lg transition-colors"
+                        onClick={() => { handleLogin(); }}
                     >
                         Go to Login
                     </Button>

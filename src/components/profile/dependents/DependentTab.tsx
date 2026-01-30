@@ -172,7 +172,7 @@ export default function DependentTab({ userId }: DependentComponentProps) {
             {/* Modal for Adding New Dependent */}
             {showAddForm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-                    <Card className="no-scrollbar w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <Card className="no-scrollbar w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                         <CardContent className="p-0">
                             <DependentForm
                                 userId={userId}
@@ -239,13 +239,14 @@ export default function DependentTab({ userId }: DependentComponentProps) {
             {/* Verification Modal for Dependents */}
             {showVerificationModal && dependentToVerify && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-                    <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+                    <Card className="w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar">
                         <CardContent className="p-0">
                             <ProfileVerificationForm
                                 onSubmit={handleVerificationSubmit}
                                 onCancel={handleVerificationCancel}
                                 dependentId={dependentToVerify.id}
                                 dependentName={`${dependentToVerify.first_name} ${dependentToVerify.last_name}`}
+                                initialData={dependentToVerify.verifications?.[0]}
                             />
                         </CardContent>
                     </Card>

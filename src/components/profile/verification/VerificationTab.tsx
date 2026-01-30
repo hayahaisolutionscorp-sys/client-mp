@@ -17,6 +17,7 @@ import { IDependent, IVerification } from "@/models"
 import { cn } from "@/lib/utils"
 import { VerificationHistory } from "../sub-components/VerificationHistory"
 import { VerificationStatusBanner } from "../sub-components/VerificationStatusBanner"
+import { useThemeSettings } from "@/hooks/theme-settings"
 import { 
     VerificationStatus,
     getStatusDisplayText,
@@ -42,6 +43,9 @@ interface VerificationComponentProps {
 }
 
 export default function VerificationTab({ accountId, verificationDetails: initialVerificationDetails = [], onStatusChange, onRefresh }: VerificationComponentProps) {
+    const themeSettings = useThemeSettings();
+    const primaryColor = themeSettings?.primary || '#2563eb';
+    
     const [verificationDetails, setVerificationDetails] = useState<IVerification[]>(initialVerificationDetails);
     const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("unverified");
     const [activeDetails, setActiveDetails] = useState<VerificationDetails>({
@@ -50,16 +54,10 @@ export default function VerificationTab({ accountId, verificationDetails: initia
         discountType: ''
     });
     const [showVerificationForm, setShowVerificationForm] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [isCanceling, setIsCanceling] = useState(false);
 
-    // Check if 48 hours have passed since the last verification request
     const lastVerification = verificationDetails?.[0];
-    const isUnderCooldown = lastVerification?.created_at && 
-        (new Date().getTime() - new Date(lastVerification.created_at).getTime()) < 48 * 60 * 60 * 1000;
-
-    const canStartVerification = verificationStatus === "unverified" || verificationStatus === "rejected" || (!isUnderCooldown && verificationStatus !== "approved");
-
+   
     useEffect(() => {
         if (verificationDetails && verificationDetails.length > 0) {
             const active = verificationDetails[0];
@@ -90,7 +88,9 @@ export default function VerificationTab({ accountId, verificationDetails: initia
             // Also call parent refresh if provided
             onRefresh?.();
         } catch (error) {
-            console.error("Failed to refresh verifications:", error);
+            if (typeof window === 'undefined') {
+                console.error("Failed to refresh verifications:", error);
+            }
         }
     };
 
@@ -113,7 +113,9 @@ export default function VerificationTab({ accountId, verificationDetails: initia
             await cancelVerificationRequest(lastVerification.id);
             await refreshVerifications();
         } catch (error) {
-            console.error("Failed to cancel verification:", error);
+            if (typeof window === 'undefined') {
+                console.error("Failed to cancel verification:", error);
+            }
         } finally {
             setIsCanceling(false);
         }
@@ -129,7 +131,11 @@ export default function VerificationTab({ accountId, verificationDetails: initia
                         <CardTitle>Identity Verification</CardTitle>
                         <CardDescription>Verify your identity for faster check-ins and a smoother travel experience.</CardDescription>
                     </div>
-                    <Badge variant={getStatusVariant(verificationStatus)} className="px-3 py-1">
+                    <Badge 
+                        variant={getStatusVariant(verificationStatus)} 
+                        className="px-3 py-1"
+                        style={verificationStatus === 'approved' ? { backgroundColor: primaryColor, color: 'white' } : { backgroundColor: 'grey', color: 'white' }}
+                    >
                         {getStatusBadge(verificationStatus).label.toUpperCase()}
                     </Badge>
                 </div>
@@ -137,9 +143,9 @@ export default function VerificationTab({ accountId, verificationDetails: initia
             <CardContent>
                 <VerificationStatusBanner 
                     status={verificationStatus}
-                    isUnderCooldown={!!isUnderCooldown}
                     onResubmit={() => setShowVerificationForm(true)}
                     rejectionReason={lastVerification?.review_notes ?? undefined}
+                    lastSubmissionDate={lastVerification?.created_at}
                 />
 
                 {(verificationStatus === "approved" || verificationStatus === "pending" || verificationStatus === "under_review" || verificationStatus === "rejected") && (
@@ -216,11 +222,12 @@ export default function VerificationTab({ accountId, verificationDetails: initia
 
                 {showVerificationForm && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4">
-                        <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+                        <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar">
                             <CardContent className="p-0">
                                 <ProfileVerificationForm
                                     onSubmit={handleVerificationFormSubmit}
                                     onCancel={() => setShowVerificationForm(false)}
+                                    initialData={lastVerification}
                                 />
                             </CardContent>
                         </Card>

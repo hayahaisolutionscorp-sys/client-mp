@@ -36,7 +36,9 @@ export async function getDestinations(): Promise<IDestination[]> {
 
         return [];
     } catch (e) {
-        console.error(e);
+        if (typeof window === 'undefined') {
+            console.error('Error fetching destinations:', e);
+        }
         return [];
     }
 }

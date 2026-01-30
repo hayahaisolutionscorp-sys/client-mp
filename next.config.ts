@@ -10,6 +10,7 @@ const withPWA = require('next-pwa')({
 const nextConfig: NextConfig = {
   // For development purposes only
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

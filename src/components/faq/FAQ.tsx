@@ -33,7 +33,9 @@ export default function FAQ({ themeColor }: FAQProps) {
           setFaqCategories([]);
         }
       } catch (error) {
-        console.error('Error fetching FAQs:', error);
+        if (typeof window === 'undefined') {
+          console.error('Error fetching FAQs:', error);
+        }
         setFaqs([]);
         setFaqCategories([]);
       } finally {

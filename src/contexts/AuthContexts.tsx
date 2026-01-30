@@ -5,8 +5,10 @@ import { IAccount, RegisterForm } from '@/models';
 import { AuthService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import { getCookie, eraseCookie } from 'helpers/cookie.helpers';
-import { invalidateItem } from 'helpers/cache.helpers';
+import { invalidateItem, fetchItem } from 'helpers/cache.helpers';
 import { accountRelatedCacheKeys } from 'constants/cache';
+import { useBranding } from "@/hooks/branding";
+import { useThemeSettings } from "@/hooks/theme-settings";
 
 interface AuthContextType {
     currentUser: any | null; // Keeping loose type for compatibility
@@ -26,6 +28,8 @@ interface AuthContextType {
         type: 'success' | 'error' | null;
         message: string;
     } | null;
+    branding: any;
+    theme: any;
     refreshProfile: () => Promise<void>;
 }
 
@@ -41,6 +45,8 @@ export const useAuth = () => {
 
 export default function AuthContextProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
+    const branding = useBranding();
+    const theme = useThemeSettings();
     const [loading, setLoading] = useState(true);
 
     // Initial state hydration from non-httpOnly 'user' cookie
@@ -90,9 +96,27 @@ export default function AuthContextProvider({ children }: { children: React.Reac
 
     // Load user profile on mount
     const loadProfile = useCallback(async () => {
+        // Only attempt to load profile if there's an indicator of a session
+        // This avoids unnecessary 401 errors for guest users
+        const hasSessionIndicator = typeof window !== 'undefined' && (
+            getCookie('user') || 
+            fetchItem('jwt')
+        );
+
+        if (!hasSessionIndicator) {
+            setLoading(false);
+            return null;
+        }
+
         try {
             setLoading(true);
             const result = await AuthService.getProfile();
+            if (!result) {
+                setCurrentUser(null);
+                setLoggedInAccount(null);
+                return null;
+            }
+
             // result is { message: string, data: UserResponseDto }
             const user = result.data || result;
 
@@ -114,6 +138,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             };
             setLoggedInAccount(account);
 
+            return user;
         } catch (error: any) {
             console.log('Failed to load profile', error);
             // Only clear session if it's a 401 Unauthorized error
@@ -124,6 +149,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
                 eraseCookie('user');
                 accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
             }
+            return null;
         } finally {
             setLoading(false);
         }
@@ -155,7 +181,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             // The API will strip extra fields.
             // Ideally I should construct the object that matches the API expectation.
 
-            showNotification('success', 'Registration successful!');
+            showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}! Registration successful!`);
 
             // Auto login? The API register does NOT automatically login usually, 
             // but the controller implementation sets cookies?
@@ -175,11 +201,11 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         }
     };
 
-    const signIn = async (email: string, password: string): Promise<string> => {
+    const signIn = async (email: string, password: string): Promise<any> => {
         try {
             setLoading(true);
             await AuthService.login({ email, password });
-            showNotification('success', 'Login successful!');
+            showNotification('success', `Welcome back to ${branding?.brand_name || 'Ayahay'}!`);
             await loadProfile();
             return 'success';
         } catch (error: any) {
@@ -196,7 +222,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         try {
             setLoading(true);
             await AuthService.signInWithGoogle();
-            showNotification('success', 'Welcome to Ayahay!');
+            showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}!`);
             await loadProfile();
             return 'success';
         } catch (error: any) {
@@ -213,7 +239,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         try {
             setLoading(true);
             await AuthService.signInWithFacebook();
-            showNotification('success', 'Welcome to Ayahay!');
+            showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}!`);
             await loadProfile();
             return 'success';
         } catch (error: any) {
@@ -317,6 +343,8 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         confirmResetPassword,
         sendEmailVerification,
         notification,
+        branding,
+        theme,
         refreshProfile: loadProfile
     };
 
@@ -327,7 +355,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
                 <div
                     className="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-opacity duration-300 text-white"
                     style={{
-                        backgroundColor: notification.type === 'success' ? '#22c55e' : '#ef4444'
+                        backgroundColor: notification.type === 'success' ? (theme?.primary || '#22c55e') : '#ef4444'
                     }}
                 >
                     {notification?.message}

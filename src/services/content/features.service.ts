@@ -50,7 +50,9 @@ export async function getWhyChooseSection(): Promise<IWhyChooseSection | undefin
         const { data } = await res.json();
         return data;
     } catch (error) {
-        console.error('Error fetching why choose section:', error);
+        if (typeof window === 'undefined') {
+            console.error('Error fetching why choose section:', error);
+        }
         return undefined;
     }
 }
@@ -73,7 +75,9 @@ export async function getWhyChooseReasons(): Promise<IWhyChooseReason[] | undefi
 
         return data;
     } catch (error) {
-        console.error('Error fetching why choose reasons:', error);
+        if (typeof window === 'undefined') {
+            console.error('Error fetching why choose reasons:', error);
+        }
         return undefined;
     }
 }

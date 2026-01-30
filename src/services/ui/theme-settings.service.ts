@@ -18,16 +18,18 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
     if (res.ok) {
       const response: IBrandingResponse = await res.json();
       return {
-        primary: response.data.colors.primaryColor,
-        secondary: response.data.colors.secondaryColor,
-        accent: response.data.colors.accent,
+        primary: response.data.colors.primaryColor || (response.data.colors as any).primary || '#000000',
+        secondary: response.data.colors.secondaryColor || (response.data.colors as any).secondary || '#ffffff',
+        accent: response.data.colors.accent || '#000000',
         fontStyle: 'Inter'
       };
     }
 
     return (themeSettingsData as IThemeSettings[])[0];
   } catch (e) {
-    console.error('Error fetching theme settings:', e);
+    if (typeof window === 'undefined') {
+      console.error('Error fetching theme settings:', e);
+    }
     return (themeSettingsData as IThemeSettings[])[0];
   }
 }

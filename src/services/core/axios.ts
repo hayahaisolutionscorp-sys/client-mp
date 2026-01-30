@@ -103,10 +103,14 @@ instance.interceptors.response.use(
           
           // If refresh succeeds, retry the original request
           return instance(originalRequest);
-        } catch (refreshError) {
+        } catch (refreshError: any) {
           // If refresh fails, the session is truly expired
           if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('session-expired'));
+          }
+          // Only throw if not a 401, as 401 is handled by logout/redirect logic elsewhere
+          if (refreshError.response?.status === 401) {
+            return Promise.reject({ ...refreshError, _silent: true });
           }
           return Promise.reject(refreshError);
         }
