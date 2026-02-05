@@ -1,30 +1,50 @@
-import { ContentItem } from "@/app/terms/terms.data"
+"use client";
 
-interface TermsContentProps {
-  content: string | ContentItem[]
-}
+import { useState, useEffect } from "react";
+import ContentSidebar from "@/components/shared/ContentSidebar";
+import TipTapRenderer from "@/components/shared/TipTapRenderer";
+import { getTermsAndConditions } from "@/services/content/terms-and-conditions.service";
+import { getBrandingConfig } from "@/services/ui/branding.service";
 
-export function TermsContent({ content }: TermsContentProps) {
-  const renderContent = (content: string | ContentItem[]) => {
-    if (typeof content === 'string') {
-      return <div className="leading-relaxed whitespace-pre-line">{content}</div>
-    }
+export default function TermsContent() {
+  const [title, setTitle] = useState("Terms and Conditions");
+  const [content, setContent] = useState<any>(null);
+  const [brandingConfig, setBrandingConfig] = useState<any>(null);
 
-    return content.map((item, index) => {
-      switch (item.type) {
-        case 'heading':
-          return <h3 key={index} className="font-semibold mt-4 mb-1">{item.text}</h3>
-        case 'paragraph':
-          return <p key={index} className="leading-relaxed mb-4">{item.text}</p>
-        default:
-          return null
+  useEffect(() => {
+    const fetchData = async () => {
+      const [termsData, brandingData] = await Promise.all([
+        getTermsAndConditions(),
+        getBrandingConfig()
+      ]);
+
+      if (termsData) {
+        setTitle(termsData.title);
+        setContent(termsData.content);
       }
-    })
-  }
+
+      if (brandingData) {
+        setBrandingConfig(brandingData);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
-    <div className="text-gray-600 leading-relaxed whitespace-pre-line">
-      {renderContent(content)}
+    <div className="min-h-screen bg-gradient-to-br sm:px-4 md:px-8 lg:px-10 lg:pb-64">
+      <div className="flex flex-col md:flex-row sm:pt-2 md:pt-4 lg:pt-6">
+        {/* Sidebar */}
+        <ContentSidebar content={content} />
+
+        {/* Main Content */}
+        <main className="flex-1 px-8">
+          <h1 className="mb-8 text-3xl font-bold">Terms and Conditions - {brandingConfig?.brand_name}</h1>
+          {content && (
+            <TipTapRenderer content={content} />
+          )}
+        </main>
+      </div>
     </div>
-  )
+  );
 }

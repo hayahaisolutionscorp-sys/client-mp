@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, SetStateAction, Dispatch } from "react";
+import { useState, useEffect, SetStateAction, Dispatch, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { LuArrowRightLeft } from "react-icons/lu";
 import { BiSolidShip } from "react-icons/bi";
@@ -20,7 +20,9 @@ import {
   DEFAULT_NUM_VEHICLES,
   DEFAULT_NUM_PASSENGERS,
 } from "constants/default";
-import { getPorts, getTripsDestinationByPortId } from "@/services";
+import { getPorts } from "@/services";
+import { getRoutes } from "@/services/shipping-line/route.service";
+import { IRoute } from "@/models/shipping-line/route.model";
 
 const SearchBox: React.FC = () => {
   const router = useRouter();
@@ -34,40 +36,52 @@ const SearchBox: React.FC = () => {
   const [selectedDestinationPort, setSelectedDestinationPort] = useState<IPort | undefined>();
   const [destinationPorts, setDestinationPorts] = useState<IPort[] | undefined>([]);
   const [ports, setPorts] = useState<IPort[] | undefined>([]);
+  const [routes, setRoutes] = useState<IRoute[]>([]); // New state for routes
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const themeSettings = useThemeSettings();
 
   useEffect(() => {
-    const fetchPorts = async () => {
+    const fetchPortsAndRoutes = async () => {
       try {
-        const allPorts = await getPorts();
+        const [allPorts, allRoutes] = await Promise.all([getPorts(), getRoutes()]);
         setPorts(allPorts);
+        setRoutes(allRoutes);
       } catch (error) {
-        console.error("Failed to fetch ports:", error);
+        console.error("Failed to fetch data:", error);
       }
     };
 
-    fetchPorts();
+    fetchPortsAndRoutes();
   }, []);
 
   useEffect(() => {
-    const fetchDestinationPorts = async () => {
-      if (selectedOriginPort) {
-        try {
-          const destinations = await getTripsDestinationByPortId(selectedOriginPort.id);
-          setDestinationPorts(destinations);
-        } catch (error) {
-          console.error("Failed to fetch destination ports:", error);
-        }
-      } else {
-        setDestinationPorts([]);
-      }
-    };
+    if (selectedOriginPort && routes.length > 0) {
+      // Get all valid destination port codes for the selected origin
+      const validDestCodes = new Set(
+        routes
+          .filter(route => route.src_port_code === selectedOriginPort.code)
+          .map(route => route.dest_port_code)
+      );
 
-    fetchDestinationPorts();
-  }, [selectedOriginPort]);
+      const availableDestPorts = ports?.filter(port => validDestCodes.has(port.code)) ?? [];
+      setDestinationPorts(availableDestPorts.sort((a, b) => a.name.localeCompare(b.name)));
+
+      // Clear destination if it's no longer valid
+      if (selectedDestinationPort && !validDestCodes.has(selectedDestinationPort.code)) {
+        setSelectedDestinationPort(undefined);
+      }
+    } else {
+      // If no origin, show all ports (or none, depending on preference. Usually empty until origin is picked)
+      // Reverting to previous logic of showing all if no origin selected, OR keeping empty
+      // Looking at previous code: if (selectedOriginPort) { fetchDestinations } else { setDestinationPorts([]) }
+      // So we keep it empty if no origin.
+      setDestinationPorts([]);
+    }
+  }, [selectedOriginPort, routes, ports]); // Replaced fetchDestinationPorts logic
+
+  // Removed old useEffect for fetchDestinationPorts
 
   useEffect(() => {
     // Validation logic to enable or disable the search button
@@ -122,18 +136,16 @@ const SearchBox: React.FC = () => {
         new Date(returnDate.getTime() - returnDate.getTimezoneOffset() * 60000).toISOString() : undefined;
 
       // Prepare search values, ensuring number fields are converted to strings
+      // Prepare search values, ensuring number fields are converted to strings
       const searchValues = {
         bookingType: bookingType?.replace("Trip", "").trim() ?? undefined,
-        srcPortId: selectedOriginPort?.id ? selectedOriginPort.id.toString() : undefined,
-        destPortId: selectedDestinationPort?.id ? selectedDestinationPort.id.toString() : undefined,
-        departureDate: departureDate ? departureDate.toISOString() : undefined,
+        origin_code: selectedOriginPort?.code ?? undefined,
+        destination_code: selectedDestinationPort?.code ?? undefined,
+        departure_date: departureDate ? departureDate.toISOString() : undefined,
         returnDate: bookingType?.toLowerCase() === "round trip" ? (returnDate ? returnDate.toISOString() : undefined) : undefined,
-        passengerCount: passengerCount !== undefined ? passengerCount.toString() : undefined,
-        vehicleCount: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
-        sortDeparture: "departureDate",
-        sortReturn: "departureDate",
-        filterSpecificDepartureDate: departureDateForFilter,
-        filterSpecificReturnDate: returnDateForFilter,
+        passenger_count: passengerCount !== undefined ? passengerCount.toString() : undefined,
+        vehicle_count: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
+        sort: "departureDate",
         page: "1",
       };
 
@@ -154,121 +166,246 @@ const SearchBox: React.FC = () => {
     }
   };
 
+  // Sticky State
+  const [isSticky, setIsSticky] = useState(false);
+  const observerRef = useState<HTMLDivElement | null>(null)[1]; // simplified ref callback pattern or use standard ref
+
+  // Actually, let's use a standard ref and useEffect
+  const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // If the top of the search box is out of view (scrolled past), show sticky
+        // We really want to know if the search box is "above" the viewport. 
+        // But IntersectionObserver checks visibility. 
+        // Better logic: if boundingClientRect.top < 0 and entry.isIntersecting === false
+
+        // Simpler: Place a 'sentry' div above the search box. When it scrolls out of view to the top, activate sticky.
+        setIsSticky(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+      },
+      { threshold: 0 }
+    );
+
+    if (topRef.current) {
+      observer.observe(topRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div className={`flex items-center justify-center absolute z-10 inset-0 w-full px-4 
-      ${bookingType?.toLowerCase() === "round trip"
-        ? "top-[380px]"
-        : "top-[330px]"
-      } sm:top-[210px] md:top-[310px] lg:top-[400px]`}
-    >
-      <div className="bg-white rounded-xl shadow-xl p-4 w-full h-auto transition-all duration-300 ease-in-out hover:shadow-2xl 
-        sm:p-6 md:p-8 md:w-[95%] lg:w-[1200px]"
+    <>
+      {/* Main Search Box */}
+      <div
+        ref={topRef}
+        className={`flex items-center justify-center absolute z-20 inset-0 w-full px-4 
+        ${bookingType?.toLowerCase() === "round trip"
+            ? "top-[380px]"
+            : "top-[330px]"
+          } sm:top-[230px] md:top-[340px] lg:top-[600px]`}
       >
-        <div className="space-y-2 md:space-y-3 mb-6">
-          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-customText">
-            Where Do You Want to Go?
-          </h2>
-          <p className="text-xs sm:text-sm text-customText/80">
-            Travel around the Philippines
-          </p>
-        </div>
-
-        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3 w-full h-auto items-start">
-          <TripDropdown value={bookingType} onChange={setBookingType} />
-          <PassengerDropdown value={passengerCount} onChange={setPassengerCount} />
-          <VehicleDropdown value={vehicleCount} onChange={setVehicleCount} />
-          <div className="col-span-1 sm:col-span-2 md:col-span-1 flex items-center justify-center">
-            {error && (
-              <p className="text-red-500 text-xs sm:text-sm animate-fadeIn">
-                {error}
-              </p>
-            )}
+        <div className="bg-white rounded-3xl shadow-2xl p-4 w-full h-auto transition-all duration-300 ease-in-out hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] 
+          sm:p-6 md:p-8 md:w-[95%] lg:w-[1300px]"
+        >
+          <div className="space-y-2 md:space-y-3 mb-6">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-customText">
+              Where Do You Want to Go?
+            </h2>
+            <p className="text-xs sm:text-sm text-customText/80">
+              Travel around the Philippines
+            </p>
           </div>
-        </div>
 
-        <div className="w-full grid gap-3 mt-2 sm:gap-4 grid-cols-1 sm:grid-cols-[2fr_auto_2fr] lg:grid-cols-[1fr_auto_1fr_auto_auto]">
-          <PortDropdownFieldset
-            legendText="Origin Port"
-            onPortSelect={handleOriginPortSelect}
-            ports={ports}
-            selectedPort={selectedOriginPort}
-          />
-          <div className="hidden sm:flex items-center justify-center h-[55px]">
-            <LuArrowRightLeft
-              className="w-5 h-5"
-              style={{ color: themeSettings?.accent || "#23abff" }}
-            />
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3 w-full h-auto items-start">
+            <TripDropdown value={bookingType} onChange={setBookingType} />
+            <PassengerDropdown value={passengerCount} onChange={setPassengerCount} />
+            <VehicleDropdown value={vehicleCount} onChange={setVehicleCount} />
+            <div className="col-span-1 sm:col-span-2 md:col-span-1 flex items-center justify-center">
+              {error && (
+                <p className="text-red-500 text-xs sm:text-sm animate-fadeIn">
+                  {error}
+                </p>
+              )}
+            </div>
           </div>
-          <PortDropdownFieldset
-            legendText="Destination Port"
-            onPortSelect={setSelectedDestinationPort}
-            ports={destinationPorts}
-            selectedPort={selectedDestinationPort}
-            disabled={destinationPorts?.length === 0}
-          />
-          <div className="hidden lg:flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4 items-center justify-center h-auto md:h-[55px]">
-            <DatePickerFieldset
-              legendText="Departure"
-              date={departureDate}
-              setDate={handleDepartureDateChange}
+
+          <div className="w-full grid gap-3 mt-2 sm:gap-4 grid-cols-1 sm:grid-cols-[2fr_auto_2fr] lg:grid-cols-[1fr_auto_1fr_auto_auto]">
+            <PortDropdownFieldset
+              legendText="Origin Port"
+              onPortSelect={handleOriginPortSelect}
+              ports={ports}
+              selectedPort={selectedOriginPort}
             />
-            {bookingType?.toLowerCase() === "Round Trip".toLowerCase() && (
-              <DatePickerFieldset
-                legendText="Return"
-                date={returnDate}
-                setDate={handleReturnDateChange}
-                disableBeforeDate={departureDate}
+            <div className="hidden sm:flex items-center justify-center h-[55px]">
+              <LuArrowRightLeft
+                className="w-5 h-5"
+                style={{ color: themeSettings?.accent || "#23abff" }}
               />
-            )}
+            </div>
+            <PortDropdownFieldset
+              legendText="Destination Port"
+              onPortSelect={setSelectedDestinationPort}
+              ports={destinationPorts}
+              selectedPort={selectedDestinationPort}
+              disabled={destinationPorts?.length === 0}
+            />
+            <div className="hidden lg:flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4 items-center justify-center h-auto md:h-[55px]">
+              <DatePickerFieldset
+                legendText="Departure"
+                date={departureDate}
+                setDate={handleDepartureDateChange}
+              />
+              {bookingType?.toLowerCase() === "Round Trip".toLowerCase() && (
+                <DatePickerFieldset
+                  legendText="Return"
+                  date={returnDate}
+                  setDate={handleReturnDateChange}
+                  disableBeforeDate={departureDate}
+                />
+              )}
+            </div>
+            <div className={`hidden lg:flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1 mt-4 sm:mt-0 h-[55px] pt-2 ${!isFormValid ? "cursor-not-allowed" : ""}`}>
+              <Button
+                variant="default"
+                onClick={handleSearchClick}
+                disabled={!isFormValid || isLoading}
+                className={`${!isFormValid ? "bg-gray-400" : ""
+                  } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
+                <BiSolidShip className="h-5 w-5 text-white" />
+                <span>Search Trip</span>
+                {isLoading && (
+                  <FiLoader className="h-5 w-5 text-white animate-spin" />
+                )}
+              </Button>
+            </div>
           </div>
-          <div className={`hidden lg:flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1 mt-4 sm:mt-0 h-[55px] pt-2 ${!isFormValid ? "cursor-not-allowed" : ""}`}>
+          <div className="w-full grid grid-cols-1 gap-4 mt-3 sm:mt-6 md:grid-cols-[2fr_auto] lg:hidden">
+            <div className="flex flex-col space-y-3 sm:gap-4 sm:space-y-0 sm:flex-row items-center justify-center ">
+              <DatePickerFieldset
+                legendText="Departure"
+                date={departureDate}
+                setDate={handleDepartureDateChange}
+              />
+              {bookingType?.toLowerCase() === "Round Trip".toLowerCase() && (
+                <DatePickerFieldset
+                  legendText="Return"
+                  date={returnDate}
+                  setDate={handleReturnDateChange}
+                  disableBeforeDate={departureDate}
+                />
+              )}
+            </div>
+            <div className={`flex items-center justify-center mt-2 mb-4 ${!isFormValid ? "cursor-not-allowed" : ""}`}>
+              <Button
+                variant="default"
+                onClick={handleSearchClick}
+                disabled={!isFormValid || isLoading}
+                className={`${!isFormValid ? "bg-gray-400" : ""
+                  } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
+                <BiSolidShip className="h-5 w-5 text-white" />
+                <span>Search Trip</span>
+                {isLoading && (
+                  <FiLoader className="h-5 w-5 text-white animate-spin" />
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Search Bar - Only Visible when Main is scrolled past */}
+      <div
+        className={`hidden md:block fixed top-0 left-0 right-0 bg-white z-[60] shadow-lg transition-transform duration-300 ease-in-out ${isSticky ? 'translate-y-0' : '-translate-y-full'
+          }`}
+      >
+        <div className="container mx-auto px-4 py-4 lg:max-w-[1400px]">
+          {/* Row 1: Trip Type Radios */}
+          <div className="flex items-center gap-6 mb-3 px-1">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="stickyTripType"
+                checked={bookingType?.toLowerCase() !== "Round Trip".toLowerCase()}
+                onChange={() => setBookingType("Single Trip")}
+                className="w-4 h-4"
+                style={{ accentColor: themeSettings?.accent || "#23abff", colorScheme: "light" }}
+              />
+              <span className="text-sm font-bold text-customText">Single Trip</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="stickyTripType"
+                checked={bookingType?.toLowerCase() === "Round Trip".toLowerCase()}
+                onChange={() => setBookingType("Round Trip")}
+                className="w-4 h-4"
+                style={{ accentColor: themeSettings?.accent || "#23abff", colorScheme: "light" }}
+              />
+              <span className="text-sm font-bold text-customText">Round Trip</span>
+            </label>
+          </div>
+
+          {/* Row 2: Inputs */}
+          <div className="grid grid-cols-1 md:grid-cols-[1.5fr_auto_1.5fr_1.5fr_1.5fr_auto] gap-3 items-center">
+            <PortDropdownFieldset
+              legendText="Origin Port"
+              onPortSelect={handleOriginPortSelect}
+              ports={ports}
+              selectedPort={selectedOriginPort}
+            />
+
+            <div className="hidden md:flex items-center justify-center">
+              <LuArrowRightLeft
+                className="w-4 h-4"
+                style={{ color: themeSettings?.accent || "#23abff" }}
+              />
+            </div>
+
+            <PortDropdownFieldset
+              legendText="Destination Port"
+              onPortSelect={setSelectedDestinationPort}
+              ports={destinationPorts}
+              selectedPort={selectedDestinationPort}
+              disabled={destinationPorts?.length === 0}
+            />
+
+            {/* Combined Date Section for Layout Simplicity if needed, or kept separate */}
+            <div className="flex gap-2">
+              <DatePickerFieldset
+                legendText="Depart"
+                date={departureDate}
+                setDate={handleDepartureDateChange}
+              />
+              {bookingType?.toLowerCase() === "Round Trip".toLowerCase() && (
+                <DatePickerFieldset
+                  legendText="Return"
+                  date={returnDate}
+                  setDate={handleReturnDateChange}
+                  disableBeforeDate={departureDate}
+                />
+              )}
+            </div>
+
+            {/* Passengers (Reuse existing component, assume it fits row) */}
+            <PassengerDropdown value={passengerCount} onChange={setPassengerCount} />
+
             <Button
               variant="default"
               onClick={handleSearchClick}
               disabled={!isFormValid || isLoading}
               className={`${!isFormValid ? "bg-gray-400" : ""
-                } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
-              <BiSolidShip className="h-5 w-5 text-white" />
-              <span>Search Trip</span>
-              {isLoading && (
-                <FiLoader className="h-5 w-5 text-white animate-spin" />
-              )}
-            </Button>
-          </div>
-        </div>
-        <div className="w-full grid grid-cols-1 gap-4 mt-3 sm:mt-6 md:grid-cols-[2fr_auto] lg:hidden">
-          <div className="flex flex-col space-y-3 sm:gap-4 sm:space-y-0 sm:flex-row items-center justify-center ">
-            <DatePickerFieldset
-              legendText="Departure"
-              date={departureDate}
-              setDate={handleDepartureDateChange}
-            />
-            {bookingType?.toLowerCase() === "Round Trip".toLowerCase() && (
-              <DatePickerFieldset
-                legendText="Return"
-                date={returnDate}
-                setDate={handleReturnDateChange}
-                disableBeforeDate={departureDate}
-              />
-            )}
-          </div>
-          <div className={`flex items-center justify-center mt-2 mb-4 ${!isFormValid ? "cursor-not-allowed" : ""}`}>
-            <Button
-              variant="default"
-              onClick={handleSearchClick}
-              disabled={!isFormValid || isLoading}
-              className={`${!isFormValid ? "bg-gray-400" : ""
-                } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
-              <BiSolidShip className="h-5 w-5 text-white" />
-              <span>Search Trip</span>
-              {isLoading && (
-                <FiLoader className="h-5 w-5 text-white animate-spin" />
-              )}
+                } text-white px-6 py-2 rounded-lg h-[55px] font-bold text-sm flex items-center justify-center gap-2 whitespace-nowrap`}
+            >
+              <BiSolidShip className="h-4 w-4" />
+              Search Trip
             </Button>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

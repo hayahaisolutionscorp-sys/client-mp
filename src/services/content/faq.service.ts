@@ -11,7 +11,7 @@ export async function getFaqs(): Promise<IFaq[]> {
     }
 
     const res = await fetch(FAQS_API, {
-      next: { tags: ['faqs'], revalidate: 3600 }
+      // next: { tags: ['faqs'], revalidate: 3600 }
     });
 
     if (res.ok) {

@@ -23,9 +23,9 @@ export async function getTripsDestinationByPortId(portId: number): Promise<IPort
   return (portsData as IPort[]).filter(p => p.id !== portId);
 }
 
-export async function getTrips(tripIds: number[]): Promise<ITrip[] | undefined> {
+export async function getTrips(tripIds: (number | string)[]): Promise<ITrip[] | undefined> {
   await new Promise(resolve => setTimeout(resolve, 100));
-  return (tripsData as any as ITrip[]).filter(t => tripIds.includes(t.id));
+  return (tripsData as any as ITrip[]).filter(t => tripIds.includes(t.id)); // Lint error here likely persists if t.id is string|number vs tripIds array element type mismatch in includes?
 }
 
 export async function getAvailableTrips(
@@ -33,58 +33,71 @@ export async function getAvailableTrips(
   searchQuery: SearchAvailableTrips,
   pagination: PaginatedRequest
 ): Promise<PaginatedResponse<ITrip> | undefined> {
-  // try {
-  //   const { data } = await axios.get(TRIP_API, {
-  //     params: {
-  //       shippingLineId,
-  //       ...searchQuery,
-  //       ...pagination
-  //     }
-  //   });
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return undefined;
-  // }
+  try {
+    const params = new URLSearchParams();
 
-  // Simulate search
-  await new Promise(resolve => setTimeout(resolve, 500));
+    if (shippingLineId) params.append('shippingLineId', shippingLineId.toString());
+    if (searchQuery.origin_code) params.append('origin_code', searchQuery.origin_code);
+    if (searchQuery.destination_code) params.append('destination_code', searchQuery.destination_code);
+    if (searchQuery.passengerCount !== undefined) params.append('passenger_count', searchQuery.passengerCount.toString());
+    if (searchQuery.vehicleCount !== undefined) params.append('vehicle_count', searchQuery.vehicleCount.toString());
+    if (searchQuery.departureDate) params.append('departure_date', searchQuery.departureDate.split('T')[0]);
+    if (pagination.page) params.append('page', pagination.page.toString());
+    if (searchQuery.sort) params.append('sort', searchQuery.sort);
 
-  let filteredTrips = tripsData as any as ITrip[];
+    // Add other params if needed by API, matching the curl or existing logic where applicable
+    if (searchQuery.srcPortId && !searchQuery.origin_code) params.append('srcPortId', searchQuery.srcPortId.toString());
+    if (searchQuery.destPortId && !searchQuery.destination_code) params.append('destPortId', searchQuery.destPortId.toString());
 
-
-
-  if (searchQuery.srcPortId) {
-    filteredTrips = filteredTrips.filter(t => t.srcPortId === Number(searchQuery.srcPortId));
-  }
-
-  if (searchQuery.destPortId) {
-    filteredTrips = filteredTrips.filter(t => t.destPortId === Number(searchQuery.destPortId));
-  }
-
-  const dateToFilter = searchQuery.filterSpecificDate || searchQuery.departureDate;
-
-  if (dateToFilter) {
-    const searchDatePH = toPhilippinesTime(dateToFilter as string, 'YYYY-MM-DD');
-
-    filteredTrips = filteredTrips.filter(t => {
-      const tripDatePH = toPhilippinesTime(t.departureDateIso, 'YYYY-MM-DD');
-      return tripDatePH === searchDatePH;
+    const res = await fetch(`${TRIP_API}?${params.toString()}`, {
+      next: { tags: ['trips'], revalidate: 3600 }
     });
+
+    if (res.ok) {
+      const responseData = await res.json();
+      const rawTrips = responseData.data || [];
+
+      const mappedTrips: ITrip[] = rawTrips.map((t: any) => {
+        const firstSegment = t.segments?.[0] || {};
+        return {
+          id: t.id,
+          referenceNo: firstSegment.reference_number || '',
+          shipId: firstSegment.ship_id || 0,
+          shipName: firstSegment.ship_name,
+          shippingLineId: 0, // API doesn't return this top-level yet
+          srcPortId: 0,
+          srcPortName: t.origin_name,
+          destPortId: 0,
+          destPortName: t.destination_name,
+          departureDateIso: t.total_departure_time,
+          arrivalTimeDateIso: t.total_arrival_time,
+          status: 'scheduled',
+          rateTableId: firstSegment.rate_table_id || 0,
+          allowOnlineBooking: true,
+          seatSelection: firstSegment.is_seat_can_be_selected || false,
+          availableVehicleCapacity: 0,
+          vehicleCapacity: 0,
+          bookingStartDateIso: firstSegment.booking_start_date || '',
+          bookingCutOffDateIso: firstSegment.booking_cut_off_date || '',
+          availableCabins: [],
+          availableSeatTypes: [],
+          meals: []
+        };
+      });
+
+      return {
+        data: mappedTrips,
+        total: mappedTrips.length
+      };
+    }
+    return {
+      data: [],
+      total: 0
+    };
+  } catch (e) {
+    console.error(e);
+    return undefined;
   }
-
-  // Enrich with associated entities
-  filteredTrips = filteredTrips.map(trip => {
-    const srcPort = (portsData as IPort[]).find(p => p.id === trip.srcPortId);
-    const destPort = (portsData as IPort[]).find(p => p.id === trip.destPortId);
-    const shippingLine = (shippingLinesData as IShippingLine[]).find(s => s.id === trip.shippingLineId);
-    return { ...trip, srcPort, destPort, shippingLine };
-  });
-
-  return {
-    data: filteredTrips,
-    total: filteredTrips.length
-  };
 }
 
 export async function fetchAssociatedEntitiesToTrips(trips: ITrip[]): Promise<void> {
@@ -100,52 +113,38 @@ export async function getScheduleAndFares(
   shippingLineId?: number,
   srcPortId?: number,
   destPortId?: number,
+  page?: number,
+  limit?: number,
   retryCount = 0
-): Promise<ITrip[]> {
-  // try {
-  //   const { data } = await axios.get(`${TRIP_API}/schedule`, {
-  //     params: {
-  //       departureDate: departureDateISO,
-  //       shippingLineId
-  //     }
-  //   });
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return [];
-  // }
+): Promise<PaginatedResponse<ITrip>> {
+  try {
+    const params = new URLSearchParams();
+    if (departureDateISO) params.append('departureDateISO', departureDateISO);
+    if (shippingLineId) params.append('shippingLineId', shippingLineId.toString());
+    if (srcPortId) params.append('srcPortId', srcPortId.toString());
+    if (destPortId) params.append('destPortId', destPortId.toString());
+    if (page) params.append('page', page.toString());
+    if (limit) params.append('limit', limit.toString());
 
-  await new Promise(resolve => setTimeout(resolve, 500));
-  let filteredTrips = tripsData as any as ITrip[];
-
-  if (departureDateISO) {
-    const searchDatePH = toPhilippinesTime(departureDateISO, 'YYYY-MM-DD');
-
-    filteredTrips = filteredTrips.filter(t => {
-      const tripDatePH = toPhilippinesTime(t.departureDateIso, 'YYYY-MM-DD');
-      return tripDatePH === searchDatePH;
+    const res = await fetch(`${TRIP_API}/schedule-and-fares?${params.toString()}`, {
+      next: { tags: ['schedule-and-fares'], revalidate: 3600 }
     });
+
+    if (res.ok) {
+      return await res.json();
+    }
+
+    return {
+      data: [],
+      total: 0
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      data: [],
+      total: 0
+    };
   }
-
-
-
-  if (srcPortId) {
-    filteredTrips = filteredTrips.filter(t => t.srcPortId === srcPortId);
-  }
-
-  if (destPortId) {
-    filteredTrips = filteredTrips.filter(t => t.destPortId === destPortId);
-  }
-
-  // Enrich with associated entities
-  filteredTrips = filteredTrips.map(trip => {
-    const srcPort = (portsData as IPort[]).find(p => p.id === trip.srcPortId);
-    const destPort = (portsData as IPort[]).find(p => p.id === trip.destPortId);
-    const shippingLine = (shippingLinesData as IShippingLine[]).find(s => s.id === trip.shippingLineId);
-    return { ...trip, srcPort, destPort, shippingLine };
-  });
-
-  return filteredTrips;
 }
 
 export async function fetchFilters(): Promise<Filters | undefined> {
@@ -161,15 +160,15 @@ export async function fetchFilters(): Promise<Filters | undefined> {
       cabinTypes: uniqueCabinTypes,
       shippingLines: filteredShippingLines
     };
-    } catch (error) {
-      if (typeof window === 'undefined') {
-        if (error instanceof Error) {
-          console.error('Error fetching filters:', error.message);
-        } else {
-          console.error('Unknown error fetching filters:', error);
-        }
+  } catch (error) {
+    if (typeof window === 'undefined') {
+      if (error instanceof Error) {
+        console.error('Error fetching filters:', error.message);
+      } else {
+        console.error('Unknown error fetching filters:', error);
       }
     }
+  }
 }
 
 // TODO: Move

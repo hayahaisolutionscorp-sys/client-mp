@@ -40,7 +40,7 @@ export async function getWhyChooseSection(): Promise<IWhyChooseSection | undefin
         }
 
         const res = await fetch(WHY_CHOOSE_SECTION_API, {
-            next: { tags: ['why-choose-section'], revalidate: 3600 },
+            // next: { tags: ['why-choose-section'], revalidate: 3600 },
         });
 
         if (!res.ok) {
@@ -64,7 +64,7 @@ export async function getWhyChooseReasons(): Promise<IWhyChooseReason[] | undefi
         }
 
         const res = await fetch(WHY_CHOOSE_REASONS_API, {
-            next: { tags: ['why-choose-reasons'], revalidate: 3600 },
+            // next: { tags: ['why-choose-reasons'], revalidate: 3600 },
         });
 
         if (!res.ok) {

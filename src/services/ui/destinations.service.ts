@@ -26,7 +26,7 @@ export async function getDestinations(): Promise<IDestination[]> {
         }
 
         const res = await fetch(DESTINATIONS_API, {
-            next: { tags: ['destinations'], revalidate: 3600 }
+            // next: { tags: ['destinations'], revalidate: 3600 }
         });
 
         if (res.ok) {

@@ -3,6 +3,7 @@ import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
 import { getPress } from '@/services/content/press.service';
+import { getBrandingConfig } from '@/services/ui/branding.service';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('press');
@@ -29,5 +30,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PressPage() {
   const theme = await getThemeSettings();
   const press = await getPress();
-  return <PressList themeSettings={theme} press={press} />;
+  const branding = await getBrandingConfig();
+  return <PressList themeSettings={theme} press={press} branding={branding} />;
 }

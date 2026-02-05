@@ -21,7 +21,7 @@ export async function getTermsAndConditions(): Promise<ITermsAndConditions | und
         }
 
         const res = await fetch(TERMS_AND_CONDITIONS_API, {
-            next: { tags: ['terms-and-conditions'], revalidate: 3600 }
+            // next: { tags: ['terms-and-conditions'], revalidate: 3600 }
         });
 
         if (res.ok) {

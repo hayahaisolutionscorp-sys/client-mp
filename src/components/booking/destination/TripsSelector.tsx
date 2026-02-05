@@ -62,15 +62,17 @@ export default function TripsSelector() {
         tripIds: searchParams.get('tripIds') ?? undefined,
         srcPortId: searchParams.get('srcPortId') ? parseInt(searchParams.get('srcPortId')!, 10) : 0,
         destPortId: searchParams.get('destPortId') ? parseInt(searchParams.get('destPortId')!, 10) : 0,
-        departureDate: searchParams.get('departureDate') ?? '',
-        passengerCount: searchParams.get('passengerCount') ? parseInt(searchParams.get('passengerCount')!, 10) : 1,
-        vehicleCount: searchParams.get('vehicleCount') ? parseInt(searchParams.get('vehicleCount')!, 10) : 0,
+        origin_code: searchParams.get('origin_code') ?? undefined,
+        destination_code: searchParams.get('destination_code') ?? undefined,
+        departureDate: searchParams.get('departure_date') ?? '',
+        passengerCount: searchParams.get('passenger_count') ? parseInt(searchParams.get('passenger_count')!, 10) : 1,
+        vehicleCount: searchParams.get('vehicle_count') ? parseInt(searchParams.get('vehicle_count')!, 10) : 0,
         cabinIds: searchParams.get('cabinIds') ?? undefined,
         cabinTypes: searchParams.get('cabinTypes') ?? undefined,
         shippingLineIds: searchParams.get('shippingLineIds') ?? undefined,
-        sort: searchParams.get('sortDeparture') ?? 'departureDate',
+        sort: searchParams.get('sort') ?? 'departureDate',
         filterSpecificDate:
-          searchParams.get('filterSpecificDepartureDate') ?? searchParams.get('departureDate') ?? undefined,
+          searchParams.get('filterSpecificDepartureDate') ?? searchParams.get('departure_date') ?? undefined,
         filterDepartureDateTime: searchParams.get('filterDepartureDateTime') ?? undefined
       };
 
@@ -84,6 +86,9 @@ export default function TripsSelector() {
       setDepartureTrips(availableDepartureTrips?.data ?? []);
 
       if (searchParams.get('returnDate')) {
+        // Swap origin/dest for return trip
+        searchQuery.destination_code = searchParams.get('origin_code') ?? undefined;
+        searchQuery.origin_code = searchParams.get('destination_code') ?? undefined;
         searchQuery.destPortId = searchParams.get('srcPortId') ? parseInt(searchParams.get('srcPortId')!, 10) : 0;
         searchQuery.srcPortId = searchParams.get('destPortId') ? parseInt(searchParams.get('destPortId')!, 10) : 0;
         searchQuery.departureDate = searchParams.get('returnDate') ?? '';

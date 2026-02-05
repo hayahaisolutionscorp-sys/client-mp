@@ -25,14 +25,14 @@ import { updatePassenger } from "@/services"
 export default function ProfilePage() {
     const router = useRouter();
     const { loggedInAccount, loading, currentUser } = useAuth();
-    
+
     const searchParams = useSearchParams();
     const tabParam = searchParams.get('tab');
-    
+
     const [activeTab, setActiveTab] = useState(tabParam || "overview");
     const [isPageLoading, setIsPageLoading] = useState(true);
     const [isCopied, setIsCopied] = useState(false);
-    
+
     const [passenger, setPassenger] = useState<IPassenger | null>(null);
     const [dependents, setDependents] = useState<IDependent[]>([]);
     const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("unverified");
@@ -62,7 +62,7 @@ export default function ProfilePage() {
             ]);
 
             const profileData = profileResult.data;
-            
+
             setAccount({
                 id: loggedInAccount.id,
                 email: loggedInAccount.email,
@@ -91,7 +91,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (loading) return;
-        
+
         if (loggedInAccount === null) {
             router.replace('/login');
             return;
@@ -148,7 +148,7 @@ export default function ProfilePage() {
         // setShowVerificationForm(false);
         // setDependentToVerify(null);
         fetchProfileData();
-        
+
         // Close modal after a delay to show success message
         setTimeout(() => {
             setShowVerificationForm(false);
@@ -190,11 +190,11 @@ export default function ProfilePage() {
         try {
             const file = new File([croppedBlob], "profile-picture.jpg", { type: "image/jpeg" });
             const upload = await UploadService.uploadKYCProfilePicture(file);
-            
+
             if (imagePreview && imagePreview.startsWith('blob:')) {
                 URL.revokeObjectURL(imagePreview);
             }
-            
+
             await updatePassenger({ profile_picture_url: upload.url });
             setImagePreview(upload.url);
             fetchProfileData();
@@ -222,7 +222,7 @@ export default function ProfilePage() {
 
     return (
         <div className="container mx-auto pb-10 px-4 sm:px-6 lg:px-8">
-            <ProfileHeader 
+            <ProfileHeader
                 firstName={passenger?.firstName || currentUser?.name?.split(' ')[0]}
                 lastName={passenger?.lastName || currentUser?.name?.split(' ').slice(1).join(' ')}
                 email={account?.email}
@@ -235,6 +235,7 @@ export default function ProfilePage() {
                 onCopyClick={copyToClipboard}
                 onVerificationClick={() => setActiveTab("verification")}
                 fileInputRef={fileInputRef}
+                onImageChange={handleImageChange}
             />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">
@@ -251,7 +252,7 @@ export default function ProfilePage() {
                 </TabsList>
 
                 <TabsContent value="overview">
-                    <ProfileOverview 
+                    <ProfileOverview
                         verificationStatus={verificationStatus}
                         verificationDetails={account?.verificationDetails}
                         dependents={dependents}
@@ -262,10 +263,10 @@ export default function ProfilePage() {
                 <TabsContent value="account-settings" className="flex flex-col lg:flex-row gap-6 items-start">
                     <Card className="flex-1 w-full">
                         <CardContent className="space-y-12">
-                            <PersonalDetailsForm 
-                                passenger={passenger || undefined} 
-                                email={account?.email} 
-                                onUpdate={(updated) => setPassenger(updated)} 
+                            <PersonalDetailsForm
+                                passenger={passenger || undefined}
+                                email={account?.email}
+                                onUpdate={(updated) => setPassenger(updated)}
                             />
                         </CardContent>
                     </Card>
@@ -288,8 +289,8 @@ export default function ProfilePage() {
                 </TabsContent>
 
                 <TabsContent value="verification">
-                    <VerificationTab 
-                        accountId={loggedInAccount.id} 
+                    <VerificationTab
+                        accountId={loggedInAccount.id}
                         verificationDetails={account?.verificationDetails}
                         onStatusChange={handleVerificationStatusChange}
                         onRefresh={fetchProfileData}
@@ -297,7 +298,7 @@ export default function ProfilePage() {
                 </TabsContent>
 
                 <TabsContent value="dependents">
-                    <DependentTab 
+                    <DependentTab
                         userId={loggedInAccount.id}
                     />
                 </TabsContent>

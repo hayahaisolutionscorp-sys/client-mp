@@ -1,7 +1,9 @@
 export interface IBrandingColors {
     accent: string;
-    primaryColor: string;
-    secondaryColor: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    primary?: string;
+    secondary?: string;
 }
 
 export interface IBrandingLogo {

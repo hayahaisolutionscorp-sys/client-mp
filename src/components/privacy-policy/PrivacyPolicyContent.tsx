@@ -4,21 +4,31 @@ import { useState, useEffect } from "react";
 import ContentSidebar from "@/components/shared/ContentSidebar";
 import TipTapRenderer from "@/components/shared/TipTapRenderer";
 import { getPrivacyPolicy } from "@/services/content/privacy-policy.service";
+import { getBrandingConfig } from "@/services/ui/branding.service";
 
 export default function PrivacyPolicyContent() {
     const [title, setTitle] = useState("Privacy Policy");
     const [content, setContent] = useState<any>(null);
+    const [brandingConfig, setBrandingConfig] = useState<any>(null);
 
     useEffect(() => {
-        const fetchPrivacyPolicy = async () => {
-            const data = await getPrivacyPolicy();
-            if (data) {
-                setTitle(data.title);
-                setContent(data.content);
+        const fetchData = async () => {
+            const [privacyData, brandingData] = await Promise.all([
+                getPrivacyPolicy(),
+                getBrandingConfig()
+            ]);
+
+            if (privacyData) {
+                setTitle(privacyData.title);
+                setContent(privacyData.content);
+            }
+
+            if (brandingData) {
+                setBrandingConfig(brandingData);
             }
         };
 
-        fetchPrivacyPolicy();
+        fetchData();
     }, []);
 
     return (
@@ -29,7 +39,7 @@ export default function PrivacyPolicyContent() {
 
                 {/* Main Content */}
                 <main className="flex-1 px-8">
-                    <h1 className="mb-8 text-3xl font-bold">{title}</h1>
+                    <h1 className="mb-8 text-3xl font-bold">Privacy Policy - {brandingConfig?.brand_name}</h1>
                     {content && (
                         <TipTapRenderer content={content} />
                     )}

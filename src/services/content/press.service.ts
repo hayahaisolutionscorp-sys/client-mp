@@ -24,7 +24,7 @@ export async function getPress(): Promise<IPress[]> {
     }
 
     const res = await fetch(PRESS_RELEASES_API, {
-      next: { tags: ['press-releases'], revalidate: 3600 }
+      // next: { tags: ['press-releases'], revalidate: 3600 }
     });
 
     if (res.ok) {
@@ -44,8 +44,8 @@ export async function getPress(): Promise<IPress[]> {
 
 
 export async function getPressById(
-  id: number | string
+  idOrSlug: number | string
 ): Promise<IPress | undefined> {
   const press = await getPress();
-  return press.find(p => p.id === id);
+  return press.find(p => p.id === idOrSlug || p.slug === idOrSlug);
 }

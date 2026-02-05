@@ -85,10 +85,17 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
         setPorts(allPorts);
 
         // Pre-fill Origin Port if query param exists
-        const originPortId = searchParams.get('srcPortId');
-        if (originPortId) {
-          const foundPort = allPorts?.find((port) => port.id.toString() === originPortId);
+        const originCode = searchParams.get('origin_code');
+        if (originCode) {
+          const foundPort = allPorts?.find((port) => port.code === originCode);
           if (foundPort) setSelectedOriginPort(foundPort);
+        } else {
+          // Fallback for ID if code is missing (backward compatibility or direct ID usage)
+          const originPortId = searchParams.get('srcPortId');
+          if (originPortId) {
+            const foundPort = allPorts?.find((port) => port.id.toString() === originPortId);
+            if (foundPort) setSelectedOriginPort(foundPort);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch ports:', error);
@@ -115,10 +122,17 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
           setDestinationPorts(destinations);
 
           // Pre-fill Destination Port if query param exists
-          const destinationPortId = searchParams.get('destPortId');
-          if (destinationPortId) {
-            const foundPort = destinations.find((port) => port.id.toString() === destinationPortId);
+          const destinationCode = searchParams.get('destination_code');
+          if (destinationCode) {
+            const foundPort = destinations.find((port) => port.code === destinationCode);
             if (foundPort) setSelectedDestinationPort(foundPort);
+          } else {
+            // Fallback
+            const destinationPortId = searchParams.get('destPortId');
+            if (destinationPortId) {
+              const foundPort = destinations.find((port) => port.id.toString() === destinationPortId);
+              if (foundPort) setSelectedDestinationPort(foundPort);
+            }
           }
         } catch (error) {
           console.error('Failed to fetch destination ports:', error);
@@ -132,32 +146,27 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
   }, [selectedOriginPort, searchParams]);
 
   useEffect(() => {
-    setPassengerCount(parseInt(searchParams.get('passengerCount') || DEFAULT_NUM_PASSENGERS.toString(), 10));
-    setVehicleCount(parseInt(searchParams.get('vehicleCount') || DEFAULT_NUM_VEHICLES.toString(), 10));
+    setPassengerCount(parseInt(searchParams.get('passenger_count') || searchParams.get('passengerCount') || DEFAULT_NUM_PASSENGERS.toString(), 10));
+    setVehicleCount(parseInt(searchParams.get('vehicle_count') || searchParams.get('vehicleCount') || DEFAULT_NUM_VEHICLES.toString(), 10));
     setBookingType(searchParams.get('bookingType') ? searchParams.get('bookingType') + ' Trip' : DEFAULT_BOOKING_TYPE);
     setDepartureDate(
-      isValidDate(searchParams.get('departureDate')) ? new Date(searchParams.get('departureDate')!) : new Date()
-    );
-    setReturnDate(
-      isValidDate(searchParams.get('returnDate'))
-        ? new Date(searchParams.get('returnDate')!)
+      isValidDate(searchParams.get('departure_date'))
+        ? new Date(searchParams.get('departure_date')!)
         : isValidDate(searchParams.get('departureDate'))
           ? new Date(searchParams.get('departureDate')!)
           : new Date()
     );
+    // ... return date logic similar if needed, keeping simple for now
+    const retDateRaw = searchParams.get('returnDate');
+    const depDateRaw = searchParams.get('departure_date') || searchParams.get('departureDate');
+    setReturnDate(
+      isValidDate(retDateRaw)
+        ? new Date(retDateRaw!)
+        : isValidDate(depDateRaw)
+          ? new Date(depDateRaw!)
+          : new Date()
+    );
   }, [searchParams]);
-
-  useEffect(() => {
-    const isValid =
-      bookingType &&
-      selectedOriginPort &&
-      selectedDestinationPort &&
-      departureDate &&
-      (bookingType.toLowerCase() !== 'Round Trip'.toLowerCase() ||
-        (bookingType.toLowerCase() === 'Round Trip'.toLowerCase() && returnDate));
-
-    setIsFormValid(Boolean(isValid));
-  }, [bookingType, selectedOriginPort, selectedDestinationPort, departureDate, returnDate]);
 
   const handleOriginPortSelect = (port: IPort | undefined) => {
     setSelectedOriginPort(port);
@@ -206,17 +215,14 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
       // Prepare search values, ensuring number fields are converted to strings
       const searchValues = {
         bookingType: bookingType?.replace('Trip', '').trim() ?? undefined,
-        srcPortId: selectedOriginPort?.id ? selectedOriginPort.id.toString() : undefined,
-        destPortId: selectedDestinationPort?.id ? selectedDestinationPort.id.toString() : undefined,
-        departureDate: departureDate ? departureDate.toISOString() : undefined,
+        origin_code: selectedOriginPort?.code ?? undefined,
+        destination_code: selectedDestinationPort?.code ?? undefined,
+        departure_date: departureDate ? departureDate.toISOString() : undefined,
         returnDate:
           bookingType?.toLowerCase() === 'round trip' ? (returnDate ? returnDate.toISOString() : undefined) : undefined,
-        passengerCount: passengerCount !== undefined ? passengerCount.toString() : undefined,
-        vehicleCount: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
-        sortDeparture: 'departureDate',
-        sortReturn: 'departureDate',
-        filterSpecificDepartureDate: departureDateForFilter,
-        filterSpecificReturnDate: returnDateForFilter,
+        passenger_count: passengerCount !== undefined ? passengerCount.toString() : undefined,
+        vehicle_count: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
+        sort: 'departureDate',
         page: '1'
       };
 

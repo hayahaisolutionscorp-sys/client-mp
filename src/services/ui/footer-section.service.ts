@@ -11,7 +11,7 @@ export async function getFooterSections(): Promise<IFooterSection | undefined> {
     }
 
     const res = await fetch(FOOTER_SECTION_API, {
-      next: { tags: ['footer-sections'], revalidate: 3600 }
+      // next: { tags: ['footer-sections'], revalidate: 3600 }
     });
 
     if (res.ok) {

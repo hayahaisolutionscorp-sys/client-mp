@@ -19,7 +19,7 @@ export default async function PopularRoutes() {
 
   return (
     <div id="Routes" className="container max-w-7xl mx-auto px-6 mt-16 sm:px-8 lg:px-10 pb-5">
-      <h1 className="font-bold text-customText text-2xl sm:text-3xl lg:text-4xl text-center">
+      <h1 className="font-bold text-customText text-2xl sm:text-3xl lg:text-4xl text-left">
         Most Popular Routes Recommended For You
       </h1>
       <div className="mt-10">

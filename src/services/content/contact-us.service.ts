@@ -27,7 +27,7 @@ export async function getContactUs(): Promise<IContactInformation[]> {
     }
 
     const res = await fetch(CONTACT_INFORMATION_API, {
-      next: { tags: ['contact-us'], revalidate: 3600 }
+      // next: { tags: ['contact-us'], revalidate: 3600 }
     });
 
     if (res.ok) {

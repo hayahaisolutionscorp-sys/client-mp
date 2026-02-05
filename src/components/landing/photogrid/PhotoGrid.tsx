@@ -41,7 +41,7 @@ export default function PhotoGrid({ images }: { images: Promise<IThumbnail[]> })
         {allImages.map((image, index) => (
           <div
             key={index}
-            className={`${styles['zoom-container']} relative shadow-md rounded-lg overflow-hidden aspect-[4/3]`}
+            className={`${styles['zoom-container']} relative shadow-md rounded-lg overflow-hidden aspect-[3/4]`}
             role="button"
             tabIndex={0}
             onClick={() => handleImageClick(image)}
@@ -61,8 +61,8 @@ export default function PhotoGrid({ images }: { images: Promise<IThumbnail[]> })
               className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
               priority={index < 4}
             />
-            <div className="absolute bottom-0 left-0 right-0 p-2 pl-4 bg-gradient-to-t from-black/60 to-transparent">
-              <p className="text-white text-xs sm:text-sm">{image.label}</p>
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-20">
+              <p className="text-white text-lg sm:text-xl font-bold">{image.label}</p>
             </div>
           </div>
         ))}

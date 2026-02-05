@@ -28,44 +28,58 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
     <>
       {/* User Dropdown Menu */}
       <div className="relative" ref={dropdownRef}>
-        <button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="flex items-center space-x-2 focus:outline-none"
-          aria-label="User menu"
-        >
-          {loggedInAccount?.passenger?.profile_picture_url ? (
-            <div className="relative w-8 h-8 rounded-full overflow-hidden border border-gray-200">
-              <Image
-                src={loggedInAccount.passenger.profile_picture_url}
-                alt="Profile"
-                fill
-                className="object-cover"
-              />
-            </div>
-          ) : currentUser ? (
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm transition-all duration-200 ${shouldBeTransparent ? 'bg-white/20 text-white backdrop-blur-sm border border-white/40 hover:bg-white/30' : 'text-white'
-                }`}
-              style={{
-                backgroundColor: !shouldBeTransparent && themeSettings?.primaryColor ? themeSettings.primaryColor : undefined
-              }}
-            >
-              {(loggedInAccount?.passenger?.firstName?.charAt(0) || currentUser.email?.charAt(0) || '?').toUpperCase()}
-            </div>
-          ) : (
+        {loggedInAccount?.passenger?.profile_picture_url ? (
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center space-x-2 focus:outline-none relative w-8 h-8 rounded-full overflow-hidden border border-gray-200"
+          >
             <Image
-              src="/assets/icons/circle-user-round.svg"
-              alt="User Menu"
-              width={32}
-              height={32}
-              className={`w-8 h-8 transition-all duration-200 ${shouldBeTransparent ? 'brightness-0 invert' : 'brightness-0'
-                }`}
+              src={loggedInAccount.passenger.profile_picture_url}
+              alt="Profile"
+              fill
+              className="object-cover"
             />
-          )}
+          </button>
+        ) : currentUser ? (
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm transition-all duration-200 focus:outline-none ${shouldBeTransparent ? 'bg-white/20 text-white backdrop-blur-sm border border-white/40 hover:bg-white/30' : 'text-white'
+              }`}
+            style={{
+              backgroundColor: !shouldBeTransparent && themeSettings?.primaryColor ? themeSettings.primaryColor : undefined
+            }}
+          >
+            {(loggedInAccount?.passenger?.firstName?.charAt(0) || currentUser.email?.charAt(0) || '?').toUpperCase()}
+          </button>
+        ) : (
+          <>
+            {/* Desktop: Login Button */}
+            <Link
+              href="/login"
+              className={`hidden md:flex items-center justify-center px-6 py-2 bg-[#23ABFF] text-white font-bold rounded-lg hover:bg-blue-500 transition-all shadow-md whitespace-nowrap`}
+            >
+              Login/Create Account
+            </Link>
 
-        </button>
+            {/* Mobile: Menu Icon */}
+            <div className="md:hidden relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center space-x-2 focus:outline-none"
+              >
+                <Image
+                  src="/assets/icons/circle-user-round.svg"
+                  alt="User Menu"
+                  width={32}
+                  height={32}
+                  className={`w-8 h-8 transition-all duration-200 ${shouldBeTransparent ? 'brightness-0 invert' : 'brightness-0'}`}
+                />
+              </button>
+            </div>
+          </>
+        )}
 
-        {/* Dropdown Menu */}
+        {/* Dropdown Menu (Only logic for logged in or mobile logged out) */}
         <div
           className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 transition-all duration-200 ${isDropdownOpen ? 'transform opacity-100 scale-100' : 'transform opacity-0 scale-95 pointer-events-none'
             }`}
@@ -96,16 +110,17 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
             </>
           ) : (
             <>
+              {/* Mobile Dropdown Links */}
               <Link
                 href="/login"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block md:hidden px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => setIsDropdownOpen(false)}
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block md:hidden px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => setIsDropdownOpen(false)}
               >
                 Create Account
@@ -113,7 +128,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
             </>
           )}
         </div>
-      </div>
+      </div >
     </>
   );
 };

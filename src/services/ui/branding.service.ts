@@ -10,7 +10,7 @@ export const getBrandingConfig = async (): Promise<IBrandingConfig> => {
         }
 
         const res = await fetch(`${BRANDING_API}`, {
-            next: { tags: ['branding'], revalidate: 3600 }
+            // next: { tags: ['branding'], revalidate: 3600 }
         });
 
         if (res.ok) {

@@ -26,7 +26,7 @@ export const getPartners = async (): Promise<IPartnersResponse> => {
     }
 
     const response = await fetch(OUR_PARTNERS_API, {
-        next: { tags: ['partners'], revalidate: 3600 }
+        // next: { tags: ['partners'], revalidate: 3600 }
     });
 
     if (!response.ok) {

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { LuBell } from 'react-icons/lu';
 
 import { NAV_ITEMS } from 'constants/index';
 
@@ -80,7 +81,7 @@ const Navbar = () => {
   const isHome = pathname === '/';
   const shouldBeTransparent = isHome && !isMenuOpen;
   const position = isHome ? 'absolute' : 'relative';
-  const backgroundColor = shouldBeTransparent ? 'text-white bg-black bg-opacity-35' : 'text-black bg-white';
+  const backgroundColor = shouldBeTransparent ? 'text-white bg-transparent' : 'text-black bg-white';
 
   const logoSrc = isHome ? branding.logo.light : branding.logo.dark;
 
@@ -106,7 +107,7 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Navigation Links */}
-            <div className="hidden md:flex flex-grow items-center justify-center space-x-8">
+            <div className={`hidden md:flex flex-1 items-center justify-center space-x-6 lg:space-x-8 ${shouldBeTransparent ? 'text-white' : 'text-black'}`}>
               {isHome &&
                 filteredNavItems.map((item) =>
                   item.trigger.toLowerCase() === 'scroll' ? (
@@ -116,7 +117,7 @@ const Navbar = () => {
                         setActiveNav(item.id);
                         scrollToElement(item.id);
                       }}
-                      className={`text-md font-medium transition-all duration-300 ${activeNav === item.id
+                      className={`text-sm lg:text-md font-medium transition-all duration-300 ${activeNav === item.id
                         ? 'border-b-2 border-current'
                         : 'hover:border-b-2 border-transparent hover:border-current'
                         }`}
@@ -127,7 +128,7 @@ const Navbar = () => {
                     <Link
                       key={item.id}
                       href={item.redirect_url}
-                      className={`text-md font-medium transition-all duration-300 ${activeNav === item.id
+                      className={`text-sm lg:text-md font-medium transition-all duration-300 ${activeNav === item.id
                         ? 'border-b-2 border-current'
                         : 'hover:border-b-2 border-transparent hover:border-current'
                         }`}
@@ -137,7 +138,19 @@ const Navbar = () => {
                   )
                 )}
             </div>
-            <UserDropdown shouldBeTransparent={shouldBeTransparent} />
+
+            {/* Right Side Icons & User Dropdown */}
+            <div className={`hidden md:flex items-center space-x-4 lg:space-x-6 ${shouldBeTransparent ? 'text-white' : 'text-customText'}`}>
+              <button className="hover:opacity-80 transition-opacity">
+                <LuBell className="w-5 h-5" />
+              </button>
+
+              <Link href="/bookings" className="text-sm font-medium hover:underline">
+                My Bookings
+              </Link>
+
+              <UserDropdown shouldBeTransparent={shouldBeTransparent} />
+            </div>
 
             {/* Mobile menu button */}
             {isHome && (

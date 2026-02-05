@@ -32,7 +32,7 @@ export async function getAboutUsSection(sectionType: AboutUsSectionType): Promis
     }
 
     const res = await fetch(`${ABOUT_US_SECTION_API}/${sectionType}`, {
-      next: { tags: [cacheKey], revalidate: 3600 },
+      // next: { tags: [cacheKey], revalidate: 3600 },
     });
 
     if (!res.ok) {

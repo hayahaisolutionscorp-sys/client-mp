@@ -1,3 +1,4 @@
+import Navbar from '@/components/Navbar';
 import Media from '@/components/landing/Media';
 import SearchBox from '@/components/landing/SearchBox';
 import { getHeroSections } from '@/services';
@@ -42,7 +43,9 @@ export default async function Hero() {
   }
   return (
     <header id="Book" className="relative bg-[#EEF8FC]">
-      <div className="relative w-full h-[600px] pl-4 pr-4 bg-transparent overflow-hidden">
+      <div className="relative w-auto h-[650px] mx-4 mt-4 rounded-[32px] overflow-hidden">
+        <Navbar />
+
         {captionBackground ? (
           captionBackground
         ) : (
@@ -57,12 +60,15 @@ export default async function Hero() {
           />
         )}
 
+        {/* Black Overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-40 z-[5] pointer-events-none" />
+
         {/* Content overlay on top of the video */}
         <div className="flex flex-col items-center absolute z-[10] inset-0 text-white text-center mt-[85px] md:mt-[100px] lg:mt-[150px]">
           <h1 className="font-bold leading-tight px-6 text-[22px] min-w-[500px] max-w-[500px] md:text-[40px] md:max-w-[800px] lg:text-[50px] lg:max-w-[1002px]">
             {heroSection?.title}
           </h1>
-          <p className="font-normal px-4 pt-3 text-xs md:text-lg">{heroSection?.subtitle}</p>
+          <p className="font-medium px-4 pt-3 text-sm md:text-2xl">{heroSection?.subtitle}</p>
         </div>
       </div>
 

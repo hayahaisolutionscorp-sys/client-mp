@@ -55,10 +55,10 @@ export function SessionExpiredModal() {
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="sm:justify-center mt-6">
-                    <Button 
+                    <Button
                         type="button"
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 rounded-lg transition-colors"
-                        onClick={() => { handleLogin(); }}
+                        onClick={handleLogin}
                     >
                         Go to Login
                     </Button>

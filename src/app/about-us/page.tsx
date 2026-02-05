@@ -1,8 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
 
-
-
 import { Card, CardContent } from '@/components/ui/Card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
@@ -74,7 +72,7 @@ export default async function AboutPage() {
     <div
       className="container mx-auto px-4 py-8 max-w-6xl"
       style={{
-        '--primary-color': theme?.primary || '#91363C'
+        '--primary-color': theme?.primary || '#0060df'
       } as React.CSSProperties}
     >
       <h1 className="text-4xl font-bold mb-12">About Us</h1>

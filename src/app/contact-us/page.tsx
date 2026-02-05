@@ -38,8 +38,8 @@ export default async function ContactUs() {
   const phoneNumbers = contactInfo.filter(c => c.type === 'phone' && c.is_active);
   const emails = contactInfo.filter(c => c.type === 'email' && c.is_active);
 
-  const primary = themeSettings?.primary || '#91363C';
-  const secondary = themeSettings?.secondary || '#d14b4e';
+  const primary = themeSettings?.primary;
+  const secondary = themeSettings?.secondary;
 
   return (
     <section

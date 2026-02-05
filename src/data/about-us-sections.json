@@ -5,8 +5,8 @@
         "type": "hero",
         "bg_type": "image",
         "bg_url": "https://ayahay-assets.s3.ap-southeast-2.amazonaws.com/about_us/3/ayahay-team.webp?cache_buster=15c888b8-4053-42fb-9c20-139b346745ef",
-        "bg_alt": "Ayahay Team image",
-        "title": "Meet the Ayahay Team!",
+        "bg_alt": "Hayahai Team image",
+        "title": "Meet the Hayahai Team!",
         "subtitle": null,
         "description": null,
         "is_active": true,
@@ -22,7 +22,7 @@
         "bg_alt": "Background of section.",
         "title": "Welcome",
         "subtitle": null,
-        "description": "At Ayahay, we bring together innovation and expertise in the world of logistics and technology. We are a dynamic and forward-thinking company founded by individuals with a wealth of experience in the IT and logistics industry. \n\nOur journey began with a shared vision: to revolutionize the way logistics and transportation are managed and experienced in the Philippines.",
+        "description": "At Hayahai, we bring together innovation and expertise in the world of logistics and technology. We are a dynamic and forward-thinking company founded by individuals with a wealth of experience in the IT and logistics industry. \n\nOur journey began with a shared vision: to revolutionize the way logistics and transportation are managed and experienced in the Philippines.",
         "is_active": true,
         "created_at": "2026-01-08T03:31:28.888Z",
         "updated_at": null
@@ -36,7 +36,7 @@
         "bg_alt": "Background of section.",
         "title": "Our Story",
         "subtitle": null,
-        "description": "Ayahay was born out of a deep understanding of the challenges faced by the shipping and logistics industry in adapting to the digital age.\n\nThe founders of Ayahay brought together their extensive knowledge and experience in IT and logistics to create a solution that would bridge the gap between traditional practices and modern technology.",
+        "description": "Hayahai was born out of a deep understanding of the challenges faced by the shipping and logistics industry in adapting to the digital age.\n\nThe founders of Ayahay brought together their extensive knowledge and experience in IT and logistics to create a solution that would bridge the gap between traditional practices and modern technology.",
         "is_active": true,
         "created_at": "2026-01-08T03:31:28.888Z",
         "updated_at": null

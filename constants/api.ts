@@ -55,6 +55,7 @@ export const SEARCH_API = `${BASE_URL}/search`;
 export const SHIPPING_LINE_API = `${BASE_URL}/shipping-lines`;
 export const SHIPS_API = `${BASE_URL}/ships`;
 export const TRIP_API = `${BASE_URL}/trips`;
+export const ROUTE_API = `${BASE_URL}/routes`;
 export const VEHICLE_TYPES_API = `${BASE_URL}/vehicle-types`;
 export const VOUCHERS_API = `${BASE_URL}/vouchers`;
 export const WEBHOOKS_API = `${BASE_URL}/webhooks`;

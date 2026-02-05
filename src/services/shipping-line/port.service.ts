@@ -23,9 +23,19 @@ export async function getAllPorts(): Promise<IPort[]> {
 }
 
 export async function getPorts(): Promise<IPort[] | undefined> {
-  // return getAllPorts();
-  await new Promise(resolve => setTimeout(resolve, 100));
-  return portsData as IPort[];
+  try {
+    const res = await fetch(PORTS_API, {
+      next: { tags: ['ports'], revalidate: 3600 }
+    });
+
+    if (res.ok) {
+      const { data } = await res.json();
+      return data;
+    }
+  } catch (error) {
+    console.error('Failed to fetch ports:', error);
+  }
+  return [];
 }
 
 export async function getPort(portId: number): Promise<IPort | undefined> {

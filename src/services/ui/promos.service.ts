@@ -29,7 +29,7 @@ export async function getPromos(): Promise<IPromo[]> {
         }
 
         const res = await fetch(PROMOS_API, {
-            next: { tags: ['promos'], revalidate: 3600 }
+            // next: { tags: ['promos'], revalidate: 3600 }
         });
 
         if (res.ok) {

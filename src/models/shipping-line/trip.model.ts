@@ -9,7 +9,7 @@ import { ITripCabin } from "../accommodation/trip-cabin.model";
 
 
 export interface ITrip {
-  id: number;
+  id: number | string;
   referenceNo: string;
   shipId: number;
   ship?: IShip;
@@ -17,8 +17,11 @@ export interface ITrip {
   shippingLine?: IShippingLine;
   srcPortId: number;
   srcPort?: IPort;
+  srcPortName?: string;
   destPortId: number;
   destPort?: IPort;
+  destPortName?: string;
+  shipName?: string;
   voyage?: IVoyage;
   rateTableId: number;
   rateTable?: IRateTable;

@@ -16,7 +16,7 @@ export default async function Promos() {
   );
 
   return (
-    <div id="Promos" className="relative w-full overflow-hidden mt-16">
+    <div id="Promos" className="relative w-full overflow-hidden mt-40">
       <div className="container max-w-7xl mx-auto pt-40 sm:pt-10 md:pt-15 lg:pt-20">
         <div className="text-center">
           <h1 className="font-bold text-customText text-2xl sm:text-3xl lg:text-4xl">Travel Promotions & Updates</h1>

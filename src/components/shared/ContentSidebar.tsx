@@ -58,7 +58,6 @@ function extractHeadingsFromTipTap(content: any): HeadingItem[] {
 
 export default function ContentSidebar({ content, className }: ContentSidebarProps) {
     const [activeSection, setActiveSection] = useState('')
-    const [isMobile, setIsMobile] = useState(false)
     const [headings, setHeadings] = useState<HeadingItem[]>([])
     const themeSettings = useThemeSettings()
 
@@ -71,15 +70,6 @@ export default function ContentSidebar({ content, className }: ContentSidebarPro
             }
         }
     }, [content, activeSection]);
-
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768)
-        }
-        checkMobile()
-        window.addEventListener('resize', checkMobile)
-        return () => window.removeEventListener('resize', checkMobile)
-    }, [])
 
     useEffect(() => {
         const handleScroll = () => {
@@ -108,7 +98,7 @@ export default function ContentSidebar({ content, className }: ContentSidebarPro
     }
 
     return (
-        <div className={`w-full md:w-64 ${isMobile ? '' : 'h-screen sticky top-0 items-center overflow-y-auto'} ${className || ''}`}>
+        <div className={`hidden md:block md:w-64 h-screen sticky top-0 items-center overflow-y-auto ${className || ''}`}>
             <nav className="w-full pb-8">
                 <ul className="space-y-2">
                     {headings.map((heading) => (

@@ -12,15 +12,17 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
     }
 
     const res = await fetch(THEME_SETTINGS_API, {
-      next: { tags: ['theme-settings'], revalidate: 3600 }
+      // next: { tags: ['theme-settings'], revalidate: 3600 }
     });
 
     if (res.ok) {
       const response: IBrandingResponse = await res.json();
       return {
-        primary: response.data.colors.primaryColor || (response.data.colors as any).primary || '#000000',
-        secondary: response.data.colors.secondaryColor || (response.data.colors as any).secondary || '#ffffff',
-        accent: response.data.colors.accent || '#000000',
+        primaryColor: response.data.colors.primaryColor || response.data.colors.primary,
+        secondaryColor: response.data.colors.secondaryColor || response.data.colors.secondary,
+        primary: response.data.colors.primary || response.data.colors.primaryColor || '',
+        secondary: response.data.colors.secondary || response.data.colors.secondaryColor || '',
+        accent: response.data.colors.accent,
         fontStyle: 'Inter'
       };
     }

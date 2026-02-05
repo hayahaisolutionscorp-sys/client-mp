@@ -25,7 +25,7 @@ export async function getHeroSections(): Promise<IHeroSection | undefined> {
     }
 
     const res = await fetch(HERO_SECTION_API, {
-      next: { tags: ['hero-sections'], revalidate: 3600 }
+      // next: { tags: ['hero-sections'], revalidate: 3600 }
     });
 
     if (res.ok) {

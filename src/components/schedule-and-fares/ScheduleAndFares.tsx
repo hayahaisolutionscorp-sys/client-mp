@@ -24,8 +24,6 @@ const ScheduleAndFares = ({ srcPortId, destPortId, themeColor = '#0060df', accen
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-
-
   useEffect(() => {
     const fetchAllShips = async () => {
       try {
@@ -55,15 +53,15 @@ const ScheduleAndFares = ({ srcPortId, destPortId, themeColor = '#0060df', accen
           throw new Error('Invalid date format');
         }
 
-        const trips: ITrip[] = await getScheduleAndFares(selectedDate, undefined, srcPortId, destPortId);
+        const { data: trips } = await getScheduleAndFares(selectedDate, undefined, srcPortId, destPortId);
 
         const formatted = trips.map((trip) => ({
           time: `${toPhilippinesTime(trip.departureDateIso, DATE_SECONDARY_DEFAULT_FORMAT)} - (${toPhilippinesTime(
             trip.departureDateIso,
             TIME_DEFAULT_FORMAT
           )})`,
-          route: `${trip.srcPort?.name ?? 'Unknown'} → ${trip.destPort?.name ?? 'Unknown'}`,
-          ship: `${getShipDetailsById(trip.shipId)?.name ?? 'Unknown'}`,
+          route: `${trip.srcPort?.name ?? trip.srcPortName ?? 'Unknown'} → ${trip.destPort?.name ?? trip.destPortName ?? 'Unknown'}`,
+          ship: `${getShipDetailsById(trip.shipId)?.name ?? trip.shipName ?? 'Unknown'}`,
           fare:
             Array.isArray(trip.availableCabins) && trip.availableCabins.length
               ? trip.availableCabins

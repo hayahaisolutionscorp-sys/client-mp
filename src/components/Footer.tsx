@@ -65,7 +65,7 @@ const Footer = () => {
     <>
       <footer
         className="bg-[#13357B] text-white py-10 px-6 sm:px-10 lg:pt-48"
-        style={{ backgroundColor: themeSettings?.primary }}
+        style={{ backgroundColor: themeSettings?.primaryColor }}
       >
         {/* Main content area */}
         <div className="flex flex-col lg:flex-row lg:justify-between gap-8">
@@ -73,7 +73,8 @@ const Footer = () => {
           {/* Logo and Tagline */}
           <div className="flex flex-col items-center mb-2 lg:mb-0 lg:items-start">
             <div
-              className={`flex justify-center items-center overflow-hidden`}
+              className={`flex justify-center items-center overflow-hidden ${branding?.logo?.light?.toLowerCase().endsWith('.png') ? 'bg-white p-2 rounded-lg' : ''
+                }`}
             >
               <Image
                 src={

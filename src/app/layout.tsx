@@ -26,7 +26,7 @@ export default async function RootLayout({
   // Fetch theme and header sections on server-side
   const brandingConfig = await getBrandingConfig();
   const headerSections = await getHeadersSections();
-  
+
   // Derive theme settings from branding config with fallback to local theme-settings.json
   const themeSettings = {
     primary: brandingConfig?.colors?.primaryColor || (brandingConfig?.colors as any)?.primary,
@@ -34,7 +34,7 @@ export default async function RootLayout({
     accent: brandingConfig?.colors?.accent,
     fontStyle: 'Inter'
   };
-    
+
   return (
     <html lang="en">
       <head>

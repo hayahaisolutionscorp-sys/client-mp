@@ -5,13 +5,10 @@ import { getPressById } from "@/services";
 import { PressItemContent } from "@/components/press/PressItemContent";
 
 export default async function PressItem({ params }: { params: Promise<{ id: string }> }) {
-  const parsedId = parseInt((await params).id, 10);
+  // No need to parseInt since ID can be a string (slug or uuid)
+  const id = (await params).id;
+  const press = await getPressById(id);
 
-  if (isNaN(parsedId)) {
-    notFound();
-  }
-
-  const press = await getPressById(parsedId);
   if (!press) {
     notFound();
   }

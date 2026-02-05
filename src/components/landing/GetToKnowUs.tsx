@@ -93,8 +93,15 @@ export default function GetToKnowUs() {
               onClick={() => setTab(tabName as TabName)}
               aria-label={`Show ${tabName}`}
               aria-pressed={tab === tabName}
-              className={`relative px-4 py-2 rounded-md font-semibold transition-colors ${tab === tabName ? 'bg-customBlue text-white' : 'bg-white-500 border shadow-lg text-customText'
+              className={`relative px-4 py-2 rounded-md font-semibold transition-colors border ${tab === tabName
+                ? 'bg-customBlue text-white border-customBlue'
+                : 'bg-white text-customBlue border-customBlue'
                 }`}
+              style={{
+                backgroundColor: tab === tabName ? themeSettings?.primaryColor : 'white',
+                borderColor: themeSettings?.primaryColor,
+                color: tab === tabName ? 'white' : themeSettings?.primaryColor,
+              }}
             >
               {tabName}
               {tab === tabName && (

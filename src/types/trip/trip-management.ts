@@ -116,6 +116,8 @@ export interface SearchAvailableTrips {
   sort?: string;
   filterSpecificDate?: string;
   filterDepartureDateTime?: string;
+  origin_code?: string;
+  destination_code?: string;
 }
 
 export interface AvailableTrips {

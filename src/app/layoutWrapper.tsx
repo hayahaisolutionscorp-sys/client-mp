@@ -16,7 +16,7 @@ export default function LayoutWrapper({
 
   return (
     <>
-      {!hideLayout && <Navbar />}
+      {!hideLayout && pathname !== '/' && <Navbar />}
       <main className="">{children}</main>
       {!hideLayout && !isProfilePage && (
         <div id="Resources" className="w-full lg:pt-56">
