@@ -37,7 +37,7 @@ export async function updatePassenger(
       address: passengerData.address,
       nationality: passengerData.nationality,
       phone: passengerData.phone,
-      profile_picture_url: passengerData.profile_picture_url
+      profilePictureUrl: passengerData.profilePictureUrl,
     };
 
     const { data } = await axios.patch(`${AUTH_API}/me`, payload);

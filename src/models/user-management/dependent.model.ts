@@ -17,7 +17,7 @@ export interface IDependent {
   updated_at?: string;
   verification?: IVerification;
 
-  verificationStatus?: DependentVerificationStatus;
+  status?: DependentVerificationStatus;
   verifications?: IVerification[];
 }
 

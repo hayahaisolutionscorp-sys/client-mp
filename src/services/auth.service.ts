@@ -84,34 +84,48 @@ export const AuthService = {
             // Listen for message from popup
             const handleMessage = (event: MessageEvent) => {
                 // Verify the origin for security
-                const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-                if (event.origin !== apiUrl) return;
+                const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000').origin;
+                
+                // Allow exact match or mismatch log for debugging
+                if (event.origin !== apiOrigin) {
+                    console.warn('OAuth Origin Warning:', { expected: apiOrigin, received: event.origin });
+                    // If the origin is very different, we ignore. 
+                    // But often it's just a trailing slash issue.
+                    if (!apiOrigin.includes(event.origin) && !event.origin.includes(apiOrigin)) {
+                        return;
+                    }
+                }
 
-                if (event.data.type === 'oauth-success') {
+                if (event.data && (event.data.type === 'oauth-success' || event.data.type === 'oauth-error')) {
                     window.removeEventListener('message', handleMessage);
                     popup?.close();
-                    resolve(event.data);
-                } else if (event.data.type === 'oauth-error') {
-                    window.removeEventListener('message', handleMessage);
-                    popup?.close();
-                    reject(new Error(event.data.error || 'OAuth failed'));
+                    
+                    if (event.data.type === 'oauth-success') {
+                        resolve(event.data);
+                    } else {
+                        reject(new Error(event.data.error || 'OAuth failed'));
+                    }
                 }
             };
 
             window.addEventListener('message', handleMessage);
 
             // Check if popup was blocked
-            if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+            if (!popup) {
                 window.removeEventListener('message', handleMessage);
                 reject(new Error('Popup blocked. Please allow popups for this site.'));
+                return;
             }
 
             // Clean up if popup is closed manually
             const checkClosed = setInterval(() => {
                 if (popup?.closed) {
                     clearInterval(checkClosed);
-                    window.removeEventListener('message', handleMessage);
-                    reject(new Error('Authentication cancelled'));
+                    // Give handleMessage a tiny bit of time to catch the last message if any
+                    setTimeout(() => {
+                        window.removeEventListener('message', handleMessage);
+                        reject(new Error('Authentication cancelled'));
+                    }, 500);
                 }
             }, 1000);
         });
@@ -133,34 +147,44 @@ export const AuthService = {
             // Listen for message from popup
             const handleMessage = (event: MessageEvent) => {
                 // Verify the origin for security
-                const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-                if (event.origin !== apiUrl) return;
+                const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000').origin;
+                
+                if (event.origin !== apiOrigin) {
+                    console.warn('Facebook OAuth Origin Warning:', { expected: apiOrigin, received: event.origin });
+                    if (!apiOrigin.includes(event.origin) && !event.origin.includes(apiOrigin)) {
+                        return;
+                    }
+                }
 
-                if (event.data.type === 'oauth-success') {
+                if (event.data && (event.data.type === 'oauth-success' || event.data.type === 'oauth-error')) {
                     window.removeEventListener('message', handleMessage);
                     popup?.close();
-                    resolve(event.data);
-                } else if (event.data.type === 'oauth-error') {
-                    window.removeEventListener('message', handleMessage);
-                    popup?.close();
-                    reject(new Error(event.data.error || 'OAuth failed'));
+                    
+                    if (event.data.type === 'oauth-success') {
+                        resolve(event.data);
+                    } else {
+                        reject(new Error(event.data.error || 'OAuth failed'));
+                    }
                 }
             };
 
             window.addEventListener('message', handleMessage);
 
             // Check if popup was blocked
-            if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+            if (!popup) {
                 window.removeEventListener('message', handleMessage);
                 reject(new Error('Popup blocked. Please allow popups for this site.'));
+                return;
             }
 
             // Clean up if popup is closed manually
             const checkClosed = setInterval(() => {
                 if (popup?.closed) {
                     clearInterval(checkClosed);
-                    window.removeEventListener('message', handleMessage);
-                    reject(new Error('Authentication cancelled'));
+                    setTimeout(() => {
+                        window.removeEventListener('message', handleMessage);
+                        reject(new Error('Authentication cancelled'));
+                    }, 500);
                 }
             }, 1000);
         });

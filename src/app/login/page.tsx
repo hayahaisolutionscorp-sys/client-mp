@@ -31,7 +31,12 @@ export default function LoginPage() {
     signIn,
     signInWithGoogle,
     signInWithFacebook,
+    clearSession
   } = useAuth();
+
+  useEffect(() => {
+    clearSession();
+  }, [clearSession]);
 
   const [error, setError] = useState<string | null>(null);
 

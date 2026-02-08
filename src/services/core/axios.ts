@@ -23,6 +23,53 @@ const isTokenExpired = (token: string): boolean => {
 let isRefreshing = false;
 let refreshPromise: Promise<any> | null = null;
 
+/**
+ * Shared function to handle token refresh.
+ * Ensures only one refresh call is made even if multiple requests trigger it.
+ */
+const handleTokenRefresh = async () => {
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const response = await axios.post(`${apiBaseUrl}/auth/refresh`, {}, { withCredentials: true });
+      return response.data;
+    } catch (error: any) {      
+      // If refresh fails (especially 401), the refresh token is invalid.
+      // We must perform a thorough cleanup to stop further refresh attempts and ensure a clean state.
+      const { invalidateItem } = await import('helpers/cache.helpers');
+      const { eraseCookie } = await import('helpers/cookie.helpers');
+      const { accountRelatedCacheKeys } = await import('constants/cache');
+
+      // Clear authentication cookies
+      eraseCookie('user');
+      eraseCookie('access_token');
+      eraseCookie('refresh_token');
+
+      // Clear all account-related cache items
+      accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+      
+      // Specifically ensure jwt is cleared (though it's in accountRelatedCacheKeys)
+      invalidateItem('jwt');
+
+      // If refresh fails, dispatch session expired event
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('session-expired'));
+      }
+      throw error;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+};
+
 instance.interceptors.request.use(
   async (config) => {
     const authToken = fetchItem<string>('jwt');
@@ -35,35 +82,18 @@ instance.interceptors.request.use(
     if (authToken) {
       // Check if access token has expired
       if (isTokenExpired(authToken)) {
-        // If already refreshing, wait for that refresh to complete
-        if (isRefreshing && refreshPromise) {
-          await refreshPromise;
-        } else {
-          // Start a new refresh
-          isRefreshing = true;
-          refreshPromise = (async () => {
-            try {
-              const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-              await instance.post(`${apiBaseUrl}/auth/refresh`);
-            } catch (error) {
-              // If refresh fails, dispatch session expired event
-              if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('session-expired'));
-              }
-              throw error;
-            } finally {
-              isRefreshing = false;
-              refreshPromise = null;
-            }
-          })();
+        try {
+          await handleTokenRefresh();
           
-          await refreshPromise;
-        }
-        
-        // Get the new token after refresh
-        const newToken = fetchItem<string>('jwt');
-        if (newToken) {
-          config.headers.Authorization = `Bearer ${newToken}`;
+          // Get the new token after refresh
+          const newToken = fetchItem<string>('jwt');
+          if (newToken) {
+            config.headers.Authorization = `Bearer ${newToken}`;
+          }
+        } catch (refreshError) {
+          // If refresh fails, we still let the request proceed? 
+          // Usually better to fail here or let it fall through to 401 handling
+          console.warn('Preemptive refresh failed, proceeding with expired token');
         }
       } else {
         config.headers.Authorization = `Bearer ${authToken}`;
@@ -95,19 +125,17 @@ instance.interceptors.response.use(
         originalRequest._retry = true;
         
         try {
-          // Attempt to refresh the token
-          // The backend expects the refresh_token in a cookie (handled by withCredentials: true)
-          // We use the same environment variable as defined in constants/api.ts
-          const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-          await instance.post(`${apiBaseUrl}/auth/refresh`);
+          // Attempt to refresh the token using the shared logic
+          await handleTokenRefresh();
           
-          // If refresh succeeds, retry the original request
+          // If refresh succeeds, update headers and retry the original request
+          const newToken = fetchItem<string>('jwt');
+          if (newToken) {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          }
+          
           return instance(originalRequest);
         } catch (refreshError: any) {
-          // If refresh fails, the session is truly expired
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('session-expired'));
-          }
           // Only throw if not a 401, as 401 is handled by logout/redirect logic elsewhere
           if (refreshError.response?.status === 401) {
             return Promise.reject({ ...refreshError, _silent: true });

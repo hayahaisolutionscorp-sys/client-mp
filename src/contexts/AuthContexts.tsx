@@ -30,7 +30,8 @@ interface AuthContextType {
     } | null;
     branding: any;
     theme: any;
-    refreshProfile: () => Promise<void>;
+    refreshProfile: (force?: boolean) => Promise<void>;
+    clearSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -95,7 +96,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     };
 
     // Load user profile on mount
-    const loadProfile = useCallback(async () => {
+    const loadProfile = useCallback(async (force: boolean = false) => {
         // Only attempt to load profile if there's an indicator of a session
         // This avoids unnecessary 401 errors for guest users
         const hasSessionIndicator = typeof window !== 'undefined' && (
@@ -103,7 +104,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             fetchItem('jwt')
         );
 
-        if (!hasSessionIndicator) {
+        if (!hasSessionIndicator && !force) {
             setLoading(false);
             return null;
         }
@@ -223,7 +224,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             setLoading(true);
             await AuthService.signInWithGoogle();
             showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}!`);
-            await loadProfile();
+            await loadProfile(true);
             return 'success';
         } catch (error: any) {
             console.error('Google sign-in error:', error);
@@ -240,7 +241,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             setLoading(true);
             await AuthService.signInWithFacebook();
             showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}!`);
-            await loadProfile();
+            await loadProfile(true);
             return 'success';
         } catch (error: any) {
             console.error('Facebook sign-in error:', error);
@@ -299,29 +300,27 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         }
     };
 
+    const clearSession = useCallback(() => {
+        setCurrentUser(null);
+        setLoggedInAccount(null);
+        eraseCookie('user');
+        eraseCookie('access_token');
+        eraseCookie('refresh_token');
+        // Clear account related cache
+        invalidateItem('logged-in-user-profile' as any);
+        accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+    }, []);
+
     const logout = async (): Promise<void> => {
         try {
             setLoading(true);
             await AuthService.logout();
-            setCurrentUser(null);
-            setLoggedInAccount(null);
-            eraseCookie('user');
-            eraseCookie('access_token');
-            eraseCookie('refresh_token');
-            // Clear account related cache
-            invalidateItem('logged-in-user-profile' as any);
-            accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+            clearSession();
             router.push('/');
         } catch (error) {
             console.error('Logout error', error);
             // Clear local state anyway on failure
-            setCurrentUser(null);
-            setLoggedInAccount(null);
-            eraseCookie('user');
-            eraseCookie('access_token');
-            eraseCookie('refresh_token');
-            invalidateItem('logged-in-user-profile' as any);
-            accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+            clearSession();
             router.push('/');
         } finally {
             setLoading(false);
@@ -345,7 +344,8 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         notification,
         branding,
         theme,
-        refreshProfile: loadProfile
+        refreshProfile: loadProfile,
+        clearSession
     };
 
     return (

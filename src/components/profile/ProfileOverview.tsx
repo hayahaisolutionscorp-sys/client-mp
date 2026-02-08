@@ -8,19 +8,26 @@ import { IDependent, IVerification } from "@/models"
 import { cn } from "@/lib/utils"
 import { getStatusBadge, getStatusVariant, VerificationStatus } from "@/utils/verification/statusHelpers"
 import { useThemeSettings } from "@/hooks/theme-settings"
+import { AccountQRCode } from "./AccountQRCode"
 
 interface ProfileOverviewProps {
     verificationStatus: VerificationStatus;
     verificationDetails?: IVerification[];
     dependents: IDependent[];
     onTabChange: (tab: string) => void;
+    qrCode?: string;
+    qrCodeId?: string;
+    passengerName?: string;
 }
 
 export default function ProfileOverview({ 
     verificationStatus, 
     verificationDetails, 
     dependents,
-    onTabChange 
+    onTabChange,
+    qrCode,
+    qrCodeId,
+    passengerName
 }: ProfileOverviewProps) {
     const themeSettings = useThemeSettings();
     const primaryColor = themeSettings?.primary || '#2563eb';
@@ -29,7 +36,16 @@ export default function ProfileOverview({
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Account QR Code - Dedicated Banner */}
+                {verificationStatus === 'approved' && qrCode && (
+                    <AccountQRCode 
+                        qrCode={qrCode}
+                        qrCodeId={qrCodeId}
+                        passengerName={passengerName}
+                    />
+                )}
+                
                 {/* Account Verification Summary */}
                 <Card className="hover:shadow-md transition-shadow cursor-pointer group" onClick={() => onTabChange("verification")}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -37,9 +53,7 @@ export default function ProfileOverview({
                             <CardTitle className="text-lg">Account Verification</CardTitle>
                             <CardDescription>Your current identity status</CardDescription>
                         </div>
-                        <Badge 
-                            variant={getStatusVariant(verificationStatus)}
-                        >
+                        <Badge variant={getStatusVariant(verificationStatus)}>
                             {accountStatus.icon}
                             {accountStatus.label}
                         </Badge>
@@ -91,10 +105,8 @@ export default function ProfileOverview({
                                         {dependents.slice(0, 3).map((dep) => (
                                             <div key={dep.id} className="flex items-center justify-between text-sm">
                                                 <span className="font-medium">{dep.first_name} {dep.last_name}</span>
-                                                <Badge 
-                                                    variant={getStatusVariant(dep.verificationStatus || 'unverified')}
-                                                >
-                                                    {getStatusBadge(dep.verificationStatus || 'unverified').label}
+                                                <Badge variant={getStatusVariant(dep.status || 'unverified')}>
+                                                    {getStatusBadge(dep.status || 'unverified').label}
                                                 </Badge>
                                             </div>
                                         ))}

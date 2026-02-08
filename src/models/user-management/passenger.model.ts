@@ -18,7 +18,7 @@ export interface IPassenger {
   nationality: string;
   phone?: string;
   discountType?: keyof typeof DISCOUNT_TYPE;
-  profile_picture_url?: string;
+  profilePictureUrl?: string;
 
   companions?: IPassenger[];
 }

@@ -28,13 +28,13 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
     <>
       {/* User Dropdown Menu */}
       <div className="relative" ref={dropdownRef}>
-        {loggedInAccount?.passenger?.profile_picture_url ? (
+        {loggedInAccount?.passenger?.profilePictureUrl ? (
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center space-x-2 focus:outline-none relative w-8 h-8 rounded-full overflow-hidden border border-gray-200"
           >
             <Image
-              src={loggedInAccount.passenger.profile_picture_url}
+              src={loggedInAccount.passenger.profilePictureUrl}
               alt="Profile"
               fill
               className="object-cover"

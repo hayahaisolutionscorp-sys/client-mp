@@ -67,7 +67,7 @@ export default function DependentCard({
     const [isSaving, setIsSaving] = useState(false);
     const [isCanceling, setIsCanceling] = useState(false);
     
-    const status = (dependent.verificationStatus || dependent.verification?.status || 'unverified') as VerificationStatus;
+    const status = (dependent.status || dependent.verification?.status || 'unverified') as VerificationStatus;
   
     const canRequestVerification = (status === 'unverified' || status === 'rejected' || status === 'expired') 
     

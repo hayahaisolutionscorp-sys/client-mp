@@ -30,7 +30,11 @@ export default function RegisterPage() {
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
   const dateToday = new Date();
-  const { register, signInWithGoogle, signInWithFacebook } = useAuth();
+  const { register, signInWithGoogle, signInWithFacebook, clearSession } = useAuth();
+  
+  useEffect(() => {
+    clearSession();
+  }, [clearSession]);
 
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1)

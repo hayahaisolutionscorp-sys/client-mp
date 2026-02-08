@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
   //   ],
   //
   // },
- 	output: "standalone", 
+ 	// output: "standalone", 
   // Add this for now para ma build ang project remove when good to go
   eslint: {
     ignoreDuringBuilds: true

@@ -11,6 +11,7 @@ import Combobox from "@/components/ui/Combobox"
 import { NATIONALITIES } from "constants/default"
 import { IPassenger } from "@/models"
 import { updatePassenger } from "@/services"
+import { useAuth } from "@/contexts/AuthContexts"
 import { SuccessModal } from "@/components/ui/SuccessModal"
 
 interface PersonalDetailsFormProps {
@@ -20,6 +21,7 @@ interface PersonalDetailsFormProps {
 }
 
 export default function PersonalDetailsForm({ passenger, email, onUpdate }: PersonalDetailsFormProps) {
+    const { refreshProfile } = useAuth();
     const [isSaving, setIsSaving] = useState(false);
     const [formData, setFormData] = useState<Partial<IPassenger>>(passenger || {});
     const [error, setError] = useState<string | null>(null);
@@ -114,6 +116,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
             const updatedPassenger = await updatePassenger(formData);
             if (updatedPassenger) {
                 onUpdate(updatedPassenger);
+                await refreshProfile(true);
                 setShowSuccessModal(true);
             }
         } catch (err: any) {

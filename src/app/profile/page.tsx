@@ -21,11 +21,14 @@ import { IDependent, IVerification, IPassenger } from "@/models"
 import { VerificationStatus } from "@/utils/verification/statusHelpers"
 import { UploadService } from "@/services/upload.service"
 import { updatePassenger } from "@/services"
+import { useThemeSettings } from "@/hooks/theme-settings"
 
 export default function ProfilePage() {
     const router = useRouter();
     const { loggedInAccount, loading, currentUser } = useAuth();
-
+    const themeSettings = useThemeSettings();
+    const primaryColor = themeSettings?.primary || '#2563eb';
+    
     const searchParams = useSearchParams();
     const tabParam = searchParams.get('tab');
 
@@ -40,6 +43,8 @@ export default function ProfilePage() {
         id: string;
         email: string;
         verificationDetails: IVerification[];
+        qrCodeUrl?: string;
+        qrCodeId?: string;
     } | null>(null);
 
     const [dependentToVerify, setDependentToVerify] = useState<IDependent | null>(null);
@@ -63,24 +68,28 @@ export default function ProfilePage() {
 
             const profileData = profileResult.data;
 
+            console.log(profileData);
+            
             setAccount({
                 id: loggedInAccount.id,
                 email: loggedInAccount.email,
-                verificationDetails: profileData.verificationDetails || []
+                verificationDetails: profileData.verificationDetails || [],
+                qrCodeUrl: profileData.passenger?.qrCodeUrl,  
+                qrCodeId: profileData.passenger?.hayahaiId
             });
 
             if (profileData.passenger) {
                 setPassenger(profileData.passenger);
                 // Set initial image preview
-                if (profileData.passenger.profile_picture_url && !imagePreview) {
-                    setImagePreview(profileData.passenger.profile_picture_url);
+                if (profileData.passenger.profilePictureUrl && !imagePreview) {
+                    setImagePreview(profileData.passenger.profilePictureUrl);
                 }
             }
 
             setDependents(dependentsData || []);
 
             if (profileData.verificationDetails && profileData.verificationDetails.length > 0) {
-                setVerificationStatus(profileData.verificationDetails[0].status as VerificationStatus);
+                setVerificationStatus(profileData.verificationDetails[0].status);
             } else {
                 setVerificationStatus('unverified');
             }
@@ -116,11 +125,11 @@ export default function ProfilePage() {
 
     // Update image preview when passenger or currentUser profile picture changes
     useEffect(() => {
-        const initialImage = passenger?.profile_picture_url || currentUser?.profile_picture_url;
+        const initialImage = passenger?.profilePictureUrl || currentUser?.profile_picture_url;
         if (!imagePreview && initialImage) {
             setImagePreview(initialImage);
         }
-    }, [passenger?.profile_picture_url, currentUser?.profile_picture_url]);
+    }, [passenger?.profilePictureUrl, currentUser?.profile_picture_url]);
 
     // Cleanup blob URLs
     useEffect(() => {
@@ -161,11 +170,6 @@ export default function ProfilePage() {
         setDependentToVerify(null);
     };
 
-    const handleRequestVerificationForDependent = (dependent: IDependent) => {
-        setDependentToVerify(dependent);
-        setShowVerificationForm(true);
-    };
-
     // Profile image handlers
     const handleImageClick = () => {
         fileInputRef.current?.click();
@@ -195,7 +199,7 @@ export default function ProfilePage() {
                 URL.revokeObjectURL(imagePreview);
             }
 
-            await updatePassenger({ profile_picture_url: upload.url });
+            await updatePassenger({ profilePictureUrl: upload.url });
             setImagePreview(upload.url);
             fetchProfileData();
         } catch (error: any) {
@@ -244,7 +248,8 @@ export default function ProfilePage() {
                         <TabsTrigger
                             key={tab}
                             value={tab}
-                            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-8 py-3 whitespace-nowrap capitalize"
+                            style={activeTab === tab ? { borderColor: primaryColor } : {}}
+                            className="rounded-none border-b-2 border-transparent data-[state=active]:bg-transparent px-8 py-3 whitespace-nowrap capitalize"
                         >
                             {tab.replace('-', ' ')}
                         </TabsTrigger>
@@ -257,6 +262,9 @@ export default function ProfilePage() {
                         verificationDetails={account?.verificationDetails}
                         dependents={dependents}
                         onTabChange={setActiveTab}
+                        qrCode={account?.qrCodeUrl}
+                        qrCodeId={account?.qrCodeId}
+                        passengerName={passenger ? `${passenger.firstName} ${passenger.lastName}` : currentUser?.name}
                     />
                 </TabsContent>
 

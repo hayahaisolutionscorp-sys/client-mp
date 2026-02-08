@@ -32,7 +32,6 @@ const ScheduleAndFaresPage = async () => {
   const theme = await getThemeSettings();
   const primaryColor = theme?.primaryColor || '#0060df';
   const accentColor = theme?.accent || '#23abff';
-  console.log(primaryColor, accentColor)
 
   return (
     <div

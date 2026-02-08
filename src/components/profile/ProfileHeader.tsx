@@ -111,6 +111,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                                 <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
                                     <span className="font-mono text-sm">{email}</span>
                                 </div>
+                                <div className="flex items-center justify-center md:justify-start gap-2 text-sm text-muted-foreground">
+                                    <span>ID: {accountId ?? '...'}</span>
+                                    <Button variant="ghost" size="icon" className="h-4 w-4" onClick={onCopyClick}>
+                                        {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                                    </Button>
+                                </div>
                             </div>
                             <Button 
                                 variant="outline" 
@@ -119,12 +125,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                             >
                                 <LogOut className="h-4 w-4" />
                                 Logout
-                            </Button>
-                        </div>
-                        <div className="flex items-center justify-center md:justify-start gap-2 text-sm text-muted-foreground">
-                            <span>ID: {accountId ?? '...'}</span>
-                            <Button variant="ghost" size="icon" className="h-4 w-4" onClick={onCopyClick}>
-                                {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                             </Button>
                         </div>
                     </div>

@@ -11,17 +11,13 @@ import {
     DialogTitle,
 } from "../ui/Dialog"
 import { Button } from "../ui/Button"
-import { LogOut } from "lucide-react"
-import { useAuth } from "@/contexts/AuthContexts"
 
 export function SessionExpiredModal() {
     const [isOpen, setIsOpen] = useState(false)
     const router = useRouter()
-    const { logout } = useAuth();
 
     useEffect(() => {
         const handleSessionExpired = () => {
-            logout();
             setIsOpen(true)
         }
 
@@ -31,7 +27,7 @@ export function SessionExpiredModal() {
 
     const handleLogin = () => {
         setIsOpen(false)
-        router.replace('/login')
+        router.replace('/')
     }
 
     return (
@@ -47,7 +43,6 @@ export function SessionExpiredModal() {
             <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-xl">
-                        <LogOut className="h-6 w-6 text-red-500" />
                         Session Expired
                     </DialogTitle>
                     <DialogDescription className="text-base pt-2">
