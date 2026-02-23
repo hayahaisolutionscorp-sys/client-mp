@@ -1,6 +1,6 @@
 import axios from '../core/axios';
 import { PROFILES_API } from 'constants/api';
-import { IDependent, CreateDependentDto, UpdateDependentDto, RequestVerificationDto, IVerification } from '@/models';
+import { IDependent, CreateDependentDto, UpdateDependentDto, RequestVerificationDto, IVerification, IVehicle } from '@/models';
 
 // ==================== DEPENDENTS ====================
 
@@ -119,6 +119,117 @@ export async function cancelVerificationRequest(verificationId: string): Promise
   } catch (error: any) {
     if (typeof window === 'undefined') {
       console.error('Error canceling verification request:', error);
+    }
+    throw error;
+  }
+}
+
+// ==================== VEHICLES ====================
+
+export async function createVehicles(
+  userId: string,
+  vehicles: any[] // Using any for now to avoid rigid DTO constraints if not yet defined
+): Promise<IVehicle[] | undefined> {
+  try {
+    const { data } = await axios.post(`${PROFILES_API}/${userId}/vehicles`, vehicles);
+    return data.data;
+  } catch (error: any) {
+    if (typeof window === 'undefined') {
+      console.error('Error creating vehicles:', error);
+    }
+    throw error;
+  }
+}
+
+export async function getVehicles(userId: string): Promise<IVehicle[]> {
+  try {
+    const { data } = await axios.get(`${PROFILES_API}/${userId}/vehicles`);
+    return data.data || [];
+  } catch (error: any) {
+    if (typeof window === 'undefined') {
+      console.error('Error fetching vehicles:', error);
+    }
+    return [];
+  }
+}
+
+export async function updateVehicle(
+  id: string,
+  updateData: any
+): Promise<IVehicle | undefined> {
+  try {
+    const { data } = await axios.patch(`${PROFILES_API}/vehicles/${id}`, updateData);
+    return data.data;
+  } catch (error: any) {
+    if (typeof window === 'undefined') {
+      console.error('Error updating vehicle:', error);
+    }
+    throw error;
+  }
+}
+
+export async function deleteVehicle(id: string): Promise<void> {
+  try {
+    await axios.delete(`${PROFILES_API}/vehicles/${id}`);
+  } catch (error: any) {
+    if (typeof window === 'undefined') {
+      console.error('Error deleting vehicle:', error);
+    }
+    throw error;
+  }
+}
+
+export async function getVehiclesWithVerification(userId: string): Promise<IVehicle[]> {
+  try {
+    const { data } = await axios.get(`${PROFILES_API}/${userId}/vehicles-with-verifications`);
+    const vehicles = data.data;
+    const finalVehicles = vehicles.map((v: any) => {
+      return {
+        ...v,
+        vehicle_model: {
+          make: v.make,
+          model: v.model,
+          vehicle_type_id: v.vehicle_type_id,
+          vehicle_type: {
+            id: v.vehicle_type_id,
+            name: v.type,
+            description: v.description,
+            wheel_count: v.wheel_count
+          }
+        }
+      }
+    })
+
+    return finalVehicles;
+  } catch (error: any) {
+    if (typeof window === 'undefined') {
+      console.error('Error fetching vehicles with verification:', error);
+    }
+    throw error;
+  }
+}
+
+export async function requestVehicleVerification(
+  vehicle_id: string,
+  verificationData: {
+    certificate_of_registration_url: string;
+    official_receipt_url: string;
+    front_vehicle_url?: string;
+    rear_vehicle_url?: string;
+    left_vehicle_url?: string;
+    right_vehicle_url?: string;
+  }
+): Promise<any> {
+  try {
+    const { data } = await axios.post(
+      `${PROFILES_API}/verifications/vehicles/${vehicle_id}`,
+      verificationData
+    );
+    console.log(`${PROFILES_API}/verifications/vehicles/${vehicle_id}`)
+    return data.data;
+  } catch (error: any) {
+    if (typeof window === 'undefined') {
+      console.error('Error submitting vehicle verification request:', error);
     }
     throw error;
   }

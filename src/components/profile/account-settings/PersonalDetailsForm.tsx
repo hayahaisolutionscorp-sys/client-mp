@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { parseISO, isValid } from "date-fns"
+import { parseISO, isValid, differenceInYears } from "date-fns"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import BirthDatePicker from "@/components/ui/BirthDatePicker"
 import Combobox from "@/components/ui/Combobox"
 import { NATIONALITIES } from "constants/default"
-import { IPassenger } from "@/models"
+import { IPassenger, IPassengerType } from "@/models"
 import { updatePassenger } from "@/services"
+import { getPassengerTypes } from "@/services/user/passenger-type.service"
 import { useAuth } from "@/contexts/AuthContexts"
 import { SuccessModal } from "@/components/ui/SuccessModal"
+import { Loader2 } from "lucide-react"
 
 interface PersonalDetailsFormProps {
     passenger?: IPassenger;
@@ -26,6 +28,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
     const [formData, setFormData] = useState<Partial<IPassenger>>(passenger || {});
     const [error, setError] = useState<string | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [passengerTypes, setPassengerTypes] = useState<IPassengerType[]>([]);
 
     useEffect(() => {
         if (passenger) {
@@ -39,6 +42,12 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
             });
         }
     }, [passenger]);
+
+    useEffect(() => {
+        getPassengerTypes().then(types => {
+            if (types) setPassengerTypes(types);
+        });
+    }, []);
 
     const isFormIncomplete = useMemo(() => {
         return !formData.firstName?.trim() || 
@@ -55,8 +64,8 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
         if (!passenger) return true;
         
         const fieldsToCompare: (keyof IPassenger)[] = [
-            'firstName', 'lastName', 'sex', 'birthdayIso', 
-            'nationality', 'phone', 'address'
+            'firstName', 'middleName', 'lastName', 'suffixName', 'sex', 'birthdayIso', 
+            'nationality', 'phone', 'address', 'passengerType', 'passengerCode'
         ];
 
         return fieldsToCompare.every(field => {
@@ -71,6 +80,34 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
             ...prev,
             [field]: value
         }));
+    };
+
+    const handlePassengerTypeChange = (typeId: string) => {
+        const selected = passengerTypes.find(t => String(t.id) === typeId);
+        if (selected) {
+            setFormData(prev => ({
+                ...prev,
+                passengerType: selected.name,
+                passengerCode: selected.code,
+            }));
+        }
+    };
+
+    const autoSelectByBirthday = (birthdayIso: string) => {
+        if (!passengerTypes.length || !birthdayIso) return;
+        const age = differenceInYears(new Date(), parseISO(birthdayIso));
+        const match = passengerTypes.find(t => {
+            const minOk = t.age_min === null || age >= t.age_min;
+            const maxOk = t.age_max === null || t.age_max >= 999 || age <= t.age_max;
+            return minOk && maxOk;
+        });
+        if (match) {
+            setFormData(prev => ({
+                ...prev,
+                passengerType: match.name,
+                passengerCode: match.code,
+            }));
+        }
     };
 
     const handlePhoneChange = (value: string) => {
@@ -110,6 +147,22 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
             }
         }
 
+        // Age range validation against selected passenger type
+        if (formData.passengerType && formData.birthdayIso) {
+            const selected = passengerTypes.find(t => t.name === formData.passengerType);
+            if (selected) {
+                const age = differenceInYears(new Date(), parseISO(formData.birthdayIso));
+                if (selected.age_min !== null && age < selected.age_min) {
+                    setError(`Your age (${age}) is below the minimum of ${selected.age_min} for the "${selected.name}" passenger type.`);
+                    return;
+                }
+                if (selected.age_max !== null && age > selected.age_max) {
+                    setError(`Your age (${age}) exceeds the maximum of ${selected.age_max} for the "${selected.name}" passenger type.`);
+                    return;
+                }
+            }
+        }
+
         setIsSaving(true);
         try {
             setError(null);
@@ -128,7 +181,15 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
     };
 
     return (
-        <Card className="border-none shadow-none bg-transparent">
+        <Card className="border-none shadow-none bg-transparent relative">
+            {isSaving && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 rounded-xl">
+                    <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <span className="text-sm font-medium text-slate-600">Saving changes...</span>
+                    </div>
+                </div>
+            )}
             <CardHeader className="flex flex-row items-center justify-between space-y-0 px-0 pb-7">
                 <div className="space-y-1">
                     <CardTitle>Personal Details</CardTitle>
@@ -152,11 +213,27 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             />
                         </div>
                         <div className="space-y-2">
+                            <label className="text-sm font-medium">Middle Name</label>
+                            <Input
+                                value={formData.middleName || ''}
+                                onChange={(e) => handleInputChange('middleName', e.target.value)}
+                                placeholder="Optional"
+                            />
+                        </div>
+                        <div className="space-y-2">
                             <label className="text-sm font-medium">Last Name <span className="text-red-500">*</span></label>
                             <Input
                                 value={formData.lastName || ''}
                                 onChange={(e) => handleInputChange('lastName', e.target.value)}
                                 required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">suffix</label>
+                            <Input
+                                value={formData.suffixName || ''}
+                                onChange={(e) => handleInputChange('suffixName', e.target.value)}
+                                placeholder="Jr., Sr., etc. (Optional)"
                             />
                         </div>
                         
@@ -204,7 +281,9 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                                     const current = formData.birthdayIso ? parseISO(formData.birthdayIso) : undefined;
                                     const newDate = typeof dateAction === 'function' ? dateAction(current) : dateAction;
                                     if (newDate && isValid(newDate)) {
-                                        handleInputChange('birthdayIso', newDate.toISOString());
+                                        const iso = newDate.toISOString();
+                                        handleInputChange('birthdayIso', iso);
+                                        autoSelectByBirthday(iso);
                                     }
                                 }}
                                 validationErrors={{}}
@@ -219,6 +298,33 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                                 onChange={(value) => handleInputChange('nationality', value)}
                             />
                         </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Passenger Type</label>
+                            <Select
+                                value={passengerTypes.find(t => t.name === formData.passengerType) ? String(passengerTypes.find(t => t.name === formData.passengerType)!.id) : ''}
+                                onValueChange={handlePassengerTypeChange}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder={passengerTypes.length === 0 ? 'Loading...' : 'Select type'} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {passengerTypes.map(t => {
+                                        const noMax = t.age_max === null || t.age_max >= 999;
+                                        const hint = t.age_min !== null && noMax
+                                            ? `${t.age_min}+ yrs`
+                                            : t.age_min !== null && t.age_max !== null
+                                                ? `${t.age_min}–${t.age_max} yrs`
+                                                : null;
+                                        return (
+                                            <SelectItem key={t.id} value={String(t.id)}>
+                                                {t.name}
+                                                {hint && <span className="text-xs text-slate-400 ml-1">({hint})</span>}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="md:col-span-2 space-y-2">
                             <label className="text-sm font-medium">Address <span className="text-red-500">*</span></label>
                             <Input
@@ -230,7 +336,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                     </div>
                     <div className="flex justify-end pt-4">
                         <Button type="submit" disabled={isSaving || hasNoChanges || isFormIncomplete}>
-                            {isSaving ? 'Saving...' : 'Save Changes'}
+                            {isSaving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</> : 'Save Changes'}
                         </Button>
                     </div>
                 </form>

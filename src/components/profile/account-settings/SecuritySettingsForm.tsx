@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { SuccessModal } from "@/components/ui/SuccessModal"
 import { AuthService } from "@/services/auth.service"
 import { useAuth } from "@/contexts/AuthContexts"
+import { PasswordStrengthTracker } from "@/components/auth/PasswordStrengthTracker";
 
 export default function SecuritySettingsForm() {
     const { loggedInAccount, refreshProfile } = useAuth();
@@ -131,6 +132,7 @@ export default function SecuritySettingsForm() {
                                 {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                         </div>
+                        <PasswordStrengthTracker password={passwordData.newPassword} />
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -146,6 +148,7 @@ export default function SecuritySettingsForm() {
                             <Input
                                 type={showConfirmPassword ? "text" : "password"}
                                 required
+                                disabled={!passwordData.newPassword}
                                 className={cn(isMatch && "border-green-500 focus-visible:ring-green-500", "pr-10")}
                                 value={passwordData.confirmPassword}
                                 onChange={(e) => updatePasswordData('confirmPassword', e.target.value)}

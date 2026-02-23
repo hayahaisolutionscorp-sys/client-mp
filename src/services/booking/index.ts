@@ -4,3 +4,4 @@ export * from './payment.service';
 export * from './rate-table.service';
 export * from './rate-table-row.service';
 export * from './vehicle-type.service';
+export * from './vehicle-model.service';

@@ -59,9 +59,12 @@ export const VerificationHistory: React.FC<VerificationHistoryProps> = ({
                                     {statusConfig.label}
                                 </Badge>
                             </div>
-                            {v.status === 'rejected' && v.review_notes && (
-                                <div className="mt-2 text-[11px] text-red-600 bg-red-50/50 p-2 rounded-lg border border-red-100/50">
-                                    <p className="font-semibold mb-0.5">Rejection Reason:</p>
+                            {(v.status === 'rejected' || v.status === 'expired') && v.review_notes && (
+                                <div className={cn(
+                                    "mt-2 text-[11px] p-2 rounded-lg border",
+                                    v.status === 'rejected' ? "text-red-600 bg-red-50/50 border-red-100/50" : "text-gray-600 bg-gray-50/50 border-gray-100/50"
+                                )}>
+                                    <p className="font-semibold mb-0.5">{v.status === 'rejected' ? "Rejection Reason:" : "Notes:"}</p>
                                     <p className="leading-relaxed">{v.review_notes}</p>
                                 </div>
                             )}

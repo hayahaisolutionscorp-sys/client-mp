@@ -3,16 +3,18 @@
 import { useEffect, useState, FormEvent } from "react";
 import Link from "next/link"
 import Image from "next/image"
-import { EyeIcon, EyeOffIcon, ArrowLeft } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useRouter } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
-import { ForgotPasswordModal } from "@/components/auth/ForgotPassword";
 import { AuthSidebar } from "@/components/auth/AuthSidebar";
-import { LoginForm } from "@/models";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
+import { AuthService } from "@/services/auth.service";
+
+const STEP_KEY = 'login-step';
+const TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,55 +22,67 @@ export default function LoginPage() {
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
 
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
+  const { clearSession, signInWithGoogle, signInWithFacebook } = useAuth();
+  const [loading, setLoading] = useState(false);
 
-  // Import auth context functions
-  const {
-    signIn,
-    signInWithGoogle,
-    signInWithFacebook,
-    clearSession
-  } = useAuth();
+  const [email, setEmail] = useState("");
+  const [emailValidation, setEmailValidation] = useState<{
+    isValid: boolean;
+    exists: boolean | null;
+    checking: boolean;
+  }>({ isValid: false, exists: null, checking: false });
 
   useEffect(() => {
     clearSession();
+    // Clear any stale step data
+    sessionStorage.removeItem(STEP_KEY);
   }, [clearSession]);
 
-  const [error, setError] = useState<string | null>(null);
+  // Email validation and lookup
+  useEffect(() => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isEmailValid = emailRegex.test(email);
+    setEmailValidation(prev => ({ ...prev, isValid: isEmailValid }));
 
-
-  // Handle email/password login
-  const handleLogin = async (values: LoginForm) => {
-    const { email, password } = values;
-    setLoading(true);
-    setError(null);
-
-    try {
-      await signIn(email, password);
-      router.push('/');
-    } catch (err: any) {
-      console.error(err);
-      // Extract error message similar to how AuthContext does it, or rely on what's thrown
-      const msg = err.response?.data?.message || err.message || "Invalid email or password";
-      setError(msg);
-    } finally {
-      setLoading(false);
+    if (!isEmailValid || !email) {
+      setEmailValidation(prev => ({ ...prev, exists: null }));
+      return;
     }
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        setEmailValidation(prev => ({ ...prev, checking: true }));
+        const response = await AuthService.lookupEmail(email);
+        setEmailValidation(prev => ({
+          ...prev,
+          exists: response.data.exists,
+          checking: false
+        }));
+      } catch {
+        setEmailValidation(prev => ({ ...prev, checking: false }));
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [email]);
+
+  const handleContinue = (e: FormEvent) => {
+    e.preventDefault();
+    if (!email || !emailValidation.isValid || emailValidation.exists === false) return;
+
+    // Store email in sessionStorage with a TTL — never in the URL
+    sessionStorage.setItem(STEP_KEY, JSON.stringify({ email, ts: Date.now() }));
+    router.push('/login/verify');
   };
 
-  // Handle Google SSO login
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
       await signInWithGoogle();
       router.push('/');
     } catch (error: unknown) {
-      if (error instanceof Error && 'code' in error && error.code === 'auth/popup-closed-by-user') {
-        console.log('Google sign-in cancelled by user');
+      if (error instanceof Error && 'code' in error && (error as any).code === 'auth/popup-closed-by-user') {
+        console.log('Google sign-in cancelled');
       } else {
         console.error('Google sign-in error:', error);
       }
@@ -77,10 +91,9 @@ export default function LoginPage() {
     }
   };
 
-  // Handle Facebook SSO login
   const handleFacebookLogin = async () => {
     try {
-      setLoading(false);
+      setLoading(true);
       await signInWithFacebook();
       router.push('/');
     } catch (error: unknown) {
@@ -112,17 +125,10 @@ export default function LoginPage() {
             />
           </div>
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">Enter your Email and Password to Continue</p>
+            <p className="text-sm text-muted-foreground">Enter your Email to Continue</p>
           </div>
-          {error && (
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm text-center">
-              {error}
-            </div>
-          )}
-          <form className="space-y-4" onSubmit={(e: FormEvent) => {
-            e.preventDefault();
-            handleLogin({ email, password });
-          }}>
+
+          <form className="space-y-4" onSubmit={handleContinue}>
             <div className="space-y-2">
               <div className="text-sm font-medium">Email</div>
               <Input
@@ -132,61 +138,33 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoFocus
                 className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-400"
               />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-medium">Password</div>
-                <button
-                  type="button"
-                  onClick={() => setShowForgotPassword(true)}
-                  className="text-xs hover:underline"
-                  style={{ color: primaryColor }}
-                >
-                  Forgot password?
-                </button>
-                <ForgotPasswordModal
-                  isOpen={showForgotPassword}
-                  onClose={() => setShowForgotPassword(false)}
-                  email={email}
-                />
-              </div>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-400"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label="Toggle password visibility"
-                >
-                  {showPassword ? (
-                    <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <EyeIcon className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-              </div>
+              {email && (
+                <div className="flex items-center gap-1 text-xs mt-1">
+                  {emailValidation.checking ? (
+                    <span className="text-gray-500">Checking...</span>
+                  ) : !emailValidation.isValid ? (
+                    <span className="text-red-500">✗ Invalid email format</span>
+                  ) : emailValidation.exists === false ? (
+                    <span className="text-red-500">✗ Email not found</span>
+                  ) : emailValidation.exists === true ? (
+                    <span className="text-green-600">✓ Valid email</span>
+                  ) : null}
+                </div>
+              )}
             </div>
             <Button
               type="submit"
               className="w-full text-white"
               style={{ backgroundColor: primaryColor }}
-              disabled={loading}
+              disabled={!emailValidation.isValid || emailValidation.exists === false || emailValidation.checking}
             >
-              {loading ? "Signing in..." : "Sign In"}
+              Continue
             </Button>
           </form>
+
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
@@ -199,6 +177,7 @@ export default function LoginPage() {
             <Button
               onClick={handleGoogleLogin}
               variant="outline"
+              disabled={loading}
               className="w-full border-[var(--theme-primary)] text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/10"
             >
               <Image src="/assets/icons/google_logo.svg" alt="Google" width={20} height={20} className="mr-2" />
@@ -207,6 +186,7 @@ export default function LoginPage() {
             <Button
               onClick={handleFacebookLogin}
               variant="outline"
+              disabled={loading}
               className="w-full border-[var(--theme-primary)] text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/10"
             >
               <Image src="/assets/icons/facebook_logo.svg" alt="Facebook" width={20} height={20} className="mr-2" />
@@ -222,7 +202,7 @@ export default function LoginPage() {
             </p>
           </div>
           <p className="text-center text-sm text-muted-foreground">
-            By signing up, you agree to our{" "}
+            By signing in, you agree to our{" "}
             <Link href="/terms" className="hover:underline" style={{ color: primaryColor }}>
               Terms of Use
             </Link>{" "}
@@ -237,4 +217,3 @@ export default function LoginPage() {
     </main>
   )
 }
-

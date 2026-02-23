@@ -4,6 +4,7 @@ export * from './booking/booking-trip.model';
 export * from './booking/booking-trip-passenger.model';
 export * from './booking/booking-trip-vehicle.model';
 export * from './booking/booking-payment-item.model';
+export * from './booking/passenger-type.model';
 
 // Ferry Operations & Infrastructure
 export * from './shipping-line/ship.model';

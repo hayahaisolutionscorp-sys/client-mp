@@ -11,13 +11,17 @@ export interface IPassenger {
   buddy?: IPassenger;
 
   firstName: string;
+  middleName?: string;
   lastName: string;
+  suffixName?: string;
   sex: keyof typeof SEX;
   birthdayIso: string;
   address: string;
   nationality: string;
   phone?: string;
   discountType?: keyof typeof DISCOUNT_TYPE;
+  passengerType?: string;
+  passengerCode?: string;
   profilePictureUrl?: string;
 
   companions?: IPassenger[];

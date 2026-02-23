@@ -7,6 +7,9 @@ import { Calendar } from "@/components/ui/Calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
 import { isValid, format, subYears } from "date-fns";
 
+import { useThemeSettings } from "@/hooks/theme-settings";
+import { hexToRgb } from "helpers/theme.helpers";
+
 const BirthDatePicker = ({
   date,
   setDate,
@@ -18,6 +21,7 @@ const BirthDatePicker = ({
   validationErrors: Record<string, string>;
   allowMinors?: boolean;
   }) => {
+  const themeSettings = useThemeSettings();
   const displayDate = date && isValid(date) ? format(date, "yyyy-MM-dd") : "Select Date";
   const eighteenYearsAgo = subYears(new Date(), 18);
   const maxDate = allowMinors ? new Date() : eighteenYearsAgo;
@@ -28,10 +32,15 @@ const BirthDatePicker = ({
         <button
           type="button"
           className={cn(
-            "flex px-3 py-2 rounded-md border border-input bg-background items-center justify-between w-full h-10 text-sm",
+            "flex px-3 py-2 rounded-md border border-input bg-background items-center justify-between w-full h-10 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)]",
             (!date || !isValid(date)) ? "text-muted-foreground" : "text-customText",
             validationErrors.birthday ? "border-red-500" : ""
           )}
+          style={
+            {
+              "--primary-color": hexToRgb(themeSettings?.primary || "#8C1F21"),
+            } as React.CSSProperties
+          }
         >
           <span>{displayDate}</span>
 

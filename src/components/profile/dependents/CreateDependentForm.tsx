@@ -6,14 +6,15 @@ import { Button } from "../../ui/Button"
 import { Input } from "../../ui/Input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/Select"
 import { X, Loader2 } from "lucide-react"
-import { IDependent, CreateDependentDto } from "@/models"
+import { IDependent, IPassengerType, CreateDependentDto } from "@/models"
 import BirthDatePicker from "../../ui/BirthDatePicker"
-import { parseISO, isValid } from "date-fns"
+import { parseISO, isValid, differenceInYears } from "date-fns"
 import Combobox from "../../ui/Combobox"
 import { NATIONALITIES } from "constants/default"
 import { Checkbox } from "../../ui/Checkbox"
 import { useAuth } from "@/contexts/AuthContexts"
 import { createDependents, updateDependent } from "@/services"
+import { getPassengerTypes } from "@/services/user/passenger-type.service"
 
 interface DependentFormProps {
     userId: string;
@@ -23,7 +24,6 @@ interface DependentFormProps {
     isEditing?: boolean;
 }
 
-const categoryOptions = ["Regular", "Student", "Senior", "PWD", "Infant", "Child"];
 const relationshipOptions = [
     "Spouse",
     "Son",
@@ -47,10 +47,19 @@ export default function DependentForm({
     const { loggedInAccount } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [useAccountContact, setUseAccountContact] = useState(false);
+    const [passengerTypes, setPassengerTypes] = useState<IPassengerType[]>([]);
+
+    useEffect(() => {
+        getPassengerTypes().then(types => {
+            if (types) setPassengerTypes(types);
+        });
+    }, []);
     
     const [formData, setFormData] = useState<CreateDependentDto>({
         first_name: "",
+        middle_name: "",
         last_name: "",
+        suffix_name: "",
         birthday: "",
         sex: "Female",
         relationship: "Relative",
@@ -58,7 +67,8 @@ export default function DependentForm({
         address: "",
         phone: "",
         email: "",
-        category: "Regular",
+        category: "",
+        passenger_code: "",
     });
 
     const [selectedRelationship, setSelectedRelationship] = useState("Relative");
@@ -69,8 +79,10 @@ export default function DependentForm({
     useEffect(() => {
         if (dependent) {
             // 1. Prepare all values first
-            const rawCategory = (dependent.category || "Regular").toString().trim().toLowerCase();
-            const validCategory = categoryOptions.find(c => c.toLowerCase() === rawCategory) || "Regular";
+            const rawCategory = (dependent.category || "").toString().trim();
+            // Match by name (case-insensitive), fall back to raw value
+            const matchedType = passengerTypes.find(t => t.name.toLowerCase() === rawCategory.toLowerCase());
+            const validCategory = matchedType ? matchedType.name : (passengerTypes[0]?.name || rawCategory);
 
             const rawRel = (dependent.relationship || "Son").toString().trim();
             const foundRel = relationshipOptions.find(opt => opt.toLowerCase() === rawRel.toLowerCase());
@@ -86,7 +98,9 @@ export default function DependentForm({
 
             const data: CreateDependentDto = {
                 first_name: dependent.first_name || "",
+                middle_name: dependent.middle_name || "",
                 last_name: dependent.last_name || "",
+                suffix_name: dependent.suffix_name || "",
                 birthday: dependent.birthday ? dependent.birthday.split('T')[0] : "",
                 sex: dependent.sex || "Female",
                 relationship: initialRel === "Other" ? initialCustomRel : initialRel,
@@ -99,6 +113,7 @@ export default function DependentForm({
                         : '',
                 email: dependent.email || "",
                 category: validCategory,
+                passenger_code: matchedType?.code || ""
             };
 
             // 2. Apply all updates together
@@ -150,6 +165,19 @@ export default function DependentForm({
         handleChange("relationship", value);
     };
 
+    const autoSelectByBirthday = (birthdayIso: string) => {
+        if (!passengerTypes.length || !birthdayIso) return;
+        const age = differenceInYears(new Date(), parseISO(birthdayIso));
+        const match = passengerTypes.find(t => {
+            const minOk = t.age_min === null || age >= t.age_min;
+            const maxOk = t.age_max === null || t.age_max >= 999 || age <= t.age_max;
+            return minOk && maxOk;
+        });
+        if (match) {
+            setFormData(prev => ({ ...prev, category: match.name, passenger_code: match.code }));
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
@@ -160,13 +188,34 @@ export default function DependentForm({
             return;
         }
 
+        const finalForm = {
+            ...formData,
+            passenger_code: passengerTypes.find(t => t.name === formData.category)?.code || ""
+        }
+
+        // Age range validation against selected passenger type
+        if (formData.category && formData.birthday) {
+            const selected = passengerTypes.find(t => t.name === formData.category);
+            if (selected) {
+                const age = differenceInYears(new Date(), parseISO(formData.birthday));
+                if (selected.age_min !== null && age < selected.age_min) {
+                    setError(`Age (${age}) is below the minimum of ${selected.age_min} for the "${selected.name}" category.`);
+                    return;
+                }
+                if (selected.age_max !== null && age > selected.age_max) {
+                    setError(`Age (${age}) exceeds the maximum of ${selected.age_max} for the "${selected.name}" category.`);
+                    return;
+                }
+            }
+        }
+
         setIsSubmitting(true);
         try {
             if (isEditing && dependent) {
-                const updated = await updateDependent(dependent.id, formData);
+                const updated = await updateDependent(dependent.id, finalForm);
                 if (updated) onSuccess(updated);
             } else {
-                const created = await createDependents(userId, [formData]);
+                const created = await createDependents(userId, [finalForm]);
                 if (created && created.length > 0) onSuccess(created[0]);
             }
         } catch (err: any) {
@@ -178,7 +227,9 @@ export default function DependentForm({
 
     const validationChecks = {
         first_name: Boolean(formData.first_name?.trim()),
+        middle_name: true, // Optional
         last_name: Boolean(formData.last_name?.trim()),
+        suffix_name: true, // Optional
         birthday: Boolean(formData.birthday),
         sex: Boolean(formData.sex),
         relationship: Boolean(selectedRelationship === "Other" ? customRelationship?.trim() : selectedRelationship),
@@ -198,26 +249,44 @@ export default function DependentForm({
     
 
     return (
-        <div className="bg-white">
-            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-20">
+        <div className="bg-white relative">
+            {isSubmitting && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/80 rounded-xl">
+                    <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <span className="text-sm font-medium text-slate-600">
+                            {isEditing ? 'Updating dependent...' : 'Saving dependent...'}
+                        </span>
+                    </div>
+                </div>
+            )}
+            <div className="p-6 py-3 border-b flex justify-between items-center sticky top-0 bg-white z-20">
                 <div>
                     <h2 className="text-xl font-semibold text-slate-900">{isEditing ? "Edit Dependent" : "Add Dependent"}</h2>
-                    <p className="text-sm text-slate-500 mt-1">{isEditing ? "Update the info." : "Add a traveler."}</p>
+                    <p className="text-sm text-slate-500 mt-1">{isEditing ? "Update the info." : "Add a companion."}</p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={onCancel} className="h-10 w-10 !text-black"><X className="h-6 w-6" /></Button>
+                <Button variant="ghost" size="icon" onClick={onCancel} disabled={isSubmitting} className="h-10 w-10 !text-black"><X className="h-6 w-6" /></Button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-4 space-y-2">
                 {error && <div className="p-4 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-2">
                         <label className="text-sm font-medium">First Name *</label>
                         <Input value={formData.first_name} onChange={(e) => handleChange("first_name", e.target.value)} required />
                     </div>
                     <div className="space-y-2">
+                        <label className="text-sm font-medium">Middle Name</label>
+                        <Input value={formData.middle_name} onChange={(e) => handleChange("middle_name", e.target.value)} placeholder="Optional" />
+                    </div>
+                    <div className="space-y-2">
                         <label className="text-sm font-medium">Last Name *</label>
                         <Input value={formData.last_name} onChange={(e) => handleChange("last_name", e.target.value)} required />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">suffixName</label>
+                        <Input value={formData.suffix_name} onChange={(e) => handleChange("suffix_name", e.target.value)} placeholder="Jr., Sr., etc. (Optional)" />
                     </div>
                 </div>
 
@@ -230,7 +299,9 @@ export default function DependentForm({
                                     const current = formData.birthday ? parseISO(formData.birthday) : undefined;
                                     const newDate = typeof dateAction === 'function' ? dateAction(current) : dateAction;
                                     if (newDate && isValid(newDate)) {
-                                        handleChange('birthday', newDate.toISOString());
+                                        const iso = newDate.toISOString();
+                                        handleChange('birthday', iso);
+                                        autoSelectByBirthday(iso);
                                     }
                                 }}
                             validationErrors={{}}
@@ -289,9 +360,22 @@ export default function DependentForm({
                                 handleChange("category", v);
                             }}
                         >
-                            <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                            <SelectTrigger><SelectValue placeholder={passengerTypes.length === 0 ? 'Loading...' : 'Select type'} /></SelectTrigger>
                             <SelectContent>
-                                {categoryOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                                {passengerTypes.map(t => {
+                                    const noMax = t.age_max === null || t.age_max >= 999;
+                                    const hint = t.age_min !== null && noMax
+                                        ? `${t.age_min}+ yrs`
+                                        : t.age_min !== null && t.age_max !== null
+                                            ? `${t.age_min}–${t.age_max} yrs`
+                                            : null;
+                                    return (
+                                        <SelectItem key={t.id} value={t.name}>
+                                            {t.name}
+                                            {hint && <span className="text-xs text-slate-400 ml-1">({hint})</span>}
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>
@@ -321,9 +405,12 @@ export default function DependentForm({
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4 border-t">
-                    <button type="button" onClick={onCancel} className="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
+                    <button type="button" onClick={onCancel} disabled={isSubmitting} className="px-4 py-2 border rounded hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">Cancel</button>
                     <Button type="submit" disabled={!isFormValid || (isEditing && !isDirty) || isSubmitting}>
-                        {isSubmitting ? "Saving..." : (isEditing ? "Update Dependent" : "Save Dependent")}
+                        {isSubmitting
+                            ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{isEditing ? 'Updating...' : 'Saving...'}</>
+                            : (isEditing ? 'Update Dependent' : 'Save Dependent')
+                        }
                     </Button>
                 </div>
             </form>

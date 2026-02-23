@@ -6,33 +6,28 @@ import axios from '@/services/core/axios';
 import vehicleTypesData from '@/data/vehicle-types.json';
 
 export async function getVehicleTypes(): Promise<IVehicleType[] | undefined> {
-  // const cached = fetchItem<IVehicleType[]>('vehicle-types');
-  // if (cached) return cached;
-  //
-  // try {
-  //   const { data } = await axios.get(VEHICLE_TYPES_API);
-  //   cacheItem('vehicle-types', data);
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return undefined;
-  // }
+  const cached = fetchItem<IVehicleType[]>('vehicle-types');
+  if (cached) return cached;
 
-  await new Promise(resolve => setTimeout(resolve, 100));
-  return vehicleTypesData as IVehicleType[];
+  try {
+    const { data } = await axios.get(VEHICLE_TYPES_API);
+    const vehicleTypes = data.data as IVehicleType[];
+    cacheItem('vehicle-types', vehicleTypes);
+    return vehicleTypes;
+  } catch (e) {
+    console.error(e);
+    return undefined;
+  }
 }
 
 export async function getVehicleType(
   vehicleTypeId: number
 ): Promise<IVehicleType | undefined> {
-  // try {
-  //   const { data } = await axios.get(`${VEHICLE_TYPES_API}/${vehicleTypeId}`);
-  //   return data;
-  // } catch (e) {
-  //   console.error(e);
-  //   return undefined;
-  // }
-
-  const vehicleTypes = await getVehicleTypes();
-  return vehicleTypes?.find((vehicleType) => vehicleType.id === vehicleTypeId);
+  try {
+    const { data } = await axios.get(`${VEHICLE_TYPES_API}/${vehicleTypeId}`);
+    return data.data;
+  } catch (e) {
+    console.error(e);
+    return undefined;
+  }
 }

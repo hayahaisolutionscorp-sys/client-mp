@@ -58,7 +58,9 @@ export interface RegisterForm {
   confirm: string;
   agreement: boolean;
   firstName: string;
+  middleName?: string;
   lastName: string;
+  suffixName?: string;
   sex: keyof typeof SEX;
   birthday: string;
   address: string;

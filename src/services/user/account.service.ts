@@ -5,18 +5,9 @@ import { UPLOAD_API } from 'constants/api';
 import { IAccount, IPassenger } from '@/models';
 
 
-export async function getAccountInformation(forceRefresh = false): Promise<IAccount | undefined> {
-  if (!forceRefresh) {
-    const cachedAccountInformation = fetchItem<IAccount>('logged-in-user-profile');
-    if (cachedAccountInformation !== undefined) {
-      return cachedAccountInformation;
-    }
-  }
-
+export async function getAccountInformation(): Promise<IAccount | undefined> {
   try {
     const { data } = await axios.get(`${AUTH_API}/me`);
-
-    cacheItem('logged-in-user-profile', data.data);
 
     return data.data;
   } catch (e) {

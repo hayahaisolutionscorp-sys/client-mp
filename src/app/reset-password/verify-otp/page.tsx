@@ -51,6 +51,23 @@ function OTPVerificationForm() {
     }
   }, []);
 
+  // Countdown timer effect
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timeLeft]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -104,6 +121,13 @@ function OTPVerificationForm() {
         inputRefs.current[0]?.focus();
       } 
     } catch (err: any) {
+      // Check if retryAfter was set in sessionStorage by AuthContext
+      const retryAfter = sessionStorage.getItem('resend_otp');
+      if (retryAfter) {
+        const remaining = Math.max(0, Math.floor((parseInt(retryAfter) - Date.now()) / 1000));
+        setTimeLeft(remaining);
+      }
+      
       setError(err.message || "Failed to resend OTP.");
     } finally {
       setLoading(false);

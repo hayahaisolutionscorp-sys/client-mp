@@ -1,8 +1,18 @@
 import dayjs from 'dayjs';
 import { CacheKey } from 'constants/cache';
 
+// Keys stored in sessionStorage (cleared on tab close / logout)
+import { sessionCacheKeys } from 'constants/cache';
+
 const isLocalStorageAvailable = () => {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+};
+
+const getStorage = (key: CacheKey): Storage | null => {
+  if (typeof window === 'undefined') return null;
+  return (sessionCacheKeys as ReadonlyArray<string>).includes(key)
+    ? sessionStorage
+    : localStorage;
 };
 
 export function cacheItem(
@@ -10,11 +20,12 @@ export function cacheItem(
   item: any,
   expirationInMinutes?: number
 ) {
-  if (!isLocalStorageAvailable()) return;
+  const storage = getStorage(key);
+  if (!storage) return;
 
   expirationInMinutes ??= 60 * 24 * 365;
 
-  localStorage.setItem(
+  storage.setItem(
     key,
     JSON.stringify({
       data: item,
@@ -24,9 +35,10 @@ export function cacheItem(
 }
 
 export function fetchItem<T>(key: CacheKey): T | undefined {
-  if (!isLocalStorageAvailable()) return undefined;
+  const storage = getStorage(key);
+  if (!storage) return undefined;
 
-  const cachedItemJson = localStorage.getItem(key);
+  const cachedItemJson = storage.getItem(key);
   if (cachedItemJson === null) {
     return undefined;
   }
@@ -41,22 +53,28 @@ export function fetchItem<T>(key: CacheKey): T | undefined {
 }
 
 export function invalidateItem(key: CacheKey) {
-  if (!isLocalStorageAvailable()) return;
-  localStorage.removeItem(key);
+  const storage = getStorage(key);
+  if (!storage) return;
+  storage.removeItem(key);
 }
 
 export function clearExpiredCache() {
-  if (!isLocalStorageAvailable()) return;
+  if (typeof window === 'undefined') return;
 
-  const keys = Object.keys(localStorage);
-
-  keys.forEach(key => {
-    const cachedItemJson = localStorage.getItem(key);
-    if (cachedItemJson !== null) {
-      const { expiration } = JSON.parse(cachedItemJson);
-      if (dayjs().isAfter(dayjs(expiration))) {
-        localStorage.removeItem(key);
+  [localStorage, sessionStorage].forEach(storage => {
+    const keys = Object.keys(storage);
+    keys.forEach(key => {
+      const cachedItemJson = storage.getItem(key);
+      if (cachedItemJson !== null) {
+        try {
+          const { expiration } = JSON.parse(cachedItemJson);
+          if (dayjs().isAfter(dayjs(expiration))) {
+            storage.removeItem(key);
+          }
+        } catch {
+          // not a managed cache entry, skip
+        }
       }
-    }
+    });
   });
 }

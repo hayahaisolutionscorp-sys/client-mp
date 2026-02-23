@@ -225,16 +225,19 @@ export default function DependentCard({
                                         <p className="text-xs font-medium text-slate-700">{formatDate(dependent.verification.expiry_date)}</p>
                                     </div>
                                 </div>
-                                {status === 'rejected' && dependent.verification.review_notes && (
-                                    <div className="mt-3 p-2 bg-red-100/50 border border-red-200 rounded text-xs text-red-700">
-                                        <strong>Reason:</strong> {dependent.verification.review_notes}
+                                {(status === 'rejected' || status === 'expired') && dependent.verification.review_notes && (
+                                    <div className={cn(
+                                        "mt-3 p-2 border rounded text-xs",
+                                        status === 'rejected' ? "bg-red-100/50 border-red-200 text-red-700" : "bg-gray-100/50 border-gray-200 text-gray-700"
+                                    )}>
+                                        <strong>{status === 'rejected' ? "Reason:" : "Notes:"}</strong> {dependent.verification.review_notes}
                                     </div>
                                 )}
                             </div>
                         )}
 
                         {/* Verification History */}
-                        <VerificationHistory verifications={dependent.verifications || []} />
+                        <VerificationHistory verifications={(dependent.verifications || []).slice(1)} />
                     </div>
                 )}
 

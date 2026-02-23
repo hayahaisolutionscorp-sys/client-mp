@@ -15,6 +15,7 @@ import ProfileImageCropper from "@/components/profile/ProfileImageCropper"
 import { Card, CardContent } from "@/components/ui/Card"
 import { ProfileHeader } from "@/components/profile/ProfileHeader"
 import { BookingHistoryTab } from "@/components/profile/BookingHistoryTab"
+import VehicleTab from "@/components/profile/vehicles/VehicleTab"
 import { AuthService, getDependents } from "@/services"
 import { useAuth } from "@/contexts/AuthContexts"
 import { IDependent, IVerification, IPassenger } from "@/models"
@@ -32,7 +33,10 @@ export default function ProfilePage() {
     const searchParams = useSearchParams();
     const tabParam = searchParams.get('tab');
 
-    const [activeTab, setActiveTab] = useState(tabParam || "overview");
+    const SESSION_KEY = 'ayahay-profile-tab';
+    const [activeTab, setActiveTab] = useState(
+        tabParam || (typeof window !== 'undefined' ? sessionStorage.getItem(SESSION_KEY) : null) || 'overview'
+    );
     const [isPageLoading, setIsPageLoading] = useState(true);
     const [isCopied, setIsCopied] = useState(false);
 
@@ -68,28 +72,53 @@ export default function ProfilePage() {
 
             const profileData = profileResult.data;
 
-            console.log(profileData);
-            
+            // Deep sanitize helper to ensure only strings reach renderable fields
+            const s = (val: any) => typeof val === 'string' ? val : (val ? String(val) : '');
+
+            const sanitizedVerifications = (profileData.verificationDetails || []).map((v: any) => ({
+                ...v,
+                id_type: s(v.id_type),
+                id_number: s(v.id_number),
+                status: s(v.status),
+                review_notes: s(v.review_notes),
+                created_at: s(v.created_at)
+            }));
+
             setAccount({
-                id: loggedInAccount.id,
-                email: loggedInAccount.email,
-                verificationDetails: profileData.verificationDetails || [],
-                qrCodeUrl: profileData.passenger?.qrCodeUrl,  
-                qrCodeId: profileData.passenger?.hayahaiId
+                id: (loggedInAccount.id || profileData.id || profileData.accountId)?.toString() || '',
+                email: typeof profileData.email === 'string' ? profileData.email : (typeof loggedInAccount.email === 'string' ? loggedInAccount.email : ''),
+                verificationDetails: sanitizedVerifications,
+                qrCodeUrl: typeof profileData.passenger?.qrCodeUrl === 'string' ? profileData.passenger.qrCodeUrl : undefined,  
+                qrCodeId: typeof profileData.passenger?.hayahaiId === 'string' ? profileData.passenger.hayahaiId : profileData.passenger?.hayahaiId?.toString()
             });
 
             if (profileData.passenger) {
-                setPassenger(profileData.passenger);
+                setPassenger({
+                    ...profileData.passenger,
+                    firstName: s(profileData.passenger.firstName),
+                    lastName: s(profileData.passenger.lastName),
+                    middleName: s(profileData.passenger.middleName),
+                    suffixName: s(profileData.passenger.suffixName),
+                    phone: s(profileData.passenger.phone),
+                    address: s(profileData.passenger.address)
+                });
+                
                 // Set initial image preview
                 if (profileData.passenger.profilePictureUrl && !imagePreview) {
                     setImagePreview(profileData.passenger.profilePictureUrl);
                 }
             }
 
-            setDependents(dependentsData || []);
+            const sanitizedDependents = (dependentsData || []).map((d: any) => ({
+                ...d,
+                first_name: s(d.first_name),
+                last_name: s(d.last_name),
+                status: s(d.status)
+            }));
+            setDependents(sanitizedDependents);
 
-            if (profileData.verificationDetails && profileData.verificationDetails.length > 0) {
-                setVerificationStatus(profileData.verificationDetails[0].status);
+            if (sanitizedVerifications.length > 0) {
+                setVerificationStatus(sanitizedVerifications[0].status as VerificationStatus);
             } else {
                 setVerificationStatus('unverified');
             }
@@ -116,12 +145,10 @@ export default function ProfilePage() {
         }
     }, [loggedInAccount, loading, fetchProfileData, router]);
 
-    // Handle initial tab from query param
+    // Persist active tab to sessionStorage whenever it changes
     useEffect(() => {
-        if (tabParam) {
-            setActiveTab(tabParam);
-        }
-    }, [tabParam]);
+        sessionStorage.setItem(SESSION_KEY, activeTab);
+    }, [activeTab]);
 
     // Update image preview when passenger or currentUser profile picture changes
     useEffect(() => {
@@ -227,9 +254,9 @@ export default function ProfilePage() {
     return (
         <div className="container mx-auto pb-10 px-4 sm:px-6 lg:px-8">
             <ProfileHeader
-                firstName={passenger?.firstName || currentUser?.name?.split(' ')[0]}
-                lastName={passenger?.lastName || currentUser?.name?.split(' ').slice(1).join(' ')}
-                email={account?.email}
+                firstName={passenger?.firstName || (typeof currentUser?.name === 'string' ? currentUser.name.split(' ')[0] : '')}
+                lastName={passenger?.lastName || (typeof currentUser?.name === 'string' ? currentUser.name.split(' ').slice(1).join(' ') : '')}
+                email={typeof account?.email === 'string' ? account.email : ''}
                 accountId={account?.id}
                 profileImageUrl={getProfileImageUrl()}
                 verificationStatus={verificationStatus}
@@ -244,7 +271,7 @@ export default function ProfilePage() {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">
                 <TabsList className="w-full h-auto justify-start border-b rounded-none bg-transparent p-0 mb-6 overflow-x-auto no-scrollbar">
-                    {["overview", "account-settings", "booking-history", "verification", "dependents"].map((tab) => (
+                    {["overview", "account-settings", "booking-history", "vehicles", "verification", "dependents"].map((tab) => (
                         <TabsTrigger
                             key={tab}
                             value={tab}
@@ -264,7 +291,7 @@ export default function ProfilePage() {
                         onTabChange={setActiveTab}
                         qrCode={account?.qrCodeUrl}
                         qrCodeId={account?.qrCodeId}
-                        passengerName={passenger ? `${passenger.firstName} ${passenger.lastName}` : currentUser?.name}
+                        passengerName={passenger ? `${passenger.firstName} ${passenger.lastName}` : (typeof currentUser?.name === 'string' ? currentUser.name : '')}
                     />
                 </TabsContent>
 
@@ -294,6 +321,12 @@ export default function ProfilePage() {
 
                 <TabsContent value="booking-history">
                     <BookingHistoryTab />
+                </TabsContent>
+
+                <TabsContent value="vehicles">
+                    <VehicleTab 
+                        userId={loggedInAccount.id}
+                    />
                 </TabsContent>
 
                 <TabsContent value="verification">

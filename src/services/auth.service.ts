@@ -13,6 +13,10 @@ export const AuthService = {
         return response.data;
     },
 
+    lookupEmail: async (email: string) => {
+        return await axios.post(`${AUTH_API}/lookup`, { email });
+    },
+
     logout: async () => {
         const response = await axios.post(`${AUTH_API}/logout`);
         return response.data;
@@ -21,12 +25,11 @@ export const AuthService = {
     getProfile: async () => {
         try {
             const response = await axios.get(`${AUTH_API}/me`);
-            const { cacheItem } = await import('helpers/cache.helpers');
-            cacheItem('logged-in-user-profile', response.data.data || response.data);
             return response.data;
         } catch (error: any) {
-            // Silently handle 401 as it's expected for unauthenticated users
-            if (error.response?.status === 401) {
+            // Silently handle 401 (no session) and 403 (session exists but no role yet)
+            // as both mean the user is effectively not usable in the current state.
+            if (error.response?.status === 401 || error.response?.status === 403) {
                 return null;
             }
             throw error;
@@ -84,7 +87,7 @@ export const AuthService = {
             // Listen for message from popup
             const handleMessage = (event: MessageEvent) => {
                 // Verify the origin for security
-                const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000').origin;
+                const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL!).origin;
                 
                 // Allow exact match or mismatch log for debugging
                 if (event.origin !== apiOrigin) {
@@ -147,7 +150,7 @@ export const AuthService = {
             // Listen for message from popup
             const handleMessage = (event: MessageEvent) => {
                 // Verify the origin for security
-                const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000').origin;
+                const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL!).origin;
                 
                 if (event.origin !== apiOrigin) {
                     console.warn('Facebook OAuth Origin Warning:', { expected: apiOrigin, received: event.origin });

@@ -8,52 +8,76 @@ interface CameraCaptureProps {
     onCapture: (blob: Blob) => void;
     onRetake?: () => void;
     onCancel?: () => void;
+    facingMode?: "user" | "environment";
 }
 
-export default function CameraCapture({ onCapture, onRetake, onCancel }: CameraCaptureProps) {
+export default function CameraCapture({ onCapture, onRetake, onCancel, facingMode = "user" }: CameraCaptureProps) {
+    const isFrontFacing = facingMode === "user";
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const themeSettings = useThemeSettings();
     const primaryColor = themeSettings?.primary || '#2563eb';
     
+    const streamRef = useRef<MediaStream | null>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isCameraReady, setIsCameraReady] = useState(false);
     const [isSelfieDone, setIsSelfieDone] = useState(false);
+    const isMounted = useRef(true);
+
+    const stopCamera = useCallback(() => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+        }
+        setStream(null);
+        setIsCameraReady(false);
+    }, []);
 
     const startCamera = useCallback(async () => {
         try {
             setError(null);
             const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+                video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
                 audio: false
             });
+
+            // Check if component is still mounted before setting state
+            if (!isMounted.current) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                return;
+            }
+
+            streamRef.current = mediaStream;
             setStream(mediaStream);
             if (videoRef.current) {
                 videoRef.current.srcObject = mediaStream;
                 videoRef.current.onloadedmetadata = () => {
-                    setIsCameraReady(true);
+                    if (isMounted.current) {
+                        setIsCameraReady(true);
+                    }
                 };
             }
         } catch (err) {
-            console.error("Error accessing camera:", err);
-            setError("Could not access camera. Please ensure you have granted permission.");
+            if (isMounted.current) {
+                console.error("Error accessing camera:", err);
+                setError("Could not access camera. Please ensure you have granted permission.");
+            }
         }
-    }, []);
-
-    const stopCamera = useCallback(() => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            setStream(null);
-        }
-        setIsCameraReady(false);
-    }, [stream]);
+    }, [facingMode]);
 
     useEffect(() => {
+        isMounted.current = true;
         startCamera();
-        return () => stopCamera();
-    }, []);
+        return () => {
+            isMounted.current = false;
+            stopCamera();
+        };
+    }, [startCamera, stopCamera]);
 
     const capturePhoto = () => {
         if (videoRef.current && canvasRef.current) {
@@ -101,7 +125,7 @@ export default function CameraCapture({ onCapture, onRetake, onCancel }: CameraC
                             autoPlay
                             playsInline
                             className="w-full h-full object-cover"
-                            style={{ transform: "scaleX(-1)" }}
+                            style={{ transform: isFrontFacing ? "scaleX(-1)" : "none" }}
                         />
                         {error && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-slate-900/90 text-white">
@@ -124,7 +148,7 @@ export default function CameraCapture({ onCapture, onRetake, onCancel }: CameraC
                         src={capturedImage}
                         alt="Captured selfie"
                         className="w-full h-full object-cover"
-                        style={{ transform: "scaleX(-1)" }}
+                        style={{ transform: isFrontFacing ? "scaleX(-1)" : "none" }}
                     />
                 )}
                 <canvas ref={canvasRef} className="hidden" />

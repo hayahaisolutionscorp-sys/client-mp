@@ -5,19 +5,8 @@ const instance = axios.create({
   withCredentials: true,
 });
 
-// Utility function to decode JWT and check expiration
-const isTokenExpired = (token: string): boolean => {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const expirationTime = payload.exp * 1000; // Convert to milliseconds
-    const currentTime = Date.now();
-    // Check if token is expired or will expire in the next 60 seconds
-    return expirationTime < currentTime + 60000;
-  } catch (error) {
-    // If we can't decode the token, consider it expired
-    return true;
-  }
-};
+// Note: We no longer manually decode tokens or check expiration on the frontend.
+// The backend handles session state via HTTP-Only cookies.
 
 // Track if we're currently refreshing to avoid duplicate refresh calls
 let isRefreshing = false;
@@ -52,9 +41,6 @@ const handleTokenRefresh = async () => {
 
       // Clear all account-related cache items
       accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
-      
-      // Specifically ensure jwt is cleared (though it's in accountRelatedCacheKeys)
-      invalidateItem('jwt');
 
       // If refresh fails, dispatch session expired event
       if (typeof window !== 'undefined') {
@@ -72,34 +58,6 @@ const handleTokenRefresh = async () => {
 
 instance.interceptors.request.use(
   async (config) => {
-    const authToken = fetchItem<string>('jwt');
-    
-    // Skip token refresh for the refresh endpoint itself
-    if (config.url?.includes('/auth/refresh')) {
-      return config;
-    }
-    
-    if (authToken) {
-      // Check if access token has expired
-      if (isTokenExpired(authToken)) {
-        try {
-          await handleTokenRefresh();
-          
-          // Get the new token after refresh
-          const newToken = fetchItem<string>('jwt');
-          if (newToken) {
-            config.headers.Authorization = `Bearer ${newToken}`;
-          }
-        } catch (refreshError) {
-          // If refresh fails, we still let the request proceed? 
-          // Usually better to fail here or let it fall through to 401 handling
-          console.warn('Preemptive refresh failed, proceeding with expired token');
-        }
-      } else {
-        config.headers.Authorization = `Bearer ${authToken}`;
-      }
-    }
-    
     // Note: The system now relies on httpOnly cookies for authentication.
     // withCredentials: true ensures cookies are sent automatically.
     return config;
@@ -127,12 +85,6 @@ instance.interceptors.response.use(
         try {
           // Attempt to refresh the token using the shared logic
           await handleTokenRefresh();
-          
-          // If refresh succeeds, update headers and retry the original request
-          const newToken = fetchItem<string>('jwt');
-          if (newToken) {
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          }
           
           return instance(originalRequest);
         } catch (refreshError: any) {

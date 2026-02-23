@@ -5,7 +5,9 @@ import { RegisterForm, IPassenger } from '@/models';
 export function mapPassengerToDto(values: RegisterForm): IPassenger {
   const {
     firstName,
+    middleName,
     lastName,
+    suffixName,
     sex,
     birthday,
     address,
@@ -16,7 +18,9 @@ export function mapPassengerToDto(values: RegisterForm): IPassenger {
   return {
     id: -1,
     firstName,
+    middleName,
     lastName,
+    suffixName,
     sex,
     birthdayIso: new Date(birthday).toISOString(),
     address,
@@ -31,13 +35,17 @@ export async function updatePassenger(
   try {
     const payload = {
       firstName: passengerData.firstName,
+      middleName: passengerData.middleName,
       lastName: passengerData.lastName,
+      suffixName: passengerData.suffixName,
       sex: passengerData.sex,
       birthday: passengerData.birthdayIso,
       address: passengerData.address,
       nationality: passengerData.nationality,
       phone: passengerData.phone,
       profilePictureUrl: passengerData.profilePictureUrl,
+      passengerType: passengerData.passengerType,
+      passengerCode: passengerData.passengerCode,
     };
 
     const { data } = await axios.patch(`${AUTH_API}/me`, payload);

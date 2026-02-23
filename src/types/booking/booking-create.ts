@@ -10,7 +10,9 @@ export interface Passenger {
     id: number;
     nationality: string;
     firstName: string;
+    middleName?: string;
     lastName: string;
+    suffixName?: string;
     sex: string;
     birthdayIso: string;
     address: string;

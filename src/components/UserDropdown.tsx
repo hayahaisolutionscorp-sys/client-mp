@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContexts';
 import { useThemeSettings } from '@/hooks/theme-settings';
 
 const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: boolean }) => {
-  const { logout, currentUser, loggedInAccount } = useAuth();
+  const { logout, currentUser, loggedInAccount, loading } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const themeSettings = useThemeSettings();
@@ -28,7 +28,9 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
     <>
       {/* User Dropdown Menu */}
       <div className="relative" ref={dropdownRef}>
-        {loggedInAccount?.passenger?.profilePictureUrl ? (
+        {loading ? (
+          <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse border border-gray-100" />
+        ) : loggedInAccount?.passenger?.profilePictureUrl ? (
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center space-x-2 focus:outline-none relative w-8 h-8 rounded-full overflow-hidden border border-gray-200"

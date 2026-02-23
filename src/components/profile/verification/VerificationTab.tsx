@@ -11,6 +11,7 @@ import {
     CardTitle,
 } from "@/components/ui/Card"
 import Image from "next/image"
+import { SecureImage } from "@/components/ui/SecureImage"
 import { cancelVerificationRequest, getVerificationsByUser } from "@/services"
 import ProfileVerificationForm from "../verification/ProfileVerificationForm"
 import { IDependent, IVerification } from "@/models"
@@ -67,8 +68,8 @@ export default function VerificationTab({ accountId, verificationDetails: initia
             onStatusChange?.(newStatus);
 
             setActiveDetails({
-                govId: active.id_type || '',
-                idNumber: active.id_number || '',
+                govId: typeof active.id_type === 'string' ? active.id_type : String(active.id_type || ''),
+                idNumber: typeof active.id_number === 'string' ? active.id_number : String(active.id_number || ''),
                 discountType: '', // This should ideally come from passenger data, but for tab we show ID info
                 frontImageUrl: active.front_image_url,
                 backImageUrl: active.back_image_url,
@@ -171,12 +172,11 @@ export default function VerificationTab({ accountId, verificationDetails: initia
                                 <div className="space-y-2">
                                     <p className="text-xs text-slate-500">ID Front</p>
                                     <div className="relative aspect-[3/2] rounded-lg overflow-hidden border bg-slate-100">
-                                        <Image 
+                                        <SecureImage 
                                             src={activeDetails.frontImageUrl} 
                                             alt="ID Front" 
                                             fill 
                                             className="object-cover"
-                                            unoptimized
                                         />
                                     </div>
                                 </div>
@@ -185,12 +185,11 @@ export default function VerificationTab({ accountId, verificationDetails: initia
                                 <div className="space-y-2">
                                     <p className="text-xs text-slate-500">ID Back</p>
                                     <div className="relative aspect-[3/2] rounded-lg overflow-hidden border bg-slate-100">
-                                        <Image 
+                                        <SecureImage 
                                             src={activeDetails.backImageUrl} 
                                             alt="ID Back" 
                                             fill 
                                             className="object-cover"
-                                            unoptimized
                                         />
                                     </div>
                                 </div>
@@ -199,12 +198,11 @@ export default function VerificationTab({ accountId, verificationDetails: initia
                                 <div className="space-y-2">
                                     <p className="text-xs text-slate-500">Verification Selfie</p>
                                     <div className="relative aspect-[3/2] rounded-lg overflow-hidden border bg-slate-100">
-                                        <Image 
+                                        <SecureImage 
                                             src={activeDetails.selfieUrl} 
                                             alt="Selfie" 
                                             fill 
                                             className="object-cover"
-                                            unoptimized
                                         />
                                     </div>
                                 </div>

@@ -1,9 +1,13 @@
+// Cached items stored in sessionStorage (auto-cleared on tab close; also invalidated on logout)
+export const sessionCacheKeys = <const>[
+  'vehicle-types',
+];
+
 // Cached items that will be invalidated when user signs out
 export const accountRelatedCacheKeys = <const>[
   'logged-in-account',
-  'logged-in-user-profile',
-  'jwt',
   'my-notifications',
+  ...sessionCacheKeys,
 ];
 
 // Cached items that will only be invalidated if explicitly called
@@ -12,7 +16,6 @@ export const publicCacheKeys = <const>[
   'ports',
   'ships',
   'shipping-lines',
-  'vehicle-types',
   'trips',
   'trips-by-id',
   'rate-tables-by-id',
@@ -25,7 +28,8 @@ export const publicCacheKeys = <const>[
   'promos',
   'hero-sections',
   'footer-sections',
-  'partners'
+  'partners',
+  'passenger-types'
 ];
 
 export const cacheKeys = <const>[

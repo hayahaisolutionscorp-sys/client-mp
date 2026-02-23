@@ -3,12 +3,13 @@
 import { useEffect, useState, FormEvent, Suspense } from "react";
 import Link from "next/link"
 import Image from "next/image"
-import { EyeIcon, EyeOffIcon, ArrowLeft } from "lucide-react"
+import { EyeIcon, EyeOffIcon, ArrowLeft, Check } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
 import { AuthSidebar } from "@/components/auth/AuthSidebar";
+import { PasswordStrengthTracker } from "@/components/auth/PasswordStrengthTracker";
 
 
 function ResetPasswordPageForm() {
@@ -136,6 +137,7 @@ function ResetPasswordPageForm() {
               )}
             </Button>
           </div>
+          <PasswordStrengthTracker password={formData.password} />
           {validationErrors.password && <p className="text-xs text-red-500">{validationErrors.password}</p>}
         </div>
         <div className="space-y-2">
@@ -148,6 +150,7 @@ function ResetPasswordPageForm() {
               value={formData.confirm}
               onChange={handleInputChange}
               required
+              disabled={!formData.password}
               className={validationErrors.confirm ? "border-red-500" : ""}
             />
             <Button
@@ -165,6 +168,12 @@ function ResetPasswordPageForm() {
               )}
             </Button>
           </div>
+          {formData.password && formData.confirm && formData.password === formData.confirm && (
+            <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
+              <Check className="h-3 w-3" />
+              Passwords match
+            </div>
+          )}
           {validationErrors.confirm && <p className="text-xs text-red-500">{validationErrors.confirm}</p>}
         </div>
         <Button

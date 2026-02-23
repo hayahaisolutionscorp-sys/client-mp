@@ -4,7 +4,9 @@ export interface IDependent {
   id: string;
   user_id: string;
   first_name: string;
+  middle_name?: string;
   last_name: string;
+  suffix_name?: string;
   birthday: string;
   sex: string;
   relationship: string;
@@ -45,7 +47,9 @@ export interface IVerification {
 
 export interface CreateDependentDto {
   first_name: string;
+  middle_name?: string;
   last_name: string;
+  suffix_name?: string;
   birthday: string;
   sex: string;
   relationship: string;
@@ -54,11 +58,14 @@ export interface CreateDependentDto {
   address: string;
   email?: string;
   category: string;
+  passenger_code: string;
 }
 
 export interface UpdateDependentDto {
   first_name?: string;
+  middle_name?: string;
   last_name?: string;
+  suffix_name?: string;
   birthday?: string;
   sex?: string;
   relationship?: string;

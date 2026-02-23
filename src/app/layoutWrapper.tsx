@@ -11,7 +11,7 @@ export default function LayoutWrapper({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const hideLayout = pathname === '/login' || pathname === '/register' || pathname.startsWith('/reset-password');
+  const hideLayout = pathname === '/login' || pathname === '/register' || pathname.startsWith('/reset-password') || pathname.startsWith('/login/') || pathname.startsWith('/register/');
   const isProfilePage = pathname === '/profile';
 
   return (

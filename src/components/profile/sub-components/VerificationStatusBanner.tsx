@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { Shield, AlertCircle, ShieldCheck, XCircle } from 'lucide-react'
+import { Shield, AlertCircle, ShieldCheck, XCircle, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import { VerificationStatus } from '@/utils/verification/statusHelpers'
@@ -162,6 +162,28 @@ export const VerificationStatusBanner: React.FC<VerificationStatusBannerProps> =
                         </div>
                     )}
                 </div>
+            </div>
+        );
+    }
+
+    if (status === 'expired') {
+        return (
+            <div className="text-center py-6 space-y-4">
+                <Clock className="h-12 w-12 text-gray-400 mx-auto" />
+                <div className="space-y-1">
+                    <p className="text-lg font-semibold text-slate-900">Verification Expired</p>
+                    <p className="text-sm text-muted-foreground">Your verification has expired. Please resubmit your documents to stay verified.</p>
+                </div>
+                {onResubmit && (
+                    <Button onClick={onResubmit}>
+                        Resubmit Verification
+                    </Button>
+                )}
+                {rejectionReason && (
+                    <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-slate-600 max-w-md mx-auto">
+                        <strong>Notes:</strong> {rejectionReason}
+                    </div>
+                )}
             </div>
         );
     }

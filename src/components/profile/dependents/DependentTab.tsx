@@ -38,8 +38,19 @@ export default function DependentTab({ userId }: DependentComponentProps) {
         setIsLoading(true);
 
         try {
-            const dependents = await getDependentsWithVerification(userId);
-            setDependents(dependents);
+            const data = await getDependentsWithVerification(userId);
+            
+            // Deep sanitize helper
+            const s = (val: any) => typeof val === 'string' ? val : (val ? String(val) : '');
+
+            const sanitizedDependents = (data || []).map((d: any) => ({
+                ...d,
+                first_name: s(d.first_name),
+                last_name: s(d.last_name),
+                status: s(d.status) || 'unverified'
+            }));
+
+            setDependents(sanitizedDependents);
         } catch (error) {
             console.error("Error fetching dependents:", error);
         } finally {

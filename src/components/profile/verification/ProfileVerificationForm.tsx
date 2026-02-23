@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
 import { ImageIcon, Loader2, Camera, User, CheckCircle2, X, AlertCircle } from "lucide-react"
 import Image from "next/image"
+import { SecureImage } from "@/components/ui/SecureImage"
 import { useAuth } from "@/contexts/AuthContexts"
 import { requestVerification } from "@/services"
 import CameraCapture from "@/components/profile/verification/CameraCapture"
@@ -216,6 +217,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                         size="icon" 
                         className="h-10 w-10 rounded-full !text-black hover:bg-slate-100 shrink-0 ml-4" 
                         onClick={onCancel}
+                        disabled={isSubmitting}
                     >
                         <X className="h-6 w-6" />
                     </Button>
@@ -385,7 +387,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                             <p className="text-sm font-semibold text-center uppercase tracking-wider text-slate-500">ID Front Side</p>
                             <div className="aspect-[3/2] border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-slate-50 group">
                                 {previews.idFront ? (
-                                    <Image src={previews.idFront} alt="ID Front" fill className="object-cover" />
+                                    <SecureImage src={previews.idFront} alt="ID Front" fill className="object-cover" />
                                 ) : (
                                     <div className="text-center p-4">
                                         <ImageIcon className="h-10 w-10 text-slate-400 mx-auto mb-2" />
@@ -404,7 +406,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                             <p className="text-sm font-semibold text-center uppercase tracking-wider text-slate-500">ID Back Side</p>
                             <div className="aspect-[3/2] border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center relative overflow-hidden bg-slate-50 group">
                                 {previews.idBack ? (
-                                    <Image src={previews.idBack} alt="ID Back" fill className="object-cover" />
+                                    <SecureImage src={previews.idBack} alt="ID Back" fill className="object-cover" />
                                 ) : (
                                     <div className="text-center p-4">
                                         <ImageIcon className="h-10 w-10 text-slate-400 mx-auto mb-2" />
@@ -431,32 +433,58 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
             {/* Step 3: Selfie Capture */}
             {currentStep === 3 && (
                 <div className="p-3 flex flex-col h-full">
-                    {!isSelfieDone && (
-                        <div className="mb-2 text-center">
-                            <p className="text-sm font-medium text-slate-600">Please position your face clearly in the frame.</p>
+                    {isSelfieDone && previews.selfie ? (
+                        /* Show existing / captured selfie with option to retake */
+                        <div className="space-y-4">
+                            <div className="text-center">
+                                <p className="text-sm font-medium text-slate-600">Your selfie photo</p>
+                                {!formData.selfie && initialData?.selfie_url && (
+                                    <p className="text-xs text-slate-400 mt-0.5">Previously submitted — retake if needed</p>
+                                )}
+                            </div>
+                            <div className="relative group aspect-square max-w-xs mx-auto border-2 border-dashed rounded-2xl overflow-hidden"
+                                style={{ borderColor: primaryColor }}>
+                                <SecureImage src={previews.selfie} alt="Selfie" fill className="object-cover" />
+                                {/* Hover overlay */}
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-slate-900/50 transition-opacity">
+                                    <Button
+                                        variant="outline"
+                                        className="text-white border-white pointer-events-auto text-xs"
+                                        onClick={() => setIsSelfieDone(false)}
+                                    >
+                                        <Camera className="h-3.5 w-3.5 mr-1.5" />
+                                        Retake Selfie
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="flex justify-between pt-4">
+                                <Button variant="outline" onClick={handleBack}>Back</Button>
+                                <Button onClick={handleNext}>
+                                    Next: Review Details
+                                </Button>
+                            </div>
                         </div>
+                    ) : (
+                        /* Camera capture mode */
+                        <>
+                            <div className="mb-2 text-center">
+                                <p className="text-sm font-medium text-slate-600">Please position your face clearly in the frame.</p>
+                            </div>
+
+                            <CameraCapture
+                                onCapture={handleSelfieCapture}
+                                onRetake={() => setIsSelfieDone(false)}
+                                onCancel={handleBack}
+                            />
+
+                            {isSubmitting && (
+                                <div className="mt-8 flex flex-col items-center gap-2">
+                                    <Loader2 className="h-8 w-8 animate-spin" style={{ color: primaryColor }} />
+                                    <p className="text-sm font-medium" style={{ color: primaryColor }}>Uploading and verifying documents...</p>
+                                </div>
+                            )}
+                        </>
                     )}
-
-                    <CameraCapture 
-                        onCapture={handleSelfieCapture} 
-                        onRetake={() => setIsSelfieDone(false)}
-                        onCancel={handleBack}
-                    />
-
-                    {isSubmitting && (
-                        <div className="mt-8 flex flex-col items-center gap-2">
-                            <Loader2 className="h-8 w-8 animate-spin" style={{ color: primaryColor }} />
-                            <p className="text-sm font-medium" style={{ color: primaryColor }}>Uploading and verifying documents...</p>
-                        </div>
-                    )}
-
-                    {isSelfieDone && (<div className="flex justify-between pt-4">
-                        <Button variant="outline" onClick={handleBack}>Back</Button>
-                        <Button onClick={handleNext} disabled={!previews.selfie}>
-                            Next: Review Details
-                        </Button>
-                    </div>  )}
-
                 </div>
             )}
 
@@ -533,24 +561,40 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                                 </Button>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                                <div className="space-y-3">
-                                    <p className="text-xs font-medium text-slate-500 text-center uppercase tracking-tight">Front View</p>
-                                    <div className="aspect-[3/2] border border-slate-200 rounded-xl overflow-hidden relative shadow-sm bg-white">
-                                        {previews.idFront && <Image src={previews.idFront} alt="ID Front" fill className="object-cover" />}
+                                {[
+                                    { label: 'Front View',          preview: previews.idFront, isUnchanged: !formData.idFront  && !!initialData?.front_image_url, step: 2 },
+                                    { label: 'Back View',           preview: previews.idBack,  isUnchanged: !formData.idBack   && !!initialData?.back_image_url,  step: 2 },
+                                    { label: 'Selfie Verification', preview: previews.selfie,  isUnchanged: !formData.selfie   && !!initialData?.selfie_url,       step: 3 },
+                                ].map((item) => (
+                                    <div key={item.label} className="space-y-3">
+                                        <p className="text-xs font-medium text-slate-500 text-center uppercase tracking-tight">{item.label}</p>
+                                        <div className="aspect-[3/2] border border-slate-200 rounded-xl overflow-hidden relative shadow-sm bg-white group">
+                                            {item.preview && (
+                                                <SecureImage src={item.preview} alt={item.label} fill className="object-cover opacity-90 group-hover:opacity-50 transition-opacity" />
+                                            )}
+                                            {item.isUnchanged && (
+                                                <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-[9px] text-center py-0.5 font-medium">
+                                                    Unchanged
+                                                </div>
+                                            )}
+                                            {item.preview && !item.isUnchanged && (
+                                                <div className="absolute bottom-0 left-0 right-0 bg-green-600/80 text-white text-[9px] text-center py-0.5 font-medium">
+                                                    Updated
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 text-[10px] font-bold hover:bg-slate-100 text-slate-700"
+                                                    onClick={() => setCurrentStep(item.step)}
+                                                >
+                                                    Edit
+                                                </Button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="space-y-3">
-                                    <p className="text-xs font-medium text-slate-500 text-center uppercase tracking-tight">Back View</p>
-                                    <div className="aspect-[3/2] border border-slate-200 rounded-xl overflow-hidden relative shadow-sm bg-white">
-                                        {previews.idBack && <Image src={previews.idBack} alt="ID Back" fill className="object-cover" />}
-                                    </div>
-                                </div>
-                                <div className="space-y-3">
-                                    <p className="text-xs font-medium text-slate-500 text-center uppercase tracking-tight">Selfie Verification</p>
-                                    <div className="aspect-[3/2] border border-slate-200 rounded-xl overflow-hidden relative shadow-sm bg-white">
-                                        {previews.selfie && <Image src={previews.selfie} alt="Selfie" fill className="object-cover" />}
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
                     </div>

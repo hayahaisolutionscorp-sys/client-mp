@@ -4,14 +4,13 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { IAccount, RegisterForm } from '@/models';
 import { AuthService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
-import { getCookie, eraseCookie } from 'helpers/cookie.helpers';
-import { invalidateItem, fetchItem } from 'helpers/cache.helpers';
+import { invalidateItem } from 'helpers/cache.helpers';
 import { accountRelatedCacheKeys } from 'constants/cache';
 import { useBranding } from "@/hooks/branding";
 import { useThemeSettings } from "@/hooks/theme-settings";
 
 interface AuthContextType {
-    currentUser: any | null; // Keeping loose type for compatibility
+    currentUser: any | null;
     loggedInAccount: IAccount | undefined | null;
     hasPrivilegedAccess: boolean;
     loading: boolean;
@@ -48,42 +47,13 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     const router = useRouter();
     const branding = useBranding();
     const theme = useThemeSettings();
+
+    // In-memory auth state — never written to localStorage or any storage.
+    // The HTTP-only JWT cookie is sent automatically on every request.
+    // Login state is determined solely by whether GET /auth/me succeeds.
+    const [currentUser, setCurrentUser] = useState<any | null>(null);
+    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(null);
     const [loading, setLoading] = useState(true);
-
-    // Initial state hydration from non-httpOnly 'user' cookie
-    const [currentUser, setCurrentUser] = useState<any | null>(() => {
-        if (typeof window === 'undefined') return null;
-        const userJson = getCookie('user');
-        if (userJson) {
-            try {
-                // Decode and parse the JSON user object from cookie
-                return JSON.parse(decodeURIComponent(userJson));
-            } catch (e) {
-                console.error('Failed to parse user cookie', e);
-                return null;
-            }
-        }
-        return null;
-    });
-
-    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(() => {
-        if (typeof window === 'undefined') return null;
-        const userJson = getCookie('user');
-        if (userJson) {
-            try {
-                const user = JSON.parse(decodeURIComponent(userJson));
-                return {
-                    id: user.id || user.accountId,
-                    email: user.email,
-                    role: user.role || 'Passenger',
-                    emailConsent: false,
-                } as IAccount;
-            } catch (e) {
-                return null;
-            }
-        }
-        return null;
-    });
 
     const [notification, setNotification] = useState<{
         type: 'success' | 'error' | null;
@@ -95,161 +65,142 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         setTimeout(() => setNotification(null), 3000);
     };
 
-    // Load user profile on mount
-    const loadProfile = useCallback(async (force: boolean = false) => {
-        // Only attempt to load profile if there's an indicator of a session
-        // This avoids unnecessary 401 errors for guest users
-        const hasSessionIndicator = typeof window !== 'undefined' && (
-            getCookie('user') || 
-            fetchItem('jwt')
-        );
+    const clearSession = useCallback(() => {
+        setCurrentUser(null);
+        setLoggedInAccount(null);
+        accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+    }, []);
 
-        if (!hasSessionIndicator && !force) {
-            setLoading(false);
-            return null;
-        }
-
+    const loadProfile = useCallback(async (_force: boolean = false) => {
         try {
             setLoading(true);
             const result = await AuthService.getProfile();
             if (!result) {
-                setCurrentUser(null);
-                setLoggedInAccount(null);
+                clearSession();
                 return null;
             }
 
             // result is { message: string, data: UserResponseDto }
             const user = result.data || result;
 
-            setCurrentUser(user);
+            if (!user || typeof user !== 'object' || Object.keys(user).length === 0) {
+                console.warn('Profile fetch returned invalid user data', result);
+                clearSession();
+                return null;
+            }
+
+            // Sanitize user for safe rendering
+            const sanitizedUser = {
+                ...user,
+                email: typeof user.email === 'string' ? user.email : '',
+                name: typeof user.name === 'string' ? user.name : '',
+                id: (user.id || user.accountId)?.toString() || ''
+            };
 
             // Mapping from UserResponseDto (which has passenger object) to IAccount
             const account: IAccount = {
-                id: user.id || user.accountId,
-                email: user.email,
-                role: user.role || (user.roles?.[0]?.name) || 'Passenger',
+                id: (user.id || user.accountId)?.toString() || '',
+                email: typeof user.email === 'string' ? user.email : '',
+                role: typeof user.role === 'string' ? user.role : (user.role?.name || user.roles?.[0]?.name || 'Passenger'),
                 emailConsent: false,
                 passenger: user.passenger || undefined,
                 verification: Array.isArray(user.verificationDetails) ? user.verificationDetails[0] : (user.verificationDetails || user.verification || undefined),
-                verificationDetails: Array.isArray(user.verificationDetails) 
-                    ? user.verificationDetails 
+                verificationDetails: Array.isArray(user.verificationDetails)
+                    ? user.verificationDetails
                     : (user.verificationDetails ? [user.verificationDetails] : undefined),
                 hasPassword: user.hasPassword,
                 providers: user.providers
             };
+
+            setCurrentUser(sanitizedUser);
             setLoggedInAccount(account);
 
             return user;
         } catch (error: any) {
             console.log('Failed to load profile', error);
             // Only clear session if it's a 401 Unauthorized error
-            // This prevents logging out on network errors or server downtime
             if (error.response?.status === 401) {
-                setCurrentUser(null);
-                setLoggedInAccount(null);
-                eraseCookie('user');
+                clearSession();
                 accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
             }
             return null;
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [clearSession]);
 
-    // Initial load
+    // Initial load — checks the HTTP-only cookie implicitly via /auth/me
     useEffect(() => {
         loadProfile();
     }, [loadProfile]);
 
     const register = async (email: string, password: string, values: RegisterForm) => {
         try {
-            setLoading(true);
-            // Map values to API DTO (BaseUserDto: name, email, password)
-            // Destructure to remove fields that shouldn't be sent to API
             const { confirm, agreement, ...cleanValues } = values;
 
             const payload = {
-                name: `${values.firstName} ${values.lastName}`.trim(),
                 ...cleanValues,
-                email, // Ensure email from argument is used
-                password, // Ensure password from argument is used
+                email,
+                password,
             };
 
             await AuthService.register(payload as any);
-            // 'as any' because AuthService register expects RegisterForm but API expects RegisterDto logic. 
-            // Wait, I defined AuthService.register to take RegisterForm.
-            // But the API call uses that object.
-            // The API will strip extra fields.
-            // Ideally I should construct the object that matches the API expectation.
 
             showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}! Registration successful!`);
 
-            // Auto login? The API register does NOT automatically login usually, 
-            // but the controller implementation sets cookies?
-            // Controller register: sets cookies.
-            // So we ARE logged in.
-
-            await loadProfile();
+            // Load profile in background — caller will redirect immediately
+            loadProfile();
 
             return 'success';
         } catch (error: any) {
             console.error('Registration error:', error);
             const msg = error.response?.data?.message || 'Registration failed';
-            // showNotification('error', msg); // Handled by component
             throw new Error(msg);
-        } finally {
-            setLoading(false);
         }
     };
 
     const signIn = async (email: string, password: string): Promise<any> => {
         try {
-            setLoading(true);
             await AuthService.login({ email, password });
             showNotification('success', `Welcome back to ${branding?.brand_name || 'Ayahay'}!`);
-            await loadProfile();
+            // Load profile in background — caller will redirect immediately
+            loadProfile();
             return 'success';
         } catch (error: any) {
             console.error('Login error:', error);
             const msg = error.response?.data?.message || 'Login failed';
             showNotification('error', msg);
             throw error;
-        } finally {
-            setLoading(false);
         }
     };
 
     const signInWithGoogle = async () => {
         try {
-            setLoading(true);
             await AuthService.signInWithGoogle();
             showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}!`);
-            await loadProfile(true);
+            // Load profile in background — caller will redirect immediately
+            loadProfile(true);
             return 'success';
         } catch (error: any) {
             console.error('Google sign-in error:', error);
             const msg = error.message || 'Google sign-in failed';
             showNotification('error', msg);
             throw error;
-        } finally {
-            setLoading(false);
         }
     };
 
     const signInWithFacebook = async () => {
         try {
-            setLoading(true);
             await AuthService.signInWithFacebook();
             showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}!`);
-            await loadProfile(true);
+            // Load profile in background — caller will redirect immediately
+            loadProfile(true);
             return 'success';
         } catch (error: any) {
             console.error('Facebook sign-in error:', error);
             const msg = error.message || 'Facebook sign-in failed';
             showNotification('error', msg);
             throw error;
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -260,6 +211,10 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             showNotification('success', 'Password reset email sent (if account exists)');
             return true;
         } catch (error: any) {
+            const retryAfter = error.response?.data?.retryAfter;
+            if (retryAfter) {
+                sessionStorage.setItem('resend_otp', retryAfter.toString());
+            }
             const msg = error.response?.data?.message || 'Failed to request password reset';
             throw new Error(msg);
         } finally {
@@ -281,8 +236,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         }
     };
 
-    const sendEmailVerification = async (user: any) => {
-        // No endpoint for this in current API
+    const sendEmailVerification = async (_user: any) => {
         console.warn('sendEmailVerification not supported by API');
     };
 
@@ -299,17 +253,6 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             setLoading(false);
         }
     };
-
-    const clearSession = useCallback(() => {
-        setCurrentUser(null);
-        setLoggedInAccount(null);
-        eraseCookie('user');
-        eraseCookie('access_token');
-        eraseCookie('refresh_token');
-        // Clear account related cache
-        invalidateItem('logged-in-user-profile' as any);
-        accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
-    }, []);
 
     const logout = async (): Promise<void> => {
         try {
@@ -363,7 +306,4 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             )}
         </AuthContext.Provider>
     );
-
-
 }
-
