@@ -3,15 +3,15 @@
     "brand_name": "Hayahai",
     "domain_name": "hayahai",
     "subdomain_name": "hayahai",
-    "favicon_url": "https://ayahay-v2-assets.s3.amazonaws.com/whitelabel/1/favicon/a884b5b6-981e-46f7-b3c7-b29662f604a1.ico",
+    "favicon_url": "/favicon.ico",
     "colors": {
-        "accent": "oklch(34.38% 0.118 262.34)",
-        "primary": "oklch(34.38% 0.118 262.34)",
-        "secondary": "oklch(83.66% 0.066 235.48)"
+        "accent": "#042B3F",
+        "primary": "#004C70",
+        "secondary": "#7ACCFA"
     },
     "logo": {
-        "dark": "https://uat.ayahay.com/assets/images/ayahay_logo_blue.png",
-        "light": "https://uat.ayahay.com/assets/images/ayahay_logo_blue.png"
+        "dark": "/Hayahai_logo_with_text.png",
+        "light": "/Hayahai_logo_with_text.png"
     },
     "slogan": "Kay Ang Pagsakay, Dapat HAYAHAI!",
     "motto": null,

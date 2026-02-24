@@ -1,14 +1,22 @@
 import { IThemeSettings } from '@/models';
 import { IBrandingResponse } from '@/models/branding.model';
 import { THEME_SETTINGS_API } from 'constants/api';
-import themeSettingsData from '@/data/theme-settings.json';
+import brandingData from '@/data/branding.json';
 import { IS_CLIENT } from '../config';
+
+const DEFAULT_THEME: IThemeSettings = {
+  primary: brandingData.colors.primary,
+  secondary: brandingData.colors.secondary,
+  accent: brandingData.colors.accent,
+  primaryColor: brandingData.colors.primary,
+  secondaryColor: brandingData.colors.secondary,
+  fontStyle: 'Inter'
+};
 
 export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
   try {
     if (!IS_CLIENT) {
-      // console.log("isClient disabled")
-      return (themeSettingsData as IThemeSettings[])[0];
+      return DEFAULT_THEME;
     }
 
     const res = await fetch(THEME_SETTINGS_API, {
@@ -27,11 +35,11 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
       };
     }
 
-    return (themeSettingsData as IThemeSettings[])[0];
+    return DEFAULT_THEME;
   } catch (e) {
     if (typeof window === 'undefined') {
       console.error('Error fetching theme settings:', e);
     }
-    return (themeSettingsData as IThemeSettings[])[0];
+    return DEFAULT_THEME;
   }
 }

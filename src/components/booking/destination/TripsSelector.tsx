@@ -64,7 +64,7 @@ export default function TripsSelector() {
         destPortId: searchParams.get('destPortId') ? parseInt(searchParams.get('destPortId')!, 10) : 0,
         origin_code: searchParams.get('origin_code') ?? undefined,
         destination_code: searchParams.get('destination_code') ?? undefined,
-        departureDate: searchParams.get('departure_date') ?? '',
+        departureDate: searchParams.get('filterSpecificDepartureDate') ?? searchParams.get('departure_date') ?? '',
         passengerCount: searchParams.get('passenger_count') ? parseInt(searchParams.get('passenger_count')!, 10) : 1,
         vehicleCount: searchParams.get('vehicle_count') ? parseInt(searchParams.get('vehicle_count')!, 10) : 0,
         cabinIds: searchParams.get('cabinIds') ?? undefined,
@@ -91,7 +91,7 @@ export default function TripsSelector() {
         searchQuery.origin_code = searchParams.get('destination_code') ?? undefined;
         searchQuery.destPortId = searchParams.get('srcPortId') ? parseInt(searchParams.get('srcPortId')!, 10) : 0;
         searchQuery.srcPortId = searchParams.get('destPortId') ? parseInt(searchParams.get('destPortId')!, 10) : 0;
-        searchQuery.departureDate = searchParams.get('returnDate') ?? '';
+        searchQuery.departureDate = searchParams.get('filterSpecificReturnDate') ?? searchParams.get('returnDate') ?? '';
         searchQuery.sort = searchParams.get('sortReturn') ?? 'departureDate';
         searchQuery.filterSpecificDate =
           searchParams.get('filterSpecificReturnDate') ?? searchParams.get('returnDate') ?? undefined;
@@ -114,11 +114,23 @@ export default function TripsSelector() {
   }, [fetchTrips]);
 
   const handleProceed = () => {
+    const getJoinedIds = (selection: SelectedTrip | null) => {
+      if (!selection || !selection.segmentSelections) return selection?.cabinId?.toString();
+      return selection.segmentSelections.map(s => s.cabinId).join('|');
+    }
+
+    const getJoinedNames = (selection: SelectedTrip | null) => {
+      if (!selection || !selection.segmentSelections) return selection?.cabinType;
+      return selection.segmentSelections.map(s => s.cabinType).join('|');
+    }
+
     const queryValues = {
       departureTripId: selectedDepartureCabin?.tripId?.toString() ?? undefined,
-      departureCabinId: selectedDepartureCabin?.cabinId?.toString() ?? undefined,
+      departureCabinName: getJoinedNames(selectedDepartureCabin),
+      departureCabinId: getJoinedIds(selectedDepartureCabin),
       returnTripId: selectedReturnCabin?.tripId?.toString() ?? undefined,
-      returnCabinId: selectedReturnCabin?.cabinId?.toString() ?? undefined,
+      returnCabinName: getJoinedNames(selectedReturnCabin),
+      returnCabinId: getJoinedIds(selectedReturnCabin),
       passengerCount: searchParams.get('passengerCount') ?? undefined,
       vehicleCount: searchParams.get('vehicleCount') ?? undefined
     };

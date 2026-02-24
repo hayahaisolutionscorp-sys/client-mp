@@ -17,10 +17,10 @@ export interface Passenger {
     birthdayIso: string;
     address: string;
   };
-  preferredCabinId?: number; // Optional field
+  preferredCabinName?: string; // Optional field
   drivesVehicleId?: number; // Optional field
 }
-  
+
 export interface GeneratePassengersProps {
   passengerDetails?: {
     passenger: PassengerData;
@@ -28,7 +28,7 @@ export interface GeneratePassengersProps {
   };
   vehicleDetails?: VehicleData[];
   tripId: number;
-  cabinId: number;
+  cabinName?: string;
 }
 
 export interface Vehicle {
@@ -56,10 +56,10 @@ export interface GenerateVehiclesProps {
 }
 
 export interface BookingTrip {
-    tripId: number;
-    passengerId: number;
-    bookingTripPassengers: Passenger[];
-    bookingTripVehicles: Vehicle[];
+  tripId: number;
+  passengerId: number;
+  bookingTripPassengers: Passenger[];
+  bookingTripVehicles: Vehicle[];
 }
 
 export interface GenerateBookingTripProps {
@@ -69,28 +69,28 @@ export interface GenerateBookingTripProps {
   };
   vehicleDetails?: VehicleData[];
   tripId: number;
-  cabinId: number;
+  cabinName?: string;
 }
 
 export interface Booking {
-    bookingTrips: BookingTrip[];
-    paymentGateway: string;
-    bookingType: string;
-    contactEmail: string;
-    contactMobile: string;
-    consigneeName: string;
+  bookingTrips: BookingTrip[];
+  paymentGateway: string;
+  bookingType: string;
+  contactEmail: string;
+  contactMobile: string;
+  consigneeName: string;
 }
 
 export interface GenerateBookingProps {
-    passengerDetails?: {
-      passenger: PassengerData;
-      companions?: PassengerData[];
-    };
-    contactDetails?: ContactData
-    vehicleDepartureDetails?: VehicleData[];
-    vehicleReturnDetails?: VehicleData[];
-    departureTripId: number;
-    returnTripId: number;
-    departureCabinId: number;
-    returnCabinId: number;
-  }
+  passengerDetails?: {
+    passenger: PassengerData;
+    companions?: PassengerData[];
+  };
+  contactDetails?: ContactData
+  vehicleDepartureDetails?: VehicleData[];
+  vehicleReturnDetails?: VehicleData[];
+  departureTripId: number;
+  returnTripId: number;
+  departureCabinName?: string;
+  returnCabinName?: string;
+}

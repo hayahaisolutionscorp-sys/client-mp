@@ -10,4 +10,5 @@ export interface PassengerData {
     accommodation: string;
     address: string;
     discountType?: string | null;
+    isDependent?: boolean;
 }

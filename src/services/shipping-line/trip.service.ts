@@ -41,7 +41,11 @@ export async function getAvailableTrips(
     if (searchQuery.destination_code) params.append('destination_code', searchQuery.destination_code);
     if (searchQuery.passengerCount !== undefined) params.append('passenger_count', searchQuery.passengerCount.toString());
     if (searchQuery.vehicleCount !== undefined) params.append('vehicle_count', searchQuery.vehicleCount.toString());
-    if (searchQuery.departureDate) params.append('departure_date', searchQuery.departureDate.split('T')[0]);
+    if (searchQuery.shippingLineIds) params.append('shippingLineIds', searchQuery.shippingLineIds);
+    if (searchQuery.departureDate) {
+      const formattedDate = toPhilippinesTime(searchQuery.departureDate, 'YYYY-MM-DD');
+      if (formattedDate) params.append('departure_date', formattedDate);
+    }
     if (pagination.page) params.append('page', pagination.page.toString());
     if (searchQuery.sort) params.append('sort', searchQuery.sort);
 
@@ -50,38 +54,132 @@ export async function getAvailableTrips(
     if (searchQuery.destPortId && !searchQuery.destination_code) params.append('destPortId', searchQuery.destPortId.toString());
 
     const res = await fetch(`${TRIP_API}?${params.toString()}`, {
-      next: { tags: ['trips'], revalidate: 3600 }
+      cache: 'no-store'
     });
 
     if (res.ok) {
       const responseData = await res.json();
       const rawTrips = responseData.data || [];
+      const allRates = responseData.rates || {};
+      const lightLogo = responseData.light_logo;
 
       const mappedTrips: ITrip[] = rawTrips.map((t: any) => {
-        const firstSegment = t.segments?.[0] || {};
+        const segments = t.segments || [];
+
+        const mappedSegments = segments.map((seg: any) => {
+          const routeCode = `${seg.source_port_code}-${seg.destination_port_code}`;
+          const routeRates = allRates[routeCode] || {};
+          const passengerRates = routeRates.passenger_rates || [];
+          const rateSnapshotId = routeRates.snapshot?.id ? parseInt(routeRates.snapshot.id, 10) : 0;
+
+          // Create a map of cabin type code to adult rate amount for this specific segment/route
+          const segRatesMap = new Map<string, number>();
+          if (Array.isArray(passengerRates)) {
+            passengerRates.forEach((rate: any) => {
+              if (rate.passenger_type_code === 'ADULT' && rate.accom_code) {
+                segRatesMap.set(rate.accom_code.toUpperCase(), parseFloat(rate.amount));
+              }
+            });
+          }
+
+          const segCabins = seg.cabins || [];
+          const availableCabins: any[] = segCabins
+            .map((c: any) => {
+              const cabinTypeName = c.cabin_type_name?.toUpperCase();
+              const adultFare = segRatesMap.get(cabinTypeName);
+
+              if (adultFare === undefined) return null;
+
+              return {
+                tripId: t.id,
+                cabinId: c.id,
+                cabin: {
+                  id: c.id,
+                  shipId: c.ship_id,
+                  cabinTypeId: c.cabin_type_id,
+                  cabinType: {
+                    id: c.cabin_type_id,
+                    shippingLineId: 0,
+                    name: c.cabin_type_name || c.name,
+                    description: c.cabin_type_description
+                  },
+                  name: c.name,
+                  recommendedPassengerCapacity: c.max_passenger_capacity,
+                  cabin_type_name: c.cabin_type_name,
+                  cabin_type_description: c.cabin_type_description
+                },
+                availablePassengerCapacity: c.max_passenger_capacity,
+                passengerCapacity: c.max_passenger_capacity,
+                adultFare: adultFare
+              };
+            })
+            .filter((c: any) => c !== null); // Filter out cabins without rates
+
+          const remainingVehicles = seg.remaining_capacities?.vehicles || {};
+          const totalVehicleCapacity = Object.values(remainingVehicles).reduce((sum: number, val: any) => sum + (val || 0), 0);
+
+          return {
+            id: seg.id,
+            tripId: t.id,
+            shipId: seg.ship_id,
+            shipName: seg.ship_name,
+            shippingLineId: seg.shipping_line_id || 0,
+            shippingLine: seg.shipping_line,
+            srcPortId: 0,
+            srcPortName: seg.source_port_name,
+            destPortId: 0,
+            destPortName: seg.destination_port_name,
+            departureDateIso: seg.scheduled_departure,
+            arrivalTimeDateIso: seg.scheduled_arrival,
+            referenceNo: seg.reference_number,
+            availableCabins: availableCabins,
+            availableVehicleCapacity: totalVehicleCapacity,
+            remainingVehicleCapacity: remainingVehicles,
+            vehicleCapacity: totalVehicleCapacity,
+            bookingStartDateIso: seg.booking_start_date,
+            bookingCutOffDateIso: seg.booking_cut_off_date,
+            seatSelection: seg.is_seat_can_be_selected,
+            rateTableId: rateSnapshotId
+          };
+        });
+
+        const firstSegment = mappedSegments[0] || {};
+        const totalTripVehicleCapacity = mappedSegments.length > 0
+          ? Math.min(...mappedSegments.map((s: any) => s.availableVehicleCapacity))
+          : 0;
+
         return {
           id: t.id,
-          referenceNo: firstSegment.reference_number || '',
-          shipId: firstSegment.ship_id || 0,
-          shipName: firstSegment.ship_name,
-          shippingLineId: 0, // API doesn't return this top-level yet
+          referenceNo: firstSegment.referenceNo || '',
+          shipId: firstSegment.shipId || 0,
+          shipName: firstSegment.shipName,
+          shippingLineId: firstSegment.shippingLineId || 0,
+          shippingLine: firstSegment.shippingLine || t.shipping_line,
           srcPortId: 0,
           srcPortName: t.origin_name,
           destPortId: 0,
           destPortName: t.destination_name,
+          lightLogoUrl: lightLogo,
           departureDateIso: t.total_departure_time,
           arrivalTimeDateIso: t.total_arrival_time,
           status: 'scheduled',
-          rateTableId: firstSegment.rate_table_id || 0,
+          rateTableId: firstSegment.rateTableId || 0,
           allowOnlineBooking: true,
-          seatSelection: firstSegment.is_seat_can_be_selected || false,
-          availableVehicleCapacity: 0,
-          vehicleCapacity: 0,
-          bookingStartDateIso: firstSegment.booking_start_date || '',
-          bookingCutOffDateIso: firstSegment.booking_cut_off_date || '',
-          availableCabins: [],
+          seatSelection: firstSegment.seatSelection || false,
+          availableVehicleCapacity: totalTripVehicleCapacity,
+          remainingVehicleCapacity: firstSegment.remainingVehicleCapacity || {},
+          vehicleCapacity: totalTripVehicleCapacity,
+          bookingStartDateIso: firstSegment.bookingStartDateIso || '',
+          bookingCutOffDateIso: firstSegment.bookingCutOffDateIso || '',
+          availableCabins: firstSegment.availableCabins || [],
           availableSeatTypes: [],
-          meals: []
+          meals: [],
+
+          type: t.type,
+          segments: mappedSegments,
+          totalDurationMinutes: t.total_duration_minutes,
+          totalLayoverMinutes: t.total_layover_minutes,
+          intermediatePorts: t.intermediate_ports
         };
       });
 
@@ -127,7 +225,6 @@ export async function getScheduleAndFares(
     if (limit) params.append('limit', limit.toString());
 
     const res = await fetch(`${TRIP_API}/schedule-and-fares?${params.toString()}`, {
-      next: { tags: ['schedule-and-fares'], revalidate: 3600 }
     });
 
     if (res.ok) {

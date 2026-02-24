@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type FC } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle, ForwardRefRenderFunction } from 'react';
 import { FiPlus, FiTrash } from 'react-icons/fi';
 import { PiInfo } from 'react-icons/pi';
 import { GiCheckMark } from 'react-icons/gi';
@@ -10,14 +10,18 @@ import { Badge } from '@/components/ui/Badge';
 import { useSearchParams } from 'next/navigation';
 import Combobox from '@/components/ui/Combobox';
 
+import { AlertModal } from '@/components/ui/AlertModal';
 import type { DISCOUNT_TYPE } from 'constants/enum';
 import { getDefaultDOB } from 'helpers/date.helpers';
 import { NATIONALITIES } from 'constants/default';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import { hexToRgb } from 'helpers/theme.helpers';
-import { getRateTableRowsByRateTableId } from '@/services';
+import { getRateTableRowsByRateTableId, getActivePassengerTypes, PassengerType } from '@/services';
 import { PassengerData } from '@/types/booking/passenger-data';
-import { IRateTableRow } from '@/models';
+import { IRateTableRow, IDependent } from '@/models';
+import { differenceInYears, format } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContexts';
+import { getDependents } from '@/services/user/profiles.service';
 
 interface PassengerDetails {
   passenger: PassengerData;
@@ -34,18 +38,21 @@ interface FareTypes {
 interface PassengerDetailsFormProps {
   rateTableId: number;
   title?: string;
+  vehicleCount?: number;
   passengerDetails?: PassengerDetails | undefined;
   onChange?: (data: { passenger: PassengerData; companions: PassengerData[] }) => void;
+  onAddVehicle?: () => void;
 }
 
-const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onChange }) => {
+const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () => void }, PassengerDetailsFormProps> = ({ rateTableId, vehicleCount = 0, passengerDetails, onChange, onAddVehicle }, ref) => {
   const generateUniqueNumber = (): number => {
     return (Date.now() + Math.floor(Math.random() * 1000)) * -1;
   };
 
   const [fareTypes, setFareTypes] = useState<FareTypes[]>([]);
-  const [companions, setCompanions] = useState<PassengerData[]>([]);
-  const [passenger, setPassenger] = useState<PassengerData>({
+  const [passengerTypes, setPassengerTypes] = useState<PassengerType[]>([]);
+  const [companions, setCompanions] = useState<PassengerData[]>(passengerDetails?.companions || []);
+  const [passenger, setPassenger] = useState<PassengerData>(passengerDetails?.passenger || {
     id: generateUniqueNumber(),
     firstname: '',
     lastname: '',
@@ -54,18 +61,63 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
     nationality: 'Filipino',
     accommodation: '',
     address: '',
-    discountType: null
+    discountType: 'ADULT'
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [userDependents, setUserDependents] = useState<IDependent[]>([]);
+  const { loggedInAccount } = useAuth();
   const searchParams = useSearchParams();
 
-  const [formData, setFormData] = useState({ passenger, companions });
+  const [formData, setFormData] = useState({
+    passenger: passengerDetails?.passenger || passenger,
+    companions: passengerDetails?.companions || companions
+  });
   const [isClient, setIsClient] = useState(false);
   const themeSettings = useThemeSettings();
+
+  const [alertModal, setAlertModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+  }>({
+    isOpen: false,
+    title: '',
+    description: ''
+  });
 
   useEffect(() => {
     onChange?.(formData); // Notify parent AFTER rendering
   }, [formData, onChange]);
+
+  useEffect(() => {
+    getActivePassengerTypes().then(setPassengerTypes);
+  }, []);
+
+  useEffect(() => {
+    if (loggedInAccount?.id) {
+      getDependents(loggedInAccount.id).then(setUserDependents);
+    } else {
+      setUserDependents([]);
+    }
+  }, [loggedInAccount]);
+
+  // Auto-fill first passenger details if user is logged in
+  useEffect(() => {
+    if (loggedInAccount?.passenger && !passenger.firstname && !passenger.lastname) {
+      const profile = loggedInAccount.passenger;
+      const updatedPassenger = {
+        ...passenger,
+        firstname: profile.firstName || '',
+        lastname: profile.lastName || '',
+        sex: profile.sex || 'Male',
+        dob: profile.birthdayIso ? format(new Date(profile.birthdayIso), 'yyyy-MM-dd') : getDefaultDOB(),
+        nationality: profile.nationality || 'Filipino',
+        address: profile.address || '',
+      };
+      setPassenger(updatedPassenger);
+      setFormData(prev => ({ ...prev, passenger: updatedPassenger }));
+    }
+  }, [loggedInAccount, passenger.firstname, passenger.lastname]);
 
   useEffect(() => {
     if (rateTableId) {
@@ -98,67 +150,76 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
     setIsClient(true);
   }, []);
 
-  const handleDiscountTypeChange = (value: keyof typeof DISCOUNT_TYPE | null, id: number, isCompanion: boolean) => {
+  const handleDiscountTypeChange = (value: string | null, id: number, isCompanion: boolean) => {
+    let updatedData;
     if (isCompanion) {
-      const updatedCompanions = companions.map((comp) => (comp.id === id ? { ...comp, discountType: value } : comp));
+      const updatedCompanions = companions.map((comp) => (comp.id === id ? { ...comp, discountType: value as any } : comp));
       setCompanions(updatedCompanions);
+      updatedData = updatedCompanions.find(c => c.id === id);
       setFormData({
         passenger,
         companions: updatedCompanions
       });
     } else {
-      const updatedPassenger = { ...passenger, discountType: value };
+      const updatedPassenger = { ...passenger, discountType: value as any };
       setPassenger(updatedPassenger);
+      updatedData = updatedPassenger;
       setFormData({
         passenger: updatedPassenger,
         companions
       });
     }
+
+    if (updatedData) {
+      const validationErrors = validateFields(updatedData, !isCompanion);
+      setErrors((prev) => ({ ...prev, ...validationErrors }));
+    }
   };
 
   const uniqueFareTypes = Array.from(new Map(fareTypes.map((type) => [type.discountType, type])).values());
 
-  const renderFareTypeSelector = (passenger: PassengerData, isCompanion = false) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-customText mb-2">Passenger Type</label>
-      {isClient && (
-        <div className="flex flex-wrap gap-4">
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input
-              type="radio"
-              name={`discountType-${passenger.id}`}
-              value=""
-              checked={passenger.discountType === null}
-              onChange={() => handleDiscountTypeChange(null, passenger.id, isCompanion)}
-              className="w-4 h-4 cursor-pointer"
-              style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
-            />
-            <span className="text-sm capitalize">Regular</span>
-          </label>
-          {uniqueFareTypes.map((type) => (
-            <label key={`${type.id}-${passenger.id}`} className="flex items-center space-x-2 cursor-pointer">
+  const renderFareTypeSelector = (passenger: PassengerData, isCompanion = false) => {
+    const filteredTypes = passengerTypes.filter(type => type.code === 'ADULT');
+    const selectedType = filteredTypes.find(t => t.code === passenger.discountType);
+
+    return (
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-customText mb-2">Passenger Type</label>
+        <div className="flex items-center space-x-4 mt-2">
+          {filteredTypes.map((type) => (
+            <label key={type.id} className="flex items-center cursor-pointer">
               <input
                 type="radio"
                 name={`discountType-${passenger.id}`}
-                value={type.discountType}
-                checked={passenger.discountType === type.discountType}
-                onChange={() => handleDiscountTypeChange(type.discountType || null, passenger.id, isCompanion)}
-                className="w-4 h-4 cursor-pointer"
+                value={type.code}
+                checked={passenger.discountType === type.code}
+                onChange={(e) => handleDiscountTypeChange(e.target.value, passenger.id, isCompanion)}
+                className="w-4 h-4 mr-2 cursor-pointer"
                 style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
+                disabled={passenger.isDependent}
               />
-              <span className="text-sm capitalize">{type.discountType}</span>
+              {type.name}
             </label>
           ))}
         </div>
-      )}
-    </div>
-  );
+        {!passenger.discountType && errors[`${passenger.id}-discountType`] && (
+          <p className="text-red-500 text-sm mt-1">{errors[`${passenger.id}-discountType`]}</p>
+        )}
+        {errors[`${passenger.id}-age`] && (
+          <p className="text-red-500 text-sm mt-1">{errors[`${passenger.id}-age`]}</p>
+        )}
+      </div>
+    );
+  };
 
   useEffect(() => {
+    // Only auto-initialize companions if no data was restored from props
+    if (passengerDetails) return;
+
     const passengerCount = Number.parseInt(searchParams.get('passengerCount') || '0', 10);
 
-    // Add passenger forms automatically if passengerCount is not empty and passengerCount > 0
-    if (passengerCount && passengerCount > 0) {
+    // Add passenger forms automatically if passengerCount > 1 and companions are empty
+    if (passengerCount > 1 && companions.length === 0) {
       const newPassengers = Array.from({ length: passengerCount - 1 }).map(() => ({
         id: generateUniqueNumber(),
         firstname: '',
@@ -168,35 +229,61 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
         nationality: 'Filipino',
         accommodation: '',
         address: '',
-        discountType: null
+        discountType: 'ADULT'
       }));
       setCompanions(newPassengers);
       setFormData({ passenger, companions: newPassengers });
     }
-  }, [searchParams, passenger]);
+  }, [searchParams, passengerDetails]); // Only run when params or initial data changes
 
-  const handleAddCompanion = () => {
+  const handleAddCompanion = (dependent?: IDependent) => {
     setCompanions((passengers) => {
-      const newCompanions = [
-        ...passengers,
-        {
-          id: generateUniqueNumber(),
-          firstname: '',
-          lastname: '',
-          sex: 'Male',
-          dob: getDefaultDOB(),
-          nationality: 'Filipino',
-          accommodation: '',
-          address: '',
-          discountType: null
-        }
-      ];
+      const newCompanion: PassengerData = dependent ? {
+        id: generateUniqueNumber(),
+        firstname: dependent.first_name,
+        lastname: dependent.last_name,
+        sex: dependent.sex ? (dependent.sex.charAt(0).toUpperCase() + dependent.sex.slice(1).toLowerCase()) : 'Male',
+        dob: dependent.birthday ? format(new Date(dependent.birthday), 'yyyy-MM-dd') : getDefaultDOB(),
+        nationality: dependent.nationality || 'Filipino',
+        accommodation: '',
+        address: dependent.address || '',
+        discountType: 'ADULT',
+        isDependent: true
+      } : {
+        id: generateUniqueNumber(),
+        firstname: '',
+        lastname: '',
+        sex: 'Male',
+        dob: getDefaultDOB(),
+        nationality: 'Filipino',
+        accommodation: '',
+        address: '',
+        discountType: 'ADULT'
+      };
+
+      const newCompanions = [...passengers, newCompanion];
       setFormData({ passenger, companions: newCompanions });
       return newCompanions;
     });
   };
 
+  // Expose handleAddCompanion to parent via ref
+  useImperativeHandle(ref, () => ({
+    handleAddCompanion
+  }));
+
   const handleRemoveCompanion = (id: number) => {
+    // Check 1:1 ratio constraint
+    const currentPassengerCount = companions.length + 1;
+    if (currentPassengerCount <= vehicleCount) {
+      setAlertModal({
+        isOpen: true,
+        title: 'Passenger Required',
+        description: `Cannot remove passenger. At least ${vehicleCount} passenger(s) are required for the ${vehicleCount} vehicle(s) selected.`
+      });
+      return;
+    }
+
     setCompanions((companions) => {
       const updatedCompanions = companions.filter((companion) => companion.id !== id);
       setFormData({ passenger, companions: updatedCompanions });
@@ -212,6 +299,11 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
             <div className="flex items-center">
               <h2 className="text-lg font-semibold mr-2">Companion {index + 1} Details</h2>
               <p className="text-sm">(Adult Ticket)</p>
+              {companion.isDependent && (
+                <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-700 border-blue-200">
+                  Dependent
+                </Badge>
+              )}
             </div>
           </div>
           <Button
@@ -235,6 +327,8 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
               value={companion.firstname}
               onChange={(e) => handleChange('firstname', e.target.value, companion.id)}
               placeholder="e.g. John"
+              readOnly={companion.isDependent}
+              disabled={companion.isDependent}
             />
             {!companion.firstname.trim() && errors[`${companion.id}-firstname`] && (
               <p className="text-red-500 text-sm mt-1">{errors[`${companion.id}-firstname`]}</p>
@@ -246,27 +340,31 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
               <label htmlFor="lastname" className="block text-sm font-medium text-customText">
                 Last Name
               </label>
-              <div className="flex items-center mt-2 sm:mt-0">
-                <input
-                  type="checkbox"
-                  id={`same-lastname-${companion.id}`}
-                  onChange={(e) => handleChange('lastname', e.target.checked ? passenger.lastname : '', companion.id)}
-                  className="mr-2 cursor-pointer"
-                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
-                />
-                <label
-                  htmlFor={`same-lastname-${companion.id}`}
-                  className="text-sm font-medium text-customText cursor-pointer"
-                >
-                  Same as main passenger&apos;s lastname
-                </label>
-              </div>
+              {!companion.isDependent && (
+                <div className="flex items-center mt-2 sm:mt-0">
+                  <input
+                    type="checkbox"
+                    id={`same-lastname-${companion.id}`}
+                    onChange={(e) => handleChange('lastname', e.target.checked ? passenger.lastname : '', companion.id)}
+                    className="mr-2 cursor-pointer"
+                    style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
+                  />
+                  <label
+                    htmlFor={`same-lastname-${companion.id}`}
+                    className="text-sm font-medium text-customText cursor-pointer"
+                  >
+                    Same as main passenger&apos;s lastname
+                  </label>
+                </div>
+              )}
             </div>
             <Input
               id="lastname"
               value={companion.lastname}
               onChange={(e) => handleChange('lastname', e.target.value, companion.id)}
               placeholder="e.g. Doe"
+              readOnly={companion.isDependent}
+              disabled={companion.isDependent}
             />
             {!companion.lastname.trim() && errors[`${companion.id}-lastname`] && (
               <p className="text-red-500 text-sm mt-1">{errors[`${companion.id}-lastname`]}</p>
@@ -283,10 +381,11 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                   type="radio"
                   name={`sex-${companion.id}`}
                   value="Male"
-                  checked={companion.sex === 'Male'}
+                  checked={companion.sex?.toLowerCase() === 'male'}
                   onChange={(e) => handleChange('sex', e.target.value, companion.id)}
                   className="w-4 h-4 mr-2 cursor-pointer"
                   style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
+                  disabled={companion.isDependent}
                 />
                 Male
               </label>
@@ -295,10 +394,11 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                   type="radio"
                   name={`sex-${companion.id}`}
                   value="Female"
-                  checked={companion.sex === 'Female'}
+                  checked={companion.sex?.toLowerCase() === 'female'}
                   onChange={(e) => handleChange('sex', e.target.value, companion.id)}
                   className="w-4 h-4 mr-2 cursor-pointer"
                   style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
+                  disabled={companion.isDependent}
                 />
                 Female
               </label>
@@ -318,6 +418,8 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
               value={companion.dob}
               onChange={(e) => handleChange('dob', e.target.value, companion.id)}
               placeholder="mm/dd/yyyy"
+              readOnly={companion.isDependent}
+              disabled={companion.isDependent}
             />
             {!companion.dob.trim() && errors[`${companion.id}-dob`] && (
               <p className="text-red-500 text-sm mt-1">{errors[`${companion.id}-dob`]}</p>
@@ -330,12 +432,20 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                 Nationality
               </label>
             </div>
-            <Combobox
-              values={NATIONALITIES}
-              placeholder="Search nationality"
-              defaultValue={companion.nationality}
-              onChange={(selectedValue) => handleChange('nationality', selectedValue, companion.id)}
-            />
+            {companion.isDependent ? (
+              <Input
+                value={companion.nationality}
+                readOnly
+                disabled
+              />
+            ) : (
+              <Combobox
+                values={NATIONALITIES}
+                placeholder="Search nationality"
+                defaultValue={companion.nationality}
+                onChange={(selectedValue) => handleChange('nationality', selectedValue, companion.id)}
+              />
+            )}
             {!companion.nationality.trim() && errors[`${companion.id}-nationality`] && (
               <p className="text-red-500 text-sm mt-1">{errors[`${companion.id}-nationality`]}</p>
             )}
@@ -343,29 +453,34 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
 
           <div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
-              <label htmlFor="address" className="block text-sm font-medium text-customText">
+              <label htmlFor={`address-${companion.id}`} className="block text-sm font-medium text-customText">
                 Address
               </label>
-              <div className="flex items-center mt-2 sm:mt-0">
-                <input
-                  id={`same-address-${companion.id}`}
-                  onChange={(e) => handleChange('address', e.target.checked ? passenger.address : '', companion.id)}
-                  className="mr-2 cursor-pointer"
-                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
-                />
-                <label
-                  htmlFor={`same-address-${companion.id}`}
-                  className="text-sm font-medium text-customText cursor-pointer"
-                >
-                  Same as main passenger&apos;s address
-                </label>
-              </div>
+              {!companion.isDependent && (
+                <div className="flex items-center mt-2 sm:mt-0">
+                  <input
+                    type="checkbox"
+                    id={`same-address-${companion.id}`}
+                    onChange={(e) => handleChange('address', e.target.checked ? passenger.address : '', companion.id)}
+                    className="mr-2 cursor-pointer"
+                    style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
+                  />
+                  <label
+                    htmlFor={`same-address-${companion.id}`}
+                    className="text-sm font-medium text-customText cursor-pointer"
+                  >
+                    Same as main passenger&apos;s address
+                  </label>
+                </div>
+              )}
             </div>
             <Input
-              id="address"
+              id={`address-${companion.id}`}
               value={companion.address}
               onChange={(e) => handleChange('address', e.target.value, companion.id)}
               placeholder="House #, Street, City, Province, Postal Code"
+              readOnly={companion.isDependent}
+              disabled={companion.isDependent}
             />
             {!companion.address.trim() && errors[`${companion.id}-address`] && (
               <p className="text-red-500 text-sm mt-1">{errors[`${companion.id}-address`]}</p>
@@ -377,63 +492,72 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
     ));
   };
 
+  const validateAge = (dob: string, passengerTypeCode: string | null): string | null => {
+    if (!dob || !passengerTypeCode) return null;
+
+    const passengerType = passengerTypes.find(t => t.code === passengerTypeCode);
+    if (!passengerType) return null;
+
+    const age = differenceInYears(new Date(), new Date(dob));
+
+    if (passengerType.age_min !== null && age < passengerType.age_min) {
+      return `Age must be at least ${passengerType.age_min} years old for ${passengerType.name}`;
+    }
+
+    if (passengerType.age_max !== null && age > passengerType.age_max) {
+      return `Age must be at most ${passengerType.age_max} years old for ${passengerType.name}`;
+    }
+
+    return null;
+  };
+
   const validateFields = (updatedData: PassengerData, isMainPassenger = false) => {
     const errors: Record<string, string> = {};
+    const prefix = isMainPassenger ? '' : `${updatedData.id}-`;
 
-    // Check if it's the passenger or a companion and validate accordingly
-    if (isMainPassenger) {
-      // For passenger, no id in the error key
-      if (!updatedData.firstname.trim()) {
-        errors['firstname'] = 'First Name is required';
-      }
-      if (!updatedData.lastname.trim()) {
-        errors['lastname'] = 'Last Name is required';
-      }
-      if (!updatedData.sex.trim()) {
-        errors['sex'] = 'Sex is required';
-      }
-      if (!updatedData.dob.trim()) {
-        errors['dob'] = 'Date of Birth is required';
-      }
-      if (!updatedData.nationality.trim()) {
-        errors['nationality'] = 'Nationality is required';
-      }
-      if (!updatedData.address.trim()) {
-        errors['address'] = 'Address is required';
-      }
+    const getErrorKey = (field: string) => isMainPassenger ? field : `${updatedData.id}-${field}`;
+
+    if (!updatedData.firstname.trim()) errors[getErrorKey('firstname')] = 'First Name is required';
+    if (!updatedData.lastname.trim()) errors[getErrorKey('lastname')] = 'Last Name is required';
+    if (!updatedData.sex.trim()) errors[getErrorKey('sex')] = 'Sex is required';
+    if (!updatedData.dob.trim()) errors[getErrorKey('dob')] = 'Date of Birth is required';
+    if (!updatedData.nationality.trim()) errors[getErrorKey('nationality')] = 'Nationality is required';
+    if (!updatedData.address.trim()) errors[getErrorKey('address')] = 'Address is required';
+
+    // Validate Passenger Type presence (assuming it's required now since we are using a dropdown)
+    // If it's optional, we can relax this, but usually "Adult" is default or required.
+    // For now, let's say it's required if we want to enforce proper type selection.
+    // However, existing logic allowed null (Regular). If "Regular" maps to "ADULT" in new system, we should handle default.
+    // Let's assume user must select a type.
+    if (!updatedData.discountType) {
+      errors[getErrorKey('discountType')] = 'Passenger Type is required';
+    }
+
+    // Validate Age
+    const ageError = validateAge(updatedData.dob, updatedData.discountType as string);
+    if (ageError) {
+      errors[getErrorKey('age')] = ageError;
     } else {
-      // For companions, include the id in the error key
-      if (!updatedData.firstname.trim()) {
-        errors[`${updatedData.id}-firstname`] = 'First Name is required';
-      }
-      if (!updatedData.lastname.trim()) {
-        errors[`${updatedData.id}-lastname`] = 'Last Name is required';
-      }
-      if (!updatedData.sex.trim()) {
-        errors[`${updatedData.id}-sex`] = 'Sex is required';
-      }
-      if (!updatedData.dob.trim()) {
-        errors[`${updatedData.id}-dob`] = 'Date of Birth is required';
-      }
-      if (!updatedData.nationality.trim()) {
-        errors[`${updatedData.id}-nationality`] = 'Nationality is required';
-      }
-      if (!updatedData.address.trim()) {
-        errors[`${updatedData.id}-address`] = 'Address is required';
-      }
+      // Clear age error if valid
+      delete errors[getErrorKey('age')];
     }
 
     return errors;
   };
 
   const handleChange = (field: keyof PassengerData, value: string, id: number) => {
-    const updatedData = id === passenger.id ? passenger : companions.find((c) => c.id === id);
+    const currentData = id === passenger.id ? passenger : companions.find((c) => c.id === id);
 
-    if (updatedData) {
+    if (currentData) {
+      if (currentData.isDependent && field !== 'accommodation' && field !== 'discountType') {
+        return; // Don't allow changing details of dependent-sourced companion
+      }
+
+      const updatedData = { ...currentData };
       if (field == 'id') {
         updatedData[field] = Number(value);
       } else {
-        updatedData[field] = value;
+        (updatedData as any)[field] = value;
       }
 
       if (id === passenger.id) {
@@ -540,7 +664,7 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                   type="radio"
                   name="sex"
                   value="Male"
-                  checked={passenger.sex === 'Male'}
+                  checked={passenger.sex?.toLowerCase() === 'male'}
                   onChange={(e) => handleChange('sex', e.target.value, passenger.id)}
                   className="w-4 h-4 mr-2 cursor-pointer"
                   style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
@@ -552,7 +676,7 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
                   type="radio"
                   name="sex"
                   value="Female"
-                  checked={passenger.sex === 'Female'}
+                  checked={passenger.sex?.toLowerCase() === 'female'}
                   onChange={(e) => handleChange('sex', e.target.value, passenger.id)}
                   className="w-4 h-4 mr-2 cursor-pointer"
                   style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
@@ -612,18 +736,55 @@ const PassengerDetailsForm: FC<PassengerDetailsFormProps> = ({ rateTableId, onCh
 
       {renderCompanionForms()}
 
-      {/* Add Companion Section */}
-      <div className="flex flex-col justify-end items-center mb-4 mt-6 md:flex-row">
-        <Button variant="outline" className="border-2 w-full md:w-auto" onClick={handleAddCompanion}>
-          <FiPlus className="w-4 h-4" />
-          Add Companion
-          {companions.length > 0 && (
-            <Badge style={{ backgroundColor: themeSettings?.accent || '#23abff' }}>{companions.length}</Badge>
-          )}
-        </Button>
-      </div>
+      {/* Add Dependent Section */}
+      {userDependents.length > 0 && (
+        <div className="mt-8 p-4 border rounded-lg bg-gray-50">
+          <h3 className="text-md font-semibold mb-3 text-customText">Add Companion from Dependents</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {userDependents.map((dependent) => {
+              const isAdded = companions.some(c =>
+                c.firstname === dependent.first_name &&
+                c.lastname === dependent.last_name
+              );
+
+              return (
+                <div
+                  key={dependent.id}
+                  className={`p-3 border rounded-md flex justify-between items-center bg-white ${isAdded ? 'opacity-60' : ''}`}
+                >
+                  <div>
+                    <p className="font-medium text-sm text-customText">{dependent.first_name} {dependent.last_name}</p>
+                    <p className="text-xs text-gray-500">{dependent.relationship}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleAddCompanion(dependent)}
+                    disabled={isAdded}
+                    className="h-8 py-1"
+                    style={{
+                      borderColor: themeSettings?.accent || '#23abff',
+                      color: themeSettings?.accent || '#23abff'
+                    }}
+                  >
+                    {isAdded ? 'Added' : 'Add'}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant="warning"
+      />
     </div>
   );
 };
 
-export default PassengerDetailsForm;
+export default forwardRef(PassengerDetailsForm);

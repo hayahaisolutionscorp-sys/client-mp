@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = seo.description || "Ayahay Marketplace";
 
   return {
-    metadataBase: new URL("https://www.ayahay.com"),
+    ...(process.env.NODE_ENV === 'production' ? { metadataBase: new URL("https://www.ayahay.com") } : {}),
 
     title: {
       default: (title as any).default || "Ayahay",
@@ -70,6 +70,13 @@ export async function generateMetadata(): Promise<Metadata> {
     } : seo.icons || {
       icon: "/favicon.ico",
       apple: "/apple-touch-icon.png",
+    },
+
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "Hayahai",
+      // startupImage: [], // Can add startup images here if available
     },
 
     // manifest: "/manifest.json", // Handled by src/app/manifest.ts

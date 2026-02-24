@@ -1,16 +1,16 @@
-import { 
-    Passenger, GeneratePassengersProps, 
-    Vehicle, GenerateVehiclesProps, 
-    BookingTrip, GenerateBookingTripProps,
-    Booking, GenerateBookingProps
+import {
+  Passenger, GeneratePassengersProps,
+  Vehicle, GenerateVehiclesProps,
+  BookingTrip, GenerateBookingTripProps,
+  Booking, GenerateBookingProps
 } from "@/types/booking/booking-create"
 import { DEFAULT_CREATE_BOOKING_PAYMENT_GATEWAY, DEFAULT_CREATE_BOOKING_TYPE } from "constants/default";
-  
+
 export const generateBookingTripPassengers = ({
   passengerDetails,
   vehicleDetails,
   tripId,
-  cabinId
+  cabinName
 }: GeneratePassengersProps): Passenger[] => {
   return [
     passengerDetails?.passenger, // Add primary passenger
@@ -18,7 +18,7 @@ export const generateBookingTripPassengers = ({
   ].map((data) => {
     const driverVehicleId =
       vehicleDetails?.find(
-        (vehicle) => 
+        (vehicle) =>
           vehicle.driverName === `${data?.firstname} ${data?.lastname}` &&
           vehicle.driverId === data?.id
       )?.id || ""; // Get the driverId, checking both name and ID
@@ -26,7 +26,7 @@ export const generateBookingTripPassengers = ({
     const passengerData: Passenger = {
       tripId: tripId,
       passengerId: data?.id || 0,
-      preferredCabinId: cabinId,
+      preferredCabinName: cabinName,
       discountType: data?.discountType || undefined,
       passenger: {
         id: data?.id || 0,
@@ -70,22 +70,22 @@ export const generateBookingTripVehicles = ({
         }
       }
     };
-      
+
     return vehicleData;
-  });   
+  });
 };
-  
+
 export const generateBookingTrips = ({
   passengerDetails,
   vehicleDetails,
   tripId,
-  cabinId
+  cabinName
 }: GenerateBookingTripProps): BookingTrip[] => {
   const bookingTripPassengers = generateBookingTripPassengers({
     passengerDetails,
     vehicleDetails,
     tripId,
-    cabinId
+    cabinName
   });
 
   const bookingTripVehicles = generateBookingTripVehicles({
@@ -106,39 +106,39 @@ export const generateBookingTrips = ({
 };
 
 export const generateBooking = ({
-    passengerDetails,
-    contactDetails,
-    vehicleDepartureDetails,
-    vehicleReturnDetails,
-    departureTripId,
-    returnTripId,
-    departureCabinId,
-    returnCabinId,
-  }: GenerateBookingProps): Booking => {
-    const bookingTrips: BookingTrip[] = [
-      ...generateBookingTrips({
-        passengerDetails: passengerDetails,
-        vehicleDetails: vehicleDepartureDetails,
-        tripId: departureTripId,
-        cabinId: departureCabinId,
-      }).filter(trip => trip.tripId), // Filter out trips with invalid tripId
-      ...generateBookingTrips({
-        passengerDetails: passengerDetails,
-        vehicleDetails: vehicleReturnDetails,
-        tripId: returnTripId,
-        cabinId: returnCabinId,
-      }).filter(trip => trip.tripId), // Filter out trips with invalid tripId
-    ];
-    
-    const bookingData: Booking = {
-      bookingTrips: bookingTrips,
-      paymentGateway: DEFAULT_CREATE_BOOKING_PAYMENT_GATEWAY,
-      bookingType: DEFAULT_CREATE_BOOKING_TYPE,
-      contactEmail: contactDetails?.email || "",
-      contactMobile: `${contactDetails?.countryCode || ""}${contactDetails?.mobileNumber || ""}`.trim(),
-      consigneeName: `${contactDetails?.firstname || ""} ${contactDetails?.lastname || ""}`.trim()
-    };
+  passengerDetails,
+  contactDetails,
+  vehicleDepartureDetails,
+  vehicleReturnDetails,
+  departureTripId,
+  returnTripId,
+  departureCabinName,
+  returnCabinName,
+}: GenerateBookingProps): Booking => {
+  const bookingTrips: BookingTrip[] = [
+    ...generateBookingTrips({
+      passengerDetails: passengerDetails,
+      vehicleDetails: vehicleDepartureDetails,
+      tripId: departureTripId,
+      cabinName: departureCabinName,
+    }).filter(trip => trip.tripId), // Filter out trips with invalid tripId
+    ...generateBookingTrips({
+      passengerDetails: passengerDetails,
+      vehicleDetails: vehicleReturnDetails,
+      tripId: returnTripId,
+      cabinName: returnCabinName,
+    }).filter(trip => trip.tripId), // Filter out trips with invalid tripId
+  ];
 
-    return bookingData;
+  const bookingData: Booking = {
+    bookingTrips: bookingTrips,
+    paymentGateway: DEFAULT_CREATE_BOOKING_PAYMENT_GATEWAY,
+    bookingType: DEFAULT_CREATE_BOOKING_TYPE,
+    contactEmail: contactDetails?.email || "",
+    contactMobile: `${contactDetails?.countryCode || ""}${contactDetails?.mobileNumber || ""}`.trim(),
+    consigneeName: `${contactDetails?.firstname || ""} ${contactDetails?.lastname || ""}`.trim()
   };
-  
+
+  return bookingData;
+};
+

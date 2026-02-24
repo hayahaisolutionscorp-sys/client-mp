@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { GiCheckMark } from 'react-icons/gi';
 import { useMediaQuery } from 'react-responsive';
 import { QRCodeSVG } from 'qrcode.react';
@@ -18,10 +19,16 @@ export default function PaymentSuccessCard({ booking }: PaymentSuccessCardProps)
   const themeSettings = useThemeSettings();
   const primaryColor = themeSettings?.accent || '#23abff';
 
+  const [qrUrl, setQrUrl] = useState('');
+
+  useEffect(() => {
+    setQrUrl(window.location.href);
+  }, []);
+
   const size = isXs ? 192 : isSm ? 224 : 256;
 
   const showQrCode = (booking: IBooking | undefined): boolean => {
-    return booking?.bookingStatus === 'Confirmed' && booking?.paymentStatus === 'Success';
+    return booking?.bookingStatus === 'Confirmed' && !!qrUrl;
   };
 
   return (
@@ -40,7 +47,7 @@ export default function PaymentSuccessCard({ booking }: PaymentSuccessCardProps)
           <div className="flex flex-col items-center justify-center bg-white border shadow-md rounded-lg w-full max-w-[350px] h-auto p-3 sm:p-4">
             {showQrCode(booking || undefined) && (
               <article style={{ flexGrow: '1' }}>
-                <QRCodeSVG value={window.location.href} size={size} bgColor="#ffffff" fgColor="#000000" level="H" />
+                <QRCodeSVG value={qrUrl} size={size} bgColor="#ffffff" fgColor="#000000" level="H" />
               </article>
             )}
             <p className="text-center text-customText text-xs sm:text-sm wrap mt-2">

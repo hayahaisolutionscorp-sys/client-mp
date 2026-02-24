@@ -1,36 +1,48 @@
 {
     "global": {
-        "title": "Ayahay Online Booking",
-        "description": "Hasul nga proseso? Kalas ug oras? Walay kasiguradohan makakuha ug ticket? Book now at Ayahay.com. Kay ang pagsakay dapay, ayahay!",
+        "title": "Hayahai Online Marketplace",
+        "description": "Book your ship tickets online with Hayahai. Fast, secure, and convenient ferry booking for all your travel needs in the Philippines.",
         "manifest": {
-            "name": "Ayahay Marketplace",
-            "short_name": "Ayahay",
-            "start_url": "/",
+            "name": "Hayahai Online Marketplace",
+            "short_name": "Hayahai",
+            "start_url": "/?utm_source=pwa",
             "display": "standalone",
             "background_color": "#ffffff",
             "theme_color": "#ffffff",
+            "id": "/",
             "icons": [
                 {
-                    "src": "/favicon.ico",
-                    "sizes": "any",
-                    "type": "image/x-icon"
-                },
-                {
-                    "src": "/icon-192x192.png",
+                    "src": "/Hayahai_Logo_192x192.png",
                     "sizes": "192x192",
-                    "type": "image/png"
+                    "type": "image/png",
+                    "purpose": "any"
                 },
                 {
-                    "src": "/icon-512x512.png",
+                    "src": "/Hayahai_Logo_512x512.png",
                     "sizes": "512x512",
-                    "type": "image/png"
+                    "type": "image/png",
+                    "purpose": "any"
+                }
+            ],
+            "screenshots": [
+                {
+                    "src": "/screenshot-wide.png",
+                    "sizes": "2560x1426",
+                    "type": "image/png",
+                    "form_factor": "wide"
+                },
+                {
+                    "src": "/screenshot-mobile.png",
+                    "sizes": "1000x1514",
+                    "type": "image/png",
+                    "form_factor": "narrow"
                 }
             ]
         },
         "openGraph": {
-            "title": "Ayahay Online Booking",
-            "description": "Hasul nga proseso? Kalas ug oras? Walay kasiguradohan makakuha ug ticket? Book now at Ayahay.com.",
-            "siteName": "Ayahay",
+            "title": "Hayahai Online Booking",
+            "description": "Hasul nga proseso? Kalas ug oras? Walay kasiguradohan makakuha ug ticket? Book now at Hayahai.com.",
+            "siteName": "Hayahai",
             "images": [
                 {
                     "url": "/assets/images/logo.png",
@@ -44,11 +56,11 @@
     },
     "pages": {
         "home": {
-            "title": "Ayahay Online Booking - Book Your Ship Journey Today",
-            "description": "Book your ship tickets online with Ayahay. Fast, secure, and convenient ferry booking for all your travel needs in the Philippines.",
+            "title": "Hayahai Online Booking - Book Your Ship Journey Today",
+            "description": "Book your ship tickets online with Hayahai. Fast, secure, and convenient ferry booking for all your travel needs in the Philippines.",
             "keywords": [
-                "ayahay booking",
-                "ayahay online booking",
+                "Hayahai booking",
+                "Hayahai online booking",
                 "ship booking",
                 "ferry booking philippines",
                 "online ship tickets"
@@ -58,26 +70,26 @@
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://ayahay.com",
-            "og_url": "https://ayahay.com",
+            "canonical_url": "https://Hayahai.com",
+            "og_url": "https://Hayahai.com",
             "og_type": "website",
-            "og_title": "Ayahay Online Booking",
-            "og_description": "Book your ship tickets online with Ayahay. Fast, secure, and convenient.",
-            "og_image": "https://ayahay.com/images/og-home.jpg",
-            "og_site_name": "Ayahay",
+            "og_title": "Hayahai Online Booking",
+            "og_description": "Book your ship tickets online with Hayahai. Fast, secure, and convenient.",
+            "og_image": "https://Hayahai.com/images/og-home.jpg",
+            "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "Ayahay Online Booking",
-            "twitter_description": "Book your ship tickets online with Ayahay. Fast, secure, and convenient.",
-            "twitter_image": "https://ayahay.com/images/twitter-home.jpg"
+            "twitter_title": "Hayahai Online Booking",
+            "twitter_description": "Book your ship tickets online with Hayahai. Fast, secure, and convenient.",
+            "twitter_image": "https://Hayahai.com/images/twitter-home.jpg"
         },
         "about-us": {
-            "title": "About Us - Ayahay Online Booking",
-            "description": "Discover Ayahay's story, mission, and vision. Learn how we're revolutionizing ship booking and making travel easier for Filipinos.",
+            "title": "About Us - Hayahai Online Booking",
+            "description": "Discover Hayahai's story, mission, and vision. Learn how we're revolutionizing ship booking and making travel easier for Filipinos.",
             "keywords": [
-                "about ayahay",
-                "ayahay company",
+                "about Hayahai",
+                "Hayahai company",
                 "ship booking company",
-                "ayahay mission",
+                "Hayahai mission",
                 "ferry booking service"
             ],
             "robots": [
@@ -85,26 +97,26 @@
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://ayahay.com/about-us",
-            "og_url": "https://ayahay.com/about-us",
+            "canonical_url": "https://Hayahai.com/about-us",
+            "og_url": "https://Hayahai.com/about-us",
             "og_type": "website",
-            "og_title": "About Us - Ayahay",
-            "og_description": "Discover Ayahay's story and mission to revolutionize ship booking in the Philippines.",
-            "og_image": "https://ayahay.com/images/og-about.jpg",
-            "og_site_name": "Ayahay",
+            "og_title": "About Us - Hayahai",
+            "og_description": "Discover Hayahai's story and mission to revolutionize ship booking in the Philippines.",
+            "og_image": "https://Hayahai.com/images/og-about.jpg",
+            "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "About Us - Ayahay",
-            "twitter_description": "Discover Ayahay's story and mission to revolutionize ship booking.",
-            "twitter_image": "https://ayahay.com/images/twitter-about.jpg"
+            "twitter_title": "About Us - Hayahai",
+            "twitter_description": "Discover Hayahai's story and mission to revolutionize ship booking.",
+            "twitter_image": "https://Hayahai.com/images/twitter-about.jpg"
         },
         "faqs": {
-            "title": "FAQs - Ayahay Online Booking Help & Support",
-            "description": "Get answers to frequently asked questions about Ayahay ship booking. Learn about payments, cancellations, refunds, and booking procedures.",
+            "title": "FAQs - Hayahai Online Booking Help & Support",
+            "description": "Get answers to frequently asked questions about Hayahai ship booking. Learn about payments, cancellations, refunds, and booking procedures.",
             "keywords": [
-                "ayahay faq",
+                "Hayahai faq",
                 "booking help",
                 "ship booking questions",
-                "ayahay support",
+                "Hayahai support",
                 "how to book",
                 "cancellation policy"
             ],
@@ -113,25 +125,25 @@
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://ayahay.com/faqs",
-            "og_url": "https://ayahay.com/faqs",
+            "canonical_url": "https://Hayahai.com/faqs",
+            "og_url": "https://Hayahai.com/faqs",
             "og_type": "website",
-            "og_title": "Frequently Asked Questions - Ayahay",
-            "og_description": "Get answers to common questions about Ayahay ship booking services.",
-            "og_image": "https://ayahay.com/images/og-faq.jpg",
-            "og_site_name": "Ayahay",
+            "og_title": "Frequently Asked Questions - Hayahai",
+            "og_description": "Get answers to common questions about Hayahai ship booking services.",
+            "og_image": "https://Hayahai.com/images/og-faq.jpg",
+            "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "FAQs - Ayahay",
-            "twitter_description": "Get answers to common questions about Ayahay ship booking services.",
-            "twitter_image": "https://ayahay.com/images/twitter-faq.jpg"
+            "twitter_title": "FAQs - Hayahai",
+            "twitter_description": "Get answers to common questions about Hayahai ship booking services.",
+            "twitter_image": "https://Hayahai.com/images/twitter-faq.jpg"
         },
         "press-releases": {
-            "title": "Press Releases - Ayahay Online Booking",
-            "description": "Read the latest press releases and news from Ayahay. Stay informed about our updates, partnerships, and announcements.",
+            "title": "Press Releases - Hayahai Online Booking",
+            "description": "Read the latest press releases and news from Hayahai. Stay informed about our updates, partnerships, and announcements.",
             "keywords": [
-                "ayahay press",
+                "Hayahai press",
                 "press releases",
-                "ayahay news",
+                "Hayahai news",
                 "company updates",
                 "announcements"
             ],
@@ -140,23 +152,23 @@
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://ayahay.com/press-releases",
-            "og_url": "https://ayahay.com/press-releases",
+            "canonical_url": "https://Hayahai.com/press-releases",
+            "og_url": "https://Hayahai.com/press-releases",
             "og_type": "website",
-            "og_title": "Press Releases - Ayahay",
-            "og_description": "Read the latest press releases and news from Ayahay.",
-            "og_image": "https://ayahay.com/images/og-press.jpg",
-            "og_site_name": "Ayahay",
+            "og_title": "Press Releases - Hayahai",
+            "og_description": "Read the latest press releases and news from Hayahai.",
+            "og_image": "https://Hayahai.com/images/og-press.jpg",
+            "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "Press Releases - Ayahay",
-            "twitter_description": "Read the latest press releases and news from Ayahay.",
-            "twitter_image": "https://ayahay.com/images/twitter-press.jpg"
+            "twitter_title": "Press Releases - Hayahai",
+            "twitter_description": "Read the latest press releases and news from Hayahai.",
+            "twitter_image": "https://Hayahai.com/images/twitter-press.jpg"
         },
         "privacy-policy": {
-            "title": "Privacy Policy - Ayahay Online Booking",
-            "description": "Learn how Ayahay protects your privacy and handles your personal data. Read our comprehensive privacy policy for online booking services.",
+            "title": "Privacy Policy - Hayahai Online Booking",
+            "description": "Learn how Hayahai protects your privacy and handles your personal data. Read our comprehensive privacy policy for online booking services.",
             "keywords": [
-                "ayahay privacy policy",
+                "Hayahai privacy policy",
                 "data protection",
                 "privacy policy",
                 "personal information",
@@ -167,53 +179,53 @@
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://ayahay.com/privacy-policy",
-            "og_url": "https://ayahay.com/privacy-policy",
+            "canonical_url": "https://Hayahai.com/privacy-policy",
+            "og_url": "https://Hayahai.com/privacy-policy",
             "og_type": "website",
-            "og_title": "Privacy Policy - Ayahay",
-            "og_description": "Learn how Ayahay protects your privacy and handles your personal data.",
-            "og_image": "https://ayahay.com/images/og-default.jpg",
-            "og_site_name": "Ayahay",
+            "og_title": "Privacy Policy - Hayahai",
+            "og_description": "Learn how Hayahai protects your privacy and handles your personal data.",
+            "og_image": "https://Hayahai.com/images/og-default.jpg",
+            "og_site_name": "Hayahai",
             "twitter_card": "summary",
-            "twitter_title": "Privacy Policy - Ayahay",
-            "twitter_description": "Learn how Ayahay protects your privacy and handles your personal data.",
-            "twitter_image": "https://ayahay.com/images/twitter-default.jpg"
+            "twitter_title": "Privacy Policy - Hayahai",
+            "twitter_description": "Learn how Hayahai protects your privacy and handles your personal data.",
+            "twitter_image": "https://Hayahai.com/images/twitter-default.jpg"
         },
         "contact-us": {
-            "title": "Contact Us - Ayahay Online Booking",
-            "description": "Contact Ayahay for support, inquiries, or to get in touch with our team.",
+            "title": "Contact Us - Hayahai Online Booking",
+            "description": "Contact Hayahai for support, inquiries, or to get in touch with our team.",
             "keywords": [
-                "ayahay contact",
+                "Hayahai contact",
                 "contact us",
-                "ayahay support",
-                "ayahay help",
-                "ayahay assistance"
+                "Hayahai support",
+                "Hayahai help",
+                "Hayahai assistance"
             ],
             "robots": [
                 "index",
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://ayahay.com/contact-us",
-            "og_url": "https://ayahay.com/contact-us",
+            "canonical_url": "https://Hayahai.com/contact-us",
+            "og_url": "https://Hayahai.com/contact-us",
             "og_type": "website",
-            "og_title": "Contact Us - Ayahay",
-            "og_description": "Contact Ayahay for support, inquiries, or to get in touch with our team.",
-            "og_image": "https://ayahay.com/images/og-contact.jpg",
-            "og_site_name": "Ayahay",
+            "og_title": "Contact Us - Hayahai",
+            "og_description": "Contact Hayahai for support, inquiries, or to get in touch with our team.",
+            "og_image": "https://Hayahai.com/images/og-contact.jpg",
+            "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "Contact Us - Ayahay",
-            "twitter_description": "Contact Ayahay for support, inquiries, or to get in touch with our team.",
-            "twitter_image": "https://ayahay.com/images/twitter-contact.jpg"
+            "twitter_title": "Contact Us - Hayahai",
+            "twitter_description": "Contact Hayahai for support, inquiries, or to get in touch with our team.",
+            "twitter_image": "https://Hayahai.com/images/twitter-contact.jpg"
         },
         "terms-and-conditions": {
-            "title": "Terms and Conditions - Ayahay Online Booking",
-            "description": "Read Ayahay's terms and conditions for booking services. Understand your rights and responsibilities when using our platform.",
+            "title": "Terms and Conditions - Hayahai Online Booking",
+            "description": "Read Hayahai's terms and conditions for booking services. Understand your rights and responsibilities when using our platform.",
             "keywords": [
-                "ayahay terms",
+                "Hayahai terms",
                 "terms and conditions",
                 "booking terms",
-                "ayahay policies",
+                "Hayahai policies",
                 "ship booking terms"
             ],
             "robots": [
@@ -221,68 +233,68 @@
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://ayahay.com/terms-and-conditions",
-            "og_url": "https://ayahay.com/terms-and-conditions",
+            "canonical_url": "https://Hayahai.com/terms-and-conditions",
+            "og_url": "https://Hayahai.com/terms-and-conditions",
             "og_type": "website",
-            "og_title": "Terms and Conditions - Ayahay",
-            "og_description": "Read Ayahay's terms and conditions for booking services.",
-            "og_image": "https://ayahay.com/images/og-default.jpg",
-            "og_site_name": "Ayahay",
+            "og_title": "Terms and Conditions - Hayahai",
+            "og_description": "Read Hayahai's terms and conditions for booking services.",
+            "og_image": "https://Hayahai.com/images/og-default.jpg",
+            "og_site_name": "Hayahai",
             "twitter_card": "summary",
-            "twitter_title": "Terms and Conditions - Ayahay",
-            "twitter_description": "Read Ayahay's terms and conditions for booking services.",
-            "twitter_image": "https://ayahay.com/images/twitter-default.jpg"
+            "twitter_title": "Terms and Conditions - Hayahai",
+            "twitter_description": "Read Hayahai's terms and conditions for booking services.",
+            "twitter_image": "https://Hayahai.com/images/twitter-default.jpg"
         },
         "find-trips": {
-            "title": "Find Ferry Trips | Ayahay",
+            "title": "Find Ferry Trips | Hayahai",
             "description": "Check ferry schedules and fares. Find the best trips for your travel dates.",
             "keywords": [
                 "ferry schedules",
                 "boat fares",
                 "trip booking",
-                "ayahay schedule"
+                "Hayahai schedule"
             ],
             "robots": [
                 "index",
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://ayahay.com/schedule-and-fares",
-            "og_url": "https://ayahay.com/schedule-and-fares",
+            "canonical_url": "https://Hayahai.com/schedule-and-fares",
+            "og_url": "https://Hayahai.com/schedule-and-fares",
             "og_type": "website",
-            "og_title": "Find Ferry Trips | Ayahay",
+            "og_title": "Find Ferry Trips | Hayahai",
             "og_description": "Check ferry schedules and fares. Find the best trips for your travel dates.",
-            "og_image": "https://ayahay.com/images/og-default.jpg",
-            "og_site_name": "Ayahay",
+            "og_image": "https://Hayahai.com/images/og-default.jpg",
+            "og_site_name": "Hayahai",
             "twitter_card": "summary",
-            "twitter_title": "Find Ferry Trips | Ayahay",
+            "twitter_title": "Find Ferry Trips | Hayahai",
             "twitter_description": "Check ferry schedules and fares. Find the best trips for your travel dates.",
-            "twitter_image": "https://ayahay.com/images/twitter-default.jpg"
+            "twitter_image": "https://Hayahai.com/images/twitter-default.jpg"
         },
         "route": {
-            "title": "Ferry Route | Ayahay",
+            "title": "Ferry Route | Hayahai",
             "description": "Details about this ferry route.",
             "keywords": [
                 "ferry route",
                 "travel route",
-                "ayahay route"
+                "Hayahai route"
             ],
             "robots": [
                 "noindex",
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://ayahay.com",
-            "og_url": "https://ayahay.com",
+            "canonical_url": "https://Hayahai.com",
+            "og_url": "https://Hayahai.com",
             "og_type": "website",
-            "og_title": "Ferry Route | Ayahay",
+            "og_title": "Ferry Route | Hayahai",
             "og_description": "Details about this ferry route.",
-            "og_image": "https://ayahay.com/images/og-default.jpg",
-            "og_site_name": "Ayahay",
+            "og_image": "https://Hayahai.com/images/og-default.jpg",
+            "og_site_name": "Hayahai",
             "twitter_card": "summary",
-            "twitter_title": "Ferry Route | Ayahay",
+            "twitter_title": "Ferry Route | Hayahai",
             "twitter_description": "Details about this ferry route.",
-            "twitter_image": "https://ayahay.com/images/twitter-default.jpg"
+            "twitter_image": "https://Hayahai.com/images/twitter-default.jpg"
         }
     }
 }

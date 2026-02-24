@@ -15,7 +15,8 @@ export interface IVehicle {
   account?: IAccount;
   vehicle_model_id: number;
   vehicle_model?: IVehicleModel;
-  
+  vehicleType?: { id?: number; name: string };
+
   // For 'Other' vehicles
   make?: string;
   model?: string;
@@ -23,7 +24,7 @@ export interface IVehicle {
 
   plate_number: string;
   status?: VerificationStatus;
-  
+
   created_at?: string;
   updated_at?: string;
 

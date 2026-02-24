@@ -15,6 +15,7 @@ export interface ITrip {
   ship?: IShip;
   shippingLineId: number;
   shippingLine?: IShippingLine;
+  lightLogoUrl?: string; // New field for light logo
   srcPortId: number;
   srcPort?: IPort;
   srcPortName?: string;
@@ -32,6 +33,7 @@ export interface ITrip {
   departureDateIso: string;
   seatSelection: boolean;
   availableVehicleCapacity: number;
+  remainingVehicleCapacity?: Record<string, number>;
   vehicleCapacity: number;
   bookingStartDateIso: string;
   bookingCutOffDateIso: string;
@@ -40,4 +42,34 @@ export interface ITrip {
   availableCabins: ITripCabin[];
   availableSeatTypes: ISeatType[];
   meals: string[];
+
+  // New fields for connecting trips
+  type: 'direct' | 'connecting';
+  segments: ITripSegment[];
+  totalDurationMinutes: number;
+  totalLayoverMinutes: number;
+  intermediatePorts: string[];
+}
+
+export interface ITripSegment {
+  id: number | string;
+  tripId: number | string; // Parent trip ID reference if needed, or just segment ID
+  shipId: number;
+  shipName?: string;
+  shippingLineId: number;
+  shippingLine?: IShippingLine;
+  srcPortId: number;
+  srcPortName?: string;
+  destPortId: number;
+  destPortName?: string;
+  departureDateIso: string;
+  arrivalTimeDateIso: string;
+  referenceNo: string;
+  availableCabins: ITripCabin[];
+  availableVehicleCapacity: number;
+  remainingVehicleCapacity?: Record<string, number>;
+  vehicleCapacity: number;
+  bookingStartDateIso: string;
+  bookingCutOffDateIso: string;
+  seatSelection: boolean;
 }

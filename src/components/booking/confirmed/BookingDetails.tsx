@@ -1,115 +1,84 @@
 'use client';
 
+import { useEffect, useState, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import { FiLoader } from 'react-icons/fi';
+import Image from 'next/image';
+
 import FareSummary from '@/components/booking/FareSummary';
 import InfoCard from '@/components/booking/confirmed/InfoCard';
 import PassengerConfirmedTripCard from '@/components/booking/confirmed/PassengerConfirmedTripCard';
-import PassengerList from '@/components/booking/confirmed/PassengerList';
+import TripDetails from '@/components/booking/payment-confirmation/TripDetails';
 import PaymentSuccessCard from '@/components/booking/confirmed/PaymentSuccessCard';
-import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { FiLoader } from 'react-icons/fi';
 import { useThemeSettings } from '@/hooks/theme-settings';
-import ErrorMessage from './ErrorMessage';
-import { IBooking } from '@/models';
-import Image from 'next/image';
-
-// Resources Section Component
-const ResourcesSection = () => (
-  <div id="Resources" className="hidden sm:block w-full lg:pt-56">
-    <div className="flex items-center justify-center w-full">
-      <div className="flex flex-col relative bg-[#AADCFB] rounded-lg shadow-md w-full h-auto max-w-6xl mx-auto px-6   md:flex-row md:justify-between md:h-[278px] sm:px-28 lg:absolute lg:z-12 lg:mb-26 lg:max-w-[85%] lg:px-10">
-        <div className="flex flex-col items-center w-full md:w-auto md:items-start justify-center text-center md:text-left py-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#051036]">Get Updates & More</h2>
-          <p className="text-sm md:text-xs text-customText mt-2">We'll send you a nice letter once per week. No spam.</p>
-          <div className="flex flex-col items-center w-full mt-5 md:mr-4 space-y-4 md:w-auto md:flex-row md:space-y-0 md:space-x-4">
-            <input
-              type="email"
-              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[rgba(var(--border-color),1)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full md:w-[300px]"
-              placeholder="Your email address"
-              style={{ '--border-color': '35, 171, 255' } as any}
-            />
-            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:bg-gray-400 disabled:text-gray-100 disabled:opacity-100 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-[#23abff] text-white hover:opacity-90 h-10 px-6 py-2 w-full md:w-auto">
-              Subscribe
-            </button>
-          </div>
-        </div>
-        <div className="flex items-end justify-center h-full mt-4 md:mt-0">
-          <Image
-            alt="Open Mailbox"
-            loading="lazy"
-            width={500}
-            height={500}
-            decoding="async"
-            className="w-full h-auto"
-            src="/assets/images/open-mailbox-with-lowered-flag.svg"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-);
+import { getBookingById, prepareBooking, calculatePricing, derivePricingStateFromBooking } from '@/services';
+import { getShip } from '@/services/shipping-line/ship.service';
+import { IBooking, ITrip } from '@/models';
+import { IPrepareBookingData, ITripSummary } from '@/models/booking/prepare-booking.model';
+import { PricingResponse } from '@/types/booking/pricing';
 
 export default function BookingDetails() {
-  const pathname = usePathname();
-  // const bookingId = pathname?.split('/').pop(); // Unused for mock
+  const params = useParams();
+  const bookingId = params?.id as string;
   const themeSettings = useThemeSettings();
 
   const [booking, setBooking] = useState<IBooking | undefined>(undefined);
-  // const [errorCode, setErrorCode] = useState<number | undefined>(); // Unused for mock
   const [loading, setLoading] = useState(true);
+  const [pricingData, setPricingData] = useState<PricingResponse['data'] | undefined>(undefined);
+  const [isPricingLoading, setIsPricingLoading] = useState(false);
+  const [prepareBookingData, setPrepareBookingData] = useState<IPrepareBookingData | undefined>(undefined);
 
+  // Fetch Booking
   useEffect(() => {
-    // Mock Data Implementation
-    const mockBooking: IBooking = {
-      id: "ba540629-edaf-4479-9373-6e011f9d6b77",
-      shippingLineId: 1,
-      referenceNo: "OCTO-12345678",
-      bookingStatus: "Confirmed",
-      paymentStatus: "Success",
-      totalPrice: 1550,
-      bookingType: "Single",
-      contactEmail: "jdelacruz@gmail.com",
-      contactMobile: "09171234567",
-      createdAtIso: "2024-12-05T10:30:00Z",
-      isBookingRequest: false,
-      bookingTrips: [
-        {
-          bookingId: "ba540629-edaf-4479-9373-6e011f9d6b77",
-          tripId: 101,
-          trip: {
-            id: 101,
-            shippingLineId: 1,
-            shippingLine: { id: 1, name: "OceanJet", logoFilename: "https://imagedelivery.net/6-4ZqaHhS7Ww2G8l13y_gA/fa577884-a4f6-49a3-5c77-49f390d40700/public" },
-            srcPort: { id: 1, name: "Cebu" },
-            destPort: { id: 2, name: "Tagbilaran" },
-            departureDateIso: "2024-12-20T08:00:00+08:00",
-            arrivalTimeDateIso: "2024-12-20T10:00:00+08:00",
-            shipId: 5,
-            ship: { id: 5, name: "OceanJet 888" },
-          } as any,
-          bookingTripPassengers: [
-            {
-              passenger: { firstName: "Juan", lastName: "Dela Cruz", birthday: "1990-01-01" },
-              cabin: { cabinType: { name: "Tourist Class" } },
-              discountType: "Regular"
-            },
-            {
-              passenger: { firstName: "Maria", lastName: "Dela Cruz", birthday: "1992-02-02" },
-              cabin: { cabinType: { name: "Business Class" } },
-              discountType: "Senior Citizen"
+    const fetchBooking = async () => {
+      if (!bookingId) return;
+      try {
+        const { booking: fetchedBooking, raw } = await getBookingById(bookingId);
+        setBooking(fetchedBooking);
+
+        // Derive pricing state and fetch pricing breakdown
+        if (raw) {
+          setIsPricingLoading(true);
+          try {
+            const pricingState = derivePricingStateFromBooking(raw);
+            if (pricingState) {
+              const pricingResp = await calculatePricing(pricingState);
+              setPricingData(pricingResp.data);
             }
-          ] as any
+          } catch (pricingError) {
+            console.error('Failed to fetch pricing breakdown:', pricingError);
+          } finally {
+            setIsPricingLoading(false);
+          }
         }
-      ]
-    } as any;
+      } catch (error) {
+        console.error('Failed to fetch booking:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Simulate loading briefly then set mock data
-    const timer = setTimeout(() => {
-      setBooking(mockBooking);
-      setLoading(false);
-    }, 1000);
+    fetchBooking();
+  }, [bookingId]);
 
-    return () => clearTimeout(timer);
+  // Map TripSummary to ITrip (reused logic)
+  const mapTripSummaryToTrip = useCallback((summary: ITripSummary, shippingLineId: number = 0): ITrip => {
+    return {
+      id: summary.id,
+      shipId: summary.ship.id,
+      shippingLineId: shippingLineId,
+      status: summary.status as any,
+      arrivalTimeDateIso: summary.scheduled_arrival,
+      departureDateIso: summary.scheduled_departure,
+      type: 'direct',
+      srcPort: { name: summary.origin } as any,
+      destPort: { name: summary.destination } as any,
+      ship: {
+        id: summary.ship.id,
+        name: summary.ship.name,
+        shippingLineId: shippingLineId,
+      } as any
+    } as ITrip;
   }, []);
 
   if (loading) {
@@ -132,14 +101,18 @@ export default function BookingDetails() {
               {/* Left Column */}
               <div className="w-full lg:w-2/3 space-y-6">
                 <PaymentSuccessCard booking={booking} />
-                <PassengerList booking={booking} />
+                <TripDetails booking={booking} />
                 <PassengerConfirmedTripCard booking={booking} />
               </div>
 
               {/* Right Column */}
               <div className="w-full lg:w-1/3 space-y-6">
-                <div className="sticky top-[100px]">
-                  <FareSummary booking={booking} />
+                <div>
+                  <FareSummary
+                    booking={booking}
+                    pricingData={pricingData}
+                    isLoading={isPricingLoading}
+                  />
                   <InfoCard
                     imgSrc="/assets/images/reminder-icon.png"
                     altText="Megaphone illustration"

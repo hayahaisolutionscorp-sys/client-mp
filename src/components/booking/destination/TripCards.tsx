@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaCar, FaShip, FaCheckCircle } from 'react-icons/fa';
+import { FaCar, FaShip, FaCheckCircle, FaTruck, FaMotorcycle } from 'react-icons/fa';
 import { IoMdPin } from 'react-icons/io';
 import { TbPointFilled } from 'react-icons/tb';
 import { MdError, MdEventSeat } from 'react-icons/md';
@@ -25,9 +25,10 @@ import { useThemeSettings } from '@/hooks/theme-settings';
 import { hexToRgb } from 'helpers/theme.helpers';
 import { formatCurrency } from 'helpers/general.helpers';
 import { DATE_SECONDARY_DEFAULT_FORMAT, TIME_DEFAULT_FORMAT, SHIPPING_LINE_LOGO } from 'constants/index';
-import { getAllShips } from '@/services';
+
 import { SelectedTrip } from '@/types/trip/selected-trip';
-import { ITrip, IShip } from '@/models';
+import { ITrip } from '@/models';
+import ConnectingTripCard from './ConnectingTripCard';
 
 interface TripCardProps {
   trips: ITrip[];
@@ -37,6 +38,12 @@ interface TripCardProps {
   onCabinSelect?: (cabin: SelectedTrip | null) => void;
 }
 
+const getVehicleCapacityDisplay = (trip: ITrip) => {
+  const capacities = trip.remainingVehicleCapacity || {};
+  const totalSlots = Object.values(capacities).reduce((sum, val) => sum + (val || 0), 0);
+  return { count: totalSlots, icon: FaCar };
+};
+
 export default function TripCards({
   trips,
   bookingType,
@@ -44,31 +51,14 @@ export default function TripCards({
   firstSelectedCabin,
   onCabinSelect
 }: TripCardProps) {
-  const [allShips, setAllShips] = useState<IShip[]>([]);
-  const [isExpanded, setIsExpanded] = useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState<number | string | null>(null);
   const [selectedCabin, setSelectedCabin] = useState<SelectedTrip | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const themeSettings = useThemeSettings();
 
-  useEffect(() => {
-    const fetchAllShips = async () => {
-      try {
-        const ships = await getAllShips();
-        setAllShips(ships || []);
-      } catch (error) {
-        console.error('Error fetching ships:', error);
-      }
-    };
 
-    fetchAllShips();
-  }, []);
-
-  const getShipDetailsById = (shipId: number): IShip | null => {
-    return allShips.find((s) => s.id === shipId)! || null;
-  };
-
-  const toggleDetails = (tripId: number) => {
+  const toggleDetails = (tripId: number | string) => {
     if (selectedCabin) {
       setSelectedCabin(null); // Reset selected cabin when toggling details
       setIsExpanded(null); // Collapse the trip details
@@ -85,51 +75,127 @@ export default function TripCards({
   };
 
   const handleCabinSelection = (
-    tripId: number,
+    tripId: number | string,
+    segmentId: number | string,
     cabinId: number,
     cabinTypeId: number,
     cabinType: string,
     cabinFare: number,
-    departureDateIso: string
+    departureDateIso: string,
+    tripType: 'direct' | 'connecting' = 'direct'
   ) => {
-    if (selectedCabin && selectedCabin.tripId === tripId && selectedCabin.cabinId === cabinId) {
-      setSelectedCabin(null); // Deselect the cabin
-      setIsExpanded(null); // Collapse the details
-      onCabinSelect?.(null); // Notify parent with null
+    // Check if we are selecting for the currently selected trip
+    const isSameTrip = selectedCabin && selectedCabin.tripId === tripId;
+
+    let newSelections = isSameTrip ? [...(selectedCabin.segmentSelections || [])] : [];
+
+    // If not same trip, clear previous selections
+    if (!isSameTrip) {
+      newSelections = [];
+    }
+
+    // Check if this segment is already selected with the same cabin
+    const existingSegmentIndex = newSelections.findIndex(s => s.segmentId === segmentId);
+    if (existingSegmentIndex >= 0) {
+      if (newSelections[existingSegmentIndex].cabinId === cabinId) {
+        // Deselecting the same cabin
+        newSelections.splice(existingSegmentIndex, 1);
+      } else {
+        // Changing cabin for this segment
+        newSelections[existingSegmentIndex] = {
+          segmentId, cabinId, cabinTypeId, cabinType, cabinFare, departureDateIso
+        };
+      }
     } else {
-      try {
-        if (firstSelectedCabin) {
-          let departureDate = '';
-          let returnDate = '';
+      // New segment selection
+      newSelections.push({
+        segmentId, cabinId, cabinTypeId, cabinType, cabinFare, departureDateIso
+      });
+    }
 
-          if (bookingType == 'Return') {
-            departureDate = firstSelectedCabin?.departureDateIso || '';
-            returnDate = departureDateIso || '';
-          }
+    // If no segments selected, clear selectedCabin
+    if (newSelections.length === 0) {
+      setSelectedCabin(null);
+      setIsExpanded(null); // Collapse if no selections left? optional.
+      onCabinSelect?.(null);
+      return;
+    }
 
-          if (bookingType == 'Depart') {
-            departureDate = departureDateIso || '';
-            returnDate = firstSelectedCabin?.departureDateIso || '';
-          }
+    // Calculate total fare
+    const totalFare = newSelections.reduce((sum, s) => sum + s.cabinFare, 0);
 
-          if (isValidTripDates(departureDate, returnDate)) {
-            const newCabin = { tripId, cabinId, cabinTypeId, cabinType, cabinFare, departureDateIso };
-            setSelectedCabin(newCabin); // Update the state
-            setIsExpanded(null); // Collapse the details
-            onCabinSelect?.(newCabin); // Notify parent with selected cabin
-          }
-        } else {
-          const newCabin = { tripId, cabinId, cabinTypeId, cabinType, cabinFare, departureDateIso };
-          setSelectedCabin(newCabin); // Update the state
-          setIsExpanded(null); // Collapse the details
-          onCabinSelect?.(newCabin); // Notify parent with selected cabin
+    // Create new SelectedTrip object
+    // For direct trips/backward compat, populate the flat fields from the first selection
+    const firstSel = newSelections[0];
+
+    const newSelectedTrip: SelectedTrip = {
+      tripId,
+      totalFare,
+      segmentSelections: newSelections,
+
+      // Backward compatibility properties
+      cabinId: firstSel?.cabinId,
+      cabinTypeId: firstSel?.cabinTypeId,
+      cabinType: firstSel?.cabinType,
+      cabinFare: firstSel?.cabinFare,
+      departureDateIso: firstSel?.departureDateIso
+    };
+
+    try {
+      // Logic for return trip validation (unchanged mostly, just verify dates)
+      if (firstSelectedCabin) {
+        let depDate = '';
+        let retDate = '';
+
+        // Just use the main trip dates or the specfic segment dates?
+        // Usually for return validation we check the overall trip dates.
+        // But existing logic uses cabin specific date. let's use the first segment's date for now.
+
+        const currentTripDate = firstSel.departureDateIso;
+
+        if (bookingType == 'Return') {
+          depDate = firstSelectedCabin?.departureDateIso || '';
+          retDate = currentTripDate || '';
         }
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message) {
-            setErrorMessage(error.message);
-            setIsDialogOpen(true);
+
+        if (bookingType == 'Depart') {
+          depDate = currentTripDate || '';
+          retDate = firstSelectedCabin?.departureDateIso || '';
+        }
+
+        if (isValidTripDates(depDate, retDate)) {
+          setSelectedCabin(newSelectedTrip);
+          // Don't auto collapse for connecting trips as user needs to select more segments
+          // Collapse only if all segments are selected?
+          const trip = trips.find(t => t.id === tripId);
+          if (trip && trip.segments.length === newSelections.length) {
+            // All segments selected
+            setIsExpanded(null);
+            onCabinSelect?.(newSelectedTrip);
+          } else {
+            setSelectedCabin(newSelectedTrip);
+            // Allow parent to know partial selection?
+            // Usually parent expects full selection. 
+            // We might wait until all segments selected? 
+            // Or just pass it up and let parent handle validation.
+            // The Proceed button usually checks if selections are valid.
+            onCabinSelect?.(newSelectedTrip);
           }
+        }
+      } else {
+        setSelectedCabin(newSelectedTrip);
+        const trip = trips.find(t => t.id === tripId);
+        if (trip && trip.segments.length === newSelections.length) {
+          setIsExpanded(null);
+        }
+        onCabinSelect?.(newSelectedTrip);
+      }
+
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message) {
+          setErrorMessage(error.message);
+          setIsDialogOpen(true);
         }
       }
     }
@@ -187,11 +253,28 @@ export default function TripCards({
       {displayedTrips.map((trip) => {
         const isTripSelected = selectedCabin?.tripId === trip.id;
         const isTripExpanded = isExpanded === trip.id;
+        const { count: vehicleCount, icon: VehicleIcon } = getVehicleCapacityDisplay(trip);
+
+        if (trip.type === 'connecting') {
+          return (
+            <ConnectingTripCard
+              key={trip.id}
+              trip={trip}
+              isSelected={isTripSelected}
+              isExpanded={isTripExpanded || false} // isExpanded is number|string|null. Check if matches.
+              selectedCabin={selectedCabin}
+              themeSettings={themeSettings}
+              bookingType={bookingType}
+              onToggleDetails={toggleDetails}
+              onSelectCabin={handleCabinSelection}
+            />
+          );
+        }
 
         return (
           <div
             key={trip.id}
-            className={`relative bg-white border-2 rounded-lg shadow-sm transition-all duration-300 ease-in-out 
+            className={`relative bg-white border-2 rounded-lg shadow-sm transition-all duration-300 ease-in-out
                       ${isTripSelected ? '' : 'hover:border-[rgba(var(--border-color),1)]'}`}
             style={
               {
@@ -225,8 +308,8 @@ export default function TripCards({
                       borderColor: `rgba(${hexToRgb(themeSettings?.accent || '#8C1F21')}, 0.2)`
                     }}
                   >
-                    <FaCar className="mr-2" />
-                    <span>{trip.availableVehicleCapacity} Vehicle Slots</span>
+                    <VehicleIcon className="mr-2" />
+                    <span>{vehicleCount} Vehicle Slots</span>
                   </div>
                   {selectedCabin && selectedCabin.tripId === trip.id && (
                     <div
@@ -259,7 +342,7 @@ export default function TripCards({
                   </span>
                   <div className="flex items-center text-gray-700">
                     <FaShip className="mr-2" style={{ color: themeSettings?.accent || '#051036' }} />
-                    <span className="text-sm font-medium">{getShipDetailsById(trip.shipId)?.name || 'Unknown'}</span>
+                    <span className="text-sm font-medium">{trip.shipName || 'Unknown'}</span>
                   </div>
                 </div>
               </div>
@@ -268,9 +351,9 @@ export default function TripCards({
               <div className="grid grid-cols-1 md:grid-cols-[200px_1fr_150px] gap-6 items-center">
                 {/* Shipping Line Logo */}
                 <div className="hidden md:flex justify-center">
-                  {trip.shippingLine?.logoFilename && (
+                  {trip.lightLogoUrl && (
                     <Image
-                      src={`${SHIPPING_LINE_LOGO}${trip.shippingLine?.logoFilename}`}
+                      src={trip.lightLogoUrl}
                       alt="Shipping Company Logo"
                       width={200}
                       height={500}
@@ -311,14 +394,14 @@ export default function TripCards({
                 <div className="flex flex-col items-center md:items-end space-y-2">
                   <p className="text-xl font-bold text-gray-900">
                     {selectedCabin && selectedCabin.tripId === trip.id
-                      ? formatCurrency(selectedCabin.cabinFare)
+                      ? formatCurrency(selectedCabin.cabinFare || 0)
                       : trip.availableCabins?.length
                         ? formatCurrency(Math.min(...trip.availableCabins.map((cabin) => cabin.adultFare)))
                         : 'N/A'}
                   </p>
                   <Button
                     variant={selectedCabin || isTripExpanded ? 'destructive' : 'default'}
-                    onClick={() => toggleDetails(Number(trip.id))}
+                    onClick={() => toggleDetails(trip.id)}
                     className="w-full px-6 py-2 text-md md:text-sm md:w-auto"
                   >
                     {selectedCabin ? 'Unselect' : isTripExpanded ? 'Close' : 'Select'}
@@ -353,7 +436,7 @@ export default function TripCards({
                         }
                       >
                         <div className="flex justify-between items-start mb-4">
-                          <h4 className="text-lg font-semibold text-gray-900">{cabin?.cabinType?.name || 'N/A'}</h4>
+                          <h4 className="text-lg font-semibold text-gray-900">{cabin?.cabin_type_name || cabin?.cabinType?.name || 'N/A'}</h4>
                           <div className="flex items-center space-x-2 text-sm">
                             <MdEventSeat
                               className="w-4 h-4"
@@ -367,11 +450,15 @@ export default function TripCards({
 
                         <div className="space-y-4">
                           <div className="text-sm text-gray-600">
-                            <ul className="list-disc pl-4 space-y-1">
-                              <li>Comfortable seating arrangement</li>
-                              <li>Access to deck area</li>
-                              <li>Basic amenities included</li>
-                            </ul>
+                            {cabin?.cabin_type_description ? (
+                              <div className="whitespace-pre-wrap">{cabin.cabin_type_description}</div>
+                            ) : (
+                              <ul className="list-disc pl-4 space-y-1">
+                                <li>Comfortable seating arrangement</li>
+                                <li>Access to deck area</li>
+                                <li>Basic amenities included</li>
+                              </ul>
+                            )}
                           </div>
 
                           <div className="flex items-center justify-between pt-4">
@@ -380,10 +467,11 @@ export default function TripCards({
                               variant={isCabinSelected ? 'outline' : 'default'}
                               onClick={() =>
                                 handleCabinSelection(
-                                  Number(trip.id),
+                                  trip.id,
+                                  trip.id,
                                   cabinData.cabinId,
                                   cabinData.cabin?.cabinTypeId || 0,
-                                  cabin?.cabinType?.name || 'N/A',
+                                  cabin?.cabin_type_name || cabin?.cabinType?.name || 'N/A',
                                   cabinData.adultFare,
                                   trip.departureDateIso
                                 )
@@ -398,6 +486,7 @@ export default function TripCards({
                     );
                   })}
                 </div>
+
 
                 {/* Info Footer */}
                 <div

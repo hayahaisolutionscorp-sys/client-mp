@@ -22,9 +22,7 @@ import Combobox from "@/components/ui/Combobox";
 import { NATIONALITIES } from "constants/default";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
-
-export const REGISTER_STEP_KEY = 'register-step';
-export const REGISTER_TTL_MS = 20 * 60 * 1000; // 20 minutes
+import { REGISTER_STEP_KEY } from "./constants";
 
 export default function RegisterPage() {
   const router = useRouter();

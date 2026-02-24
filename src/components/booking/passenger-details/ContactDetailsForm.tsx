@@ -11,11 +11,13 @@ import {
 } from "@/components/ui/Select";
 import { PassengerData } from "@/types/booking/passenger-data";
 import { ContactData } from "@/types/booking/contact-data";
-import { useThemeSettings } from "@/hooks/theme-settings"; // Added import
+import { useThemeSettings } from "@/hooks/theme-settings";
+import { useAuth } from "@/contexts/AuthContexts";
 
 
 interface ContactDetailsFormProps {
   passengerDetails?: PassengerData;
+  initialContact?: ContactData | null;
   onChange?: (contacts: ContactData) => void;
 }
 
@@ -23,11 +25,13 @@ const emailDomains = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com.br",
 
 const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
   passengerDetails,
+  initialContact,
   onChange,
 }) => {
-  const themeSettings = useThemeSettings(); // Added hook call
+  const themeSettings = useThemeSettings();
+  const { loggedInAccount } = useAuth();
   const [usePassengerDetails, setUsePassengerDetails] = useState(false);
-  const [contactDetails, setContactDetails] = useState<ContactData>({
+  const [contactDetails, setContactDetails] = useState<ContactData>(initialContact || {
     firstname: "",
     lastname: "",
     mobileNumber: "",
@@ -45,6 +49,20 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
       onChange(contactDetails);
     }
   }, [contactDetails, onChange]);
+
+  // Auto-fill contact details if user is logged in
+  useEffect(() => {
+    if (loggedInAccount && !contactDetails.firstname && !contactDetails.lastname && !contactDetails.email) {
+      const profile = loggedInAccount.passenger;
+      setContactDetails({
+        firstname: profile?.firstName || "",
+        lastname: profile?.lastName || "",
+        mobileNumber: profile?.phone || "",
+        email: loggedInAccount.email || "",
+        countryCode: "+639", // Default
+      });
+    }
+  }, [loggedInAccount, contactDetails.firstname, contactDetails.lastname, contactDetails.email]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

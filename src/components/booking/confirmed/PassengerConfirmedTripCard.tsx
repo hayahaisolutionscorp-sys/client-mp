@@ -36,59 +36,92 @@ export default function PassengerConfirmedTripCard({ booking }: PassengerConfirm
     return allShips.find((s) => s.id === shipId)! || null;
   };
 
-  const TripCard = ({ type, tripIndex }: { type: 'Depart' | 'Return'; tripIndex: number }) => (
-    <div className="border rounded-lg shadow-md bg-white p-3 sm:p-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <span
-            className="bg-[rgba(var(--bg-color),0.1)] text-[rgba(var(--bg-color),1)] rounded-full text-xs sm:text-sm font-medium px-2 py-1"
-            style={
-              {
-                '--bg-color': hexToRgb('#FFFFFF')
-              } as React.CSSProperties
-            }
-          >
-            {type}
-          </span>
-          <span className="text-customText text-xs sm:text-sm">
-            {toPhilippinesTime(
-              booking?.bookingTrips?.[tripIndex]?.trip?.departureDateIso || '',
-              DATE_SECONDARY_DEFAULT_FORMAT
-            )}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 text-customText">
-          <FaShip
-            className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
-            style={{ color: themeSettings?.accent || '#23abff' }}
-          />
-          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-            <span className="text-xs sm:text-sm font-medium max-w-[120px] sm:max-w-[150px] truncate">
-              {booking?.bookingTrips?.[tripIndex]?.trip?.shippingLine?.name}
+  const TripCard = ({ type, tripIndex, tripData }: { type: 'Depart' | 'Return'; tripIndex: number; tripData?: any }) => {
+    const trip = tripData || booking?.bookingTrips?.[tripIndex];
+    const cabinName = trip?.bookingTripPassengers?.[0]?.cabin?.name;
+
+    return (
+      <div className="border rounded-lg shadow-md bg-white p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-3 sm:space-y-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="rounded-full text-xs font-semibold px-3 py-1 border"
+              style={{
+                backgroundColor: `${themeSettings?.accent || '#23abff'}15`,
+                color: themeSettings?.accent || '#23abff',
+                borderColor: `${themeSettings?.accent || '#23abff'}40`
+              }}
+            >
+              {type}
             </span>
-            <span className="px-1 sm:px-2 text-gray-400">|</span>
-            <span className="text-xs sm:text-sm font-medium max-w-[80px] sm:max-w-[100px] truncate">
-              {getShipDetailsById(booking?.bookingTrips?.[tripIndex]?.trip?.shipId || 0)?.name || booking?.bookingTrips?.[tripIndex]?.trip?.ship?.name}
+            <span className="text-customText text-xs sm:text-sm font-medium">
+              {toPhilippinesTime(
+                trip?.trip?.departureDateIso || '',
+                'ddd, MMM. DD, YYYY hh:mm A'
+              )}
             </span>
           </div>
+          <div className="flex items-center gap-2 text-customText">
+            <FaShip
+              className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
+              style={{ color: themeSettings?.accent || '#23abff' }}
+            />
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+              <span className="text-xs sm:text-sm font-medium max-w-[120px] sm:max-w-[150px] truncate">
+                {trip?.trip?.shippingLine?.name}
+              </span>
+              <span className="px-1 sm:px-2 text-gray-400">|</span>
+              <span className="text-xs sm:text-sm font-medium max-w-[80px] sm:max-w-[100px] truncate">
+                {getShipDetailsById(trip?.trip?.shipId || 0)?.name || trip?.trip?.ship?.name}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 sm:mt-5 space-y-3 sm:space-y-0">
+          <div className="flex items-center text-customText text-sm sm:text-base font-bold">
+            <span className="truncate max-w-[150px] sm:max-w-[200px]">
+              {trip?.trip?.srcPort?.name}
+            </span>
+            <FaArrowRight className="w-4 h-4 mx-2 text-gray-400" />
+            <span className="truncate max-w-[150px] sm:max-w-[200px]">
+              {trip?.trip?.destPort?.name}
+            </span>
+          </div>
+
+          {cabinName && (
+            <span
+              className="rounded-full text-[10px] sm:text-xs font-semibold px-3 py-1 border shadow-sm"
+              style={{
+                borderColor: `${themeSettings?.accent || '#8C1F21'}40`,
+                color: '#4B5563', // gray-600 for better readability
+                backgroundColor: '#F9FAFB' // gray-50
+              }}
+            >
+              {cabinName}
+            </span>
+          )}
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center text-customText text-sm sm:text-base font-medium mt-3 sm:mt-4 space-y-2 sm:space-y-0">
-        <span className="truncate max-w-full sm:max-w-[200px]">
-          {booking?.bookingTrips?.[tripIndex]?.trip?.srcPort?.name}
-        </span>
-        <FaArrowRight className="w-4 h-4 my-1 sm:mx-2 transform rotate-90 sm:rotate-0" />
-        <span className="truncate max-w-full sm:max-w-[200px]">
-          {booking?.bookingTrips?.[tripIndex]?.trip?.destPort?.name}
-        </span>
-      </div>
-    </div >
-  );
+    );
+  };
+
+  const departureTrips = (booking?.bookingTrips || []).filter(t => (t as any).direction === 'departure');
+  const returnTrips = (booking?.bookingTrips || []).filter(t => (t as any).direction === 'return');
+
+  // Fallback for cases where direction is not set (e.g. existing data)
+  const hasDirection = (booking?.bookingTrips || []).some(t => (t as any).direction);
+  const displayDepartures = hasDirection ? departureTrips : [(booking?.bookingTrips || [])[0]].filter(Boolean);
+  const displayReturns = hasDirection ? returnTrips : [(booking?.bookingTrips || [])[1]].filter(Boolean);
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <TripCard type="Depart" tripIndex={0} />
-      {(booking?.bookingTrips?.length || 0) > 1 && <TripCard type="Return" tripIndex={1} />}
+      {displayDepartures.map((trip, idx) => (
+        <TripCard key={`depart-${idx}`} type="Depart" tripIndex={idx} tripData={trip} />
+      ))}
+      {displayReturns.map((trip, idx) => (
+        <TripCard key={`return-${idx}`} type="Return" tripIndex={idx} tripData={trip} />
+      ))}
     </div>
   );
 }

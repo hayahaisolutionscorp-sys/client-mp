@@ -20,9 +20,7 @@ import {
   DEFAULT_NUM_VEHICLES,
   DEFAULT_NUM_PASSENGERS,
 } from "constants/default";
-import { getPorts } from "@/services";
-import { getRoutes } from "@/services/shipping-line/route.service";
-import { IRoute } from "@/models/shipping-line/route.model";
+import { getPorts, getDestinationPortsByOrigin } from "@/services";
 
 const SearchBox: React.FC = () => {
   const router = useRouter();
@@ -36,7 +34,7 @@ const SearchBox: React.FC = () => {
   const [selectedDestinationPort, setSelectedDestinationPort] = useState<IPort | undefined>();
   const [destinationPorts, setDestinationPorts] = useState<IPort[] | undefined>([]);
   const [ports, setPorts] = useState<IPort[] | undefined>([]);
-  const [routes, setRoutes] = useState<IRoute[]>([]); // New state for routes
+  // const [routes, setRoutes] = useState<IRoute[]>([]); // Removed routes state
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,9 +43,8 @@ const SearchBox: React.FC = () => {
   useEffect(() => {
     const fetchPortsAndRoutes = async () => {
       try {
-        const [allPorts, allRoutes] = await Promise.all([getPorts(), getRoutes()]);
+        const allPorts = await getPorts();
         setPorts(allPorts);
-        setRoutes(allRoutes);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }
@@ -57,29 +54,31 @@ const SearchBox: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedOriginPort && routes.length > 0) {
-      // Get all valid destination port codes for the selected origin
-      const validDestCodes = new Set(
-        routes
-          .filter(route => route.src_port_code === selectedOriginPort.code)
-          .map(route => route.dest_port_code)
-      );
+    const fetchDestinations = async () => {
+      if (selectedOriginPort) {
+        // Clear destinations while fetching
+        setDestinationPorts([]);
 
-      const availableDestPorts = ports?.filter(port => validDestCodes.has(port.code)) ?? [];
-      setDestinationPorts(availableDestPorts.sort((a, b) => a.name.localeCompare(b.name)));
+        const destPorts = await getDestinationPortsByOrigin(selectedOriginPort.code);
 
-      // Clear destination if it's no longer valid
-      if (selectedDestinationPort && !validDestCodes.has(selectedDestinationPort.code)) {
-        setSelectedDestinationPort(undefined);
+        // Filter the main ports list using the codes returned from the service
+        // This ensures we have the full IPort object with IDs
+        const validDestCodes = new Set(destPorts.map(p => p.code));
+        const availableDestPorts = ports?.filter(port => validDestCodes.has(port.code)) ?? [];
+
+        setDestinationPorts(availableDestPorts.sort((a, b) => a.name.localeCompare(b.name)));
+
+        // Clear destination if it's no longer valid
+        if (selectedDestinationPort && !validDestCodes.has(selectedDestinationPort.code)) {
+          setSelectedDestinationPort(undefined);
+        }
+      } else {
+        setDestinationPorts([]);
       }
-    } else {
-      // If no origin, show all ports (or none, depending on preference. Usually empty until origin is picked)
-      // Reverting to previous logic of showing all if no origin selected, OR keeping empty
-      // Looking at previous code: if (selectedOriginPort) { fetchDestinations } else { setDestinationPorts([]) }
-      // So we keep it empty if no origin.
-      setDestinationPorts([]);
-    }
-  }, [selectedOriginPort, routes, ports]); // Replaced fetchDestinationPorts logic
+    };
+
+    fetchDestinations();
+  }, [selectedOriginPort, ports, selectedDestinationPort]);
 
   // Removed old useEffect for fetchDestinationPorts
 

@@ -27,7 +27,7 @@ const handleTokenRefresh = async () => {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
       const response = await axios.post(`${apiBaseUrl}/auth/refresh`, {}, { withCredentials: true });
       return response.data;
-    } catch (error: any) {      
+    } catch (error: any) {
       // If refresh fails (especially 401), the refresh token is invalid.
       // We must perform a thorough cleanup to stop further refresh attempts and ensure a clean state.
       const { invalidateItem } = await import('helpers/cache.helpers');
@@ -41,6 +41,9 @@ const handleTokenRefresh = async () => {
 
       // Clear all account-related cache items
       accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+
+      // Specifically ensure jwt is cleared (though it's in accountRelatedCacheKeys)
+      invalidateItem('jwt');
 
       // If refresh fails, dispatch session expired event
       if (typeof window !== 'undefined') {
@@ -74,18 +77,26 @@ instance.interceptors.response.use(
 
     // Handle 401 Unauthorized errors
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // If the user was never authenticated (no JWT), skip refresh entirely.
+      // This allows unauthenticated users to make API calls without
+      // triggering the "Session Expired" modal.
+      const existingToken = fetchItem<string>('jwt');
+      if (!existingToken) {
+        return Promise.reject(error);
+      }
+
       // Avoid infinite loops and don't try to refresh if already on login/register
-      if (typeof window !== 'undefined' && 
-          window.location.pathname !== '/login' && 
-          window.location.pathname !== '/register' &&
-          !originalRequest.url?.includes('/auth/refresh')) {
-        
+      if (typeof window !== 'undefined' &&
+        window.location.pathname !== '/login' &&
+        window.location.pathname !== '/register' &&
+        !originalRequest.url?.includes('/auth/refresh')) {
+
         originalRequest._retry = true;
-        
+
         try {
           // Attempt to refresh the token using the shared logic
           await handleTokenRefresh();
-          
+
           return instance(originalRequest);
         } catch (refreshError: any) {
           // Only throw if not a 401, as 401 is handled by logout/redirect logic elsewhere

@@ -11,9 +11,7 @@ import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
 import { AuthService } from "@/services/auth.service";
-
-const STEP_KEY = 'register-step';
-const TTL_MS = 10 * 60 * 1000;
+import { REGISTER_STEP_KEY, REGISTER_TTL_MS } from "../constants";
 
 export default function RegisterEmailPage() {
   const router = useRouter();
@@ -29,12 +27,12 @@ export default function RegisterEmailPage() {
 
   // Guard: requires valid step 1 session data
   useEffect(() => {
-    const raw = sessionStorage.getItem(STEP_KEY);
+    const raw = sessionStorage.getItem(REGISTER_STEP_KEY);
     if (!raw) { router.replace('/register'); return; }
     try {
       const parsed = JSON.parse(raw);
-      if (!parsed.firstName || Date.now() - parsed.ts > TTL_MS) {
-        sessionStorage.removeItem(STEP_KEY);
+      if (!parsed.firstName || Date.now() - parsed.ts > REGISTER_TTL_MS) {
+        sessionStorage.removeItem(REGISTER_STEP_KEY);
         router.replace('/register');
         return;
       }
@@ -42,7 +40,7 @@ export default function RegisterEmailPage() {
       // Pre-fill email if user navigated back
       if (parsed.email) setEmail(parsed.email);
     } catch {
-      sessionStorage.removeItem(STEP_KEY);
+      sessionStorage.removeItem(REGISTER_STEP_KEY);
       router.replace('/register');
     }
   }, [router]);
@@ -72,7 +70,7 @@ export default function RegisterEmailPage() {
 
     // Merge email into existing step data, refresh TTL
     const updated = { ...stepData, email, ts: Date.now() };
-    sessionStorage.setItem(STEP_KEY, JSON.stringify(updated));
+    sessionStorage.setItem(REGISTER_STEP_KEY, JSON.stringify(updated));
     router.push('/register/password');
   };
 

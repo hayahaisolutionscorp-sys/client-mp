@@ -1,15 +1,19 @@
 'use client';
 
-import { useState, FC, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, forwardRef, useImperativeHandle, ForwardRefRenderFunction } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/Select';
 import { FiPlus, FiTrash } from 'react-icons/fi';
+import { PiInfo } from 'react-icons/pi';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { AlertModal } from '@/components/ui/AlertModal';
 
-import { getRateTableRowsByRateTableId } from '@/services';
+import { getVehicleTypes } from '@/services';
 import { formatCurrency } from 'helpers/general.helpers';
+import { useThemeSettings } from '@/hooks/theme-settings';
+import { hexToRgb } from 'helpers/theme.helpers';
 import { PassengerData } from '@/types/booking/passenger-data';
 import { VehicleData } from '@/types/booking/vehicle-data';
 
@@ -23,6 +27,11 @@ interface VehicleTypes {
   vehicleTypeName: string;
   vehicleTypeDescription: string;
   vehicleFare: number | 0;
+  cargo_class?: string;
+}
+
+export interface VehicleInformationFormHandle {
+  addVehicle: () => void;
 }
 
 interface VehicleInformationFormProps {
@@ -32,23 +41,36 @@ interface VehicleInformationFormProps {
   passengerDetails?: PassengerDetails | undefined;
   onChange?: (vehicles: VehicleData[]) => void;
   cargoRequired?: boolean;
+  initialVehicles?: VehicleData[];
 }
 
-const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
+const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHandle, VehicleInformationFormProps> = ({
   rateTableId,
   vehicleSlots,
   title = '',
   passengerDetails = undefined,
   cargoRequired = false,
+  initialVehicles,
   onChange
-}) => {
+}, ref) => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const themeSettings = useThemeSettings();
 
   const [vehicleTypes, setVehicleTypes] = useState<VehicleTypes[]>([]);
-  const [vehicles, setVehicles] = useState<VehicleData[]>([]);
+  const [vehicles, setVehicles] = useState<VehicleData[]>(initialVehicles || []);
   const [combinedPassengerData, setCombinedPassengerData] = useState<PassengerData[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const [alertModal, setAlertModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+  }>({
+    isOpen: false,
+    title: '',
+    description: ''
+  });
 
   const generateUniqueNumber = (): number => {
     return (Date.now() + Math.floor(Math.random() * 1000)) * -1;
@@ -64,6 +86,16 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
   );
 
   const handleAddVehicle = () => {
+    const totalPassengers = combinedPassengerData.length;
+    if (vehicles.length >= totalPassengers) {
+      setAlertModal({
+        isOpen: true,
+        title: 'Vehicle Limit Reached',
+        description: `Cannot add more vehicles. The number of vehicles cannot exceed the number of passengers (${totalPassengers}).`
+      });
+      return;
+    }
+
     updateVehicles([
       ...vehicles,
       {
@@ -79,6 +111,10 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
     ]);
   };
 
+  useImperativeHandle(ref, () => ({
+    addVehicle: handleAddVehicle
+  }));
+
   const handleRemoveVehicle = (id: number) => {
     updateVehicles(vehicles.filter((vehicle) => vehicle.id !== id));
   };
@@ -89,18 +125,20 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
     value: string,
     vehicleTypeId: number,
     vehicleTypeDescription: string,
-    driverId: number
+    driverId: number,
+    cargo_class?: string
   ) => {
     // Update the vehicle in the vehicles array
     const updatedVehicles = vehicles.map((vehicle) =>
       vehicle.id === id
         ? {
-            ...vehicle,
-            [field]: value,
-            vehicleTypeId: vehicleTypeId,
-            vehicleTypeDescription: vehicleTypeDescription,
-            driverId: driverId
-          }
+          ...vehicle,
+          [field]: value,
+          vehicleTypeId: vehicleTypeId,
+          vehicleTypeDescription: vehicleTypeDescription,
+          driverId: driverId,
+          cargo_class: cargo_class
+        }
         : vehicle
     );
 
@@ -130,23 +168,31 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
   };
 
   useEffect(() => {
-    if (rateTableId) {
-      getRateTableRowsByRateTableId(rateTableId).then((data) => {
-        const rows = Array.isArray(data) ? data : [data];
-        const vehicleTypesList = rows
-          .filter((row) => row.vehicleType && row.vehicleType.name) // Ensure valid rows with vehicleType
-          .map((row) => ({
-            vehicleTypeId: row.vehicleTypeId,
-            vehicleTypeName: row.vehicleType.name,
-            vehicleTypeDescription: row.vehicleType.description,
-            vehicleFare: row.fare
-          }))
-          .sort((a, b) => a.vehicleTypeName.localeCompare(b.vehicleTypeName)); // Sort alphabetically by vehicleTypeName
+    // Fetch vehicle types from API
+    getVehicleTypes().then((vehicleTypesData) => {
+      if (!vehicleTypesData) {
+        console.warn('No vehicle types data received');
+        setVehicleTypes([]);
+        return;
+      }
 
-        setVehicleTypes(vehicleTypesList);
-      });
-    }
-  }, [rateTableId]);
+      // Map vehicle types from API
+      const vehicleTypesList = vehicleTypesData
+        .map((vt: { id: number; name: string; description: string }) => ({
+          vehicleTypeId: vt.id,
+          vehicleTypeName: vt.name,
+          vehicleTypeDescription: vt.description,
+          vehicleFare: 0, // Fare not provided by vehicle types endpoint
+          cargo_class: (vt as any).cargo_class // Map cargo_class from API
+        }))
+        .sort((a: VehicleTypes, b: VehicleTypes) => a.vehicleTypeName.localeCompare(b.vehicleTypeName));
+
+      setVehicleTypes(vehicleTypesList);
+    }).catch((error) => {
+      console.error('Error fetching vehicle types:', error);
+      setVehicleTypes([]);
+    });
+  }, []);
 
   useEffect(() => {
     if (passengerDetails) {
@@ -202,34 +248,9 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
   }
 
   return (
-    <div>
-      {cargoRequired && (
-        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-sm text-yellow-700">
-            <strong>Note:</strong> Vehicle information is required for this trip.
-          </p>
-        </div>
-      )}
-      {/* <div
-        className={`flex flex-col sm:flex-row justify-between items-start sm:items-center ${
-          title ? "h-[40px]" : ""
-        } space-y-4 sm:space-y-0`}
-      >
-        <h3 className="text-lg w-full font-semibold text-customText">{title}</h3>
-  
-        {vehicles.length === 0 && (
-        <div className="flex justify-center w-full mt-4 sm:justify-end">
-          <Button
-            variant="outline"
-            className="w-full gap-2 py-2 px-4 sm:px-6 md:w-auto"
-            onClick={handleAddVehicle}
-          >
-            <FiPlus className="w-4 h-4" />
-            <span>Add Vehicle or Cargo</span>
-          </Button>
-        </div>
-      )}
-      </div> */}
+    <div className="mt-8">
+
+
 
       {vehicles.map((vehicle, index) => (
         <div key={vehicle.id} className="border rounded-lg shadow-md bg-white p-4 sm:p-6 mb-6">
@@ -244,6 +265,22 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
               <FiTrash className="w-4 h-4" />
               <span>Remove</span>
             </Button>
+          </div>
+
+          <div
+            className="mb-4 p-4 border rounded-lg flex items-start"
+            style={{
+              backgroundColor: `rgba(${hexToRgb(themeSettings?.accent || '#23abff')}, 0.1)`,
+              borderColor: `rgba(${hexToRgb(themeSettings?.accent || '#23abff')}, 0.3)`
+            }}
+          >
+            <PiInfo
+              className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5"
+              style={{ color: themeSettings?.accent || '#23abff' }}
+            />
+            <p className="text-sm text-customText">
+              <strong>Please choose the correct Model Body.</strong> Any misdeclaration of information will automatically void the ticket&apos;s validity and make it non-refundable.
+            </p>
           </div>
 
           <div className={`grid grid-cols-1 sm:grid-cols-2 ${title ? 'gap-4' : 'gap-6'}`}>
@@ -263,7 +300,8 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
                     e.target.value,
                     vehicle.vehicleTypeId,
                     vehicle.vehicleTypeDescription,
-                    vehicle.driverId
+                    vehicle.driverId,
+                    vehicle.cargo_class
                   )
                 }
               />
@@ -288,7 +326,8 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
                     e.target.value,
                     vehicle.vehicleTypeId,
                     vehicle.vehicleTypeDescription,
-                    vehicle.driverId
+                    vehicle.driverId,
+                    vehicle.cargo_class
                   )
                 }
               />
@@ -312,7 +351,8 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
                     value,
                     selectedVehicleType?.vehicleTypeId || 0,
                     selectedVehicleType?.vehicleTypeDescription || '',
-                    vehicle.driverId
+                    vehicle.driverId,
+                    selectedVehicleType?.cargo_class
                   );
                 }}
               >
@@ -322,7 +362,7 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
                 <SelectContent>
                   {vehicleTypes?.map((row) => (
                     <SelectItem key={row.vehicleTypeId} value={row?.vehicleTypeName}>
-                      {row?.vehicleTypeName} - ({formatCurrency(row?.vehicleFare || 0)})
+                      {row?.vehicleTypeName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -335,7 +375,7 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
             {/* Driver Name */}
             <div>
               <label htmlFor={`driverName-${vehicle.id}`} className="block text-sm font-medium text-customText">
-                Driver Name
+                Vehicle Owner
               </label>
               <Select
                 value={vehicle.driverId.toString()}
@@ -349,13 +389,14 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
                       `${selectedDriver.firstname} ${selectedDriver.lastname}`,
                       vehicle.vehicleTypeId,
                       vehicle.vehicleTypeDescription,
-                      selectedDriverId
+                      selectedDriverId,
+                      vehicle.cargo_class
                     );
                   }
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a driver" />
+                  <SelectValue placeholder="Select vehicle owner" />
                 </SelectTrigger>
                 <SelectContent>
                   {combinedPassengerData?.length > 0 &&
@@ -384,38 +425,15 @@ const VehicleInformationForm: FC<VehicleInformationFormProps> = ({
         </div>
       ))}
 
-      <div className="flex justify-center md:justify-end items-center mt-6">
-        <Button
-          variant="outline"
-          className="w-full sm:w-auto"
-          onClick={handleAddVehicle}
-          disabled={vehicles.length >= (vehicleSlots || 1)}
-        >
-          <FiPlus className="w-4 h-4" />
-          <span>Add Vehicle or Cargo</span>
-          {vehicles.length > 0 && <Badge>{vehicles.length}</Badge>}
-        </Button>
-      </div>
-
-      {/* {vehicles.length > 0 && (
-        <div className="flex justify-center md:justify-end items-center mt-6">
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto"
-            onClick={handleAddVehicle}
-          >
-            <FiPlus className="w-4 h-4" />
-            <span>Add Vehicle or Cargo</span>
-            {vehicles.length > 0 && (
-              <Badge className="flex justify-center items-center bg-customBlue ml-1">
-                {vehicles.length}
-              </Badge>
-            )}
-          </Button>
-        </div>
-      )} */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+        title={alertModal.title}
+        description={alertModal.description}
+        variant="warning"
+      />
     </div>
   );
 };
 
-export default VehicleInformationForm;
+export default forwardRef(VehicleInformationForm);

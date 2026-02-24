@@ -7,4 +7,5 @@ export interface VehicleData {
     modelBody: string;
     driverName: string;
     driverId: number;
+    cargo_class?: string;
 }

@@ -1,6 +1,7 @@
 // Cached items stored in sessionStorage (auto-cleared on tab close; also invalidated on logout)
 export const sessionCacheKeys = <const>[
   'vehicle-types',
+  'jwt',
 ];
 
 // Cached items that will be invalidated when user signs out
@@ -16,6 +17,8 @@ export const publicCacheKeys = <const>[
   'ports',
   'ships',
   'shipping-lines',
+  'vehicle-types',
+  'commodities',
   'trips',
   'trips-by-id',
   'rate-tables-by-id',

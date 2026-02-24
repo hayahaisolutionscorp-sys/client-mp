@@ -43,3 +43,50 @@ export async function getPort(portId: number): Promise<IPort | undefined> {
   return ports?.find((port) => port.id === portId);
 }
 
+export async function getDestinationPortsByOrigin(originCode: string): Promise<IPort[]> {
+  try {
+    const res = await fetch(`${PORTS_API}/${originCode}/trips`, {
+      next: { tags: ['ports', `ports-${originCode}`], revalidate: 300 } // shorter revalidate for dynamic nature
+    });
+
+    if (res.ok) {
+      const { data } = await res.json();
+      // The API returns distinct objects: { destination_port_name, destination_port_code }
+      // We need to map them to IPort interface if possible, or usually we need the IDs to match the selected object in dropdowns.
+      // However, the dropdowns uses IPort which has id, name, code.
+      // The API response shown by user:
+      // { "destination_port_name": "Talisay, Cebu", "destination_port_code": "TLSY" }
+      // It is missing 'id'.
+      // Strategy: The SearchBox.tsx has "ports" (all ports). We can filter "ports" based on the codes returned here.
+
+      const destinations: any[] = [];
+
+      data.forEach((item: any) => {
+        // Add direct destination
+        destinations.push({
+          name: item.destination_port_name,
+          code: item.destination_port_code,
+        });
+
+        // Add 2-hop destinations if they exist
+        if (item.next_destinations && Array.isArray(item.next_destinations)) {
+          item.next_destinations.forEach((next: any) => {
+            destinations.push({
+              name: next.destination_port_name,
+              code: next.destination_port_code,
+            });
+          });
+        }
+      });
+
+      // Deduplicate by code
+      const uniqueDestinations = Array.from(new Map(destinations.map((item) => [item.code, item])).values());
+
+      return uniqueDestinations;
+    }
+  } catch (error) {
+    console.error('Failed to fetch destination ports:', error);
+  }
+  return [];
+}
+

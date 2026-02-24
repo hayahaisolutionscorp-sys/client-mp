@@ -1,9 +1,7 @@
 import { IVehicleType } from "@/models";
 import { VEHICLE_TYPES_API } from "constants/api";
 import { cacheItem, fetchItem } from 'helpers/cache.helpers';
-import axios from '@/services/core/axios';
-
-import vehicleTypesData from '@/data/vehicle-types.json';
+import axios from "axios";
 
 export async function getVehicleTypes(): Promise<IVehicleType[] | undefined> {
   const cached = fetchItem<IVehicleType[]>('vehicle-types');

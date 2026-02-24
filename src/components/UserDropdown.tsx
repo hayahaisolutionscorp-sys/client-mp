@@ -5,8 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContexts';
 import { useThemeSettings } from '@/hooks/theme-settings';
+import { usePathname } from 'next/navigation';
 
 const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: boolean }) => {
+  const pathname = usePathname();
   const { logout, currentUser, loggedInAccount, loading } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -23,6 +25,10 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  if (pathname !== '/') {
+    return null;
+  }
 
   return (
     <>
@@ -58,13 +64,16 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
             {/* Desktop: Login Button */}
             <Link
               href="/login"
-              className={`hidden md:flex items-center justify-center px-6 py-2 bg-[#23ABFF] text-white font-bold rounded-lg hover:bg-blue-500 transition-all shadow-md whitespace-nowrap`}
+              className={`hidden lg:flex items-center justify-center px-6 py-2 text-white font-bold rounded-lg transition-all shadow-md whitespace-nowrap`}
+              style={{
+                backgroundColor: themeSettings?.primary
+              }}
             >
               Login/Create Account
             </Link>
 
             {/* Mobile: Menu Icon */}
-            <div className="md:hidden relative">
+            <div className="lg:hidden relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center space-x-2 focus:outline-none"
@@ -115,14 +124,14 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
               {/* Mobile Dropdown Links */}
               <Link
                 href="/login"
-                className="block md:hidden px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block lg:hidden px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => setIsDropdownOpen(false)}
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="block md:hidden px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block lg:hidden px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => setIsDropdownOpen(false)}
               >
                 Create Account

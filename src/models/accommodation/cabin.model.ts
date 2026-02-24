@@ -13,4 +13,9 @@ export interface ICabin {
 
   name: string;
   recommendedPassengerCapacity: number;
+
+  // Flattened properties from API
+  cabin_type_name?: string;
+  cabin_type_description?: string;
+  cabin_type_code?: string;
 }

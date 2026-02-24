@@ -17,6 +17,7 @@ type NavItem = {
 import UserDropdown from './UserDropdown';
 import { useBranding } from '@/hooks/branding';
 import { useHeaders } from '@/hooks/headers';
+import { useAuth } from '@/contexts/AuthContexts';
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -26,6 +27,7 @@ const Navbar = () => {
 
   const branding = useBranding();
   const headerSection = useHeaders();
+  const { currentUser, logout } = useAuth();
 
 
   useEffect(() => {
@@ -107,7 +109,7 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Navigation Links */}
-            <div className={`hidden md:flex flex-1 items-center justify-center space-x-6 lg:space-x-8 ${shouldBeTransparent ? 'text-white' : 'text-black'}`}>
+            <div className={`hidden lg:flex flex-1 items-center justify-center space-x-6 lg:space-x-8 ${shouldBeTransparent ? 'text-white' : 'text-black'}`}>
               {isHome &&
                 filteredNavItems.map((item) =>
                   item.trigger.toLowerCase() === 'scroll' ? (
@@ -140,21 +142,21 @@ const Navbar = () => {
             </div>
 
             {/* Right Side Icons & User Dropdown */}
-            <div className={`hidden md:flex items-center space-x-4 lg:space-x-6 ${shouldBeTransparent ? 'text-white' : 'text-customText'}`}>
-              <button className="hover:opacity-80 transition-opacity">
-                <LuBell className="w-5 h-5" />
-              </button>
-
-              <Link href="/bookings" className="text-sm font-medium hover:underline">
-                My Bookings
-              </Link>
+            <div className={`hidden lg:flex items-center space-x-4 lg:space-x-6 ${shouldBeTransparent ? 'text-white' : 'text-customText'}`}>
+              {isHome && currentUser && (
+                <>
+                  <button className="hover:opacity-80 transition-opacity">
+                    <LuBell className="w-5 h-5" />
+                  </button>
+                </>
+              )}
 
               <UserDropdown shouldBeTransparent={shouldBeTransparent} />
             </div>
 
             {/* Mobile menu button */}
             {isHome && (
-              <div className="md:hidden relative z-50">
+              <div className="lg:hidden relative z-50">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="inline-flex items-center justify-center p-2 mt-4 rounded-md focus:outline-none"
@@ -183,50 +185,85 @@ const Navbar = () => {
         {/* Mobile menu overlay */}
         {isHome && (
           <div
-            className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            className={`fixed inset-0 bg-white transition-opacity duration-300 lg:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
               }`}
             style={{ zIndex: 40 }}
           >
             <div className="h-full w-full px-4 pt-[100px] overflow-y-auto">
               <div className="space-y-1">
-                {/* Mobile menu overlay */}
-                {isHome && (
-                  <div
-                    className={`fixed inset-0 bg-white transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                      }`}
-                    style={{ zIndex: 40 }}
-                  >
-                    <div className="h-full w-full px-4 pt-[100px] overflow-y-auto">
-                      <div className="space-y-1">
-                        {filteredNavItems.map((item) =>
-                          item.trigger.toLowerCase() === 'scroll' ? (
-                            <button
-                              key={item.id}
-                              onClick={() => {
-                                setActiveNav(item.id);
-                                scrollToElement(item.id);
-                              }}
-                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
-                                } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
-                            >
-                              {item.name}
-                            </button>
-                          ) : (
-                            <Link
-                              key={item.id}
-                              href={item.redirect_url}
-                              onClick={() => setIsMenuOpen(false)}
-                              className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
-                                } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
-                            >
-                              {item.name}
-                            </Link>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                {filteredNavItems.map((item) =>
+                  item.trigger.toLowerCase() === 'scroll' ? (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveNav(item.id);
+                        scrollToElement(item.id);
+                      }}
+                      className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                        } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
+                    >
+                      {item.name}
+                    </button>
+                  ) : (
+                    <Link
+                      key={item.id}
+                      href={item.redirect_url}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                        } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
+                    >
+                      {item.name}
+                    </Link>
+                  )
                 )}
+
+                {/* Auth links for mobile */}
+                <div className="pt-4 mt-4 border-t border-gray-100">
+                  {currentUser ? (
+                    <>
+                      <div className="px-3 py-2 mb-2">
+                        <p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
+                      </div>
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                          } text-gray-900 hover:text-blue-600`}
+                      >
+                        Profile
+                      </Link>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setIsMenuOpen(false);
+                        }}
+                        className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                          } text-red-600 hover:bg-red-50`}
+                      >
+                        Log Out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/login"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                          } text-gray-900 hover:text-blue-600`}
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        href="/register"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                          } text-gray-900 hover:text-blue-600`}
+                      >
+                        Create Account
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -236,7 +273,7 @@ const Navbar = () => {
       {/* Mobile backdrop */}
       {isHome && (
         <div
-          className={`fixed inset-0 bg-black transition-opacity duration-300 md:hidden ${isMenuOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
+          className={`fixed inset-0 bg-black transition-opacity duration-300 lg:hidden ${isMenuOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
             }`}
           style={{ zIndex: 30 }}
           onClick={() => setIsMenuOpen(false)}

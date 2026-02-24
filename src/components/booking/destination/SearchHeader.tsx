@@ -23,7 +23,7 @@ import {
   SHIPPING_LINE_LOGO
 } from 'constants/index';
 import { IPort } from '@/models';
-import { getPorts, getTripsDestinationByPortId } from '@/services';
+import { getPorts, getDestinationPortsByOrigin } from '@/services';
 import { getBrandingConfig } from '@/services/ui/branding.service';
 import { IBrandingConfig } from '@/models/branding.model';
 
@@ -118,19 +118,27 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
     const fetchDestinationPorts = async () => {
       if (selectedOriginPort) {
         try {
-          const destinations = await getTripsDestinationByPortId(selectedOriginPort.id);
-          setDestinationPorts(destinations);
+          const destPorts = await getDestinationPortsByOrigin(selectedOriginPort.code);
+
+          // Filter ports to get full objects with IDs
+          // Note: destPorts from service has code and name, but might not have ID if the API doesn't return it.
+          // However, we have 'ports' state which has all ports.
+          // Let's filter 'ports' based on the codes.
+          const validDestCodes = new Set(destPorts.map(p => p.code));
+          const availableDestPorts = ports?.filter(port => validDestCodes.has(port.code)) ?? [];
+
+          setDestinationPorts(availableDestPorts);
 
           // Pre-fill Destination Port if query param exists
           const destinationCode = searchParams.get('destination_code');
           if (destinationCode) {
-            const foundPort = destinations.find((port) => port.code === destinationCode);
+            const foundPort = availableDestPorts.find((port) => port.code === destinationCode);
             if (foundPort) setSelectedDestinationPort(foundPort);
           } else {
             // Fallback
             const destinationPortId = searchParams.get('destPortId');
             if (destinationPortId) {
-              const foundPort = destinations.find((port) => port.id.toString() === destinationPortId);
+              const foundPort = availableDestPorts.find((port) => port.id.toString() === destinationPortId);
               if (foundPort) setSelectedDestinationPort(foundPort);
             }
           }
@@ -187,6 +195,26 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
       setReturnDate(value);
     }
   };
+
+  useEffect(() => {
+    const isRoundTrip = bookingType?.toLowerCase() === 'round trip';
+    const isValid =
+      !!selectedOriginPort &&
+      !!selectedDestinationPort &&
+      !!departureDate &&
+      (passengerCount > 0 || vehicleCount > 0) &&
+      (!isRoundTrip || !!returnDate);
+
+    setIsFormValid(isValid);
+  }, [
+    selectedOriginPort,
+    selectedDestinationPort,
+    departureDate,
+    returnDate,
+    bookingType,
+    passengerCount,
+    vehicleCount
+  ]);
 
   const handleSearchClick = () => {
     setError(null); // Reset error state

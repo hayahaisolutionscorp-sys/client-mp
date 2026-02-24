@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import SearchBox from "@/components/landing/SearchBox";
 import { TripSearchWidget } from "@oltek/hayahai-sdk/react";
 import type { TripData } from "@oltek/hayahai-sdk/react";
+import { DEFAULT_BOOKING_TYPE } from "constants/default";
 
 type Mode = "form" | "chat";
 
 export default function SearchBoxWrapper() {
-    const [mode, setMode] = useState<Mode>("chat"); // Default to AI chat
+    const [mode, setMode] = useState<Mode>("form"); // Default to AI chat
+    const [bookingType, setBookingType] = useState<string | undefined>(DEFAULT_BOOKING_TYPE);
     const router = useRouter();
 
     const handleTripSelect = (trip: TripData) => {
@@ -19,10 +21,13 @@ export default function SearchBoxWrapper() {
 
     return (
         <div
-            className={`flex items-center justify-center absolute z-10 inset-0 w-full px-4 
-      ${mode === "form" ? "top-[330px] sm:top-[210px] md:top-[310px] lg:top-[400px]" : "top-[300px] sm:top-[220px] md:top-[320px] lg:top-[400px]"}`}
+            className={`flex items-center justify-center absolute z-20 inset-0 w-full px-4 
+            ${bookingType?.toLowerCase() === "round trip"
+                    ? "top-[380px]"
+                    : "top-[330px]"
+                } sm:top-[230px] md:top-[340px] lg:top-[600px]`}
         >
-            <div className="w-full sm:w-[95%] md:w-[95%] lg:w-[1200px]">
+            <div className="w-full sm:w-[95%] md:w-[95%] lg:w-[1300px]">
                 <AnimatePresence mode="wait">
                     {mode === "chat" ? (
                         <motion.div
@@ -52,7 +57,11 @@ export default function SearchBoxWrapper() {
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <SearchBoxWithToggle onSwitchToChat={() => setMode("chat")} />
+                            <SearchBoxWithToggle
+                                onSwitchToChat={() => setMode("chat")}
+                                bookingType={bookingType}
+                                setBookingType={setBookingType}
+                            />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -62,10 +71,18 @@ export default function SearchBoxWrapper() {
 }
 
 // Wrapper for SearchBox that adds the toggle button
-function SearchBoxWithToggle({ onSwitchToChat }: { onSwitchToChat: () => void }) {
+function SearchBoxWithToggle({
+    onSwitchToChat,
+    bookingType,
+    setBookingType
+}: {
+    onSwitchToChat: () => void;
+    bookingType: string | undefined;
+    setBookingType: (value: string | undefined) => void;
+}) {
     return (
         <div className="relative">
-            <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-8 w-full h-auto transition-all duration-300 ease-in-out hover:shadow-2xl">
+            <div className="bg-white rounded-3xl shadow-2xl p-4 w-full h-auto transition-all duration-300 ease-in-out hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] sm:p-6 md:p-8">
                 {/* Header with toggle */}
                 <div className="flex items-center justify-between mb-4">
                     <div className="space-y-1">
@@ -98,7 +115,10 @@ function SearchBoxWithToggle({ onSwitchToChat }: { onSwitchToChat: () => void })
                 </div>
 
                 {/* Original SearchBox content - import the form parts */}
-                <SearchBoxFormContent />
+                <SearchBoxFormContent
+                    bookingType={bookingType}
+                    setBookingType={setBookingType}
+                />
             </div>
         </div>
     );
@@ -109,7 +129,6 @@ import { useState as useStateForm, useEffect, SetStateAction, Dispatch } from "r
 import { LuArrowRightLeft } from "react-icons/lu";
 import { BiSolidShip } from "react-icons/bi";
 import { FiLoader } from "react-icons/fi";
-
 import PortDropdownFieldset from "@/components/booking/destination/PortDropdownFieldset";
 import PassengerDropdown from "@/components/booking/destination/PassengerDropdown";
 import VehicleDropdown from "@/components/ui/VehicleDropdown";
@@ -120,18 +139,22 @@ import { Button } from "@/components/ui/Button";
 import { IPort } from "@/models";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import {
-    DEFAULT_BOOKING_TYPE,
     DEFAULT_NUM_VEHICLES,
     DEFAULT_NUM_PASSENGERS,
 } from "constants/default";
-import { getPorts, getTripsDestinationByPortId } from "@/services";
+import { getPorts, getDestinationPortsByOrigin } from "@/services";
 
-function SearchBoxFormContent() {
+function SearchBoxFormContent({
+    bookingType,
+    setBookingType
+}: {
+    bookingType: string | undefined;
+    setBookingType: (value: string | undefined) => void;
+}) {
     const router = useRouter();
 
     const [passengerCount, setPassengerCount] = useStateForm<number>(DEFAULT_NUM_PASSENGERS);
     const [vehicleCount, setVehicleCount] = useStateForm<number>(DEFAULT_NUM_VEHICLES);
-    const [bookingType, setBookingType] = useStateForm<string | undefined>(DEFAULT_BOOKING_TYPE);
     const [departureDate, setDepartureDate] = useStateForm<Date | undefined>(new Date());
     const [returnDate, setReturnDate] = useStateForm<Date | undefined>(new Date());
     const [selectedOriginPort, setSelectedOriginPort] = useStateForm<IPort | undefined>();
@@ -160,8 +183,22 @@ function SearchBoxFormContent() {
         const fetchDestinationPorts = async () => {
             if (selectedOriginPort) {
                 try {
-                    const destinations = await getTripsDestinationByPortId(selectedOriginPort.id);
-                    setDestinationPorts(destinations);
+                    // Clear destinations while fetching
+                    setDestinationPorts([]);
+
+                    const destPorts = await getDestinationPortsByOrigin(selectedOriginPort.code);
+
+                    // Filter the main ports list using the codes returned from the service
+                    // This ensures we have the full IPort object with IDs
+                    const validDestCodes = new Set(destPorts.map(p => p.code));
+                    const availableDestPorts = ports?.filter(port => validDestCodes.has(port.code)) ?? [];
+
+                    setDestinationPorts(availableDestPorts.sort((a, b) => a.name.localeCompare(b.name)));
+
+                    // Clear destination if it's no longer valid
+                    if (selectedDestinationPort && !validDestCodes.has(selectedDestinationPort.code)) {
+                        setSelectedDestinationPort(undefined);
+                    }
                 } catch (error) {
                     console.error("Failed to fetch destination ports:", error);
                 }
@@ -171,7 +208,7 @@ function SearchBoxFormContent() {
         };
 
         fetchDestinationPorts();
-    }, [selectedOriginPort]);
+    }, [selectedOriginPort, ports, selectedDestinationPort]);
 
     useEffect(() => {
         const isValid =
@@ -224,16 +261,13 @@ function SearchBoxFormContent() {
 
             const searchValues = {
                 bookingType: bookingType?.replace("Trip", "").trim() ?? undefined,
-                srcPortId: selectedOriginPort?.id ? selectedOriginPort.id.toString() : undefined,
-                destPortId: selectedDestinationPort?.id ? selectedDestinationPort.id.toString() : undefined,
-                departureDate: departureDate ? departureDate.toISOString() : undefined,
+                origin_code: selectedOriginPort?.code ?? undefined,
+                destination_code: selectedDestinationPort?.code ?? undefined,
+                departure_date: departureDate ? departureDate.toISOString() : undefined,
                 returnDate: bookingType?.toLowerCase() === "round trip" ? (returnDate ? returnDate.toISOString() : undefined) : undefined,
-                passengerCount: passengerCount !== undefined ? passengerCount.toString() : undefined,
-                vehicleCount: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
-                sortDeparture: "departureDate",
-                sortReturn: "departureDate",
-                filterSpecificDepartureDate: departureDateForFilter,
-                filterSpecificReturnDate: returnDateForFilter,
+                passenger_count: passengerCount !== undefined ? passengerCount.toString() : undefined,
+                vehicle_count: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
+                sort: "departureDate",
                 page: "1",
             };
 

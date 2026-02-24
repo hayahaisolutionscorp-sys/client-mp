@@ -11,6 +11,7 @@ import {
 } from "./Dialog"
 import { Button } from "./Button"
 import { CheckCircle2 } from "lucide-react"
+import { useThemeSettings } from "@/hooks/theme-settings"
 
 interface SuccessModalProps {
     isOpen: boolean
@@ -27,26 +28,30 @@ export function SuccessModal({
     description,
     buttonText = "Continue"
 }: SuccessModalProps) {
+    const themeSettings = useThemeSettings()
+    const accentColor = themeSettings?.accent || "#23abff"
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader className="flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center">
-                        <CheckCircle2 className="h-10 w-10 text-green-600" />
+            <DialogContent className="sm:max-w-[360px] p-5">
+                <DialogHeader className="flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="h-12 w-12 bg-green-50 rounded-full flex items-center justify-center">
+                        <CheckCircle2 className="h-8 w-8 text-green-600" />
                     </div>
-                    <div className="space-y-2">
-                        <DialogTitle className="text-2xl font-bold text-gray-900">
+                    <div className="space-y-1">
+                        <DialogTitle className="text-xl font-bold text-gray-900">
                             {title}
                         </DialogTitle>
-                        <DialogDescription className="text-base text-gray-500 max-w-xs mx-auto">
+                        <DialogDescription className="text-sm text-gray-500 max-w-[280px] mx-auto leading-tight">
                             {description}
                         </DialogDescription>
                     </div>
                 </DialogHeader>
-                <DialogFooter className="sm:justify-center mt-6">
-                    <Button 
-                        type="button" 
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 rounded-lg transition-colors" 
+                <DialogFooter className="sm:justify-center mt-4">
+                    <Button
+                        type="button"
+                        className="w-full text-white font-semibold py-4 h-auto rounded-lg transition-opacity hover:opacity-90"
+                        style={{ backgroundColor: accentColor }}
                         onClick={onClose}
                     >
                         {buttonText}

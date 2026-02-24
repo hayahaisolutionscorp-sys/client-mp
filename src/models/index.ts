@@ -27,6 +27,9 @@ export * from './accommodation/seat-plan.model';
 export * from './vehicle/vehicle.model';
 export * from './vehicle/vehicle-type.model';
 
+// Commodity Management
+export * from './commodity/commodity.model';
+
 // Pricing & Financial
 export * from './pricing/rate-table.model';
 export * from './pricing/rate-table-row.model';

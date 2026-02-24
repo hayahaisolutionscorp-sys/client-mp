@@ -12,9 +12,7 @@ import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import { PasswordStrengthTracker } from "@/components/auth/PasswordStrengthTracker";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
-
-const STEP_KEY = 'register-step';
-const TTL_MS = 10 * 60 * 1000;
+import { REGISTER_STEP_KEY, REGISTER_TTL_MS } from "../constants";
 
 export default function RegisterPasswordPage() {
   const router = useRouter();
@@ -34,18 +32,18 @@ export default function RegisterPasswordPage() {
 
   // Guard: requires step 1 + email data
   useEffect(() => {
-    const raw = sessionStorage.getItem(STEP_KEY);
+    const raw = sessionStorage.getItem(REGISTER_STEP_KEY);
     if (!raw) { router.replace('/register'); return; }
     try {
       const parsed = JSON.parse(raw);
-      if (!parsed.firstName || !parsed.email || Date.now() - parsed.ts > TTL_MS) {
-        sessionStorage.removeItem(STEP_KEY);
+      if (!parsed.firstName || !parsed.email || Date.now() - parsed.ts > REGISTER_TTL_MS) {
+        sessionStorage.removeItem(REGISTER_STEP_KEY);
         router.replace('/register');
         return;
       }
       setStepData(parsed);
     } catch {
-      sessionStorage.removeItem(STEP_KEY);
+      sessionStorage.removeItem(REGISTER_STEP_KEY);
       router.replace('/register');
     }
   }, [router]);
@@ -87,7 +85,7 @@ export default function RegisterPasswordPage() {
       };
       await register(stepData.email, password, fullForm);
       // Clear step data after successful registration
-      sessionStorage.removeItem(STEP_KEY);
+      sessionStorage.removeItem(REGISTER_STEP_KEY);
       router.push('/');
     } catch (error: any) {
       console.error(error);
