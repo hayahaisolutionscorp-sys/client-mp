@@ -2,6 +2,7 @@
 import { usePathname } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import SubscribeBanner from '@/components/landing/SubscribeBanner';
+import ChatWidget from '@/components/chat/ChatWidget';
 import Footer from '@/components/Footer';
 import { SessionExpiredModal } from '@/components/auth/SessionExpiredModal';
 
@@ -27,6 +28,7 @@ export default function LayoutWrapper({
         </div>
       )}
       <SessionExpiredModal />
+      <ChatWidget />
     </>
   );
 }

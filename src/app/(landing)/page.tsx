@@ -8,7 +8,6 @@ const WhyChooseUs = dynamic(() => import('@/components/landing/WhyChooseUs'), { 
 
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
-import ButtonShowcase from '@/components/ui/ButtonShowcase';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('home');

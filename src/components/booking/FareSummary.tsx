@@ -161,8 +161,8 @@ const FareSummary: FC<FareSummaryProps> = ({
   };
 
   const handleProceedToPayment = () => {
-    const departureTripId = trips ? trips[0]?.id || 0 : 0;
-    const returnTripId = trips ? trips[1]?.id || 0 : 0;
+    const departureTripId = trips ? Number(trips[0]?.id) || 0 : 0;
+    const returnTripId = trips ? Number(trips[1]?.id) || 0 : 0;
 
     // Clear error if validation passes
     setError(null);

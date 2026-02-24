@@ -1,8 +1,8 @@
 import Navbar from '@/components/Navbar';
 import Media from '@/components/landing/Media';
-import SearchBox from '@/components/landing/SearchBox';
-import { getHeroSections } from '@/services';
+import SearchBoxWrapper from '@/components/landing/SearchBoxWrapper';
 import { HERO_SECTION_IMAGES } from 'constants/storage';
+import { getHeroSections } from '@/services';
 
 export default async function Hero() {
   const heroSection = await getHeroSections();
@@ -72,7 +72,7 @@ export default async function Hero() {
         </div>
       </div>
 
-      <SearchBox />
+      <SearchBoxWrapper />
     </header>
   );
 }

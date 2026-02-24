@@ -318,7 +318,7 @@ export default function TripCards({
                   </p>
                   <Button
                     variant={selectedCabin || isTripExpanded ? 'destructive' : 'default'}
-                    onClick={() => toggleDetails(trip.id)}
+                    onClick={() => toggleDetails(Number(trip.id))}
                     className="w-full px-6 py-2 text-md md:text-sm md:w-auto"
                   >
                     {selectedCabin ? 'Unselect' : isTripExpanded ? 'Close' : 'Select'}
@@ -380,7 +380,7 @@ export default function TripCards({
                               variant={isCabinSelected ? 'outline' : 'default'}
                               onClick={() =>
                                 handleCabinSelection(
-                                  trip.id,
+                                  Number(trip.id),
                                   cabinData.cabinId,
                                   cabinData.cabin?.cabinTypeId || 0,
                                   cabin?.cabinType?.name || 'N/A',
