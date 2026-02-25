@@ -38,37 +38,16 @@ export default function LoginPage() {
     sessionStorage.removeItem(STEP_KEY);
   }, [clearSession]);
 
-  // Email validation and lookup
+  // email validation
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmailValid = emailRegex.test(email);
     setEmailValidation(prev => ({ ...prev, isValid: isEmailValid }));
-
-    if (!isEmailValid || !email) {
-      setEmailValidation(prev => ({ ...prev, exists: null }));
-      return;
-    }
-
-    const timeoutId = setTimeout(async () => {
-      try {
-        setEmailValidation(prev => ({ ...prev, checking: true }));
-        const response = await AuthService.lookupEmail(email);
-        setEmailValidation(prev => ({
-          ...prev,
-          exists: response.data.exists,
-          checking: false
-        }));
-      } catch {
-        setEmailValidation(prev => ({ ...prev, checking: false }));
-      }
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
   }, [email]);
 
   const handleContinue = (e: FormEvent) => {
     e.preventDefault();
-    if (!email || !emailValidation.isValid || emailValidation.exists === false) return;
+    if (!email || !emailValidation.isValid) return;
 
     // Store email in sessionStorage with a TTL — never in the URL
     sessionStorage.setItem(STEP_KEY, JSON.stringify({ email, ts: Date.now() }));
@@ -141,17 +120,9 @@ export default function LoginPage() {
                 autoFocus
                 className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-400"
               />
-              {email && (
+              {email && !emailValidation.isValid && (
                 <div className="flex items-center gap-1 text-xs mt-1">
-                  {emailValidation.checking ? (
-                    <span className="text-gray-500">Checking...</span>
-                  ) : !emailValidation.isValid ? (
-                    <span className="text-red-500">✗ Invalid email format</span>
-                  ) : emailValidation.exists === false ? (
-                    <span className="text-red-500">✗ Email not found</span>
-                  ) : emailValidation.exists === true ? (
-                    <span className="text-green-600">✓ Valid email</span>
-                  ) : null}
+                  <span className="text-red-500">✗ Invalid email format</span>
                 </div>
               )}
             </div>
@@ -159,7 +130,7 @@ export default function LoginPage() {
               type="submit"
               className="w-full text-white"
               style={{ backgroundColor: primaryColor }}
-              disabled={!emailValidation.isValid || emailValidation.exists === false || emailValidation.checking}
+              disabled={!emailValidation.isValid}
             >
               Continue
             </Button>

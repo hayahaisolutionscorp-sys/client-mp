@@ -81,6 +81,7 @@ const DatePickerFieldset = ({
                   );
                 }}
                 initialFocus
+                defaultMonth={date}
                 className="rounded-md"
               />
             )}

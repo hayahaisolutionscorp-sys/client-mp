@@ -225,7 +225,6 @@ export async function requestVehicleVerification(
       `${PROFILES_API}/verifications/vehicles/${vehicle_id}`,
       verificationData
     );
-    console.log(`${PROFILES_API}/verifications/vehicles/${vehicle_id}`)
     return data.data;
   } catch (error: any) {
     if (typeof window === 'undefined') {

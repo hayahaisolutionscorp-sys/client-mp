@@ -38,7 +38,7 @@ export default function SearchBoxWrapper() {
                             transition={{ duration: 0.3 }}
                         >
                             <TripSearchWidget
-                                tenantId={1}
+                                tenantId={Number(process.env.NEXT_PUBLIC_TENANT_ID) || 1}
                                 chatApiUrl="/api/chat-booking"
                                 routesApiUrl="/api/routes"
                                 tripsApiUrl="/api/trips"
@@ -241,7 +241,6 @@ function SearchBoxFormContent({
 
     const handleSearchClick = () => {
         setError(null);
-        setIsLoading(true);
 
         if (!isFormValid) {
             return;
@@ -252,13 +251,9 @@ function SearchBoxFormContent({
             return;
         }
 
+        setIsLoading(true);
+
         try {
-            const departureDateForFilter = departureDate ?
-                new Date(departureDate.getTime() - departureDate.getTimezoneOffset() * 60000).toISOString() : undefined;
-
-            const returnDateForFilter = returnDate ?
-                new Date(returnDate.getTime() - returnDate.getTimezoneOffset() * 60000).toISOString() : undefined;
-
             const searchValues = {
                 bookingType: bookingType?.replace("Trip", "").trim() ?? undefined,
                 origin_code: selectedOriginPort?.code ?? undefined,
@@ -278,11 +273,8 @@ function SearchBoxFormContent({
             ).toString();
 
             router.push(`/booking/destination?${queryParams}`);
-
         } catch (error) {
             console.error("Error occurred while searching:", error);
-
-        } finally {
             setIsLoading(false);
         }
     };

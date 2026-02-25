@@ -1,37 +1,14 @@
+'use client';
+
 import ScheduleAndFares from '@/components/schedule-and-fares/ScheduleAndFares';
 import { Card, CardContent, CardFooter } from '@/components/ui/Card';
 import { CalendarIcon } from 'lucide-react';
 
-import { getPageMetadata } from '@/services/content/seo.service';
-import { getThemeSettings } from '@/services/ui/theme-settings.service';
-import { Metadata } from 'next';
+import { useThemeSettings } from '@/hooks/theme-settings';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getPageMetadata('find-trips');
-
-  return {
-    title: seo?.title,
-    description: seo?.description,
-    keywords: seo?.keywords,
-    robots: seo?.robots,
-    alternates: seo?.alternates,
-    openGraph: seo?.openGraph ? {
-      title: seo.openGraph.title || seo.title,
-      description: seo.openGraph.description || seo.description,
-      images: seo.openGraph.images,
-      type: seo.openGraph.type,
-      siteName: seo.openGraph.siteName,
-      locale: seo.openGraph.locale,
-      url: seo.openGraph.url,
-    } : undefined,
-    twitter: seo?.twitter,
-  };
-}
-
-const ScheduleAndFaresPage = async () => {
-  const theme = await getThemeSettings();
+const ScheduleAndFaresPage = () => {
+  const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || '#0060df';
-  const accentColor = theme?.accent || '#23abff';
 
   return (
     <div
@@ -47,7 +24,7 @@ const ScheduleAndFaresPage = async () => {
             </h2>
           </div>
 
-          <ScheduleAndFares themeColor={primaryColor} accentColor={accentColor} />
+          <ScheduleAndFares />
         </CardContent>
         <CardFooter className="bg-slate-50 py-4 sm:py-5 px-6 sm:px-8 text-sm sm:text-base text-muted-foreground border-t">
           Schedule and fares for the selected date. Prices may vary based on availability.

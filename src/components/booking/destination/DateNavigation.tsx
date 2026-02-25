@@ -23,10 +23,10 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
 
   useEffect(() => {
     const queryKey = label === "Departure"
-      ? "filterSpecificDepartureDate"
-      : "filterSpecificReturnDate";
+      ? ["filterSpecificDepartureDate", "departure_date", "departureDate"]
+      : ["filterSpecificReturnDate", "returnDate"];
 
-    const dateFromParams = searchParams.get(queryKey);
+    const dateFromParams = queryKey.reduce<string | null>((acc, key) => acc || searchParams.get(key), null);
     const paramsDate = dateFromParams ? new Date(dateFromParams).toISOString() : null;
     setSelectedDate(paramsDate);
 
@@ -136,6 +136,15 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
     }
 
     router.push(`/booking/destination?${queryParams.toString()}`);
+
+    // Lead user to results
+    const anchorId = isDeparture ? "departure-results" : "return-results";
+    setTimeout(() => {
+      const element = document.getElementById(anchorId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
   };
 
   return (

@@ -9,24 +9,31 @@ export const useHeaders = () => {
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    setIsHydrated(true);
-    
     // Try to get cached headers first
     const cached = localStorage.getItem(HEADERS_CACHE_KEY);
     if (cached) {
       try {
         setHeaders(JSON.parse(cached));
+        setIsHydrated(true);
+        // Skip fetch if cached
+        return;
       } catch (e) {
         console.error("Failed to parse cached headers:", e);
       }
     }
 
-    // Fetch fresh headers in background to keep it updated
+    setIsHydrated(true);
+
+    // Fetch fresh headers only if not cached
     getHeadersSections()
       .then((data) => {
         if (data) {
           setHeaders(data);
-          localStorage.setItem(HEADERS_CACHE_KEY, JSON.stringify(data));
+          
+          // Exclude unnecessary fields before caching
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { id, shippingLineId, ...cacheData } = data;
+          localStorage.setItem(HEADERS_CACHE_KEY, JSON.stringify(cacheData));
         }
       })
       .catch((error) => console.error("Error fetching headers settings:", error));

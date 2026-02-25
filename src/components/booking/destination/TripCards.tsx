@@ -29,6 +29,7 @@ import { DATE_SECONDARY_DEFAULT_FORMAT, TIME_DEFAULT_FORMAT, SHIPPING_LINE_LOGO 
 import { SelectedTrip } from '@/types/trip/selected-trip';
 import { ITrip } from '@/models';
 import ConnectingTripCard from './ConnectingTripCard';
+import { getTripStatusInfo } from 'helpers/trip.helpers';
 
 interface TripCardProps {
   trips: ITrip[];
@@ -254,6 +255,7 @@ export default function TripCards({
         const isTripSelected = selectedCabin?.tripId === trip.id;
         const isTripExpanded = isExpanded === trip.id;
         const { count: vehicleCount, icon: VehicleIcon } = getVehicleCapacityDisplay(trip);
+        const statusInfo = getTripStatusInfo(trip);
 
         if (trip.type === 'connecting') {
           return (
@@ -310,6 +312,17 @@ export default function TripCards({
                   >
                     <VehicleIcon className="mr-2" />
                     <span>{vehicleCount} Vehicle Slots</span>
+                  </div>
+                  {/* Trip Status Badge */}
+                  <div
+                    className="inline-flex items-center px-3 py-1 font-semibold border rounded-full text-sm"
+                    style={{
+                      backgroundColor: statusInfo.bgColor,
+                      color: statusInfo.textColor,
+                      borderColor: statusInfo.bgColor,
+                    }}
+                  >
+                    {statusInfo.label}
                   </div>
                   {selectedCabin && selectedCabin.tripId === trip.id && (
                     <div
@@ -401,10 +414,15 @@ export default function TripCards({
                   </p>
                   <Button
                     variant={selectedCabin || isTripExpanded ? 'destructive' : 'default'}
-                    onClick={() => toggleDetails(trip.id)}
+                    disabled={!statusInfo.isBookable}
+                    onClick={() => {
+                      if (statusInfo.isBookable) {
+                        toggleDetails(trip.id);
+                      }
+                    }}
                     className="w-full px-6 py-2 text-md md:text-sm md:w-auto"
                   >
-                    {selectedCabin ? 'Unselect' : isTripExpanded ? 'Close' : 'Select'}
+                    {selectedCabin ? 'Unselect' : isTripExpanded ? 'Close' : statusInfo.isBookable ? 'Select' : 'Not Available'}
                   </Button>
                 </div>
               </div>
@@ -465,20 +483,23 @@ export default function TripCards({
                             <p className="text-xl font-bold text-gray-900">{formatCurrency(cabinData.adultFare)}</p>
                             <Button
                               variant={isCabinSelected ? 'outline' : 'default'}
-                              onClick={() =>
-                                handleCabinSelection(
-                                  trip.id,
-                                  trip.id,
-                                  cabinData.cabinId,
-                                  cabinData.cabin?.cabinTypeId || 0,
-                                  cabin?.cabin_type_name || cabin?.cabinType?.name || 'N/A',
-                                  cabinData.adultFare,
-                                  trip.departureDateIso
-                                )
-                              }
+                              disabled={!statusInfo.isBookable}
+                              onClick={() => {
+                                if (statusInfo.isBookable) {
+                                  handleCabinSelection(
+                                    trip.id,
+                                    trip.id,
+                                    cabinData.cabinId,
+                                    cabinData.cabin?.cabinTypeId || 0,
+                                    cabin?.cabin_type_name || cabin?.cabinType?.name || 'N/A',
+                                    cabinData.adultFare,
+                                    trip.departureDateIso
+                                  );
+                                }
+                              }}
                               className="px-6 py-2 text-md lg:text-sm"
                             >
-                              {isCabinSelected ? 'Selected' : 'Choose'}
+                              {isCabinSelected ? 'Selected' : statusInfo.isBookable ? 'Choose' : 'Not Available'}
                             </Button>
                           </div>
                         </div>

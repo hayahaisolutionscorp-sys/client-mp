@@ -8,47 +8,21 @@ import Link from "next/link";
 import { v4 as uuidv4 } from 'uuid';
 
 
-import { getContactUs, getFooterSections } from "@/services";
-import { IFooterSection } from "@/models";
 import { useThemeSettings } from "@/hooks/theme-settings";
-import { getBrandingConfig } from "@/services/ui/branding.service";
+import { useBranding } from "@/hooks/branding";
+import { useFooter } from "@/hooks/footer";
+import { useContactUs } from "@/hooks/contact-us";
 
 const Footer = () => {
-  const [footerSection, setFooterSection] = useState<IFooterSection | undefined>(undefined);
+  const themeSettings = useThemeSettings();
+  const branding = useBranding();
+  const footerSection = useFooter();
+  const contactInfo = useContactUs();
 
   const [cacheBuster, setCacheBuster] = useState("");
-  // const shippingLine = useShippingLineForWhiteLabel();
-  const themeSettings = useThemeSettings();
 
   useEffect(() => {
     setCacheBuster(uuidv4());
-  }, []);
-
-  useEffect(() => {
-    const fetchFooterSection = async () => {
-      const footerSection = await getFooterSections();
-      if (footerSection) {
-        setFooterSection(footerSection);
-      }
-    };
-
-    fetchFooterSection();
-  }, []);
-
-  const [branding, setBranding] = useState<any>(null);
-  const [contactInfo, setContactInfo] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchBranding = async () => {
-      const config = await getBrandingConfig();
-      setBranding(config);
-    };
-    const fetchContactInfo = async () => {
-      const info = await getContactUs();
-      setContactInfo(info);
-    }
-    fetchBranding();
-    fetchContactInfo();
   }, []);
 
   const socialLinks = {

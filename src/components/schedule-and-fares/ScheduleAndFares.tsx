@@ -9,6 +9,7 @@ import { formatCurrency } from 'helpers/general.helpers';
 import ScheduleTable from './ScheduleTable';
 import { ScheduleItem } from './ScheduleItem';
 import { IShip, ITrip } from '@/models';
+import { useThemeSettings } from '@/hooks/theme-settings';
 
 interface ScheduleAndFaresProps {
   srcPortId?: number;
@@ -17,7 +18,10 @@ interface ScheduleAndFaresProps {
   accentColor?: string;
 }
 
-const ScheduleAndFares = ({ srcPortId, destPortId, themeColor = '#0060df', accentColor = '#23abff' }: ScheduleAndFaresProps) => {
+const ScheduleAndFares = ({ srcPortId, destPortId }: ScheduleAndFaresProps) => {
+  const theme = useThemeSettings();
+  const themeColor = theme?.primaryColor || '#0060df';
+  const accentColor = theme?.accent || '#23abff';
   const [allShips, setAllShips] = useState<IShip[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);

@@ -33,9 +33,14 @@ export enum DISCOUNT_TYPE {
 }
 
 export enum TRIP_STATUS {
-  Awaiting = 'Awaiting',
-  Cancelled = 'Cancelled',
-  Arrived = 'Arrived',
+  Awaiting = 'awaiting',
+  Arrived = 'arrived',
+  Departed = 'departed',
+  Cancelled = 'cancelled',
+  OpenForBooking = 'open_for_booking',
+  Onboarded = 'onboarded',
+  Pending = 'pending',
+  Scheduled = 'scheduled',
 }
 
 export enum BOOKING_STATUS {

@@ -14,6 +14,7 @@ import { formatCurrency } from 'helpers/general.helpers';
 import { DATE_SECONDARY_DEFAULT_FORMAT, TIME_DEFAULT_FORMAT, SHIPPING_LINE_LOGO } from 'constants/index';
 import { SelectedTrip, SelectedSegment } from '@/types/trip/selected-trip';
 import { ITrip } from '@/models';
+import { getTripStatusInfo } from 'helpers/trip.helpers';
 
 interface ConnectingTripCardProps {
     trip: ITrip;
@@ -45,6 +46,7 @@ export default function ConnectingTripCard({
     onToggleDetails,
     onSelectCabin
 }: ConnectingTripCardProps) {
+    const statusInfo = getTripStatusInfo(trip);
 
     // Internal handle wrapper to pass 'connecting' type
     const handleSelection = (
@@ -112,6 +114,22 @@ export default function ConnectingTripCard({
                             <FaCar className="mr-2" />
                             <span>{trip.availableVehicleCapacity} Vehicle Slots</span>
                         </div>
+                        {/* Trip Status Badge */}
+                        {(() => {
+                            const statusInfo = getTripStatusInfo(trip);
+                            return (
+                                <div
+                                    className="inline-flex items-center px-3 py-1 font-semibold border rounded-full text-xs"
+                                    style={{
+                                        backgroundColor: statusInfo.bgColor,
+                                        color: statusInfo.textColor,
+                                        borderColor: statusInfo.bgColor,
+                                    }}
+                                >
+                                    {statusInfo.label}
+                                </div>
+                            );
+                        })()}
                         {isSelected && (
                             <div
                                 className="inline-flex items-center px-3 py-1 rounded-full text-sm"
@@ -209,10 +227,15 @@ export default function ConnectingTripCard({
                         </p>
                         <Button
                             variant={isSelected || isExpanded ? 'destructive' : 'default'}
-                            onClick={() => onToggleDetails(trip.id)}
+                            disabled={!statusInfo.isBookable}
+                            onClick={() => {
+                                if (statusInfo.isBookable) {
+                                    onToggleDetails(trip.id);
+                                }
+                            }}
                             className="w-full px-6 py-2 text-md md:text-sm md:w-auto"
                         >
-                            {isSelected ? 'Unselect' : isExpanded ? 'Close' : 'Select'}
+                            {isSelected ? 'Unselect' : isExpanded ? 'Close' : statusInfo.isBookable ? 'Select' : 'Not Available'}
                         </Button>
                     </div>
                 </div>
@@ -256,6 +279,22 @@ export default function ConnectingTripCard({
                                         <span className="text-xs text-gray-500 ml-2">
                                             {toPhilippinesTime(segment.departureDateIso, 'MMM DD, h:mm A')}
                                         </span>
+                                        {/* Segment Status Badge */}
+                                        {(() => {
+                                            const statusInfo = getTripStatusInfo({ ...trip, status: segment.status, availableCabins: segment.availableCabins } as any);
+                                            return (
+                                                <div
+                                                    className="inline-flex items-center px-2 py-0.5 font-semibold border rounded-full text-[10px]"
+                                                    style={{
+                                                        backgroundColor: statusInfo.bgColor,
+                                                        color: statusInfo.textColor,
+                                                        borderColor: statusInfo.bgColor,
+                                                    }}
+                                                >
+                                                    {statusInfo.label}
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
 
                                     {/* Vehicle Slots per Segment */}
@@ -327,19 +366,22 @@ export default function ConnectingTripCard({
                                                         </p>
                                                         <Button
                                                             variant={isCabinSelected ? 'outline' : 'default'}
-                                                            onClick={() =>
-                                                                handleSelection(
-                                                                    segment.id,
-                                                                    cabinData.cabinId,
-                                                                    cabinData.cabin?.cabinTypeId || 0,
-                                                                    cabin?.cabinType?.name || 'N/A',
-                                                                    cabinData.adultFare,
-                                                                    trip.departureDateIso
-                                                                )
-                                                            }
+                                                            disabled={!statusInfo.isBookable}
+                                                            onClick={() => {
+                                                                if (statusInfo.isBookable) {
+                                                                    handleSelection(
+                                                                        segment.id,
+                                                                        cabinData.cabinId,
+                                                                        cabinData.cabin?.cabinTypeId || 0,
+                                                                        cabin?.cabinType?.name || 'N/A',
+                                                                        cabinData.adultFare,
+                                                                        trip.departureDateIso
+                                                                    );
+                                                                }
+                                                            }}
                                                             className="px-6 py-2 text-md lg:text-sm"
                                                         >
-                                                            {isCabinSelected ? 'Selected' : 'Choose'}
+                                                            {isCabinSelected ? 'Selected' : statusInfo.isBookable ? 'Choose' : 'Not Available'}
                                                         </Button>
                                                     </div>
                                                 </div>

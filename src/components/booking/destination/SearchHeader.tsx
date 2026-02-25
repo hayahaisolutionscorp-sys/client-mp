@@ -24,8 +24,7 @@ import {
 } from 'constants/index';
 import { IPort } from '@/models';
 import { getPorts, getDestinationPortsByOrigin } from '@/services';
-import { getBrandingConfig } from '@/services/ui/branding.service';
-import { IBrandingConfig } from '@/models/branding.model';
+import { useBranding } from '@/hooks/branding';
 
 interface SearchHeaderProps {
   isScroll?: boolean;
@@ -39,7 +38,6 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
   const [isMobile, setIsMobile] = useState(false);
 
 
-  const [branding, setBranding] = useState<IBrandingConfig | null>(null);
 
   // Utility to check if a date string is valid
   const isValidDate = (dateString: string | null) => {
@@ -105,14 +103,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
     fetchPorts();
   }, [searchParams]);
 
-  useEffect(() => {
-    const fetchBranding = async () => {
-      const config = await getBrandingConfig();
-      setBranding(config);
-    };
-
-    fetchBranding();
-  }, []);
+  const branding = useBranding();
 
   useEffect(() => {
     const fetchDestinationPorts = async () => {
@@ -157,23 +148,20 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
     setPassengerCount(parseInt(searchParams.get('passenger_count') || searchParams.get('passengerCount') || DEFAULT_NUM_PASSENGERS.toString(), 10));
     setVehicleCount(parseInt(searchParams.get('vehicle_count') || searchParams.get('vehicleCount') || DEFAULT_NUM_VEHICLES.toString(), 10));
     setBookingType(searchParams.get('bookingType') ? searchParams.get('bookingType') + ' Trip' : DEFAULT_BOOKING_TYPE);
-    setDepartureDate(
-      isValidDate(searchParams.get('departure_date'))
-        ? new Date(searchParams.get('departure_date')!)
-        : isValidDate(searchParams.get('departureDate'))
-          ? new Date(searchParams.get('departureDate')!)
-          : new Date()
-    );
-    // ... return date logic similar if needed, keeping simple for now
-    const retDateRaw = searchParams.get('returnDate');
-    const depDateRaw = searchParams.get('departure_date') || searchParams.get('departureDate');
-    setReturnDate(
-      isValidDate(retDateRaw)
-        ? new Date(retDateRaw!)
-        : isValidDate(depDateRaw)
-          ? new Date(depDateRaw!)
-          : new Date()
-    );
+    
+    // Header should reflect the active search date (base or specific filter)
+    const depDateParam = searchParams.get('filterSpecificDepartureDate') || searchParams.get('departure_date') || searchParams.get('departureDate');
+    if (isValidDate(depDateParam)) {
+      setDepartureDate(new Date(depDateParam!));
+    }
+
+    const retDateParam = searchParams.get('filterSpecificReturnDate') || searchParams.get('returnDate');
+    if (isValidDate(retDateParam)) {
+      setReturnDate(new Date(retDateParam!));
+    } else if (isValidDate(depDateParam)) {
+      // Fallback to departure date for return if missing
+      setReturnDate(new Date(depDateParam!));
+    }
   }, [searchParams]);
 
   const handleOriginPortSelect = (port: IPort | undefined) => {
@@ -218,7 +206,6 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
 
   const handleSearchClick = () => {
     setError(null); // Reset error state
-    setIsLoading(true); // Set loading state to true
 
     if (!isFormValid) {
       return;
@@ -230,17 +217,11 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
       return;
     }
 
+    setIsLoading(true); // Set loading state to true
+    setIsExpanded(false); // Close expanded search immediately for feedback
+
     try {
-      // Get the dates in correct format for filtering
-      const departureDateForFilter = departureDate
-        ? new Date(departureDate.getTime() - departureDate.getTimezoneOffset() * 60000).toISOString()
-        : undefined;
-
-      const returnDateForFilter = returnDate
-        ? new Date(returnDate.getTime() - returnDate.getTimezoneOffset() * 60000).toISOString()
-        : undefined;
-
-      // Prepare search values, ensuring number fields are converted to strings
+      // Prepare search values
       const searchValues = {
         bookingType: bookingType?.replace('Trip', '').trim() ?? undefined,
         origin_code: selectedOriginPort?.code ?? undefined,
@@ -254,19 +235,30 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
         page: '1'
       };
 
-      // Filter out undefined values to avoid passing empty params
       const queryParams = new URLSearchParams(
         Object.entries(searchValues)
-          .filter(([, value]) => value !== undefined) // Filter out undefined values
-          .map(([key, value]) => [key, value as string]) // Ensure the values are cast as strings
-      ).toString();
+          .filter(([, value]) => value !== undefined)
+          .map(([key, value]) => [key, value as string])
+      );
+      
+      queryParams.delete('filterSpecificDepartureDate');
+      queryParams.delete('filterSpecificReturnDate');
 
-      router.push(`/booking/destination?${queryParams}`);
-      setIsExpanded(false);
+      // Navigate immediately
+      router.push(`/booking/destination?${queryParams.toString()}`);
+
+      // Smooth scroll only if we're already on the destination page
+      if (window.location.pathname.includes('/booking/destination')) {
+        setTimeout(() => {
+          const element = document.getElementById('departure-results');
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 150);
+      }
     } catch (error) {
       console.error('Error occurred while searching:', error);
-    } finally {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     }
   };
 

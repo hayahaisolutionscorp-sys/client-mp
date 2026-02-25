@@ -15,9 +15,9 @@ const DEFAULT_THEME: IThemeSettings = {
 
 export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
   try {
-    if (!IS_CLIENT) {
+    /* if (!IS_CLIENT) {
       return DEFAULT_THEME;
-    }
+    } */
 
     const res = await fetch(THEME_SETTINGS_API, {
       // next: { tags: ['theme-settings'], revalidate: 3600 }

@@ -45,33 +45,35 @@ export default function RegisterEmailPage() {
     }
   }, [router]);
 
-  // Email validation and lookup
+  // email validation
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmailValid = emailRegex.test(email);
-    setEmailValidation(prev => ({ ...prev, isValid: isEmailValid }));
-    if (!isEmailValid || !email) { setEmailValidation(prev => ({ ...prev, exists: null })); return; }
-
-    const timeoutId = setTimeout(async () => {
-      try {
-        setEmailValidation(prev => ({ ...prev, checking: true }));
-        const response = await AuthService.lookupEmail(email);
-        setEmailValidation(prev => ({ ...prev, exists: response.data.data.exists, checking: false }));
-      } catch {
-        setEmailValidation(prev => ({ ...prev, checking: false }));
-      }
-    }, 500);
-    return () => clearTimeout(timeoutId);
+    setEmailValidation(prev => ({ ...prev, isValid: isEmailValid, exists: null }));
   }, [email]);
 
-  const handleContinue = (e: React.FormEvent) => {
+  const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !emailValidation.isValid || emailValidation.exists === true || emailValidation.checking) return;
+    if (!email || !emailValidation.isValid || emailValidation.checking) return;
 
-    // Merge email into existing step data, refresh TTL
-    const updated = { ...stepData, email, ts: Date.now() };
-    sessionStorage.setItem(REGISTER_STEP_KEY, JSON.stringify(updated));
-    router.push('/register/password');
+    try {
+      setEmailValidation(prev => ({ ...prev, checking: true }));
+      const response = await AuthService.lookupEmail(email);
+      const exists = response.data.data.exists;
+      
+      setEmailValidation({ isValid: true, exists, checking: false });
+
+      if (exists) {
+        return; // Stay on page and show error
+      }
+
+      // Merge email into existing step data, refresh TTL
+      const updated = { ...stepData, email, ts: Date.now() };
+      sessionStorage.setItem(REGISTER_STEP_KEY, JSON.stringify(updated));
+      router.push('/register/password');
+    } catch {
+      setEmailValidation(prev => ({ ...prev, checking: false }));
+    }
   };
 
   if (!stepData) return null;
@@ -139,12 +141,12 @@ export default function RegisterEmailPage() {
               )}
             </div>
             <div className="flex space-x-4">
-              <Button type="button" variant="outline" className="w-full" onClick={() => router.push('/register')}>
+              <Button type="button" variant="outline" className="w-full" onClick={() => router.push('/register')} disabled={emailValidation.checking}>
                 Back
               </Button>
               <Button type="submit" className="w-full text-white" style={{ backgroundColor: primaryColor }}
-                disabled={!emailValidation.isValid || emailValidation.checking || emailValidation.exists === true}>
-                Continue
+                disabled={!emailValidation.isValid || emailValidation.checking}>
+                {emailValidation.checking ? "Checking..." : "Continue"}
               </Button>
             </div>
           </form>

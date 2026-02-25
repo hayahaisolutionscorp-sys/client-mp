@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { getDestinations } from "@/services/ui/destinations.service"
-import { getBrandingConfig } from "@/services/ui/branding.service"
+import { useBranding } from "@/hooks/branding"
 
 
 
@@ -22,13 +22,12 @@ export function AuthSidebar() {
   ])
   const [slogan, setSlogan] = useState("Kay Ang Pagsakay, Dapat AYAHAY!")
 
+  const branding = useBranding()
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [destinations, branding] = await Promise.all([
-          getDestinations(),
-          getBrandingConfig()
-        ])
+        const destinations = await getDestinations()
 
         if (destinations && destinations.length > 0) {
           setSlides(destinations.map(d => ({
@@ -36,17 +35,19 @@ export function AuthSidebar() {
             title: d.image_alt || d.route // Fallback title
           })))
         }
-
-        if (branding?.slogan) {
-          setSlogan(branding.slogan)
-        }
       } catch (error) {
-        console.error("Failed to fetch sidebar data:", error)
+        console.error("Failed to fetch destinations:", error)
       }
     }
 
     fetchData()
   }, [])
+
+  useEffect(() => {
+    if (branding?.slogan) {
+      setSlogan(branding.slogan)
+    }
+  }, [branding])
 
   useEffect(() => {
     const timer = setInterval(() => {

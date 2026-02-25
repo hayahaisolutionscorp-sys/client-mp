@@ -45,8 +45,11 @@ export default function TripsSelector() {
 
   useEffect(() => {
     // Update selected dates when search parameters change
-    setSelectedDepartureDate(searchParams.get('filterSpecificDepartureDate'));
-    setSelectedReturnDate(searchParams.get('filterSpecificReturnDate'));
+    const departureDate = searchParams.get('filterSpecificDepartureDate') || searchParams.get('departure_date') || searchParams.get('departureDate');
+    const returnDate = searchParams.get('filterSpecificReturnDate') || searchParams.get('returnDate');
+    
+    setSelectedDepartureDate(departureDate);
+    setSelectedReturnDate(returnDate);
   }, [searchParams]);
 
   const fetchTrips = useCallback(async () => {
@@ -131,8 +134,8 @@ export default function TripsSelector() {
       returnTripId: selectedReturnCabin?.tripId?.toString() ?? undefined,
       returnCabinName: getJoinedNames(selectedReturnCabin),
       returnCabinId: getJoinedIds(selectedReturnCabin),
-      passengerCount: searchParams.get('passengerCount') ?? undefined,
-      vehicleCount: searchParams.get('vehicleCount') ?? undefined
+      passengerCount: searchParams.get('passengerCount') || searchParams.get('passenger_count') || undefined,
+      vehicleCount: searchParams.get('vehicleCount') || searchParams.get('vehicle_count') || undefined
     };
 
     // Filter out undefined values to avoid passing empty params
@@ -155,7 +158,7 @@ export default function TripsSelector() {
   return (
     <>
       {/* Departure Trips */}
-      <div className="space-y-2 sm:space-y-4">
+      <div className="space-y-2 sm:space-y-4" id="departure-results">
         <DateNavigation label="Departure" />
 
         <TripHeader label="Departure" />
@@ -191,7 +194,7 @@ export default function TripsSelector() {
 
         {/* Return Trips */}
         {searchParams.get('returnDate') && (
-          <div className="mt-6 sm:mt-9 space-y-2 sm:space-y-4">
+          <div className="mt-6 sm:mt-9 space-y-2 sm:space-y-4" id="return-results">
             <hr className="mb-6 sm:mb-8 border-gray-300" />
             <DateNavigation label="Return" onDateChange={handleReturnDateChange} />
 

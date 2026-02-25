@@ -4,27 +4,20 @@ import { useState, useEffect } from "react";
 import ContentSidebar from "@/components/shared/ContentSidebar";
 import TipTapRenderer from "@/components/shared/TipTapRenderer";
 import { getTermsAndConditions } from "@/services/content/terms-and-conditions.service";
-import { getBrandingConfig } from "@/services/ui/branding.service";
+import { useBranding } from "@/hooks/branding";
 
 export default function TermsContent() {
+  const brandingConfig = useBranding();
   const [title, setTitle] = useState("Terms and Conditions");
   const [content, setContent] = useState<any>(null);
-  const [brandingConfig, setBrandingConfig] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [termsData, brandingData] = await Promise.all([
-        getTermsAndConditions(),
-        getBrandingConfig()
-      ]);
+      const termsData = await getTermsAndConditions();
 
       if (termsData) {
         setTitle(termsData.title);
         setContent(termsData.content);
-      }
-
-      if (brandingData) {
-        setBrandingConfig(brandingData);
       }
     };
 

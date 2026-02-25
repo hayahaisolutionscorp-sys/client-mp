@@ -72,4 +72,5 @@ export interface ITripSegment {
   bookingStartDateIso: string;
   bookingCutOffDateIso: string;
   seatSelection: boolean;
+  status: keyof typeof TRIP_STATUS;
 }

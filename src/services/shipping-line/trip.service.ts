@@ -1,11 +1,5 @@
-import { isEmpty } from 'lodash';
 import { TRIP_API } from 'constants/api';
-import { getAllShippingLines, getShippingLineServer } from './shipping-line.service';
-import { getPort, getPorts } from './port.service';
-import { getRateTableById } from '../booking/rate-table.service';
-import { cacheItem, fetchItem } from 'helpers/cache.helpers';
 import { toPhilippinesTime } from 'helpers/date.helpers';
-import axios from '@/services/core/axios';
 
 import { getAllCabinTypes } from './cabin-type.service';
 import { getAllShippingLinesServer } from './shipping-line.service';
@@ -15,7 +9,6 @@ import { IPort, ITrip, ICabinType, IShippingLine } from '@/models';
 
 import tripsData from '@/data/trips.json';
 import portsData from '@/data/ports.json';
-import shippingLinesData from '@/data/shipping-lines.json';
 
 export async function getTripsDestinationByPortId(portId: number): Promise<IPort[]> {
   await new Promise(resolve => setTimeout(resolve, 100));
@@ -53,7 +46,7 @@ export async function getAvailableTrips(
     if (searchQuery.srcPortId && !searchQuery.origin_code) params.append('srcPortId', searchQuery.srcPortId.toString());
     if (searchQuery.destPortId && !searchQuery.destination_code) params.append('destPortId', searchQuery.destPortId.toString());
 
-    const res = await fetch(`${TRIP_API}?${params.toString()}`, {
+    const res = await fetch(`${TRIP_API}/marketplace?${params.toString()}`, {
       cache: 'no-store'
     });
 
@@ -139,7 +132,8 @@ export async function getAvailableTrips(
             bookingStartDateIso: seg.booking_start_date,
             bookingCutOffDateIso: seg.booking_cut_off_date,
             seatSelection: seg.is_seat_can_be_selected,
-            rateTableId: rateSnapshotId
+            rateTableId: rateSnapshotId,
+            status: seg.status || 'pending'
           };
         });
 
@@ -162,7 +156,7 @@ export async function getAvailableTrips(
           lightLogoUrl: lightLogo,
           departureDateIso: t.total_departure_time,
           arrivalTimeDateIso: t.total_arrival_time,
-          status: 'scheduled',
+          status: t.status || firstSegment.status || 'pending',
           rateTableId: firstSegment.rateTableId || 0,
           allowOnlineBooking: true,
           seatSelection: firstSegment.seatSelection || false,

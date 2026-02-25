@@ -9,24 +9,31 @@ export const useBranding = () => {
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    setIsHydrated(true);
-    
     // Try to get cached branding first
     const cached = localStorage.getItem(BRANDING_CACHE_KEY);
     if (cached) {
       try {
         setBranding(JSON.parse(cached));
+        setIsHydrated(true);
+        // Avoid redundant fetch if cached
+        return;
       } catch (e) {
         console.error("Failed to parse cached branding:", e);
       }
     }
 
-    // Fetch fresh branding in background to keep it updated
+    setIsHydrated(true);
+
+    // Fetch fresh branding only if not cached
     getBrandingConfig()
       .then((data) => {
         if (data) {
           setBranding(data);
-          localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(data));
+          
+          // Exclude unnecessary fields before caching as requested
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { id, created_at, updated_at, ...cacheData } = data;
+          localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(cacheData));
         }
       })
       .catch((error) => console.error("Error fetching branding settings:", error));
