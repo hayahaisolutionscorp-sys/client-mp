@@ -477,14 +477,17 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       const bookingId = result?.data || result?.id;
       if (bookingId) {
         router.push(`/booking/confirmed/${bookingId}`);
+        return true;
       } else {
         // This case might happen if result is empty but no error thrown
         toastError('Failed to create booking. Please try again.', { title: 'Booking Error' });
+        return false;
       }
     } catch (error: any) {
       console.error('Booking creation error:', error);
       const errorMessage = error.response?.data?.message || 'Something went wrong while creating your booking.';
       toastError(errorMessage, { title: 'Booking Error' });
+      return false;
     }
 
   }, [booking, prepareBookingData, departureTripId, returnTripId, router]);

@@ -41,7 +41,7 @@ interface FareSummaryProps {
   cargoDetails?: CargoData[];
   commodityId?: string;
   isLoading?: boolean;
-  onPay?: () => Promise<void>;
+  onPay?: () => Promise<boolean | void>;
 }
 
 const ObscuredPrice = ({ price, isLoading }: { price: number; isLoading?: boolean }) => {
@@ -141,7 +141,14 @@ const FareSummary: FC<FareSummaryProps> = ({
     setIsProcessing(true);
     try {
       if (onPay) {
-        await onPay();
+        const success = await onPay();
+        if (success) {
+          // If successful, we DON'T set processing to false to maintain the loading state
+          // until the page redirects.
+          return;
+        }
+        // If not successful, we reset it.
+        setIsProcessing(false);
         return;
       }
 
@@ -156,11 +163,11 @@ const FareSummary: FC<FareSummaryProps> = ({
       } else {
         setShowMessage(false);
         console.error('Payment initiation failed.');
+        setIsProcessing(false);
       }
     } catch (err) {
       setShowMessage(false);
       console.error('Payment initiation failed:', err);
-    } finally {
       setIsProcessing(false);
     }
   };

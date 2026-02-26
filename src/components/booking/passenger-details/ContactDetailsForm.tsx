@@ -30,7 +30,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
 }) => {
   const themeSettings = useThemeSettings();
   const { loggedInAccount } = useAuth();
-  const [usePassengerDetails, setUsePassengerDetails] = useState(true);
+  const [usePassengerDetails, setUsePassengerDetails] = useState(false);
   const [contactDetails, setContactDetails] = useState<ContactData>(initialContact || {
     firstname: "",
     lastname: "",
@@ -97,24 +97,27 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
   };
 
   const handleCheckboxChange = () => {
-    setUsePassengerDetails((prev) => !prev);
-    if (usePassengerDetails && passengerDetails) {
-      setContactDetails({
-        firstname: passengerDetails.firstname,
-        lastname: passengerDetails.lastname,
-        mobileNumber: "",
-        email: "",
-        countryCode: "+639",
-      });
-    } else {
-      setContactDetails({
-        firstname: "",
-        lastname: "",
-        mobileNumber: "",
-        email: "",
-        countryCode: "+639",
-      });
-    }
+    setUsePassengerDetails((prev) => {
+      const newValue = !prev;
+      if (newValue && passengerDetails) {
+        setContactDetails({
+          firstname: passengerDetails.firstname,
+          lastname: passengerDetails.lastname,
+          mobileNumber: "",
+          email: "",
+          countryCode: "+639",
+        });
+      } else {
+        setContactDetails({
+          firstname: "",
+          lastname: "",
+          mobileNumber: "",
+          email: "",
+          countryCode: "+639",
+        });
+      }
+      return newValue;
+    });
   };
 
   useEffect(() => {
