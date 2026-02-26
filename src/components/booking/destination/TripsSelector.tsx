@@ -31,6 +31,7 @@ export default function TripsSelector() {
   const [selectedReturnDate, setSelectedReturnDate] = useState<string | null>(
     searchParams.get('filterSpecificReturnDate')
   );
+  const [isNavigating, setIsNavigating] = useState(false);
 
 
   const themeSettings = useThemeSettings();
@@ -117,6 +118,7 @@ export default function TripsSelector() {
   }, [fetchTrips]);
 
   const handleProceed = () => {
+    setIsNavigating(true);
     const getJoinedIds = (selection: SelectedTrip | null) => {
       if (!selection || !selection.segmentSelections) return selection?.cabinId?.toString();
       return selection.segmentSelections.map(s => s.cabinId).join('|');
@@ -244,9 +246,11 @@ export default function TripsSelector() {
             {/* Right Side - Button */}
             <Button
               variant="default"
-              className="w-full text-md lg:text-sm lg:w-auto py-2.5 sm:py-3 px-6 sm:px-8 lg:mt-0"
+              className="w-full text-md lg:text-sm lg:w-auto py-2.5 sm:py-3 px-6 sm:px-8 lg:mt-0 flex items-center justify-center gap-2"
               onClick={handleProceed}
+              disabled={isNavigating}
             >
+              {isNavigating && <FiLoader className="animate-spin" />}
               Proceed to Booking
             </Button>
           </div>

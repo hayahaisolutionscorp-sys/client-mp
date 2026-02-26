@@ -30,7 +30,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
 }) => {
   const themeSettings = useThemeSettings();
   const { loggedInAccount } = useAuth();
-  const [usePassengerDetails, setUsePassengerDetails] = useState(false);
+  const [usePassengerDetails, setUsePassengerDetails] = useState(true);
   const [contactDetails, setContactDetails] = useState<ContactData>(initialContact || {
     firstname: "",
     lastname: "",
@@ -98,7 +98,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
 
   const handleCheckboxChange = () => {
     setUsePassengerDetails((prev) => !prev);
-    if (!usePassengerDetails && passengerDetails) {
+    if (usePassengerDetails && passengerDetails) {
       setContactDetails({
         firstname: passengerDetails.firstname,
         lastname: passengerDetails.lastname,

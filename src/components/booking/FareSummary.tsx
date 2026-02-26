@@ -71,6 +71,7 @@ const FareSummary: FC<FareSummaryProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNavigatingToPayment, setIsNavigatingToPayment] = useState(false);
 
   // Expand/Collapse States
   const [isAdultDepExpanded, setIsAdultDepExpanded] = useState(false);
@@ -104,6 +105,7 @@ const FareSummary: FC<FareSummaryProps> = ({
   }, [passengerDetails, contactDetails]);
 
   const handleProceedToPayment = () => {
+    setIsNavigatingToPayment(true);
     const departureTripIds = departureTrips?.map(t => t.id).join(',') || '';
     const returnTripIds = returnTrips?.map(t => t.id).join(',') || '';
 
@@ -512,10 +514,11 @@ const FareSummary: FC<FareSummaryProps> = ({
         <>
           <Button
             variant="default"
-            className="mt-6 w-full bg-customBlue text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-500"
+            className="mt-6 w-full bg-customBlue text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-500 flex items-center justify-center gap-2"
             onClick={handleProceedToPayment}
-            disabled={!isFormValid || isLoading}
+            disabled={!isFormValid || isLoading || isNavigatingToPayment}
           >
+            {isNavigatingToPayment && <FiLoader className="animate-spin" />}
             Proceed to Payment
           </Button>
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}

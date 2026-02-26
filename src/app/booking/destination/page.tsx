@@ -5,7 +5,7 @@ import { fetchFilters } from '@/services';
 import MobileFilterModal from '@/components/booking/destination/MobileFilter';
 import TripsSelector from '@/components/booking/destination/TripsSelector';
 
-export default async function Destination() {
+export default function Destination() {
   const filters = fetchFilters();
 
   return (
@@ -25,7 +25,14 @@ export default async function Destination() {
 
         <div className="flex-1 lg:pl-8 space-y-4 sm:space-y-6">
           <h1 className="sr-only">Available Trips</h1>
-          <TripsSelector />
+          <Suspense fallback={
+            <div className="space-y-4">
+              <div className="h-10 bg-gray-200 animate-pulse rounded-md w-1/4" />
+              <div className="h-64 bg-gray-200 animate-pulse rounded-lg w-full" />
+            </div>
+          }>
+            <TripsSelector />
+          </Suspense>
         </div>
       </div>
     </>

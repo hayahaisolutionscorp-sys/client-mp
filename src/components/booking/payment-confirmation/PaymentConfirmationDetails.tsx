@@ -4,17 +4,18 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContexts';
 
 import TripDetails from '@/components/booking/payment-confirmation/TripDetails';
 import PassengerTripCard from '@/components/booking/PassengerTripCard';
 import FareSummary from '@/components/booking/FareSummary';
 import { cacheItem, fetchItem, invalidateItem } from 'helpers/cache.helpers';
 import { useThemeSettings } from '@/hooks/theme-settings';
-import { createBooking, prepareBooking, calculatePricing } from '@/services';
+import { createBooking, prepareBooking, calculatePricing, VehicleModelService } from '@/services';
 import { getShip } from '@/services/shipping-line/ship.service';
 import { SuccessModal } from '@/components/ui/SuccessModal';
 import { useToast } from '@/hooks/use-toast';
-import { ITrip, IBooking } from '@/models';
+import { ITrip, IBooking, IVehicleModel } from '@/models';
 import { IPrepareBookingData, ITripSummary } from '@/models/booking/prepare-booking.model';
 import { PricingResponse } from '@/types/booking/pricing';
 
@@ -36,8 +37,22 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
   const [pricingData, setPricingData] = useState<PricingResponse['data'] | undefined>(undefined);
   const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [vehicleModels, setVehicleModels] = useState<IVehicleModel[]>([]);
+  const { loggedInAccount } = useAuth();
   const { error: toastError } = useToast();
   const themeSettings = useThemeSettings();
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const models = await VehicleModelService.getAllVehicleModels();
+        setVehicleModels(models || []);
+      } catch (error) {
+        console.error('Failed to fetch vehicle models:', error);
+      }
+    };
+    fetchModels();
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0); // Scrolls to the top of the page on component load
@@ -402,21 +417,30 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
 
     const allVehicleTripAssignments = allLegIds.map(id => ({ tripId: id }));
 
-    const vehicles = (rawData.vehicleDepartureDetails || []).map((v: any) => ({
-      plateNumber: v.plateNo || '',
-      make: v.make || '',
-      modelName: v.modelName || '',
-      vehicleModelId: v.vehicleModelId || null,
-      vehicleTypeId: v.vehicleTypeId || null,
-      usesPendingModel: false,
-      driverId: String(v.drivesVehicleId || '0'),
-      cargoClassCode: v.cargoClassCode || '',
-      length: v.length || 0,
-      width: v.width || 0,
-      height: v.height || 0,
-      weight: v.weight || 0,
-      tripAssignments: allVehicleTripAssignments,
-    }));
+    const vehicles = (rawData.vehicleDepartureDetails || []).map((v: any) => {
+      // Try to find an existing model ID by name if not already provided
+      let matchedModelId = v.vehicleModelId;
+      if (!matchedModelId && v.modelName) {
+        const match = vehicleModels.find(m => m.model.toLowerCase() === v.modelName.toLowerCase());
+        if (match) matchedModelId = match.id;
+      }
+
+      return {
+        plateNumber: v.plateNumber || v.plateNo || '',
+        make: v.make || '',
+        modelName: v.modelName || '',
+        vehicleModelId: matchedModelId || null,
+        vehicleTypeId: v.vehicleTypeId || null,
+        usesPendingModel: !matchedModelId,
+        driverId: (v.driverId != null && v.driverId !== '') ? String(v.driverId) : null,
+        cargoClassCode: v.cargo_class || v.cargoClassCode || '',
+        length: v.length || 0,
+        width: v.width || 0,
+        height: v.height || 0,
+        weight: v.weight || 0,
+        tripAssignments: allVehicleTripAssignments,
+      };
+    });
 
     const payload = {
       bookingSource: 'online',
