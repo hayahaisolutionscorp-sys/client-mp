@@ -37,7 +37,6 @@ export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState(
         tabParam || (typeof window !== 'undefined' ? sessionStorage.getItem(SESSION_KEY) : null) || 'overview'
     );
-    const [isPageLoading, setIsPageLoading] = useState(true);
     const [isCopied, setIsCopied] = useState(false);
 
     const [passenger, setPassenger] = useState<IPassenger | null>(null);
@@ -89,7 +88,7 @@ export default function ProfilePage() {
                 email: typeof profileData.email === 'string' ? profileData.email : (typeof loggedInAccount.email === 'string' ? loggedInAccount.email : ''),
                 verificationDetails: sanitizedVerifications,
                 qrCodeUrl: typeof profileData.passenger?.qrCodeUrl === 'string' ? profileData.passenger.qrCodeUrl : undefined,  
-                qrCodeId: typeof profileData.passenger?.hayahaiId === 'string' ? profileData.passenger.hayahaiId : profileData.passenger?.hayahaiId?.toString()
+                qrCodeId:  profileData.passenger?.hayahaiId || profileData.passenger?.qrId
             });
 
             if (profileData.passenger) {
@@ -136,12 +135,7 @@ export default function ProfilePage() {
         }
 
         if (loggedInAccount?.role === 'Passenger') {
-            setIsPageLoading(true);
-            fetchProfileData().finally(() => {
-                setIsPageLoading(false);
-            });
-        } else {
-            setIsPageLoading(false);
+            fetchProfileData();
         }
     }, [loggedInAccount, loading, fetchProfileData, router]);
 
@@ -243,8 +237,8 @@ export default function ProfilePage() {
         return imagePreview;
     }, [imagePreview]);
 
-    if (isPageLoading) {
-        return <ProfileSkeleton />;
+    if (!loggedInAccount && loading) {
+        return null;
     }
 
     if (!loggedInAccount) {

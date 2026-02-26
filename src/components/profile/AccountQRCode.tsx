@@ -110,7 +110,7 @@ export const AccountQRCode: React.FC<AccountQRCodeProps> = ({
                                 "font-mono text-l text-slate-500 tracking-widest truncate px-2 w-full text-wrap",
                                 isModal ? "text-l pb-2" : "text-[10px]"
                             )}>
-                                HAYAHAI ID: {qrCodeId}
+                                ID: {qrCodeId}
                             </p>
                         )}
                     </div>
