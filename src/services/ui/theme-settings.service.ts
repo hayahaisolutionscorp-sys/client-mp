@@ -2,7 +2,7 @@ import { IThemeSettings } from '@/models';
 import { IBrandingResponse } from '@/models/branding.model';
 import { THEME_SETTINGS_API } from 'constants/api';
 import brandingData from '@/data/branding.json';
-import { IS_CLIENT } from '../config';
+import { IS_BROWSER } from '../config';
 
 const DEFAULT_THEME: IThemeSettings = {
   primary: brandingData.colors.primary,
@@ -14,22 +14,19 @@ const DEFAULT_THEME: IThemeSettings = {
 };
 
 export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
-  // Check cache first on client side
-  if (IS_CLIENT) {
-    const cached = localStorage.getItem("theme_settings");
-    if (cached) {
-      try {
+  if (IS_BROWSER) {
+    try {
+      const cached = localStorage.getItem("theme_settings");
+      if (cached) {
         return JSON.parse(cached);
-      } catch (e) {
-        console.error("Failed to parse cached theme settings", e);
       }
+    } catch (e) {
+      console.error("Failed to parse cached theme settings", e);
     }
   }
 
   try {
-    const res = await fetch(THEME_SETTINGS_API, {
-      // next: { tags: ['theme-settings'], revalidate: 3600 }
-    });
+    const res = await fetch(THEME_SETTINGS_API);
 
     if (res.ok) {
       const response: IBrandingResponse = await res.json();
@@ -42,8 +39,7 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
         fontStyle: 'Inter'
       };
 
-      // Save to cache on client side
-      if (IS_CLIENT) {
+      if (IS_BROWSER) {
         localStorage.setItem("theme_settings", JSON.stringify(theme));
       }
 
@@ -52,9 +48,7 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
 
     return DEFAULT_THEME;
   } catch (e) {
-    if (typeof window === 'undefined') {
-      console.error('Error fetching theme settings:', e);
-    }
+    console.error('Error fetching theme settings:', e);
     return DEFAULT_THEME;
   }
 }
