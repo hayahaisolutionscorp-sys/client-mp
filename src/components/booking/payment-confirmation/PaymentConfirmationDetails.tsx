@@ -21,15 +21,18 @@ import { PricingResponse } from '@/types/booking/pricing';
 interface Props {
   departureTripId?: string;
   returnTripId?: string;
+  initialDepartureTrips?: ITrip[];
+  initialReturnTrips?: ITrip[];
+  initialPrepareBookingData?: IPrepareBookingData;
 }
 
-export default function PaymentConfirmationDetails({ departureTripId, returnTripId }: Props) {
+export default function PaymentConfirmationDetails({ departureTripId, returnTripId, initialDepartureTrips, initialReturnTrips, initialPrepareBookingData }: Props) {
   const router = useRouter();
 
-  const [departureTrips, setDepartureTrips] = useState<ITrip[] | undefined>(undefined);
-  const [returnTrips, setReturnTrips] = useState<ITrip[] | undefined>(undefined);
+  const [departureTrips, setDepartureTrips] = useState<ITrip[] | undefined>(initialDepartureTrips);
+  const [returnTrips, setReturnTrips] = useState<ITrip[] | undefined>(initialReturnTrips);
   const [booking, setBooking] = useState<IBooking | undefined>(undefined);
-  const [prepareBookingData, setPrepareBookingData] = useState<IPrepareBookingData | undefined>(undefined);
+  const [prepareBookingData, setPrepareBookingData] = useState<IPrepareBookingData | undefined>(initialPrepareBookingData);
   const [pricingData, setPricingData] = useState<PricingResponse['data'] | undefined>(undefined);
   const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -64,7 +67,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
   // Fetch trip details using prepareBooking
   const fetchTripDetails = useCallback(async () => {
     if (!departureTripId) return;
-    if (prepareBookingData) return; // Already loaded from cache or previous call
+    if (prepareBookingData || initialDepartureTrips) return; // Already loaded from cache or previous call
 
     try {
       const response = await prepareBooking({

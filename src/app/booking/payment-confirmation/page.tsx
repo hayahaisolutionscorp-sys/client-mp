@@ -1,5 +1,7 @@
-import PaymentConfirmationDetails from "@/components/booking/payment-confirmation/PaymentConfirmationDetails";
 import { redirect } from "next/navigation";
+import { Suspense } from 'react';
+import PaymentConfirmationContent from "@/components/booking/payment-confirmation/PaymentConfirmationContent";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 interface PageProps {
   searchParams?: Promise<{
@@ -24,6 +26,11 @@ export default async function PaymentConfirmation(props: PageProps) {
   const returnTripId = cleanTripId(searchParams.returnTripId);
 
   return (
-    <PaymentConfirmationDetails departureTripId={departureTripId} returnTripId={returnTripId} />
+    <Suspense fallback={<LoadingScreen fullScreen={false} />}>
+      <PaymentConfirmationContent
+        departureTripId={departureTripId}
+        returnTripId={returnTripId}
+      />
+    </Suspense>
   )
 }

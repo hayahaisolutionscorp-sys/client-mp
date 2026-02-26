@@ -15,7 +15,7 @@ export const UploadService = {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await axios.post(`${UPLOAD_API}/kyc/profile-picture`, formData, {
+        const response = await axios.post(`${UPLOAD_API}/users/profile-picture`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
