@@ -1,18 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { resolveApiBaseUrl } from '../_utils/resolveApiBaseUrl';
 
-const API_V2_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-const MARKETPLACE_TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "1";
+const API_BASE_URL = resolveApiBaseUrl();
+const MARKETPLACE_TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || '1';
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const tenantId = url.searchParams.get("tenantId") || MARKETPLACE_TENANT_ID;
-  const agentType = url.searchParams.get("type") || "trip-search";
+  const tenantId = url.searchParams.get('tenantId') || MARKETPLACE_TENANT_ID;
+  const agentType = url.searchParams.get('type') || 'trip-search';
 
   try {
     const res = await fetch(
-      `${API_V2_URL}/knowledge-base/agent-config/${tenantId}/${agentType}`,
-      { cache: "no-store" } // no cache in dev; use ISR in production
+      `${API_BASE_URL}/knowledge-base/agent-config/${tenantId}/${agentType}`,
+      { cache: 'no-store' } // no cache in dev; use ISR in production
     );
 
     if (!res.ok) {
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const config = data?.data?.config || data?.config || null;
     return NextResponse.json({ config });
   } catch (error) {
-    console.error("Failed to fetch agent config:", error);
+    console.error('Failed to fetch agent config:', error);
     return NextResponse.json({ config: null }, { status: 200 });
   }
 }

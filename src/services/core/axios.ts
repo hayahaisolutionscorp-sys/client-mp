@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { fetchItem } from 'helpers/cache.helpers';
+import { EFFECTIVE_API_BASE_URL } from 'constants/api';
 
 const instance = axios.create({
-  withCredentials: true,
+  withCredentials: true
 });
 
 // Note: We no longer manually decode tokens or check expiration on the frontend.
@@ -24,8 +25,7 @@ const handleTokenRefresh = async () => {
   isRefreshing = true;
   refreshPromise = (async () => {
     try {
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const response = await axios.post(`${apiBaseUrl}/auth/refresh`, {}, { withCredentials: true });
+      const response = await axios.post(`${EFFECTIVE_API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
       return response.data;
     } catch (error: any) {
       // If refresh fails (especially 401), the refresh token is invalid.
@@ -40,7 +40,7 @@ const handleTokenRefresh = async () => {
       eraseCookie('refresh_token');
 
       // Clear all account-related cache items
-      accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
+      accountRelatedCacheKeys.forEach((key) => invalidateItem(key as any));
 
       // Specifically ensure jwt is cleared (though it's in accountRelatedCacheKeys)
       invalidateItem('jwt');
@@ -86,11 +86,12 @@ instance.interceptors.response.use(
       }
 
       // Avoid infinite loops and don't try to refresh if already on login/register
-      if (typeof window !== 'undefined' &&
+      if (
+        typeof window !== 'undefined' &&
         window.location.pathname !== '/login' &&
         window.location.pathname !== '/register' &&
-        !originalRequest.url?.includes('/auth/refresh')) {
-
+        !originalRequest.url?.includes('/auth/refresh')
+      ) {
         originalRequest._retry = true;
 
         try {

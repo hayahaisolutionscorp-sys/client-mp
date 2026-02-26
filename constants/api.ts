@@ -1,4 +1,12 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const trimTrailingSlash = (url: string) => url.replace(/\/+$/, '');
+
+const IS_CLIENT = process.env.NEXT_PUBLIC_IS_CLIENT === 'true';
+const CLIENT_API_BASE_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000');
+const CORE_API_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002');
+
+const BASE_URL = IS_CLIENT ? CLIENT_API_BASE_URL : CORE_API_URL;
+
+export const EFFECTIVE_API_BASE_URL = BASE_URL;
 
 export const THEME_SETTINGS_API = `${BASE_URL}/gen_configs`;
 export const SEO_API = `${BASE_URL}/pages`;
@@ -35,7 +43,6 @@ export const PRESS_RELEASES_API = `${BASE_URL}/press-releases`;
 export const PRESS_API = `${BASE_URL}/press`;
 
 export const FAQS_API = `${BASE_URL}/faqs`;
-
 
 export const UPLOAD_API = `${BASE_URL}/upload`;
 export const ACCOUNT_API = `${BASE_URL}/accounts`;
