@@ -78,13 +78,13 @@ export function mapBookingData(raw: any): IBooking {
     bookingTripVehicles: (t.vehicles || []).map((v: any) => ({
       price: v.price,
       vehicle: {
-        plateNo: v.plate_number || v.plate_no || v.plateNumber,
-        plateNumber: v.plate_number || v.plate_no || v.plateNumber,
+        plateNo: v.plate_no || v.plate_number || v.plateNumber,
         make: v.make,
         model: v.model,
+        vehicleType: { name: v.type || v.vehicle_type || v.vehicleType?.name },
+        plateNumber: v.plate_number || v.plate_no || v.plateNumber,
         modelName: [v.make, v.model].filter(Boolean).join(' ') || undefined,
         modelBody: v.type || v.vehicle_type || undefined,
-        vehicleType: { name: v.type || v.vehicle_type }
       }
     })),
     bookingTripCargos: (t.cargos || t.cargo || []).map((c: any) => ({
@@ -352,9 +352,9 @@ export function derivePricingStateFromBooking(rawBookingData: any) {
   const vehicle: Record<string, any> = {};
   (departureLegs[0]?.vehicles || []).forEach((v: any, i: number) => {
     vehicle[`vehicle_${i + 1}`] = {
-      vehicleTypeId: v.vehicle_type_id || v.vehicleTypeId,
+      vehicleTypeId: v.vehicle_type_id || v.vehicleTypeId || v.vehicleTypeId,
       plateNumber: v.plate_no || v.plateNumber || v.plate_number,
-      cargo_class: v.cargo_class || v.vehicle_type || (v.vehicle?.vehicleType?.name)
+      cargo_class: v.cargo_class || v.type || v.vehicle_type || (v.vehicle?.vehicleType?.name)
     };
   });
 

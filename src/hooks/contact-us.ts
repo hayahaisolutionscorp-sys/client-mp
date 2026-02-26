@@ -28,7 +28,7 @@ export const useContactUs = () => {
           setContactInfo(data);
 
           // Exclude unnecessary fields before caching
-          const cacheData = data.map(({ id, created_at, updated_at, ...rest }) => rest);
+          const cacheData = data.map(({ created_at, updated_at, ...rest }) => rest);
           localStorage.setItem(CONTACT_CACHE_KEY, JSON.stringify(cacheData));
         }
       })

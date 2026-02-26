@@ -29,7 +29,7 @@ export const useFooter = () => {
 
           // Exclude unnecessary fields before caching
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { id, shippingLineId, ...cacheData } = data;
+          const { ...cacheData } = data;
           localStorage.setItem(FOOTER_CACHE_KEY, JSON.stringify(cacheData));
         }
       })

@@ -52,10 +52,14 @@ export default function TripDetails({ booking }: TripDetailsProps) {
         <div className="pl-7 space-y-3">
           {vehicles.map((vehicle, index) => {
             const v = vehicle.vehicle as any;
+            const displayName = v?.modelName || v?.model || v?.make || 'Vehicle';
+            const description = v?.modelBody || v?.vehicleType?.name || '';
+            const plate = v?.plateNo || v?.plateNumber || v?.plate_number || v?.plate_no;
+
             return (
               <div key={index} className="text-customText">
                 <p className="text-sm font-medium">
-                  {v?.modelName || v?.model} ({v?.plateNumber || v?.plateNo}) {v?.modelBody ? `| ${v?.modelBody}` : ''}
+                  {displayName} {plate ? `(${plate})` : ''} {description ? `| ${description}` : ''}
                 </p>
               </div>
             );

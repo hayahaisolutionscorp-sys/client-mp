@@ -11,7 +11,7 @@ import PassengerTripCard from '@/components/booking/PassengerTripCard';
 import FareSummary from '@/components/booking/FareSummary';
 import { cacheItem, fetchItem, invalidateItem } from 'helpers/cache.helpers';
 import { useThemeSettings } from '@/hooks/theme-settings';
-import { createBooking, prepareBooking, calculatePricing, VehicleModelService } from '@/services';
+import { createBooking, prepareBooking, calculatePricing } from '@/services';
 import { getShip } from '@/services/shipping-line/ship.service';
 import { SuccessModal } from '@/components/ui/SuccessModal';
 import { useToast } from '@/hooks/use-toast';
@@ -38,22 +38,11 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
   const [pricingData, setPricingData] = useState<PricingResponse['data'] | undefined>(undefined);
   const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [vehicleModels, setVehicleModels] = useState<IVehicleModel[]>([]);
   const { loggedInAccount } = useAuth();
   const { error: toastError } = useToast();
   const themeSettings = useThemeSettings();
 
-  useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const models = await VehicleModelService.getAllVehicleModels();
-        setVehicleModels(models || []);
-      } catch (error) {
-        console.error('Failed to fetch vehicle models:', error);
-      }
-    };
-    fetchModels();
-  }, []);
+
 
   useEffect(() => {
     window.scrollTo(0, 0); // Scrolls to the top of the page on component load
@@ -442,12 +431,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
     const allVehicleTripAssignments = allLegIds.map(id => ({ tripId: id }));
 
     const vehicles = (rawData.vehicleDepartureDetails || []).map((v: any) => {
-      // Try to find an existing model ID by name if not already provided
-      let matchedModelId = v.vehicleModelId;
-      if (!matchedModelId && v.modelName) {
-        const match = vehicleModels.find(m => m.model.toLowerCase() === v.modelName.toLowerCase());
-        if (match) matchedModelId = match.id;
-      }
+      const matchedModelId = v.vehicleModelId;
 
       return {
         plateNumber: v.plateNumber || v.plateNo || '',

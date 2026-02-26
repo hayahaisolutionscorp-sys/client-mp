@@ -11,13 +11,10 @@ export const useThemeSettings = () => {
   const { themeSettings, setThemeSettings } = useTheme();
 
   useEffect(() => {
-    // If we already have theme settings from context (server-side initialTheme),
-    // we don't need to do anything immediately.
     if (themeSettings) {
       return;
     }
 
-    // Fallback: Try to get cached branding/theme
     const cached = localStorage.getItem(BRANDING_CACHE_KEY);
     if (cached) {
       try {
@@ -55,8 +52,9 @@ export const useThemeSettings = () => {
         if (data) {
           setThemeSettings(data);
 
+          // Exclude unnecessary fields before caching for consistency
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { id, created_at, updated_at, ...cacheData } = data as any;
+          const { created_at, updated_at, ...cacheData } = data as any;
           localStorage.setItem("theme_settings", JSON.stringify(cacheData));
         }
       })
