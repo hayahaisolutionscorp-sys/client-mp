@@ -7,11 +7,13 @@ import PaymentConfirmationDetails from './PaymentConfirmationDetails';
 interface PaymentConfirmationContentProps {
   departureTripId?: string;
   returnTripId?: string;
+  commodityId?: string;
 }
 
 export default async function PaymentConfirmationContent({
   departureTripId,
-  returnTripId
+  returnTripId,
+  commodityId
 }: PaymentConfirmationContentProps) {
   let initialDepartureTrips: ITrip[] = [];
   let initialReturnTrips: ITrip[] = [];
@@ -21,7 +23,7 @@ export default async function PaymentConfirmationContent({
     const response = await prepareBooking({
       departure: departureTripId ? departureTripId.split(',') : [],
       return: returnTripId ? returnTripId.split(',') : [],
-    });
+    }, commodityId);
 
     if (response.data) {
       prepareBookingData = response.data;
@@ -49,6 +51,7 @@ export default async function PaymentConfirmationContent({
     <PaymentConfirmationDetails
       departureTripId={departureTripId}
       returnTripId={returnTripId}
+      commodityId={commodityId}
       initialDepartureTrips={initialDepartureTrips}
       initialReturnTrips={initialReturnTrips}
       initialPrepareBookingData={prepareBookingData}

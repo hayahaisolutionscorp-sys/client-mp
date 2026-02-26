@@ -11,6 +11,7 @@ interface PassengerDetailsContentProps {
   departureCabinId?: string;
   returnCabinName?: string;
   returnCabinId?: string;
+  commodityId?: string;
 }
 
 export default async function PassengerDetailsContent({
@@ -19,7 +20,8 @@ export default async function PassengerDetailsContent({
   departureCabinName,
   departureCabinId,
   returnCabinName,
-  returnCabinId
+  returnCabinId,
+  commodityId
 }: PassengerDetailsContentProps) {
   let initialDepartureTrips: ITrip[] = [];
   let initialReturnTrips: ITrip[] = [];
@@ -29,7 +31,7 @@ export default async function PassengerDetailsContent({
     const response = await prepareBooking({
       departure: departureTripId ? [departureTripId] : [],
       return: returnTripId ? [returnTripId] : [],
-    });
+    }, commodityId);
 
     if (response.data) {
       prepareBookingData = response.data;
@@ -64,6 +66,7 @@ export default async function PassengerDetailsContent({
       departureCabinId={departureCabinId}
       returnCabinName={returnCabinName}
       returnCabinId={returnCabinId}
+      commodityId={commodityId}
     />
   );
 }

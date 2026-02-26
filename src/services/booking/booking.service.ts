@@ -90,7 +90,7 @@ export function mapBookingData(raw: any): IBooking {
     bookingTripCargos: (t.cargos || t.cargo || []).map((c: any) => ({
       price: c.price,
       quantity: c.quantity,
-      commodity: { name: c.commodity_name || 'Cargo' }
+      commodity: { name: c.description || c.commodity_name || 'Cargo' }
     }))
   });
 
@@ -240,6 +240,7 @@ export async function getBookingTripVehicleById(
 
 export async function prepareBooking(
   tripIds: { departure: string[]; return?: string[] },
+  commodityId?: string,
   headers?: HeadersInit
 ): Promise<IPrepareBookingResponse> {
   try {
@@ -264,6 +265,9 @@ export async function prepareBooking(
     }
     if (tripIds.return && tripIds.return.length > 0) {
       appendIds('return', tripIds.return);
+    }
+    if (commodityId) {
+      queryParams.append('commodity_id', commodityId);
     }
 
     const queryString = queryParams.toString();

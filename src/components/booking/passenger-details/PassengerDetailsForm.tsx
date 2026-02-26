@@ -179,7 +179,9 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
   const uniqueFareTypes = Array.from(new Map(fareTypes.map((type) => [type.discountType, type])).values());
 
   const renderFareTypeSelector = (passenger: PassengerData, isCompanion = false) => {
-    const filteredTypes = passengerTypes.filter(type => type.code === 'ADULT');
+    const filteredTypes = passengerTypes.filter(type =>
+      type.code === 'ADULT' || type.code === passenger.discountType
+    );
     const selectedType = filteredTypes.find(t => t.code === passenger.discountType);
 
     return (
@@ -247,7 +249,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
         nationality: dependent.nationality || 'Filipino',
         accommodation: '',
         address: dependent.address || '',
-        discountType: 'ADULT',
+        discountType: dependent.passenger_code || 'ADULT',
         isDependent: true
       } : {
         id: generateUniqueNumber(),
@@ -298,7 +300,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
           <div className="flex justify-start items-start sm:items-center text-customText">
             <div className="flex items-center">
               <h2 className="text-lg font-semibold mr-2">Companion {index + 1} Details</h2>
-              <p className="text-sm">(Adult Ticket)</p>
+              <p className="text-sm">({passengerTypes.find(t => t.code === companion.discountType)?.name || 'Adult'} Ticket)</p>
               {companion.isDependent && (
                 <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-700 border-blue-200">
                   Dependent
@@ -587,7 +589,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
           <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center text-customText">
             <div className="flex items-center">
               <h2 className="text-base sm:text-lg font-semibold mr-2">Passenger Details</h2>
-              <p className="text-sm">(Adult Ticket)</p>
+              <p className="text-sm">({passengerTypes.find(t => t.code === passenger.discountType)?.name || 'Adult'} Ticket)</p>
             </div>
           </div>
           <div className="flex items-center">

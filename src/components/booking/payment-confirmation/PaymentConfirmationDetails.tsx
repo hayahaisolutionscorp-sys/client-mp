@@ -22,12 +22,13 @@ import { PricingResponse } from '@/types/booking/pricing';
 interface Props {
   departureTripId?: string;
   returnTripId?: string;
+  commodityId?: string;
   initialDepartureTrips?: ITrip[];
   initialReturnTrips?: ITrip[];
   initialPrepareBookingData?: IPrepareBookingData;
 }
 
-export default function PaymentConfirmationDetails({ departureTripId, returnTripId, initialDepartureTrips, initialReturnTrips, initialPrepareBookingData }: Props) {
+export default function PaymentConfirmationDetails({ departureTripId, returnTripId, commodityId, initialDepartureTrips, initialReturnTrips, initialPrepareBookingData }: Props) {
   const router = useRouter();
 
   const [departureTrips, setDepartureTrips] = useState<ITrip[] | undefined>(initialDepartureTrips);
@@ -88,7 +89,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       const response = await prepareBooking({
         departure: departureTripId.split(','),
         return: returnTripId ? returnTripId.split(',') : [],
-      });
+      }, commodityId);
 
       if (response.data) {
         setPrepareBookingData(response.data);
@@ -176,7 +177,12 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           bookingTrips.push({
             tripId: trip.id,
             bookingTripPassengers: depPax,
-            bookingTripVehicles: index === 0 ? depVeh : [] // typically vehicles only load once, but depends on logic
+            bookingTripVehicles: index === 0 ? depVeh : [], // typically vehicles only load once, but depends on logic
+            bookingTripCargos: (rawData.cargoDetails || []).map((c: any) => ({
+              commodity: { id: c.commodityId, name: c.commodityName },
+              quantity: c.quantity || 1,
+              price: parseFloat(c.cbmRate) || 0
+            }))
           });
         });
       }
@@ -189,7 +195,12 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           bookingTrips.push({
             tripId: trip.id,
             bookingTripPassengers: depPax, // Assuming same passengers return
-            bookingTripVehicles: index === 0 ? retVeh : []
+            bookingTripVehicles: index === 0 ? retVeh : [],
+            bookingTripCargos: (rawData.cargoDetails || []).map((c: any) => ({
+              commodity: { id: c.commodityId, name: c.commodityName },
+              quantity: c.quantity || 1,
+              price: parseFloat(c.cbmRate) || 0
+            }))
           });
         });
       }
@@ -305,6 +316,19 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
               vehicleTypeId: v.vehicleTypeId || v.vehicleType?.id || '',
               plateNumber: v.plateNo || v.plateNumber || '',
               cargo_class: v.cargoClassCode || 'ROLLING' // Default to ROLLING if missing
+            };
+          });
+        }
+
+        // 4. Cargo Mapping
+        const cargoDetails = rawData.cargoDetails || (rawData.bookingTrips?.[0]?.bookingTripCargos);
+        if (cargoDetails) {
+          cargoDetails.forEach((c: any, index: number) => {
+            state.cargo[`cargo_${index + 1}`] = {
+              commodityId: c.commodityId || c.commodity?.id || 0,
+              quantity: c.quantity || 0,
+              cbmRate: c.cbmRate || String(c.price) || '',
+              cargo_class: c.cargo_class || ''
             };
           });
         }
@@ -448,7 +472,12 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       trips: tripsPayload,
       passengers,
       vehicles,
-      looseCargos: [],
+      looseCargos: (rawData.cargoDetails || []).map((c: any) => ({
+        commodityId: c.commodityId || 0,
+        quantity: c.quantity || 1,
+        description: c.commodityName || 'Cargo',
+        tripAssignments: allLegIds.map(id => ({ tripId: id }))
+      })),
       consignee: `${contactDetails.firstname} ${contactDetails.lastname}`,
       voucherCode: '',
       referralCode: '',
@@ -519,6 +548,8 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
             departureTrips={departureTrips}
             returnTrips={returnTrips}
             booking={booking}
+            cargoDetails={(booking as any)?.cargoDetails}
+            commodityId={commodityId}
             pricingData={pricingData}
             prepareBookingData={prepareBookingData}
             isLoading={isPricingLoading}

@@ -21,6 +21,7 @@ export interface IDependent {
 
   status?: DependentVerificationStatus;
   verifications?: IVerification[];
+  passenger_code?: string;
 }
 
 export interface IVerification {

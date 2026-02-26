@@ -48,7 +48,7 @@ export default function TripsSelector() {
     // Update selected dates when search parameters change
     const departureDate = searchParams.get('filterSpecificDepartureDate') || searchParams.get('departure_date') || searchParams.get('departureDate');
     const returnDate = searchParams.get('filterSpecificReturnDate') || searchParams.get('returnDate');
-    
+
     setSelectedDepartureDate(departureDate);
     setSelectedReturnDate(returnDate);
   }, [searchParams]);
@@ -77,7 +77,8 @@ export default function TripsSelector() {
         sort: searchParams.get('sort') ?? 'departureDate',
         filterSpecificDate:
           searchParams.get('filterSpecificDepartureDate') ?? searchParams.get('departure_date') ?? undefined,
-        filterDepartureDateTime: searchParams.get('filterDepartureDateTime') ?? undefined
+        filterDepartureDateTime: searchParams.get('filterDepartureDateTime') ?? undefined,
+        commodity_id: searchParams.get('commodity_id') ?? undefined
       };
 
       const pagination: PaginatedRequest = {
@@ -137,7 +138,8 @@ export default function TripsSelector() {
       returnCabinName: getJoinedNames(selectedReturnCabin),
       returnCabinId: getJoinedIds(selectedReturnCabin),
       passengerCount: searchParams.get('passengerCount') || searchParams.get('passenger_count') || undefined,
-      vehicleCount: searchParams.get('vehicleCount') || searchParams.get('vehicle_count') || undefined
+      vehicleCount: searchParams.get('vehicleCount') || searchParams.get('vehicle_count') || undefined,
+      commodityId: searchParams.get('commodity_id') || searchParams.get('commodityId') || undefined
     };
 
     // Filter out undefined values to avoid passing empty params

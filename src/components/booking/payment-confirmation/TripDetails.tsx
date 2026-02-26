@@ -55,7 +55,7 @@ export default function TripDetails({ booking }: TripDetailsProps) {
             return (
               <div key={index} className="text-customText">
                 <p className="text-sm font-medium">
-                  {v?.modelName} ({v?.plateNumber || v?.plateNo}) | {v?.modelBody}
+                  {v?.modelName || v?.model} ({v?.plateNumber || v?.plateNo}) {v?.modelBody ? `| ${v?.modelBody}` : ''}
                 </p>
               </div>
             );

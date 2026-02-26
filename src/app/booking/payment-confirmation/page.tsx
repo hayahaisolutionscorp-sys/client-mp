@@ -7,6 +7,7 @@ interface PageProps {
   searchParams?: Promise<{
     departureTripId?: string;
     returnTripId?: string;
+    commodityId?: string;
   }>;
 }
 
@@ -30,6 +31,7 @@ export default async function PaymentConfirmation(props: PageProps) {
       <PaymentConfirmationContent
         departureTripId={departureTripId}
         returnTripId={returnTripId}
+        commodityId={searchParams.commodityId}
       />
     </Suspense>
   )
