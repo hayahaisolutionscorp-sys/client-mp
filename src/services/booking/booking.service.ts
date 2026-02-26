@@ -30,11 +30,14 @@ export async function createTentativeBooking(booking: IBooking): Promise<IBookin
 export async function getBookingById(bookingId: string): Promise<{ booking: IBooking; raw: any }> {
   try {
     const { data } = await axios.get(`${BOOKING_API}/${bookingId}`);
-    const raw = data.data;
-
+    // Support both {data: {...}} and direct object response shapes
+    const raw = data?.data ?? data;
+    if (!raw || !raw.id) {
+      throw new Error(`Unexpected booking response shape: ${JSON.stringify(data)}`);
+    }
     return { booking: mapBookingData(raw), raw };
   } catch (e) {
-    console.error(e);
+    console.error('[getBookingById] failed:', e);
     throw e;
   }
 }
@@ -43,6 +46,8 @@ export async function getBookingById(bookingId: string): Promise<{ booking: IBoo
  * Maps snake_case API response to camelCase IBooking model
  */
 export function mapBookingData(raw: any): IBooking {
+  if (!raw) throw new Error('mapBookingData: raw booking data is null/undefined');
+
   const mapTrip = (t: any, direction?: 'departure' | 'return') => ({
     tripId: t.id || t.trip_id,
     direction,
@@ -73,8 +78,13 @@ export function mapBookingData(raw: any): IBooking {
     bookingTripVehicles: (t.vehicles || []).map((v: any) => ({
       price: v.price,
       vehicle: {
-        plateNo: v.plate_no,
-        vehicleType: { name: v.vehicle_type }
+        plateNo: v.plate_number || v.plate_no || v.plateNumber,
+        plateNumber: v.plate_number || v.plate_no || v.plateNumber,
+        make: v.make,
+        model: v.model,
+        modelName: [v.make, v.model].filter(Boolean).join(' ') || undefined,
+        modelBody: v.type || v.vehicle_type || undefined,
+        vehicleType: { name: v.type || v.vehicle_type }
       }
     })),
     bookingTripCargos: (t.cargos || t.cargo || []).map((c: any) => ({
