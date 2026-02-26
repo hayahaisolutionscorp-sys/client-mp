@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Knowledge base endpoints are on api-v2 (port 3002), not client-api (port 3000)
-const KNOWLEDGE_BASE_API_URL = process.env.NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL || "http://localhost:3002";
+const KNOWLEDGE_BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+const MARKETPLACE_TENANT_ID = parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10);
 
 export interface BookingContext {
     srcPort?: string;
@@ -84,9 +84,9 @@ export async function POST(request: NextRequest) {
             },
             body: JSON.stringify({
                 query: latestMessage,
-                agentId: "booking-assistant",
+                agentType: "trip-search",
                 history,
-                tenantId: 1,
+                tenantId: MARKETPLACE_TENANT_ID,
             }),
         });
 

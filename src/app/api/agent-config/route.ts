@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const API_V2_URL =
-  process.env.NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL || "http://localhost:3002";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+const MARKETPLACE_TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "1";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const tenantId = url.searchParams.get("tenantId") || "1";
+  const tenantId = url.searchParams.get("tenantId") || MARKETPLACE_TENANT_ID;
   const agentType = url.searchParams.get("type") || "trip-search";
 
   try {

@@ -151,6 +151,10 @@ const Navbar = () => {
                 </>
               )}
 
+              <Link href="/booking/destination" className="text-sm font-medium hover:underline">
+                My Bookings
+              </Link>
+
               <UserDropdown shouldBeTransparent={shouldBeTransparent} />
             </div>
 

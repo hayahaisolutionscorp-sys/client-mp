@@ -28,7 +28,7 @@ export default function LayoutWrapper({
         </div>
       )}
       <SessionExpiredModal />
-      <ChatWidget />
+      <ChatWidget tenantId={parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10)} />
     </>
   );
 }

@@ -1,26 +1,24 @@
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-// Knowledge base endpoints are on api-v2 (port 3002), not client-api (port 3000)
-const API_V2_URL = process.env.NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL || "http://localhost:3002";
+const API_V2_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+const MARKETPLACE_TENANT_ID = parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10);
 
 export async function POST(req: Request) {
   console.log("--> /api/chat [Proxy Mode] POST received");
   try {
     const url = new URL(req.url);
-    const queryAgentId = url.searchParams.get("agentId");
     const queryTenantId = url.searchParams.get("tenantId");
     const queryScope = url.searchParams.get("scope");
 
     const body = await req.json();
     console.log("--> Request body:", JSON.stringify(body, null, 2));
     
-    const { messages, agentId: bodyAgentId } = body;
+    const { messages } = body;
 
-    // Prioritize Body, then URL, then default
-    const agentId = bodyAgentId || queryAgentId || "default";
-    // Default to tenant 1 (localhost) for testing if not specified
-    const tenantId = queryTenantId ? parseInt(queryTenantId) : 1;
+    // AI Configuration is the source of truth — pass agentType so backend resolves from agent_configs
+    const agentType = "chatbot";
+    const tenantId = queryTenantId ? parseInt(queryTenantId) : MARKETPLACE_TENANT_ID;
     const scope = queryScope || undefined;
 
     // AI SDK v3+ can send in multiple formats depending on version/config
@@ -63,7 +61,7 @@ export async function POST(req: Request) {
       return new Response("No user message found", { status: 400 });
     }
     
-    console.log(`--> Extracted query: "${query.substring(0, 100)}..." for agent: ${agentId}`);
+    console.log(`--> Extracted query: "${query.substring(0, 100)}..." (agentType: ${agentType}, tenantId: ${tenantId})`);
 
     // Extract conversation history (exclude the current message)
     const history: Array<{ role: 'user' | 'assistant'; content: string }> = [];
@@ -99,7 +97,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        agentId,
+        agentType,
         query,
         history,
         tenantId,
@@ -109,7 +107,7 @@ export async function POST(req: Request) {
 
     if (!apiRes.ok) {
       const errText = await apiRes.text();
-      console.error("--> API v2 Error:", apiRes.status, errText);
+      console.error("--> API Error:", apiRes.status, errText);
       return new Response(errText, { status: apiRes.status });
     }
 
