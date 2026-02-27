@@ -2,7 +2,7 @@ import { IThemeSettings } from '@/models';
 import { IBrandingResponse } from '@/models/branding.model';
 import { THEME_SETTINGS_API } from 'constants/api';
 import brandingData from '@/data/branding.json';
-import { IS_CLIENT } from '../config';
+import { IS_BROWSER } from '../config';
 
 const DEFAULT_THEME: IThemeSettings = {
   primary: brandingData.colors.primary,
@@ -14,18 +14,23 @@ const DEFAULT_THEME: IThemeSettings = {
 };
 
 export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
-  try {
-    /* if (!IS_CLIENT) {
-      return DEFAULT_THEME;
-    } */
+  if (IS_BROWSER) {
+    try {
+      const cached = localStorage.getItem("theme_settings");
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {
+      console.error("Failed to parse cached theme settings", e);
+    }
+  }
 
-    const res = await fetch(THEME_SETTINGS_API, {
-      // next: { tags: ['theme-settings'], revalidate: 3600 }
-    });
+  try {
+    const res = await fetch(THEME_SETTINGS_API);
 
     if (res.ok) {
       const response: IBrandingResponse = await res.json();
-      return {
+      const theme: IThemeSettings = {
         primaryColor: response.data.colors.primaryColor || response.data.colors.primary,
         secondaryColor: response.data.colors.secondaryColor || response.data.colors.secondary,
         primary: response.data.colors.primary || response.data.colors.primaryColor || '',
@@ -33,13 +38,17 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
         accent: response.data.colors.accent,
         fontStyle: 'Inter'
       };
+
+      if (IS_BROWSER) {
+        localStorage.setItem("theme_settings", JSON.stringify(theme));
+      }
+
+      return theme;
     }
 
     return DEFAULT_THEME;
   } catch (e) {
-    if (typeof window === 'undefined') {
-      console.error('Error fetching theme settings:', e);
-    }
+    console.error('Error fetching theme settings:', e);
     return DEFAULT_THEME;
   }
 }

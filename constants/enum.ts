@@ -27,7 +27,7 @@ export enum DISCOUNT_TYPE {
   PWD = 'PWD',
   Child = 'Child',
   Infant = 'Infant',
-  Driver = 'Driver',
+  Driver = 'DRIVER',
   Passes = 'Passes',
   Helper = 'Helper',
 }

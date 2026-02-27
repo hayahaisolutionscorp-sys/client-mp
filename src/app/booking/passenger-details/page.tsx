@@ -13,6 +13,7 @@ interface PageProps {
     returnCabinId?: string;
     passengerCount?: string;
     vehicleCount?: string;
+    commodityId?: string;
   }>;
 }
 
@@ -41,6 +42,7 @@ export default async function PassengerDetails(props: PageProps) {
           departureCabinId={searchParams.departureCabinId}
           returnCabinName={searchParams.returnCabinName}
           returnCabinId={searchParams.returnCabinId}
+          commodityId={searchParams.commodityId}
         />
       </Suspense>
     </div>

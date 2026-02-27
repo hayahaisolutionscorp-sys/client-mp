@@ -36,8 +36,113 @@ export default function BookingDetails() {
         const { booking: fetchedBooking, raw } = await getBookingById(bookingId);
         setBooking(fetchedBooking);
 
-        // Derive pricing state and fetch pricing breakdown
-        if (raw) {
+        // If the API returned payment_breakdown, build pricingData from it directly
+        // (avoids an extra calculatePricing round-trip and uses the actual recorded charges)
+        const pb = raw?.payment_breakdown;
+        const hasPb =
+          pb &&
+          (pb.passengers_fare > 0 ||
+            pb.cargo_fare > 0 ||
+            pb.charges_total > 0 ||
+            pb.taxes_total > 0 ||
+            pb.charges?.length > 0 ||
+            pb.taxes?.length > 0);
+
+        if (hasPb) {
+          const departureLeg = raw.trips?.departure?.[0] || {};
+          const passengers: any[] = departureLeg.passengers || [];
+          const vehicles: any[] = departureLeg.vehicles || [];
+          const cargos: any[] = departureLeg.cargos || departureLeg.cargo || [];
+
+          const paxCount = passengers.length;
+          const cargoCount = vehicles.length + cargos.length;
+
+          const passengerPrices = passengers.map((p: any, i: number) => ({
+            index: i,
+            tripId: '',
+            routeCode: '',
+            passengerType: p.discount_type || p.discountType || 'ADULT',
+            accommodationCode:
+              p.cabin_type_name || p.cabinTypeName || p.cabin || p.accommodation || '',
+            baseFare: paxCount > 0 ? pb.passengers_fare / paxCount : 0,
+            currency: 'PHP',
+          }));
+
+          const cargoPriceItems = [
+            ...vehicles.map((v: any, i: number) => ({
+              index: i,
+              tripId: '',
+              cargoType: 'VEHICLE',
+              cargoClassCode: v.type || v.vehicle_type || v.make || 'Vehicle',
+              baseFare: cargoCount > 0 ? pb.cargo_fare / cargoCount : 0,
+              currency: 'PHP',
+              rateUnit: 'unit',
+            })),
+            ...cargos.map((c: any, i: number) => ({
+              index: vehicles.length + i,
+              tripId: '',
+              cargoType: 'CARGO',
+              cargoClassCode: c.description || 'Cargo',
+              baseFare: cargoCount > 0 ? pb.cargo_fare / cargoCount : 0,
+              currency: 'PHP',
+              rateUnit: 'unit',
+            })),
+          ];
+
+          const charges = [
+            ...(pb.charges || []).map((ch: any) => ({
+              ruleId: ch.charge_code || '',
+              chargeCode: ch.charge_code || '',
+              chargeName: ch.description,
+              category: 'CHARGE',
+              amount: ch.amount,
+              isInclusive: false,
+              calcType: 'FIXED',
+              basis: 'UNIT',
+              showOnReceipt: true,
+            })),
+            ...(pb.taxes || []).map((t: any) => ({
+              ruleId: t.charge_code || '',
+              chargeCode: t.charge_code || '',
+              chargeName: t.description,
+              category: 'TAX',
+              amount: t.amount,
+              isInclusive: false,
+              calcType: 'FIXED',
+              basis: 'UNIT',
+              showOnReceipt: true,
+            })),
+          ];
+
+          const chargesTotal = (pb.charges_total || 0) + (pb.taxes_total || 0);
+          const baseFareTotal = (pb.passengers_fare || 0) + (pb.cargo_fare || 0);
+          const grandTotal = raw.total_price
+            ? parseFloat(raw.total_price)
+            : baseFareTotal + chargesTotal;
+
+          setPricingData({
+            trips: [
+              {
+                tripId: '',
+                routeCode: '',
+                passengerPrices,
+                cargoPrices: cargoPriceItems,
+                baseFare: {
+                  passengers: pb.passengers_fare || 0,
+                  cargo: pb.cargo_fare || 0,
+                  total: baseFareTotal,
+                },
+                charges,
+                chargesTotal,
+                taxesTotal: pb.taxes_total || 0,
+                subtotal: grandTotal,
+                grandTotal,
+              },
+            ],
+            grandTotal,
+          } as any);
+        } else if (raw) {
+          // Fallback: derive pricing state and call calculatePricing
           setIsPricingLoading(true);
           try {
             const pricingState = derivePricingStateFromBooking(raw);

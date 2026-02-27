@@ -5,7 +5,7 @@ import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import Image from "next/image";
 import Link from "next/link";
-import { v4 as uuidv4 } from 'uuid';
+
 
 
 import { useThemeSettings } from "@/hooks/theme-settings";
@@ -19,11 +19,7 @@ const Footer = () => {
   const footerSection = useFooter();
   const contactInfo = useContactUs();
 
-  const [cacheBuster, setCacheBuster] = useState("");
 
-  useEffect(() => {
-    setCacheBuster(uuidv4());
-  }, []);
 
   const socialLinks = {
     facebook: contactInfo.find(c => c.type === 'facebook' && c.is_active),
@@ -47,15 +43,11 @@ const Footer = () => {
           {/* Logo and Tagline */}
           <div className="flex flex-col items-center mb-2 lg:mb-0 lg:items-start">
             <div
-              className={`flex justify-center items-center overflow-hidden ${branding?.logo?.light?.toLowerCase().endsWith('.png') ? 'bg-white p-2 rounded-lg' : ''
+              className={`flex justify-center items-center overflow-hidden ${(branding?.logo?.light || '').toLowerCase().endsWith('.png') ? 'bg-white p-2 rounded-lg' : ''
                 }`}
             >
               <Image
-                src={
-                  branding?.logo
-                    ? branding.logo.light
-                    : "/assets/images/ayahay_logo_white.png"
-                }
+                src={branding?.logo?.light || "/assets/images/ayahay_logo_white.png"}
                 alt="Ayahay Logo"
                 width={200}
                 height={500}
@@ -71,39 +63,39 @@ const Footer = () => {
           {/* Company Links */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {(footerSection?.hasAboutUs || footerSection?.hasPress) && (
-              <div>
+              <div key="company-links">
                 <h3 className="font-semibold mb-5">Company</h3>
                 <ul className="space-y-3 text-sm sm:text-base opacity-80">
                   {footerSection?.hasAboutUs && (
-                    <li><Link href="/about-us" className="hover:underline">About us</Link></li>
+                    <li key="about"><Link href="/about-us" className="hover:underline">About us</Link></li>
                   )}
                   {footerSection?.hasPress && (
-                    <li><Link href="/press" className="hover:underline">Press</Link></li>
+                    <li key="press"><Link href="/press" className="hover:underline">Press</Link></li>
                   )}
                 </ul>
               </div>
             )}
 
             {(footerSection?.hasFaq) && (
-              <div>
+              <div key="support-links">
                 <h3 className="font-semibold mb-5">Support</h3>
                 <ul className="space-y-3 text-sm sm:text-base opacity-80">
                   {footerSection?.hasFaq && (
-                    <li><Link href="/faq" className="hover:underline">FAQ</Link></li>
+                    <li key="faq"><Link href="/faq" className="hover:underline">FAQ</Link></li>
                   )}
                 </ul>
               </div>
             )}
 
             {(footerSection?.hasPrivacyPolicy || footerSection?.hasTermsAndConditions) && (
-              <div>
+              <div key="legal-links">
                 <h3 className="font-semibold mb-5">Legal Docs</h3>
                 <ul className="space-y-3 text-sm sm:text-base opacity-80">
                   {footerSection?.hasPrivacyPolicy && (
-                    <li><Link href="/privacy-policy" className="hover:underline">Privacy Policy</Link></li>
+                    <li key="privacy"><Link href="/privacy-policy" className="hover:underline">Privacy Policy</Link></li>
                   )}
                   {footerSection?.hasTermsAndConditions && (
-                    <li><Link href="/terms" className="hover:underline">Terms and Conditions</Link></li>
+                    <li key="terms"><Link href="/terms" className="hover:underline">Terms and Conditions</Link></li>
                   )}
                 </ul>
               </div>
@@ -113,15 +105,15 @@ const Footer = () => {
           {/* Contact Details */}
           <div>
             <h3 className="font-semibold mb-5">Customer Care</h3>
-            {phoneNumbers.map(phone => (
-              <p key={phone.id} className="mb-5 text-sm sm:text-base opacity-80 whitespace-nowrap">
+            {phoneNumbers.map((phone, idx) => (
+              <p key={`phone-${phone.id || idx}`} className="mb-5 text-sm sm:text-base opacity-80 whitespace-nowrap">
                 {phone.label}: {phone.value}
               </p>
             ))}
 
             <h4 className="font-semibold mt-8 mb-5">Need support?</h4>
-            {emails.map(email => (
-              <a key={email.id} href={`mailto:${email.value}`} className="block mb-2 text-sm sm:text-base opacity-80 hover:underline">
+            {emails.map((email, idx) => (
+              <a key={`email-${email.id || idx}`} href={`mailto:${email.value}`} className="block mb-2 text-sm sm:text-base opacity-80 hover:underline">
                 {email.value}
               </a>
             ))}

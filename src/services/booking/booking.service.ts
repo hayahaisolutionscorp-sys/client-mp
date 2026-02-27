@@ -30,11 +30,14 @@ export async function createTentativeBooking(booking: IBooking): Promise<IBookin
 export async function getBookingById(bookingId: string): Promise<{ booking: IBooking; raw: any }> {
   try {
     const { data } = await axios.get(`${BOOKING_API}/${bookingId}`);
-    const raw = data.data;
-
+    // Support both {data: {...}} and direct object response shapes
+    const raw = data?.data ?? data;
+    if (!raw || !raw.id) {
+      throw new Error(`Unexpected booking response shape: ${JSON.stringify(data)}`);
+    }
     return { booking: mapBookingData(raw), raw };
   } catch (e) {
-    console.error(e);
+    console.error('[getBookingById] failed:', e);
     throw e;
   }
 }
@@ -43,6 +46,8 @@ export async function getBookingById(bookingId: string): Promise<{ booking: IBoo
  * Maps snake_case API response to camelCase IBooking model
  */
 export function mapBookingData(raw: any): IBooking {
+  if (!raw) throw new Error('mapBookingData: raw booking data is null/undefined');
+
   const mapTrip = (t: any, direction?: 'departure' | 'return') => ({
     tripId: t.id || t.trip_id,
     direction,
@@ -73,14 +78,19 @@ export function mapBookingData(raw: any): IBooking {
     bookingTripVehicles: (t.vehicles || []).map((v: any) => ({
       price: v.price,
       vehicle: {
-        plateNo: v.plate_no,
-        vehicleType: { name: v.vehicle_type }
+        plateNo: v.plate_no || v.plate_number || v.plateNumber,
+        make: v.make,
+        model: v.model,
+        vehicleType: { name: v.type || v.vehicle_type || v.vehicleType?.name },
+        plateNumber: v.plate_number || v.plate_no || v.plateNumber,
+        modelName: [v.make, v.model].filter(Boolean).join(' ') || undefined,
+        modelBody: v.type || v.vehicle_type || undefined,
       }
     })),
     bookingTripCargos: (t.cargos || t.cargo || []).map((c: any) => ({
       price: c.price,
       quantity: c.quantity,
-      commodity: { name: c.commodity_name || 'Cargo' }
+      commodity: { name: c.description || c.commodity_name || 'Cargo' }
     }))
   });
 
@@ -230,6 +240,7 @@ export async function getBookingTripVehicleById(
 
 export async function prepareBooking(
   tripIds: { departure: string[]; return?: string[] },
+  commodityId?: string,
   headers?: HeadersInit
 ): Promise<IPrepareBookingResponse> {
   try {
@@ -254,6 +265,9 @@ export async function prepareBooking(
     }
     if (tripIds.return && tripIds.return.length > 0) {
       appendIds('return', tripIds.return);
+    }
+    if (commodityId) {
+      queryParams.append('commodity_id', commodityId);
     }
 
     const queryString = queryParams.toString();
@@ -338,9 +352,9 @@ export function derivePricingStateFromBooking(rawBookingData: any) {
   const vehicle: Record<string, any> = {};
   (departureLegs[0]?.vehicles || []).forEach((v: any, i: number) => {
     vehicle[`vehicle_${i + 1}`] = {
-      vehicleTypeId: v.vehicle_type_id || v.vehicleTypeId,
+      vehicleTypeId: v.vehicle_type_id || v.vehicleTypeId || v.vehicleTypeId,
       plateNumber: v.plate_no || v.plateNumber || v.plate_number,
-      cargo_class: v.cargo_class || v.vehicle_type || (v.vehicle?.vehicleType?.name)
+      cargo_class: v.cargo_class || v.type || v.vehicle_type || (v.vehicle?.vehicleType?.name)
     };
   });
 

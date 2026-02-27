@@ -1,15 +1,20 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import { useEffect } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 import { getThemeSettings } from "@/services/ui/theme-settings.service";
 import { IThemeSettings } from "@/models";
 
 const BRANDING_CACHE_KEY = "branding_config";
 
 export const useThemeSettings = () => {
-  const [themeSettings, setThemeSettings] = useState<IThemeSettings | null>(null);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const { themeSettings, setThemeSettings } = useTheme();
 
   useEffect(() => {
-    // Try to get cached branding first (which contains theme)
+    if (themeSettings) {
+      return;
+    }
+
     const cached = localStorage.getItem(BRANDING_CACHE_KEY);
     if (cached) {
       try {
@@ -24,7 +29,6 @@ export const useThemeSettings = () => {
             fontStyle: 'Inter'
           };
           setThemeSettings(derivedTheme);
-          setIsHydrated(true);
           return;
         }
       } catch (e) {
@@ -32,35 +36,30 @@ export const useThemeSettings = () => {
       }
     }
 
-    // Fallback to theme settings cache or fetch
     const themeCached = localStorage.getItem("theme_settings");
     if (themeCached) {
-        try {
-            setThemeSettings(JSON.parse(themeCached));
-            setIsHydrated(true);
-            return;
-        } catch (e) {
-            console.error("Failed to parse theme_settings:", e);
-        }
+      try {
+        setThemeSettings(JSON.parse(themeCached));
+        return;
+      } catch (e) {
+        console.error("Failed to parse theme_settings:", e);
+      }
     }
 
-    // Mark as hydrated
-    setIsHydrated(true);
-
-    // Fetch fresh theme only if nothing cached
+    // Fetch fresh theme only if nothing cached and nothing from provider
     getThemeSettings()
       .then((data) => {
         if (data) {
           setThemeSettings(data);
-          
+
           // Exclude unnecessary fields before caching for consistency
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { id, created_at, updated_at, ...cacheData } = data as any;
+          const { created_at, updated_at, ...cacheData } = data as any;
           localStorage.setItem("theme_settings", JSON.stringify(cacheData));
         }
       })
       .catch((error) => console.error("Error fetching theme settings:", error));
-  }, []);
+  }, [themeSettings, setThemeSettings]);
 
   return themeSettings;
 };

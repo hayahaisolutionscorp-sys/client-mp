@@ -151,6 +151,23 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
   }, []);
 
   const handleDiscountTypeChange = (value: string | null, id: number, isCompanion: boolean) => {
+    if (value === 'DRIVER') {
+      const currentDriverCount = (passenger.discountType === 'DRIVER' ? 1 : 0) +
+        companions.filter(c => c.discountType === 'DRIVER').length;
+
+      const currentData = isCompanion ? companions.find(c => c.id === id) : passenger;
+      const isAlreadyDriver = currentData?.discountType === 'DRIVER';
+
+      if (!isAlreadyDriver && currentDriverCount >= vehicleCount) {
+        setAlertModal({
+          isOpen: true,
+          title: 'Driver Limit Reached',
+          description: `You can only select up to ${vehicleCount} Driver(s), which is the number of vehicles in your booking.`
+        });
+        return;
+      }
+    }
+
     let updatedData;
     if (isCompanion) {
       const updatedCompanions = companions.map((comp) => (comp.id === id ? { ...comp, discountType: value as any } : comp));
@@ -176,31 +193,97 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
     }
   };
 
+  useEffect(() => {
+    const syncDriversWithVehicles = () => {
+      let changed = false;
+      let currentDriverCount = (passenger.discountType === 'DRIVER' ? 1 : 0) +
+        companions.filter(c => c.discountType === 'DRIVER').length;
+
+      let updatedPassenger = passenger;
+      let updatedCompanions = [...companions];
+
+      // Case 1: Driver count is less than vehicle count (Auto-assign)
+      if (currentDriverCount < vehicleCount) {
+        if (passenger.discountType !== 'DRIVER' && currentDriverCount < vehicleCount) {
+          updatedPassenger = { ...passenger, discountType: 'DRIVER' as any };
+          setPassenger(updatedPassenger);
+          currentDriverCount++;
+          changed = true;
+        }
+
+        updatedCompanions = updatedCompanions.map((comp) => {
+          if (comp.discountType !== 'DRIVER' && currentDriverCount < vehicleCount) {
+            currentDriverCount++;
+            changed = true;
+            return { ...comp, discountType: 'DRIVER' as any };
+          }
+          return comp;
+        });
+      }
+      // Case 2: Driver count is more than vehicle count (Revert to Adult)
+      else if (currentDriverCount > vehicleCount) {
+        // Revert companions first (reverse order)
+        for (let i = updatedCompanions.length - 1; i >= 0 && currentDriverCount > vehicleCount; i--) {
+          if (updatedCompanions[i].discountType === 'DRIVER') {
+            updatedCompanions[i] = { ...updatedCompanions[i], discountType: 'ADULT' as any };
+            currentDriverCount--;
+            changed = true;
+          }
+        }
+
+        // Then revert main passenger if still over limit
+        if (currentDriverCount > vehicleCount && updatedPassenger.discountType === 'DRIVER') {
+          updatedPassenger = { ...updatedPassenger, discountType: 'ADULT' as any };
+          setPassenger(updatedPassenger);
+          currentDriverCount--;
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        setCompanions(updatedCompanions);
+        setFormData({
+          passenger: updatedPassenger,
+          companions: updatedCompanions
+        });
+      }
+    };
+
+    syncDriversWithVehicles();
+  }, [vehicleCount]);
+
   const uniqueFareTypes = Array.from(new Map(fareTypes.map((type) => [type.discountType, type])).values());
 
   const renderFareTypeSelector = (passenger: PassengerData, isCompanion = false) => {
-    const filteredTypes = passengerTypes.filter(type => type.code === 'ADULT');
-    const selectedType = filteredTypes.find(t => t.code === passenger.discountType);
+    const filteredTypes = passengerTypes.filter(type => type.code === 'ADULT' || type.code === 'DRIVER');
 
     return (
       <div className="mb-4">
         <label className="block text-sm font-medium text-customText mb-2">Passenger Type</label>
         <div className="flex items-center space-x-4 mt-2">
-          {filteredTypes.map((type) => (
-            <label key={type.id} className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name={`discountType-${passenger.id}`}
-                value={type.code}
-                checked={passenger.discountType === type.code}
-                onChange={(e) => handleDiscountTypeChange(e.target.value, passenger.id, isCompanion)}
-                className="w-4 h-4 mr-2 cursor-pointer"
-                style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
-                disabled={passenger.isDependent}
-              />
-              {type.name}
-            </label>
-          ))}
+          {filteredTypes.map((type) => {
+            const isDriver = type.code === 'DRIVER';
+            const currentDriverCount = (formData.passenger.discountType === 'DRIVER' ? 1 : 0) +
+              formData.companions.filter(c => c.discountType === 'DRIVER').length;
+
+            const isDisabled = isDriver && passenger.discountType !== 'DRIVER' && currentDriverCount >= vehicleCount;
+
+            return (
+              <label key={type.id} className={`flex items-center ${isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                <input
+                  type="radio"
+                  name={`discountType-${passenger.id}`}
+                  value={type.code}
+                  checked={passenger.discountType === type.code}
+                  onChange={(e) => handleDiscountTypeChange(e.target.value, passenger.id, isCompanion)}
+                  className="w-4 h-4 mr-2 cursor-pointer"
+                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
+                  disabled={isDisabled || passenger.isDependent}
+                />
+                {type.name}
+              </label>
+            );
+          })}
         </div>
         {!passenger.discountType && errors[`${passenger.id}-discountType`] && (
           <p className="text-red-500 text-sm mt-1">{errors[`${passenger.id}-discountType`]}</p>
@@ -220,17 +303,20 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
 
     // Add passenger forms automatically if passengerCount > 1 and companions are empty
     if (passengerCount > 1 && companions.length === 0) {
-      const newPassengers = Array.from({ length: passengerCount - 1 }).map(() => ({
-        id: generateUniqueNumber(),
-        firstname: '',
-        lastname: '',
-        sex: 'Male',
-        dob: getDefaultDOB(),
-        nationality: 'Filipino',
-        accommodation: '',
-        address: '',
-        discountType: 'ADULT'
-      }));
+      const newPassengers = Array.from({ length: passengerCount - 1 }).map((_, index) => {
+        const expectedCompType = (index + 1) < vehicleCount ? 'DRIVER' : 'ADULT';
+        return {
+          id: generateUniqueNumber(),
+          firstname: '',
+          lastname: '',
+          sex: 'Male',
+          dob: getDefaultDOB(),
+          nationality: 'Filipino',
+          accommodation: '',
+          address: '',
+          discountType: expectedCompType as any
+        };
+      });
       setCompanions(newPassengers);
       setFormData({ passenger, companions: newPassengers });
     }
@@ -238,6 +324,9 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
 
   const handleAddCompanion = (dependent?: IDependent) => {
     setCompanions((passengers) => {
+      const nextIndex = passengers.length + 1;
+      const expectedCompType = nextIndex < vehicleCount ? 'DRIVER' : 'ADULT';
+
       const newCompanion: PassengerData = dependent ? {
         id: generateUniqueNumber(),
         firstname: dependent.first_name,
@@ -247,7 +336,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
         nationality: dependent.nationality || 'Filipino',
         accommodation: '',
         address: dependent.address || '',
-        discountType: 'ADULT',
+        discountType: expectedCompType as any,
         isDependent: true
       } : {
         id: generateUniqueNumber(),
@@ -258,7 +347,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
         nationality: 'Filipino',
         accommodation: '',
         address: '',
-        discountType: 'ADULT'
+        discountType: expectedCompType as any
       };
 
       const newCompanions = [...passengers, newCompanion];
@@ -298,7 +387,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
           <div className="flex justify-start items-start sm:items-center text-customText">
             <div className="flex items-center">
               <h2 className="text-lg font-semibold mr-2">Companion {index + 1} Details</h2>
-              <p className="text-sm">(Adult Ticket)</p>
+              <p className="text-sm">({passengerTypes.find(t => t.code === companion.discountType)?.name || 'Adult'} Ticket)</p>
               {companion.isDependent && (
                 <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-700 border-blue-200">
                   Dependent
@@ -587,7 +676,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
           <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center text-customText">
             <div className="flex items-center">
               <h2 className="text-base sm:text-lg font-semibold mr-2">Passenger Details</h2>
-              <p className="text-sm">(Adult Ticket)</p>
+              <p className="text-sm">({passengerTypes.find(t => t.code === passenger.discountType)?.name || 'Adult'} Ticket)</p>
             </div>
           </div>
           <div className="flex items-center">

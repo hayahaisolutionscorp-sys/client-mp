@@ -11,7 +11,7 @@ import PassengerTripCard from '@/components/booking/PassengerTripCard';
 import FareSummary from '@/components/booking/FareSummary';
 import { cacheItem, fetchItem, invalidateItem } from 'helpers/cache.helpers';
 import { useThemeSettings } from '@/hooks/theme-settings';
-import { createBooking, prepareBooking, calculatePricing, VehicleModelService } from '@/services';
+import { createBooking, prepareBooking, calculatePricing } from '@/services';
 import { getShip } from '@/services/shipping-line/ship.service';
 import { SuccessModal } from '@/components/ui/SuccessModal';
 import { useToast } from '@/hooks/use-toast';
@@ -22,12 +22,13 @@ import { PricingResponse } from '@/types/booking/pricing';
 interface Props {
   departureTripId?: string;
   returnTripId?: string;
+  commodityId?: string;
   initialDepartureTrips?: ITrip[];
   initialReturnTrips?: ITrip[];
   initialPrepareBookingData?: IPrepareBookingData;
 }
 
-export default function PaymentConfirmationDetails({ departureTripId, returnTripId, initialDepartureTrips, initialReturnTrips, initialPrepareBookingData }: Props) {
+export default function PaymentConfirmationDetails({ departureTripId, returnTripId, commodityId, initialDepartureTrips, initialReturnTrips, initialPrepareBookingData }: Props) {
   const router = useRouter();
 
   const [departureTrips, setDepartureTrips] = useState<ITrip[] | undefined>(initialDepartureTrips);
@@ -37,22 +38,11 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
   const [pricingData, setPricingData] = useState<PricingResponse['data'] | undefined>(undefined);
   const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [vehicleModels, setVehicleModels] = useState<IVehicleModel[]>([]);
   const { loggedInAccount } = useAuth();
   const { error: toastError } = useToast();
   const themeSettings = useThemeSettings();
 
-  useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const models = await VehicleModelService.getAllVehicleModels();
-        setVehicleModels(models || []);
-      } catch (error) {
-        console.error('Failed to fetch vehicle models:', error);
-      }
-    };
-    fetchModels();
-  }, []);
+
 
   useEffect(() => {
     window.scrollTo(0, 0); // Scrolls to the top of the page on component load
@@ -88,7 +78,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       const response = await prepareBooking({
         departure: departureTripId.split(','),
         return: returnTripId ? returnTripId.split(',') : [],
-      });
+      }, commodityId);
 
       if (response.data) {
         setPrepareBookingData(response.data);
@@ -176,7 +166,12 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           bookingTrips.push({
             tripId: trip.id,
             bookingTripPassengers: depPax,
-            bookingTripVehicles: index === 0 ? depVeh : [] // typically vehicles only load once, but depends on logic
+            bookingTripVehicles: index === 0 ? depVeh : [], // typically vehicles only load once, but depends on logic
+            bookingTripCargos: (rawData.cargoDetails || []).map((c: any) => ({
+              commodity: { id: c.commodityId, name: c.commodityName },
+              quantity: c.quantity || 1,
+              price: parseFloat(c.cbmRate) || 0
+            }))
           });
         });
       }
@@ -189,7 +184,12 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           bookingTrips.push({
             tripId: trip.id,
             bookingTripPassengers: depPax, // Assuming same passengers return
-            bookingTripVehicles: index === 0 ? retVeh : []
+            bookingTripVehicles: index === 0 ? retVeh : [],
+            bookingTripCargos: (rawData.cargoDetails || []).map((c: any) => ({
+              commodity: { id: c.commodityId, name: c.commodityName },
+              quantity: c.quantity || 1,
+              price: parseFloat(c.cbmRate) || 0
+            }))
           });
         });
       }
@@ -309,6 +309,19 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           });
         }
 
+        // 4. Cargo Mapping
+        const cargoDetails = rawData.cargoDetails || (rawData.bookingTrips?.[0]?.bookingTripCargos);
+        if (cargoDetails) {
+          cargoDetails.forEach((c: any, index: number) => {
+            state.cargo[`cargo_${index + 1}`] = {
+              commodityId: c.commodityId || c.commodity?.id || 0,
+              quantity: c.quantity || 0,
+              cbmRate: c.cbmRate || String(c.price) || '',
+              cargo_class: c.cargo_class || ''
+            };
+          });
+        }
+
         const pricing = await calculatePricing(state);
         setPricingData(pricing.data);
 
@@ -418,12 +431,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
     const allVehicleTripAssignments = allLegIds.map(id => ({ tripId: id }));
 
     const vehicles = (rawData.vehicleDepartureDetails || []).map((v: any) => {
-      // Try to find an existing model ID by name if not already provided
-      let matchedModelId = v.vehicleModelId;
-      if (!matchedModelId && v.modelName) {
-        const match = vehicleModels.find(m => m.model.toLowerCase() === v.modelName.toLowerCase());
-        if (match) matchedModelId = match.id;
-      }
+      const matchedModelId = v.vehicleModelId;
 
       return {
         plateNumber: v.plateNumber || v.plateNo || '',
@@ -448,7 +456,12 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       trips: tripsPayload,
       passengers,
       vehicles,
-      looseCargos: [],
+      looseCargos: (rawData.cargoDetails || []).map((c: any) => ({
+        commodityId: c.commodityId || 0,
+        quantity: c.quantity || 1,
+        description: c.commodityName || 'Cargo',
+        tripAssignments: allLegIds.map(id => ({ tripId: id }))
+      })),
       consignee: `${contactDetails.firstname} ${contactDetails.lastname}`,
       voucherCode: '',
       referralCode: '',
@@ -464,14 +477,17 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       const bookingId = result?.data || result?.id;
       if (bookingId) {
         router.push(`/booking/confirmed/${bookingId}`);
+        return true;
       } else {
         // This case might happen if result is empty but no error thrown
         toastError('Failed to create booking. Please try again.', { title: 'Booking Error' });
+        return false;
       }
     } catch (error: any) {
       console.error('Booking creation error:', error);
       const errorMessage = error.response?.data?.message || 'Something went wrong while creating your booking.';
       toastError(errorMessage, { title: 'Booking Error' });
+      return false;
     }
 
   }, [booking, prepareBookingData, departureTripId, returnTripId, router]);
@@ -519,6 +535,8 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
             departureTrips={departureTrips}
             returnTrips={returnTrips}
             booking={booking}
+            cargoDetails={(booking as any)?.cargoDetails}
+            commodityId={commodityId}
             pricingData={pricingData}
             prepareBookingData={prepareBookingData}
             isLoading={isPricingLoading}

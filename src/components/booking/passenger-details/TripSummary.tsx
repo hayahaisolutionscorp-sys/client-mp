@@ -34,9 +34,10 @@ interface Props {
   departureCabinId?: string;
   returnCabinName?: string;
   returnCabinId?: string;
+  commodityId?: string;
 }
 
-export default function TripSummary({ departureTripId, returnTripId, initialDepartureTrips, initialReturnTrips, prepareBookingData, departureCabinName, departureCabinId, returnCabinName, returnCabinId }: Props) {
+export default function TripSummary({ departureTripId, returnTripId, initialDepartureTrips, initialReturnTrips, prepareBookingData, departureCabinName, departureCabinId, returnCabinName, returnCabinId, commodityId }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -383,6 +384,8 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
           bookingState={bookingState}
           pricingData={pricingData}
           prepareBookingData={prepareBookingData}
+          cargoDetails={cargoDetails}
+          commodityId={commodityId}
           isLoading={isPricingLoading}
         />
       </div>

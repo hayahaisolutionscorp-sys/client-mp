@@ -29,10 +29,10 @@ export const useBranding = () => {
       .then((data) => {
         if (data) {
           setBranding(data);
-          
+
           // Exclude unnecessary fields before caching as requested
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { id, created_at, updated_at, ...cacheData } = data;
+          const { created_at, updated_at, ...cacheData } = data;
           localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(cacheData));
         }
       })

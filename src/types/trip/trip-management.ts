@@ -118,6 +118,7 @@ export interface SearchAvailableTrips {
   filterDepartureDateTime?: string;
   origin_code?: string;
   destination_code?: string;
+  commodity_id?: string;
 }
 
 export interface AvailableTrips {

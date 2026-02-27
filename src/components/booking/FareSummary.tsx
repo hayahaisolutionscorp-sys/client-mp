@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type FC } from 'react';
+import { useState, useEffect, useMemo, type FC } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { FiChevronDown, FiChevronUp, FiLoader } from 'react-icons/fi';
@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Dialog, DialogContent, DialogActions, DialogTitle } from '@/components/ui/Dialog';
 import { PassengerData } from '@/types/booking/passenger-data';
 import { VehicleData } from '@/types/booking/vehicle-data';
+import { CargoData } from '@/types/booking/cargo-data';
 import { ContactData } from '@/types/booking/contact-data';
 import { PaymentInitiationRequest, PaymentInitiationResponse } from '@/types/payment/payment';
 import { ITrip, IBooking } from '@/models';
@@ -37,8 +38,10 @@ interface FareSummaryProps {
   bookingState?: any;
   pricingData?: PricingResponse['data'];
   prepareBookingData?: any;
+  cargoDetails?: CargoData[];
+  commodityId?: string;
   isLoading?: boolean;
-  onPay?: () => Promise<void>;
+  onPay?: () => Promise<boolean | void>;
 }
 
 const ObscuredPrice = ({ price, isLoading }: { price: number; isLoading?: boolean }) => {
@@ -60,6 +63,8 @@ const FareSummary: FC<FareSummaryProps> = ({
   bookingState,
   pricingData,
   prepareBookingData,
+  cargoDetails,
+  commodityId,
   isLoading = false,
   onPay
 }) => {
@@ -117,6 +122,7 @@ const FareSummary: FC<FareSummaryProps> = ({
       contactDetails,
       vehicleDepartureDetails,
       vehicleReturnDetails,
+      cargoDetails,
       bookingState,
       prepareBookingData,
       pricingData
@@ -126,6 +132,7 @@ const FareSummary: FC<FareSummaryProps> = ({
     const queryParams = new URLSearchParams();
     if (departureTripIds) queryParams.append('departureTripId', departureTripIds);
     if (returnTripIds) queryParams.append('returnTripId', returnTripIds);
+    if (commodityId) queryParams.append('commodityId', commodityId);
 
     router.push(`/booking/payment-confirmation?${queryParams.toString()}`);
   };
@@ -134,7 +141,14 @@ const FareSummary: FC<FareSummaryProps> = ({
     setIsProcessing(true);
     try {
       if (onPay) {
-        await onPay();
+        const success = await onPay();
+        if (success) {
+          // If successful, we DON'T set processing to false to maintain the loading state
+          // until the page redirects.
+          return;
+        }
+        // If not successful, we reset it.
+        setIsProcessing(false);
         return;
       }
 
@@ -149,11 +163,11 @@ const FareSummary: FC<FareSummaryProps> = ({
       } else {
         setShowMessage(false);
         console.error('Payment initiation failed.');
+        setIsProcessing(false);
       }
     } catch (err) {
       setShowMessage(false);
       console.error('Payment initiation failed:', err);
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -164,122 +178,141 @@ const FareSummary: FC<FareSummaryProps> = ({
   };
 
   // --- Process Pricing Data ---
-  let effectivePricingData = pricingData;
+  const {
+    effectivePricingData,
+    depTripsPricing,
+    retTripsPricing,
+    depSubtotal,
+    retSubtotal,
+    grandTotal
+  } = useMemo(() => {
+    let effective = pricingData;
 
-  // If no pricingData (breakdown) is provided but we have a booking,
-  // derive the breakdown from the booking data.
-  if (!effectivePricingData && booking) {
-    const trips = booking.bookingTrips || [];
-    const derivedTrips = trips.map((trip, index) => {
-      const passengerPrices = (trip.bookingTripPassengers || []).map((p, pIndex) => ({
-        index: pIndex,
-        tripId: String(trip.tripId),
-        routeCode: '', // Not strictly needed for display here
-        passengerType: p.discountType || 'ADULT',
-        accommodationCode: p.cabin?.name || '',
-        baseFare: p.totalPrice || 0,
-        currency: 'PHP'
-      }));
-
-      const cargoPrices = [
-        ...(trip.bookingTripVehicles || []).map((v, vIndex) => ({
-          index: vIndex,
+    // If no pricingData (breakdown) is provided but we have a booking,
+    // derive the breakdown from the booking data.
+    if (!effective && booking) {
+      const trips = booking.bookingTrips || [];
+      const derivedTrips = trips.map((trip, index) => {
+        const passengerPrices = (trip.bookingTripPassengers || []).map((p, pIndex) => ({
+          index: pIndex,
           tripId: String(trip.tripId),
-          routeCode: '',
-          cargoType: 'VEHICLE',
-          cargoClassCode: (v.vehicle as any)?.vehicleType?.name || v.vehicle?.vehicle_model?.vehicle_type?.name || 'Vehicle',
-          baseFare: v.totalPrice || 0,
-          currency: 'PHP',
-          rateUnit: 'unit'
-        })),
-        ...((trip as any).bookingTripCargos || []).map((c: any, cIndex: number) => ({
-          index: cIndex,
-          tripId: String(trip.tripId),
-          routeCode: '',
-          cargoType: 'CARGO',
-          cargoClassCode: c.commodity?.name || 'Cargo',
-          baseFare: (c.price || 0) * (c.quantity || 1),
-          currency: 'PHP',
-          rateUnit: 'unit'
-        }))
-      ];
-
-      const charges = (booking.bookingPaymentItems || [])
-        .filter(item => item.tripId === trip.tripId && (item.type as any) === 'SERVICE_CHARGE') // example filter
-        .map(item => ({
-          ruleId: String(item.id),
-          chargeCode: '',
-          chargeName: item.description,
-          category: 'SERVICE',
-          amount: item.price,
-          isInclusive: false,
-          calcType: 'FIXED',
-          basis: 'UNIT',
-          showOnReceipt: true
+          routeCode: '', // Not strictly needed for display here
+          passengerType: p.discountType || 'ADULT',
+          accommodationCode: p.cabin?.name || '',
+          baseFare: p.totalPrice || 0,
+          currency: 'PHP'
         }));
 
-      const subtotal = passengerPrices.reduce((sum, p) => sum + p.baseFare, 0) +
-        cargoPrices.reduce((sum, c) => sum + c.baseFare, 0) +
-        charges.reduce((sum, c) => sum + c.amount, 0);
+        const cargoPrices = [
+          ...(trip.bookingTripVehicles || []).map((v, vIndex) => ({
+            index: vIndex,
+            tripId: String(trip.tripId),
+            routeCode: '',
+            cargoType: 'VEHICLE',
+            cargoClassCode: (v.vehicle as any)?.vehicleType?.name || v.vehicle?.vehicle_model?.vehicle_type?.name || 'Vehicle',
+            baseFare: v.totalPrice || 0,
+            currency: 'PHP',
+            rateUnit: 'unit'
+          })),
+          ...((trip as any).bookingTripCargos || []).map((c: any, cIndex: number) => ({
+            index: cIndex,
+            tripId: String(trip.tripId),
+            routeCode: '',
+            cargoType: 'CARGO',
+            cargoClassCode: c.commodity?.name || 'Cargo',
+            baseFare: (c.price || 0) * (c.quantity || 1),
+            currency: 'PHP',
+            rateUnit: 'unit'
+          }))
+        ];
 
-      return {
-        tripId: String(trip.tripId),
-        routeCode: '',
-        passengerPrices,
-        cargoPrices,
-        baseFare: {
-          passengers: passengerPrices.reduce((sum, p) => sum + p.baseFare, 0),
-          cargo: cargoPrices.reduce((sum, c) => sum + c.baseFare, 0),
-          total: passengerPrices.reduce((sum, p) => sum + p.baseFare, 0) + cargoPrices.reduce((sum, c) => sum + c.baseFare, 0)
-        },
-        charges,
-        chargesTotal: charges.reduce((sum, c) => sum + c.amount, 0),
-        taxesTotal: 0,
-        subtotal,
-        grandTotal: subtotal
-      };
-    });
+        const charges = (booking.bookingPaymentItems || [])
+          .filter(item => item.tripId === trip.tripId && (item.type as any) === 'SERVICE_CHARGE') // example filter
+          .map(item => ({
+            ruleId: String(item.id),
+            chargeCode: '',
+            chargeName: item.description,
+            category: 'SERVICE',
+            amount: item.price,
+            isInclusive: false,
+            calcType: 'FIXED',
+            basis: 'UNIT',
+            showOnReceipt: true
+          }));
 
-    effectivePricingData = {
-      trips: derivedTrips,
-      grandTotal: booking.totalPrice
-    } as any;
-  }
+        const subtotal = passengerPrices.reduce((sum, p) => sum + p.baseFare, 0) +
+          cargoPrices.reduce((sum, c) => sum + c.baseFare, 0) +
+          charges.reduce((sum, c) => sum + c.amount, 0);
 
-  let depTripsPricing: any[] = [];
-  let retTripsPricing: any[] = [];
+        return {
+          tripId: String(trip.tripId),
+          routeCode: '',
+          passengerPrices,
+          cargoPrices,
+          baseFare: {
+            passengers: passengerPrices.reduce((sum, p) => sum + p.baseFare, 0),
+            cargo: cargoPrices.reduce((sum, c) => sum + c.baseFare, 0),
+            total: passengerPrices.reduce((sum, p) => sum + p.baseFare, 0) + cargoPrices.reduce((sum, c) => sum + c.baseFare, 0)
+          },
+          charges,
+          chargesTotal: charges.reduce((sum, c) => sum + c.amount, 0),
+          taxesTotal: 0,
+          subtotal,
+          grandTotal: subtotal
+        };
+      });
 
-  if (prepareBookingData) {
-    const depIds = prepareBookingData.departure?.map((t: any) => String(t.id)) || [];
-    const retIds = prepareBookingData.return?.map((t: any) => String(t.id)) || [];
-
-    const depRouteCodes = prepareBookingData.departure?.map((t: any) => String(t.route_code)) || [];
-    const retRouteCodes = prepareBookingData.return?.map((t: any) => String(t.route_code)) || [];
-
-    depTripsPricing = (effectivePricingData?.trips || []).filter((t: any) =>
-      depIds.includes(String(t.tripId)) || depRouteCodes.includes(String(t.routeCode))
-    );
-    retTripsPricing = (effectivePricingData?.trips || []).filter((t: any) =>
-      retIds.includes(String(t.tripId)) || retRouteCodes.includes(String(t.routeCode))
-    );
-  } else if (booking) {
-    if (booking.bookingType === 'Single') {
-      depTripsPricing = effectivePricingData?.trips || [];
-    } else if ((booking.bookingType as any) === 'Round Trip' || booking.bookingType === 'Round') {
-      const half = Math.ceil((effectivePricingData?.trips || []).length / 2);
-      depTripsPricing = (effectivePricingData?.trips || []).slice(0, half);
-      retTripsPricing = (effectivePricingData?.trips || []).slice(half);
-    } else {
-      depTripsPricing = effectivePricingData?.trips?.[0] ? [effectivePricingData.trips[0]] : [];
-      retTripsPricing = effectivePricingData?.trips?.[1] ? [effectivePricingData.trips[1]] : [];
+      effective = {
+        trips: derivedTrips,
+        grandTotal: booking.totalPrice
+      } as any;
     }
-  } else {
-    depTripsPricing = effectivePricingData?.trips?.[0] ? [effectivePricingData.trips[0]] : [];
-    retTripsPricing = effectivePricingData?.trips?.[1] ? [effectivePricingData.trips[1]] : [];
-  }
 
-  const depSubtotal = depTripsPricing.reduce((sum, t) => sum + (t.subtotal || 0), 0);
-  const retSubtotal = retTripsPricing.reduce((sum, t) => sum + (t.subtotal || 0), 0);
+    let dep: any[] = [];
+    let ret: any[] = [];
+
+    if (prepareBookingData) {
+      const depIds = prepareBookingData.departure?.map((t: any) => String(t.id)) || [];
+      const retIds = prepareBookingData.return?.map((t: any) => String(t.id)) || [];
+
+      const depRouteCodes = prepareBookingData.departure?.map((t: any) => String(t.route_code)) || [];
+      const retRouteCodes = prepareBookingData.return?.map((t: any) => String(t.route_code)) || [];
+
+      dep = (effective?.trips || []).filter((t: any) =>
+        depIds.includes(String(t.tripId)) || depRouteCodes.includes(String(t.routeCode))
+      );
+      ret = (effective?.trips || []).filter((t: any) =>
+        retIds.includes(String(t.tripId)) || retRouteCodes.includes(String(t.routeCode))
+      );
+    } else if (booking) {
+      if (booking.bookingType === 'Single') {
+        dep = effective?.trips || [];
+      } else if ((booking.bookingType as any) === 'Round Trip' || booking.bookingType === 'Round') {
+        const half = Math.ceil((effective?.trips || []).length / 2);
+        dep = (effective?.trips || []).slice(0, half);
+        ret = (effective?.trips || []).slice(half);
+      } else {
+        dep = effective?.trips?.[0] ? [effective.trips[0]] : [];
+        ret = effective?.trips?.[1] ? [effective.trips[1]] : [];
+      }
+    } else {
+      dep = effective?.trips?.[0] ? [effective.trips[0]] : [];
+      ret = effective?.trips?.[1] ? [effective.trips[1]] : [];
+    }
+
+    const depSub = dep.reduce((sum, t) => sum + (t.subtotal || 0), 0);
+    const retSub = ret.reduce((sum, t) => sum + (t.subtotal || 0), 0);
+    const gTotal = effective?.grandTotal || booking?.totalPrice || 0;
+
+    return {
+      effectivePricingData: effective,
+      depTripsPricing: dep,
+      retTripsPricing: ret,
+      depSubtotal: depSub,
+      retSubtotal: retSub,
+      grandTotal: gTotal
+    };
+  }, [pricingData, booking, prepareBookingData]);
 
   return (
     <div className={`bg-white border shadow rounded-lg w-full min-w-[300px] sm:min-w-[400px] sm:max-w-[500px] h-auto p-4 sm:p-6 mb-10 ${pathname === '/booking/confirmed' ? 'border-2 border-green-500' : ''}`}>
@@ -498,12 +531,12 @@ const FareSummary: FC<FareSummaryProps> = ({
                 Amount Paid
                 <FaCheckCircle className="w-6 h-6 text-green-500" />
               </span>
-              <span className="text-green-500">{formatCurrency(effectivePricingData?.grandTotal || booking?.totalPrice || 0)}</span>
+              <span className="text-green-500">{formatCurrency(grandTotal)}</span>
             </>
           ) : (
             <>
               <span>Total Amount</span>
-              <span style={{ color: themeSettings?.primaryColor || '#23abff' }}>{formatCurrency(effectivePricingData?.grandTotal || booking?.totalPrice || 0)}</span>
+              <span style={{ color: themeSettings?.primaryColor || '#23abff' }}>{formatCurrency(grandTotal)}</span>
             </>
           )}
         </div>
@@ -547,7 +580,7 @@ const FareSummary: FC<FareSummaryProps> = ({
                 </label>
               </div>
               <Button variant="default" className="mt-6 w-full" onClick={() => setIsModalOpen(true)} disabled={isProcessing || !agreedToTerms}>
-                {onPay ? `Pay ${formatCurrency(effectivePricingData?.grandTotal || booking?.totalPrice || 0)}` : 'Pay via Paymongo'}
+                {onPay ? `Pay ${formatCurrency(grandTotal)}` : 'Pay via Paymongo'}
                 {isProcessing && <FiLoader className="ml-1 animate-spin" />}
               </Button>
             </>

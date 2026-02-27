@@ -34,6 +34,7 @@ export async function getAvailableTrips(
     if (searchQuery.destination_code) params.append('destination_code', searchQuery.destination_code);
     if (searchQuery.passengerCount !== undefined) params.append('passenger_count', searchQuery.passengerCount.toString());
     if (searchQuery.vehicleCount !== undefined) params.append('vehicle_count', searchQuery.vehicleCount.toString());
+    if (searchQuery.commodity_id) params.append('commodity_id', searchQuery.commodity_id);
     if (searchQuery.shippingLineIds) params.append('shippingLineIds', searchQuery.shippingLineIds);
     if (searchQuery.departureDate) {
       const formattedDate = toPhilippinesTime(searchQuery.departureDate, 'YYYY-MM-DD');
