@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3003",
     "clean": "rimraf .next",
-    "build": "npm run clean && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },

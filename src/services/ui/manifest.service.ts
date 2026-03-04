@@ -1,4 +1,5 @@
 import seoData from '@/data/seo.json';
+import { IBrandingConfig } from '@/models/branding.model';
 
 export interface ManifestIcon {
     src: string;
@@ -29,18 +30,38 @@ export interface ManifestData {
 }
 
 export const ManifestService = {
-    getManifest: (): ManifestData => {
+    getManifest: (brandingConfig?: IBrandingConfig | null): ManifestData => {
         const { manifest } = seoData.global;
+
+        const dynamicName = brandingConfig?.brand_name?.trim();
+        const dynamicThemeColor = brandingConfig?.colors?.primaryColor || brandingConfig?.colors?.primary;
+        const dynamicFavicon = brandingConfig?.favicon_url?.trim();
+
+        const dynamicIcons: ManifestIcon[] = dynamicFavicon
+            ? [
+                {
+                    src: dynamicFavicon,
+                    sizes: 'any',
+                    type: dynamicFavicon.endsWith('.ico') ? 'image/x-icon' : 'image/png',
+                    purpose: 'any'
+                }
+            ]
+            : [];
+
+        const mergedIcons = dynamicIcons.length > 0
+            ? [...dynamicIcons, ...(manifest.icons as ManifestIcon[])]
+            : (manifest.icons as ManifestIcon[]);
+
         return {
-            name: manifest.name,
-            short_name: manifest.short_name,
+            name: dynamicName || manifest.name,
+            short_name: dynamicName || manifest.short_name,
             description: seoData.global.description,
             start_url: manifest.start_url,
             id: manifest.id,
             display: manifest.display as any,
             background_color: manifest.background_color,
-            theme_color: manifest.theme_color,
-            icons: manifest.icons as ManifestIcon[],
+            theme_color: dynamicThemeColor || manifest.theme_color,
+            icons: mergedIcons,
             screenshots: manifest.screenshots as ManifestScreenshot[]
         };
     }

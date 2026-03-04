@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { IS_CLIENT } from "@/services/config";
 
 interface BeforeInstallPromptEvent extends Event {
     readonly platforms: string[];
@@ -49,13 +48,6 @@ export const usePWAInstall = () => {
         };
 
         checkDevice();
-
-        // Register Service Worker manually as a fallback/reinforcement
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("/sw.js")
-                .then((reg) => console.log("SW registered:", reg.scope))
-                .catch((err) => console.error("SW reg failed:", err));
-        }
 
         const handleBeforeInstallPrompt = (e: Event) => {
             // Prevent the mini-infobar from appearing on mobile

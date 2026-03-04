@@ -1,0 +1,22 @@
+
+> hayahai-web-app@0.1.0 build D:\Coding Projects\ayahay-v2\ayahay-v2-marketplace
+> npm run clean && next build
+
+
+> hayahai-web-app@0.1.0 clean
+> rimraf .next
+
+  ▲ Next.js 15.0.1
+  - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+> [PWA] Compile server
+> [PWA] Compile server
+> [PWA] Compile client (static)
+> [PWA] Auto register service worker with: D:\Coding Projects\ayahay-v2\ayahay-v2-marketplace\node_modules\.pnpm\next-pwa@5.6.0_@babel+core@_d695ef7f3e89e730c5aaaaafcc573da8\node_modules\next-pwa\register.js
+> [PWA] Service worker: D:\Coding Projects\ayahay-v2\ayahay-v2-marketplace\public\sw.js
+> [PWA]   url: /sw.js
+> [PWA]   scope: /
+Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme

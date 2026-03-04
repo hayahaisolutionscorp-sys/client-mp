@@ -1,8 +1,10 @@
 import { MetadataRoute } from 'next';
 import { ManifestService } from '@/services/ui/manifest.service';
+import { getBrandingConfig } from '@/services/ui/branding.service';
 
-export default function manifest(): MetadataRoute.Manifest {
-    const data = ManifestService.getManifest();
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+    const brandingConfig = await getBrandingConfig();
+    const data = ManifestService.getManifest(brandingConfig);
 
     return {
         name: data.name,
