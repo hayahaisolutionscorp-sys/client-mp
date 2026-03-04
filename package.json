@@ -13,7 +13,7 @@
     "@ai-sdk/openai": "^3.0.21",
     "@ai-sdk/react": "^3.0.61",
     "@hookform/resolvers": "^5.2.2",
-    "@oltek/hayahai-sdk": "git+https://ayahay@dev.azure.com/ayahay/Ayahay%20V2/_git/hayahai-ai-sdk#v1.2.0",
+    "@oltek/hayahai-sdk": "git+https://github.com/MrJim-Dev/hayahai-ai-sdk.git",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
