@@ -14,13 +14,23 @@ interface BeforeInstallPromptEvent extends Event {
 export const usePWAInstall = () => {
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [isVisible, setIsVisible] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-    const [isCompatible, setIsCompatible] = useState(false);
+    const [isMobileView, setIsMobileView] = useState(false);
+
+    const isInstalled = () => {
+        const standaloneMatch = window.matchMedia("(display-mode: standalone)").matches;
+        const iosStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+        const androidTwa = document.referrer.includes("android-app://");
+        const installedFlag = localStorage.getItem("pwa_installed") === "true";
+
+        return standaloneMatch || iosStandalone || androidTwa || installedFlag;
+    };
 
     useEffect(() => {
         const checkDevice = () => {
             const ua = navigator.userAgent;
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+            const isMobileScreen = window.matchMedia("(max-width: 1024px)").matches;
+            const shouldTargetMobile = isMobileDevice || isMobileScreen;
 
             // Simpler, more inclusive Chromium check - includes Edge (Edg) and Opera (OPR)
             const isChromiumBrowser = /Chrome|Chromium|Edg|OPR|Opera/i.test(ua);
@@ -28,26 +38,22 @@ export const usePWAInstall = () => {
             const isSafari = /Safari/i.test(ua) && !isChromiumBrowser;
             const isInstallableIOS = isIOS && isSafari;
 
-            setIsMobile(isMobileDevice);
-            setIsCompatible(isChromiumBrowser || isInstallableIOS);
+            setIsMobileView(shouldTargetMobile);
 
-            // iOS Safari doesn't support beforeinstallprompt, so we show the banner manually
-            if (isInstallableIOS) {
-                const dismissedAt = localStorage.getItem("pwa_banner_dismissed_at");
-                if (dismissedAt) {
-                    const lastDismissed = parseInt(dismissedAt, 10);
-                    const now = Date.now();
-                    const twentyFourHours = 24 * 60 * 60 * 1000;
-                    if (now - lastDismissed > twentyFourHours) {
-                        setIsVisible(true);
-                    }
-                } else {
-                    setIsVisible(true);
-                }
+            if (!shouldTargetMobile || isInstalled()) {
+                setIsVisible(false);
+                return;
             }
+
+            const sessionDismissed = sessionStorage.getItem("pwa_banner_dismissed") === "true";
+            setIsVisible(!sessionDismissed);
         };
 
         checkDevice();
+
+        const mediaQuery = window.matchMedia("(max-width: 1024px)");
+        const handleViewportChange = () => checkDevice();
+        mediaQuery.addEventListener("change", handleViewportChange);
 
         const handleBeforeInstallPrompt = (e: Event) => {
             // Prevent the mini-infobar from appearing on mobile
@@ -55,25 +61,30 @@ export const usePWAInstall = () => {
             // Stash the event so it can be triggered later.
             setDeferredPrompt(e as BeforeInstallPromptEvent);
 
-            // Check if user has already dismissed the banner and if it has expired
-            const dismissedAt = localStorage.getItem("pwa_banner_dismissed_at");
-            if (dismissedAt) {
-                const lastDismissed = parseInt(dismissedAt, 10);
-                const now = Date.now();
-                const twentyFourHours = 24 * 60 * 60 * 1000;
+            const sessionDismissed = sessionStorage.getItem("pwa_banner_dismissed") === "true";
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isMobileScreen = window.matchMedia("(max-width: 1024px)").matches;
+            const shouldTargetMobile = isMobileDevice || isMobileScreen;
 
-                if (now - lastDismissed > twentyFourHours) {
-                    setIsVisible(true);
-                }
-            } else {
+            if (shouldTargetMobile && !isInstalled() && !sessionDismissed) {
                 setIsVisible(true);
             }
         };
 
+        const handleAppInstalled = () => {
+            localStorage.setItem("pwa_installed", "true");
+            sessionStorage.removeItem("pwa_banner_dismissed");
+            setDeferredPrompt(null);
+            setIsVisible(false);
+        };
+
         window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+        window.addEventListener("appinstalled", handleAppInstalled);
 
         return () => {
             window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+            window.removeEventListener("appinstalled", handleAppInstalled);
+            mediaQuery.removeEventListener("change", handleViewportChange);
         };
     }, []);
 
@@ -97,6 +108,8 @@ export const usePWAInstall = () => {
 
         if (outcome === "accepted") {
             console.log("User accepted the PWA install");
+            localStorage.setItem("pwa_installed", "true");
+            sessionStorage.removeItem("pwa_banner_dismissed");
         } else {
             console.log("User dismissed the PWA install");
         }
@@ -108,11 +121,11 @@ export const usePWAInstall = () => {
 
     const handleDismiss = () => {
         setIsVisible(false);
-        localStorage.setItem("pwa_banner_dismissed_at", Date.now().toString());
+        sessionStorage.setItem("pwa_banner_dismissed", "true");
     };
 
     return {
-        isVisible: isVisible && isCompatible, // Renamed from isChromium
+        isVisible: isVisible && isMobileView,
         handleInstallClick,
         handleDismiss,
     };
