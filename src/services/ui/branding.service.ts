@@ -10,6 +10,33 @@ export interface BrandingConfigResult {
     source: BrandingSource;
 }
 
+const appendVersionParam = (url: string, version?: string): string => {
+    if (!url || !version) return url;
+
+    try {
+        const parsed = new URL(url);
+        parsed.searchParams.set('v', version);
+        return parsed.toString();
+    } catch {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}v=${encodeURIComponent(version)}`;
+    }
+};
+
+const withBrandingCacheBuster = (config: IBrandingConfig): IBrandingConfig => {
+    const version = config.updated_at || config.created_at || '';
+
+    return {
+        ...config,
+        favicon_url: appendVersionParam(config.favicon_url, version),
+        logo: {
+            ...config.logo,
+            dark: appendVersionParam(config.logo?.dark, version),
+            light: appendVersionParam(config.logo?.light, version),
+        },
+    };
+};
+
 export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<BrandingConfigResult> => {
     if (IS_BUILD_TIME) {
         return {
@@ -19,8 +46,13 @@ export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<B
     }
 
     try {
-        const res = await fetch(`${BRANDING_API}`, {
+        const requestInit: RequestInit = {
+            cache: 'no-store',
             ...init,
+        };
+
+        const res = await fetch(`${BRANDING_API}`, {
+            ...requestInit,
             // next: { tags: ['branding'], revalidate: 3600 }
         });
 
@@ -28,7 +60,7 @@ export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<B
             const response: IBrandingResponse = await res.json();
             if (response.data) {
                 return {
-                    data: response.data,
+                    data: withBrandingCacheBuster(response.data),
                     source: 'api'
                 };
             }

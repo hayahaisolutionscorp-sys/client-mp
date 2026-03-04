@@ -3,20 +3,18 @@ import { getBrandingConfig } from "@/services/ui/branding.service";
 import { IBrandingConfig } from "@/models/branding.model";
 
 const BRANDING_CACHE_KEY = "branding_config";
+const BRANDING_CACHE_TS_KEY = "branding_config_ts";
 
 export const useBranding = () => {
   const [branding, setBranding] = useState<IBrandingConfig | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    // Try to get cached branding first
+    // Try to get cached branding first for fast initial paint
     const cached = localStorage.getItem(BRANDING_CACHE_KEY);
     if (cached) {
       try {
         setBranding(JSON.parse(cached));
-        setIsHydrated(true);
-        // Avoid redundant fetch if cached
-        return;
       } catch (e) {
         console.error("Failed to parse cached branding:", e);
       }
@@ -24,16 +22,13 @@ export const useBranding = () => {
 
     setIsHydrated(true);
 
-    // Fetch fresh branding only if not cached
+    // Always fetch fresh branding so whitelabel updates are reflected
     getBrandingConfig()
       .then((data) => {
         if (data) {
           setBranding(data);
-
-          // Exclude unnecessary fields before caching as requested
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { created_at, updated_at, ...cacheData } = data;
-          localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(cacheData));
+          localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(data));
+          localStorage.setItem(BRANDING_CACHE_TS_KEY, String(Date.now()));
         }
       })
       .catch((error) => console.error("Error fetching branding settings:", error));
