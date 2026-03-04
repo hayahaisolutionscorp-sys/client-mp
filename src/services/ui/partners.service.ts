@@ -25,12 +25,27 @@ export const getPartners = async (): Promise<IPartnersResponse> => {
         };
     }
 
-    const response = await fetch(OUR_PARTNERS_API, {
-        // next: { tags: ['partners'], revalidate: 3600 }
-    });
+    try {
+        const response = await fetch(OUR_PARTNERS_API, {
+            // next: { tags: ['partners'], revalidate: 3600 }
+        });
 
-    if (!response.ok) {
-        throw new Error("Failed to fetch Partners data");
+        if (response.ok) {
+            return response.json();
+        }
+
+        return {
+            message: 'Fallback to local data due to fetch error.',
+            data: partnersData as IPartner[]
+        };
+    } catch (error) {
+        if (typeof window === 'undefined') {
+            console.error('Error fetching Partners data:', error);
+        }
+
+        return {
+            message: 'Fallback to local data due to fetch error.',
+            data: partnersData as IPartner[]
+        };
     }
-    return response.json();
 };

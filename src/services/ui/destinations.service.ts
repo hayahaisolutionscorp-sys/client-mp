@@ -34,11 +34,11 @@ export async function getDestinations(): Promise<IDestination[]> {
             return data;
         }
 
-        return [];
+        return destinationsData as IDestination[];
     } catch (e) {
         if (typeof window === 'undefined') {
             console.error('Error fetching destinations:', e);
         }
-        return [];
+        return destinationsData as IDestination[];
     }
 }

@@ -19,11 +19,11 @@ export async function getHeadersSections(): Promise<IHeaderSection | undefined> 
       return data;
     }
 
-    return undefined;
+    return headerSectionsData[0] as IHeaderSection | undefined;
   } catch (e) {
     if (typeof window === 'undefined') {
       console.error('Error fetching header sections:', e);
     }
-    return undefined;
+    return headerSectionsData[0] as IHeaderSection | undefined;
   }
 }

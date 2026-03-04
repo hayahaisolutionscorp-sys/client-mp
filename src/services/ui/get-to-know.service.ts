@@ -61,13 +61,23 @@ export const getGetToKnowMission = async (): Promise<IGetToKnowResponse> => {
         };
     }
 
-    const response = await fetch(GET_TO_KNOW_MISSION_API, {
-        // next: { tags: ['get-to-know-mission'], revalidate: 3600 }
-    });
-    if (!response.ok) {
-        throw new Error("Failed to fetch Get To Know Mission data");
+    try {
+        const response = await fetch(GET_TO_KNOW_MISSION_API, {
+            // next: { tags: ['get-to-know-mission'], revalidate: 3600 }
+        });
+        if (!response.ok) {
+            throw new Error("Failed to fetch Get To Know Mission data");
+        }
+        return response.json();
+    } catch (error) {
+        if (typeof window === 'undefined') {
+            console.error('Error fetching Get To Know Mission data:', error);
+        }
+        return {
+            message: 'Fallback to local data due to fetch error.',
+            data: getToKnowMissionData as IGetToKnowData
+        };
     }
-    return response.json();
 };
 
 export const getGetToKnowVision = async (): Promise<IGetToKnowResponse> => {

@@ -37,11 +37,11 @@ export async function getPromos(): Promise<IPromo[]> {
             return data;
         }
 
-        return [];
+        return promosData as IPromo[];
     } catch (e) {
         if (typeof window === 'undefined') {
             console.error('Error fetching promos:', e);
         }
-        return [];
+        return promosData as IPromo[];
     }
 }

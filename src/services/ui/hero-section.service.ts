@@ -33,11 +33,11 @@ export async function getHeroSections(): Promise<IHeroSection | undefined> {
       return data;
     }
 
-    return undefined;
+    return heroSectionData as IHeroSection;
   } catch (e) {
     if (typeof window === 'undefined') {
       console.error('Error fetching hero sections:', e);
     }
-    return undefined;
+    return heroSectionData as IHeroSection;
   }
 }

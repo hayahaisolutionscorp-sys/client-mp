@@ -19,11 +19,11 @@ export async function getFooterSections(): Promise<IFooterSection | undefined> {
       return data;
     }
 
-    return undefined;
+    return footerSectionsData as IFooterSection;
   } catch (e) {
     if (typeof window === 'undefined') {
       console.error('Error fetching footer sections:', e);
     }
-    return undefined;
+    return footerSectionsData as IFooterSection;
   }
 }
