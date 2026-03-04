@@ -90,13 +90,21 @@ export const usePWAInstall = () => {
 
     const handleInstallClick = async () => {
         if (!deferredPrompt) {
-            // If No deferredPrompt but on iOS Safari, we can't trigger native prompt
-            // Maybe show a hint/alert for iOS users
             const ua = navigator.userAgent;
             const isIOS = /iPhone|iPad|iPod/i.test(ua);
+            const isAndroid = /Android/i.test(ua);
+
             if (isIOS) {
                 alert("To install: Tap the 'Share' icon and then 'Add to Home Screen'.");
+                return;
             }
+
+            if (isAndroid) {
+                alert("To install: Open browser menu (⋮) then tap 'Install app' or 'Add to Home screen'.");
+                return;
+            }
+
+            alert("Install option is not available yet on this browser. Try Chrome or Safari on mobile.");
             return;
         }
 
