@@ -58,6 +58,16 @@ export function RegisterForm() {
       placeholder: formatStr.replace(/\./g, "0").replace(/\\/g, "") || "917 123 4567"
     };
   }, []);
+  
+  const [phoneState, setPhoneState] = useState({
+    code: defaultCountryData.iso2,
+    digits: "",
+    config: {
+      maxLength: defaultCountryData.maxLength,
+      placeholder: defaultCountryData.placeholder,
+      dialCode: defaultCountryData.dialCode
+    }
+  });
 
   const [formData, setFormData] = useState<Omit<IRegisterForm, 'email' | 'password' | 'confirm' | 'agreement' | 'emailConsent'>>({
     firstName: "",
@@ -69,14 +79,6 @@ export function RegisterForm() {
     address: "",
     nationality: "",
     phone: "",
-    countryCode: defaultCountryData.iso2,
-  });
-  const [phoneDigits, setPhoneDigits] = useState("");
-
-  const [phoneConfig, setPhoneConfig] = useState({
-    maxLength: defaultCountryData.maxLength,
-    placeholder: defaultCountryData.placeholder,
-    dialCode: defaultCountryData.dialCode
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -88,9 +90,9 @@ export function RegisterForm() {
 
   const handlePhoneChange = (value: string) => {
     const digitsOnly = value.replace(/\D/g, '');
-    const limitedDigits = digitsOnly.slice(0, phoneConfig.maxLength);
-    setPhoneDigits(limitedDigits);
-    setFormData(prev => ({ ...prev, phone: '+' + phoneConfig.dialCode + limitedDigits }));
+    const limitedDigits = digitsOnly.slice(0, phoneState.config.maxLength);
+    setPhoneState(prev => ({ ...prev, digits: limitedDigits }));
+    setFormData(prev => ({ ...prev, phone: '+' + phoneState.config.dialCode + limitedDigits }));
   };
 
   const setBirthday: Dispatch<SetStateAction<Date | undefined>> = (value) => {
@@ -106,8 +108,8 @@ export function RegisterForm() {
     if (!formData.lastName.trim()) errors.lastName = "Last Name is required";
     if (!formData.address.trim()) errors.address = "Address is required";
     if (!formData.nationality.trim()) errors.nationality = "Nationality is required";
-    if (!phoneDigits || phoneDigits.length < phoneConfig.maxLength) {
-      errors.phone = `Phone number must be ${phoneConfig.maxLength} digits`;
+    if (!phoneState.digits || phoneState.digits.length < phoneState.config.maxLength) {
+      errors.phone = `Phone number must be ${phoneState.config.maxLength} digits`;
     }
 
     const birthDate = new Date(formData.birthday);
@@ -219,26 +221,28 @@ export function RegisterForm() {
           <div className="text-sm font-medium">Phone Number <span className="text-red-500">*</span></div>
           <div className="flex gap-2">
             <CountryCodeSelector 
-              value={formData.countryCode}
+              value={phoneState.code}
               onChange={(country: CountryData) => {
-                const truncated = phoneDigits.slice(0, country.maxLength);
-                setPhoneDigits(truncated);
+                const truncated = phoneState.digits.slice(0, country.maxLength);
+                setPhoneState({
+                  code: country.iso2,
+                  digits: truncated,
+                  config: {
+                    maxLength: country.maxLength,
+                    placeholder: country.placeholder,
+                    dialCode: country.dialCode
+                  }
+                });
                 setFormData(prev => ({ 
                   ...prev, 
-                  countryCode: country.iso2, 
                   phone: '+' + country.dialCode + truncated 
                 }));
-                setPhoneConfig({
-                  maxLength: country.maxLength,
-                  placeholder: country.placeholder,
-                  dialCode: country.dialCode
-                });
               }}
             />
             <Input 
               name="phone" 
-              placeholder={phoneConfig.placeholder} 
-              value={phoneDigits}
+              placeholder={phoneState.config.placeholder} 
+              value={phoneState.digits}
               onChange={(e) => handlePhoneChange(e.target.value)} 
               required 
               type="tel"

@@ -49,7 +49,10 @@ const NationalitySelector = ({
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(externalValue ?? defaultValue);
   const themeSettings = useThemeSettings();
-  const primaryColor = hexToRgb(themeSettings?.primary || "#8C1F21");
+  
+  const primaryColorRgb = React.useMemo(() => {
+    return hexToRgb(themeSettings?.primary || "#8C1F21");
+  }, [themeSettings?.primary]);
 
   React.useEffect(() => {
     if (externalValue !== undefined) setValue(externalValue);
@@ -68,14 +71,14 @@ const NationalitySelector = ({
             "h-10 w-full justify-between rounded-md border border-input bg-background px-3 py-2 font-normal text-customText text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
             className
           )}
-          style={{ "--primary-color": primaryColor } as React.CSSProperties}
+          style={{ "--primary-color": primaryColorRgb } as React.CSSProperties}
         >
           <span className="truncate">
             {value
               ? nationalities.find((n) => n.value === value)?.label
               : placeholder}
           </span>
-          <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-100" style={{ color: `rgba(${primaryColor}, 1)` }} />
+          <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-100" style={{ color: `rgba(${primaryColorRgb}, 1)` }} />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0" align="start">
@@ -89,7 +92,7 @@ const NationalitySelector = ({
                   key={item.value}
                   value={item.value}
                   className="data-[selected='true']:bg-[rgba(var(--primary-color),0.12)] data-[selected='true']:text-inherit aria-selected:bg-[rgba(var(--primary-color),0.12)]"
-                  style={{ "--primary-color": primaryColor } as React.CSSProperties}
+                  style={{ "--primary-color": primaryColorRgb } as React.CSSProperties}
                   onSelect={() => {
                     const next = item.value === value ? "" : item.value;
                     setValue(next);

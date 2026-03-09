@@ -66,6 +66,5 @@ export interface RegisterForm {
   address: string;
   nationality: string;
   phone: string;
-  countryCode: string;
   emailConsent: boolean;
 }

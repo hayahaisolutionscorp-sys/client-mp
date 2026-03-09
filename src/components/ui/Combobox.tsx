@@ -83,12 +83,18 @@ const Combobox = ({
                 <CommandItem
                   key={item.value}
                   value={item.value}
+                  className="data-[selected='true']:bg-[rgba(var(--primary-color),0.12)] data-[selected='true']:text-inherit aria-selected:bg-[rgba(var(--primary-color),0.12)]"
                   onSelect={() => {
                     const newValue = item.value === value ? "" : item.value;
                     setValue(newValue);
                     setOpen(false);
                     if (onChange) onChange(newValue);
                   }}
+                  style={
+                    {
+                      "--primary-color": hexToRgb(themeSettings?.primary || "#8C1F21"),
+                    } as React.CSSProperties
+                  }
                 >
                   {item.label}
                   <Check

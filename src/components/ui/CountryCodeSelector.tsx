@@ -47,7 +47,10 @@ const CountryCodeSelector = ({
 }: CountryCodeSelectorProps) => {
   const [open, setOpen] = React.useState(false);
   const themeSettings = useThemeSettings();
-  const primaryColor = hexToRgb(themeSettings?.primary || "#8C1F21");
+  
+  const primaryColorRgb = React.useMemo(() => {
+    return hexToRgb(themeSettings?.primary || "#8C1F21");
+  }, [themeSettings?.primary]);
 
   const countries = React.useMemo(() => {
     return defaultCountries.map((c) => {
@@ -79,14 +82,14 @@ const CountryCodeSelector = ({
           )}
           style={
             {
-              "--primary-color": hexToRgb(themeSettings?.primary || "#8C1F21"),
+              "--primary-color": primaryColorRgb,
             } as React.CSSProperties
           }
         >
           <span className="truncate">
             {selectedCountry ? `+${selectedCountry.dialCode}` : "+63"}
           </span>
-          <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-100" style={{ color: `rgba(${primaryColor}, 1)` }} />
+          <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-100" style={{ color: `rgba(${primaryColorRgb}, 1)` }} />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0" align="start">
@@ -100,7 +103,7 @@ const CountryCodeSelector = ({
                   key={country.iso2}
                   value={`${country.name} ${country.dialCode} ${country.iso2}`}
                   className="data-[selected='true']:bg-[rgba(var(--primary-color),0.12)] data-[selected='true']:text-inherit aria-selected:bg-[rgba(var(--primary-color),0.12)]"
-                  style={{ "--primary-color": hexToRgb(themeSettings?.primary || "#8C1F21") } as React.CSSProperties}
+                  style={{ "--primary-color": primaryColorRgb } as React.CSSProperties}
                   onSelect={() => {
                     // Extract numeric length from format (e.g., "(...) ...-...." -> 10)
                     const format = country.format;
