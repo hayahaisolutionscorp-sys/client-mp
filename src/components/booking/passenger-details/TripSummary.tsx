@@ -6,6 +6,7 @@ import CargoInformationForm, { CargoInformationFormHandle } from '@/components/C
 import FareSummary from '@/components/booking/FareSummary';
 import PassengerDetailsForm from '@/components/booking/passenger-details/PassengerDetailsForm';
 import PassengerTripCard from '@/components/booking/PassengerTripCard';
+import PaymentMethodSelector, { PaymentMethodType } from '@/components/booking/payment/PaymentMethodSelector';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState, useRef } from 'react';
@@ -53,6 +54,7 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
   const [vehicleDepartureDetails, setVehicleDepartureDetails] = useState<VehicleData[]>(() => getCachedData()?.vehicleDepartureDetails || []);
   const [cargoDetails, setCargoDetails] = useState<CargoData[]>(() => getCachedData()?.cargoDetails || []);
   const [contactDetails, setContactDetails] = useState<ContactData | null>(() => getCachedData()?.contactDetails || null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethodType>(() => getCachedData()?.paymentMethod || 'credit-card');
 
   const themeSettings = useThemeSettings();
   const vehicleFormRef = useRef<VehicleInformationFormHandle>(null);
@@ -280,10 +282,7 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
             className="h-4 w-9 md:h-5 md:w-12 mx-2"
           />
         </div>
-
         <PassengerTripCard departureTrips={departureTrips} returnTrips={returnTrips} />
-
-
         <PassengerDetailsForm
           ref={passengerFormRef}
           rateTableId={departureTrips?.[0]?.rateTableId ?? 0}

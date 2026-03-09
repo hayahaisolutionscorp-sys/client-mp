@@ -9,9 +9,10 @@ import { useAuth } from '@/contexts/AuthContexts';
 import TripDetails from '@/components/booking/payment-confirmation/TripDetails';
 import PassengerTripCard from '@/components/booking/PassengerTripCard';
 import FareSummary from '@/components/booking/FareSummary';
+import PaymentMethodPicker, { PaymentPickerMethod } from '@/components/booking/payment-confirmation/PaymentMethodPicker';
 import { cacheItem, fetchItem, invalidateItem } from 'helpers/cache.helpers';
 import { useThemeSettings } from '@/hooks/theme-settings';
-import { createBooking, prepareBooking, calculatePricing } from '@/services';
+      import { createBooking, prepareBooking, calculatePricing, getBookingPaymentId, createPaymongoCheckout, createMayaCheckout, getEnabledPaymentProviders, initiatePaymongoPaymentIntent } from '@/services';
 import { getShip } from '@/services/shipping-line/ship.service';
 import { SuccessModal } from '@/components/ui/SuccessModal';
 import { useToast } from '@/hooks/use-toast';
@@ -27,7 +28,6 @@ interface Props {
   initialReturnTrips?: ITrip[];
   initialPrepareBookingData?: IPrepareBookingData;
 }
-
 export default function PaymentConfirmationDetails({ departureTripId, returnTripId, commodityId, initialDepartureTrips, initialReturnTrips, initialPrepareBookingData }: Props) {
   const router = useRouter();
 
@@ -38,6 +38,8 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
   const [pricingData, setPricingData] = useState<PricingResponse['data'] | undefined>(undefined);
   const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [enabledProviders, setEnabledProviders] = useState<string[]>([]);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentPickerMethod | null>(null);
   const { loggedInAccount } = useAuth();
   const { error: toastError } = useToast();
   const themeSettings = useThemeSettings();
@@ -46,6 +48,11 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
 
   useEffect(() => {
     window.scrollTo(0, 0); // Scrolls to the top of the page on component load
+  }, []);
+
+  // Load enabled payment providers on mount so picker renders before user tries to pay
+  useEffect(() => {
+    getEnabledPaymentProviders().then(setEnabledProviders);
   }, []);
 
   // Map TripSummary to ITrip (copied/adapted from passenger-details/page.tsx)
@@ -337,7 +344,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
     }
   }, [booking, prepareBookingData]);
 
-  // Final Booking Creation
+  // Final Booking Creation and PayMongo Integration
   const handleCreateBooking = useCallback(async () => {
     if (!booking) return;
 
@@ -430,6 +437,40 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
 
     const allVehicleTripAssignments = allLegIds.map(id => ({ tripId: id }));
 
+    // Resolve payment provider and method before creating the booking so the
+    // correct payment_method value can be stored in the DB on creation.
+    const isMayaEnabled = enabledProviders.includes('maya');
+    const isPaymongoEnabled = enabledProviders.includes('paymongo');
+    const bothEnabled = isMayaEnabled && isPaymongoEnabled;
+
+    if (!isMayaEnabled && !isPaymongoEnabled) {
+      toastError('No payment provider is currently available. Please contact support.', { title: 'Payment Error' });
+      return false;
+    }
+    if (bothEnabled && !selectedMethod) {
+      toastError('Please select a payment method to continue.', { title: 'Payment Method Required' });
+      return false;
+    }
+
+    const effectiveMethod = bothEnabled ? selectedMethod! : (isMayaEnabled ? 'card' : 'paymongo-checkout');
+
+    // Map picker method → DB values
+    // payment_method must be one of the constrained enum values; epayment_method holds the specific provider.
+    const epaymentMethodForDB: Record<string, string> = {
+      'card':              'Maya',
+      'gcash':             'GCash',
+      'paymaya':           'PayMaya',
+      'grab_pay':          'GrabPay',
+      'qrph':              'QRPh',
+      'dob':               'OnlineBanking',
+      'paymongo-checkout': 'PayMongo',
+    };
+    const resolvedPaymentMethod = 'EPAYMENT';
+    const resolvedEpaymentMethod = epaymentMethodForDB[effectiveMethod] ?? 'PayMongo';
+    // Generate a temporary reference that satisfies the NOT NULL constraint;
+    // will be superseded by the actual gateway transaction ID once payment completes.
+    const tempTransactionRef = `PENDING-${Date.now()}-${Math.random().toString(36).slice(2, 9).toUpperCase()}`;
+
     const vehicles = (rawData.vehicleDepartureDetails || []).map((v: any) => {
       const matchedModelId = v.vehicleModelId;
 
@@ -466,31 +507,206 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       voucherCode: '',
       referralCode: '',
       remarks: '',
-      payment_method: 'Cash',
+      payment_method: resolvedPaymentMethod,
+      epayment_method: resolvedEpaymentMethod,
+      transaction_number: tempTransactionRef,
       isQuickBooking: false,
     };
 
     console.log('Creating final booking with payload:', payload);
     try {
+      // Step 1: Create booking
+      console.log('=== STEP 1: Creating booking ===');
       const result = await createBooking(payload);
-
       const bookingId = result?.data || result?.id;
-      if (bookingId) {
-        router.push(`/booking/confirmed/${bookingId}`);
-        return true;
-      } else {
-        // This case might happen if result is empty but no error thrown
+      
+      if (!bookingId) {
+        console.error('Booking creation failed - no ID returned');
         toastError('Failed to create booking. Please try again.', { title: 'Booking Error' });
         return false;
       }
+
+      console.log('✓ Booking created successfully:', bookingId);
+
+      // Step 2: Get booking payment ID
+      console.log('=== STEP 2: Getting booking payment ID ===');
+      const bookingPaymentId = await getBookingPaymentId(bookingId);
+      
+      if (!bookingPaymentId) {
+        console.error('Failed to get booking payment ID');
+        toastError('Failed to initiate payment. Please contact support.', { title: 'Payment Error' });
+        return false;
+      }
+
+      console.log('✓ Got booking payment ID:', bookingPaymentId);
+
+      // Step 3: Calculate grand total from pricing data
+      console.log('=== STEP 3: Calculating amount ===');
+      console.log('Pricing data:', pricingData);
+      
+      const grandTotal = pricingData?.trips?.reduce((sum, trip) => sum + (trip.grandTotal || 0), 0) || 0;
+      console.log('Grand total (PHP):', grandTotal);
+      
+      // Convert grand total to cents for PayMongo
+      const amountInCents = Math.round(grandTotal * 100);
+      console.log('Amount in cents:', amountInCents);
+      
+      if (amountInCents <= 0) {
+        console.error('Invalid amount:', amountInCents);
+        toastError('Invalid payment amount. Please try again.', { title: 'Payment Error' });
+        return false;
+      }
+
+      // Step 4: Route to the correct payment provider based on enabled providers and selected method
+      // (effectiveMethod already resolved above before booking creation)
+      console.log(`=== STEP 4: Determining payment route — ${effectiveMethod} ===`);
+      console.log(`Providers — maya: ${isMayaEnabled}, paymongo: ${isPaymongoEnabled}, bothEnabled: ${bothEnabled}`);
+
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const successUrl = `${baseUrl}/booking/payment-success?booking_id=${bookingId}`;
+      const cancelUrl = `${baseUrl}/booking/payment-confirmation?departureTripId=${departureTripId || ''}&returnTripId=${returnTripId || ''}&commodityId=${commodityId || ''}`;
+
+      let checkoutUrl: string | undefined;
+
+      if (effectiveMethod === 'card') {
+        // Maya hosted checkout (handles card payments)
+        console.log('=== STEP 4a: Maya hosted checkout (card) ===');
+        const amountInPHP = grandTotal;
+        const mayaRequest = {
+          bookingPaymentId,
+          totalAmount: { value: amountInPHP, currency: 'PHP' },
+          buyer: {
+            firstName: loggedInAccount?.passenger?.firstName || loggedInAccount?.email?.split('@')[0] || 'Guest',
+            lastName: loggedInAccount?.passenger?.lastName || loggedInAccount?.email?.split('@')[1] || 'User',
+            contact: {
+              phone: loggedInAccount?.passenger?.phone || '',
+              email: loggedInAccount?.email || 'noreply@ayahay.com',
+            },
+          },
+          items: [
+            {
+              name: `Booking ${bookingId}`,
+              quantity: 1,
+              description: `Payment for booking ${bookingId}`,
+              amount: { value: amountInPHP },
+              totalAmount: { value: amountInPHP },
+            },
+          ],
+          successUrl,
+          failureUrl: cancelUrl,
+          cancelUrl,
+          requestReferenceNumber: bookingId,
+          metadata: { bookingId, bookingPaymentId, source: 'marketplace' },
+        };
+        console.log('Maya request:', JSON.stringify(mayaRequest, null, 2));
+        const mayaResponse = await createMayaCheckout(mayaRequest);
+        if (!mayaResponse?.data?.checkoutUrl) {
+          toastError('Failed to create Maya payment session. Please try again.', { title: 'Payment Error' });
+          return false;
+        }
+        checkoutUrl = mayaResponse.data.checkoutUrl;
+        console.log('✓ Maya checkout created, transaction:', mayaResponse.data.transactionId);
+
+      } else if (effectiveMethod === 'paymongo-checkout') {
+        // Only PayMongo enabled → use checkout session (user picks method on PayMongo's page)
+        console.log('=== STEP 4b: PayMongo checkout session (only PayMongo enabled) ===');
+        const amountInCentsCalc = Math.round(grandTotal * 100);
+        const checkoutRequest = {
+          bookingPaymentId,
+          lineItems: [
+            {
+              name: `Booking ${bookingId}`,
+              quantity: 1,
+              amount: amountInCentsCalc,
+              currency: 'PHP',
+              description: `Payment for booking ${bookingId}`,
+            },
+          ],
+          paymentMethodTypes: ['gcash', 'paymaya', 'qrph', 'card', 'dob'],
+          successUrl,
+          cancelUrl,
+          referenceNumber: bookingId,
+          description: `Payment for booking ${bookingId}`,
+          metadata: { bookingId, bookingPaymentId, source: 'marketplace' },
+        };
+        console.log('PayMongo checkout request:', JSON.stringify(checkoutRequest, null, 2));
+        const checkoutResponse = await createPaymongoCheckout(checkoutRequest);
+        if (!checkoutResponse?.data?.checkoutUrl) {
+          toastError('Failed to create PayMongo payment session. Please try again.', { title: 'Payment Error' });
+          return false;
+        }
+        checkoutUrl = checkoutResponse.data.checkoutUrl;
+        console.log('✓ PayMongo checkout created, transaction:', checkoutResponse.data.transactionId);
+
+      } else if (effectiveMethod === 'qrph' || effectiveMethod === 'dob') {
+        // QR PH and DOB (Direct Online Banking) use Checkout Session:
+        // - qrph: Payment Intent returns a QR code display action, not a redirect URL
+        // - dob: requires a bank_code detail upfront; Checkout Session handles bank selection on PayMongo's page
+        console.log(`=== STEP 4c: PayMongo Checkout Session for ${effectiveMethod} ===`);
+        const amountInCentsCalc = Math.round(grandTotal * 100);
+        const checkoutRequest = {
+          bookingPaymentId,
+          lineItems: [
+            {
+              name: `Booking ${bookingId}`,
+              quantity: 1,
+              amount: amountInCentsCalc,
+              currency: 'PHP',
+              description: `Payment for booking ${bookingId}`,
+            },
+          ],
+          paymentMethodTypes: [effectiveMethod],
+          successUrl,
+          cancelUrl,
+          referenceNumber: bookingId,
+          description: `Payment for booking ${bookingId}`,
+          metadata: { bookingId, bookingPaymentId, source: 'marketplace' },
+        };
+        console.log(`PayMongo checkout request (${effectiveMethod}):`, JSON.stringify(checkoutRequest, null, 2));
+        const checkoutResponse = await createPaymongoCheckout(checkoutRequest);
+        if (!checkoutResponse?.data?.checkoutUrl) {
+          toastError('Failed to create PayMongo payment session. Please try again.', { title: 'Payment Error' });
+          return false;
+        }
+        checkoutUrl = checkoutResponse.data.checkoutUrl;
+        console.log(`✓ PayMongo checkout (${effectiveMethod}) created, transaction:`, checkoutResponse.data.transactionId);
+
+      } else {
+        // Payment Intent flow: gcash, paymaya, grab_pay
+        console.log(`=== STEP 4d: PayMongo Payment Intent (${effectiveMethod}) ===`);
+        const intentRequest = {
+          bookingPaymentId,
+          amount: grandTotal,
+          paymentMethodType: effectiveMethod as 'gcash' | 'paymaya' | 'grab_pay',
+          returnUrl: successUrl,
+          billing: {
+            name: `${loggedInAccount?.passenger?.firstName || ''} ${loggedInAccount?.passenger?.lastName || ''}`.trim() || undefined,
+            email: loggedInAccount?.email || undefined,
+            phone: loggedInAccount?.passenger?.phone || undefined,
+          },
+        };
+        console.log('PayMongo intent request:', JSON.stringify(intentRequest, null, 2));
+        const intentResponse = await initiatePaymongoPaymentIntent(intentRequest);
+        if (!intentResponse?.data?.redirectUrl) {
+          toastError('Failed to initiate PayMongo payment. Please try again.', { title: 'Payment Error' });
+          return false;
+        }
+        checkoutUrl = intentResponse.data.redirectUrl;
+        console.log('✓ PayMongo intent created, transaction:', intentResponse.data.transactionId);
+      }
+
+      console.log(`=== STEP 5: Redirecting to payment gateway ===`);
+      console.log('Checkout URL:', checkoutUrl);
+      window.location.href = checkoutUrl;
+      return true;
     } catch (error: any) {
-      console.error('Booking creation error:', error);
+      console.error('Booking/Payment error:', error);
       const errorMessage = error.response?.data?.message || 'Something went wrong while creating your booking.';
       toastError(errorMessage, { title: 'Booking Error' });
       return false;
     }
 
-  }, [booking, prepareBookingData, departureTripId, returnTripId, router]);
+  }, [booking, prepareBookingData, departureTripId, returnTripId, commodityId, pricingData, enabledProviders, selectedMethod, loggedInAccount, toastError]);
 
   return (
     <>
@@ -524,7 +740,14 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
 
           <div className="space-y-6">
             <PassengerTripCard departureTrips={departureTrips} returnTrips={returnTrips} />
-            {/* New TripDetails component handling Passengers, Vehicles, Cargo */}
+            {/* Payment method picker — shown when both Maya and PayMongo are enabled */}
+            {enabledProviders.includes('maya') && enabledProviders.includes('paymongo') && (
+              <PaymentMethodPicker
+                selected={selectedMethod}
+                onChange={setSelectedMethod}
+              />
+            )}
+            {/* Booking details — Passengers, Vehicles, Cargo */}
             <TripDetails booking={booking} />
           </div>
         </div>
@@ -541,6 +764,8 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
             prepareBookingData={prepareBookingData}
             isLoading={isPricingLoading}
             onPay={handleCreateBooking}
+            enabledProviders={enabledProviders}
+            selectedMethod={selectedMethod}
           />
         </div>
       </div>

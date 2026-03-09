@@ -42,6 +42,8 @@ interface FareSummaryProps {
   commodityId?: string;
   isLoading?: boolean;
   onPay?: () => Promise<boolean | void>;
+  enabledProviders?: string[];
+  selectedMethod?: string | null;
 }
 
 const ObscuredPrice = ({ price, isLoading }: { price: number; isLoading?: boolean }) => {
@@ -66,7 +68,9 @@ const FareSummary: FC<FareSummaryProps> = ({
   cargoDetails,
   commodityId,
   isLoading = false,
-  onPay
+  onPay,
+  enabledProviders = [],
+  selectedMethod = null,
 }) => {
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -141,7 +145,7 @@ const FareSummary: FC<FareSummaryProps> = ({
     setIsProcessing(true);
     try {
       if (onPay) {
-        const success = await onPay();
+        const success = await onPay( );
         if (success) {
           // If successful, we DON'T set processing to false to maintain the loading state
           // until the page redirects.
@@ -579,8 +583,12 @@ const FareSummary: FC<FareSummaryProps> = ({
                   I agree to the <a href="/terms" className="hover:underline">Terms and Conditions</a> and <a href="/privacy" className="hover:underline">Privacy Policy</a>
                 </label>
               </div>
-              <Button variant="default" className="mt-6 w-full" onClick={() => setIsModalOpen(true)} disabled={isProcessing || !agreedToTerms}>
-                {onPay ? `Pay ${formatCurrency(grandTotal)}` : 'Pay via Paymongo'}
+              <Button variant="default" className="mt-6 w-full" onClick={() => setIsModalOpen(true)} disabled={isProcessing || !agreedToTerms || (enabledProviders.includes('maya') && enabledProviders.includes('paymongo') && !selectedMethod)}>
+                {enabledProviders.includes('maya') && enabledProviders.includes('paymongo')
+                  ? 'Pay'
+                  : enabledProviders.includes('paymongo')
+                  ? 'Pay via PayMongo'
+                  : 'Pay via Maya'}
                 {isProcessing && <FiLoader className="ml-1 animate-spin" />}
               </Button>
             </>

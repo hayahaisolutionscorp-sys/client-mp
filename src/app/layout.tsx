@@ -8,6 +8,7 @@ import ThemeProvider from '@/components/ThemeProvider';
 import { getHeadersSections } from '@/services/ui/header-section.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
 import PwaInstallBanner from '@/components/pwa/PwaInstallBanner';
+import DevServiceWorkerReset from '@/components/pwa/DevServiceWorkerReset';
 import { ToasterProvider } from '@/components/ui/ToasterProvider';
 import { hexToHsl } from '@/lib/color-utils';
 import ThemeHydrator from '@/components/ThemeHydrator';
@@ -66,6 +67,7 @@ export default async function RootLayout({
             <ThemeHydrator theme={themeSettings} />
             <BodyWrapper> {/* Wrap everything inside BodyWrapper */}
               <ToasterProvider />
+              <DevServiceWorkerReset />
               <PwaInstallBanner />
               <LayoutWrapper>
                 {children}

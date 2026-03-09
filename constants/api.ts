@@ -58,6 +58,10 @@ export const PASSENGER_API = `${BASE_URL}/passengers`;
 export const PASSENGER_TYPES_ACTIVE_API = `${BASE_URL}/passenger-types/active`;
 export const PASSENGER_TYPES_API = `${BASE_URL}/passenger-types`;
 export const PAYMENT_API = `${BASE_URL}/pay`;
+export const PAYMONGO_API = `${BASE_URL}/payments/paymongo`;
+export const MAYA_API = `${BASE_URL}/payments/maya`;
+// Uses CORE_API_URL directly — provider config lives on ayahay-api-v2, not the client api
+export const PAYMENT_PROVIDERS_API = `${CORE_API_URL}/payments/providers`;
 export const PORTS_API = `${BASE_URL}/ports`;
 export const REPORTING_API = `${BASE_URL}/reporting`;
 export const SEARCH_API = `${BASE_URL}/search`;
