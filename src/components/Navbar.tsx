@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { LuBell } from 'react-icons/lu';
@@ -21,6 +21,7 @@ import { useAuth } from '@/contexts/AuthContexts';
 
 const Navbar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [activeNav, setActiveNav] = useState('Book');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
@@ -226,6 +227,7 @@ const Navbar = () => {
                       </div>
                       <Link
                         href="/profile"
+                        onMouseEnter={() => router.prefetch('/profile')}
                         onClick={() => setIsMenuOpen(false)}
                         className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
                           } text-gray-900 hover:text-blue-600`}
@@ -247,6 +249,7 @@ const Navbar = () => {
                     <>
                       <Link
                         href="/login"
+                        onMouseEnter={() => router.prefetch('/login')}
                         onClick={() => setIsMenuOpen(false)}
                         className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
                           } text-gray-900 hover:text-blue-600`}
@@ -255,6 +258,7 @@ const Navbar = () => {
                       </Link>
                       <Link
                         href="/register"
+                        onMouseEnter={() => router.prefetch('/register')}
                         onClick={() => setIsMenuOpen(false)}
                         className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
                           } text-gray-900 hover:text-blue-600`}

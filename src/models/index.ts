@@ -57,6 +57,7 @@ export * from './content-management/privacy-policy.model';
 export * from './content-management/theme-settings.model';
 export * from './content-management/thumbnail.model';
 export * from './content-management/core-value.model';
+export * from './branding.model';
 
 // Communication & Notifications
 export * from './communication/notification.model';

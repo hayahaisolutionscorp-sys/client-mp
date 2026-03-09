@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import * as React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "../../ui/Button"
 import { Input } from "../../ui/Input"
@@ -10,7 +10,9 @@ import { IDependent, IPassengerType, CreateDependentDto } from "@/models"
 import BirthDatePicker from "../../ui/BirthDatePicker"
 import { parseISO, isValid, differenceInYears } from "date-fns"
 import Combobox from "../../ui/Combobox"
-import { NATIONALITIES } from "constants/default"
+import CountryCodeSelector, { CountryData } from "../../ui/CountryCodeSelector"
+import { defaultCountries, parseCountry } from "react-international-phone"
+import NationalitySelector from "../../ui/NationalitySelector"
 import { Checkbox } from "../../ui/Checkbox"
 import { useAuth } from "@/contexts/AuthContexts"
 import { createDependents, updateDependent } from "@/services"
@@ -37,6 +39,7 @@ const relationshipOptions = [
     "Other"
 ];
 
+
 export default function DependentForm({ 
     userId,
     dependent, 
@@ -51,7 +54,13 @@ export default function DependentForm({
 
     useEffect(() => {
         getPassengerTypes().then(types => {
-            if (types) setPassengerTypes(types);
+            if (types) {
+                setPassengerTypes(types);
+                // Also trigger auto-detection if birthday exists
+                if (formData.birthday) {
+                    autoSelectByBirthday(formData.birthday, types);
+                }
+            }
         });
     }, []);
     
@@ -71,8 +80,13 @@ export default function DependentForm({
         passenger_code: "",
     });
 
+    const ph = defaultCountries.find(c => parseCountry(c).iso2 === 'ph') || defaultCountries[0];
+    const defaultCountry = parseCountry(ph);
+
     const [selectedRelationship, setSelectedRelationship] = useState("Relative");
     const [customRelationship, setCustomRelationship] = useState("");
+    const [countryCode, setCountryCode] = useState(defaultCountry.iso2);
+    const [phoneDigits, setPhoneDigits] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [initialState, setInitialState] = useState<any>(null);
 
@@ -106,15 +120,49 @@ export default function DependentForm({
                 relationship: initialRel === "Other" ? initialCustomRel : initialRel,
                 nationality: dependent.nationality || "Filipino",
                 address: dependent.address || "",
-                phone: dependent.phone && dependent.phone.startsWith('+639')
-                    ? dependent.phone
-                    : dependent.phone
-                        ? '+639' + dependent.phone.replace(/^\+639/, '').replace(/\D/g, '').slice(0, 9)
-                        : '',
+                phone: dependent.phone || "",
                 email: dependent.email || "",
                 category: validCategory,
                 passenger_code: matchedType?.code || ""
             };
+
+            // If no matched category but we HAVE a birthday, try auto-suggesting
+            if (!matchedType && data.birthday && passengerTypes.length) {
+                const age = differenceInYears(new Date(), parseISO(data.birthday));
+                const ageRelatedTypes = passengerTypes.filter(t => t.age_min !== null || (t.age_max !== null && t.age_max < 999));
+                const autoMatch = ageRelatedTypes.find(t => {
+                    const minOk = t.age_min === null || age >= t.age_min;
+                    const maxOk = t.age_max === null || t.age_max >= 999 || age <= t.age_max;
+                    return minOk && maxOk;
+                });
+                if (autoMatch) {
+                    data.category = autoMatch.name;
+                    data.passenger_code = autoMatch.code;
+                }
+            }
+
+            if (dependent.phone) {
+                const match = defaultCountries.find(c => {
+                    const parsed = parseCountry(c);
+                    const dialCode = parsed.dialCode;
+                    return dependent.phone?.startsWith(dialCode) || dependent.phone?.startsWith('+' + dialCode);
+                });
+                if (match) {
+                    const parsed = parseCountry(match);
+                    const dialCode = parsed.dialCode;
+                    setCountryCode(parsed.iso2);
+                    const digits = dependent.phone.startsWith('+')
+                        ? dependent.phone.slice(dialCode.length + 1).replace(/\D/g, '')
+                        : dependent.phone.slice(dialCode.length).replace(/\D/g, '');
+                    setPhoneDigits(digits);
+                } else {
+                    setCountryCode(defaultCountry.iso2);
+                    setPhoneDigits(dependent.phone.replace(/\D/g, ''));
+                }
+            } else {
+                setCountryCode(defaultCountry.iso2);
+                setPhoneDigits("");
+            }
 
             // 2. Apply all updates together
             setSelectedRelationship(initialRel);
@@ -126,25 +174,58 @@ export default function DependentForm({
                 customRelationship: initialCustomRel
             });
         }
-    }, [dependent]);
+    }, [dependent, passengerTypes.length]);
 
     const handleChange = (field: keyof CreateDependentDto, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
     const handlePhoneChange = (value: string) => {
-        if (!value.startsWith('+639')) value = '+639';
-        const digitsOnly = value.slice(4).replace(/\D/g, '').slice(0, 9);
-        setFormData(prev => ({ ...prev, phone: '+639' + digitsOnly }));
+        const match = defaultCountries.find(c => parseCountry(c).iso2 === countryCode) || defaultCountries[0];
+        const parsed = parseCountry(match);
+        const formatStr = typeof parsed.format === 'string' ? parsed.format : '';
+        const dotMatches = formatStr.match(/\./g);
+        const maxLength = dotMatches ? dotMatches.length : 10;
+        
+        const digitsOnly = value.replace(/\D/g, '').slice(0, maxLength);
+        setPhoneDigits(digitsOnly);
+        setFormData(prev => ({ ...prev, phone: '+' + parsed.dialCode + digitsOnly }));
     };
 
     const handleAccountContactToggle = (checked: boolean) => {
         setUseAccountContact(checked);
         if (checked && loggedInAccount) {
+            const passenger = loggedInAccount.passenger;
+            const updatedPhone = passenger?.phone || "";
+            
+            // Sync phone digits and country code
+            if (updatedPhone) {
+                const match = defaultCountries.find(c => {
+                    const parsed = parseCountry(c);
+                    const dialCode = parsed.dialCode;
+                    return updatedPhone.startsWith(dialCode) || updatedPhone.startsWith('+' + dialCode);
+                });
+                if (match) {
+                    const parsed = parseCountry(match);
+                    const dialCode = parsed.dialCode;
+                    setCountryCode(parsed.iso2);
+                    const digits = updatedPhone.startsWith('+')
+                        ? updatedPhone.slice(dialCode.length + 1).replace(/\D/g, '')
+                        : updatedPhone.slice(dialCode.length).replace(/\D/g, '');
+                    setPhoneDigits(digits);
+                } else {
+                    setCountryCode(defaultCountry.iso2);
+                    setPhoneDigits(updatedPhone.replace(/\D/g, ''));
+                }
+            } else {
+                setCountryCode(defaultCountry.iso2);
+                setPhoneDigits("");
+            }
+
             setFormData(prev => ({
                 ...prev,
-                address: loggedInAccount.passenger?.address || prev.address,
-                phone: loggedInAccount.passenger?.phone || prev.phone,
+                address: passenger?.address || prev.address,
+                phone: updatedPhone || prev.phone,
                 email: loggedInAccount.email || prev.email,
             }));
         }
@@ -165,14 +246,21 @@ export default function DependentForm({
         handleChange("relationship", value);
     };
 
-    const autoSelectByBirthday = (birthdayIso: string) => {
-        if (!passengerTypes.length || !birthdayIso) return;
+    const autoSelectByBirthday = (birthdayIso: string, typesOverride?: IPassengerType[]) => {
+        const typesToUse = typesOverride || passengerTypes;
+        if (!typesToUse.length || !birthdayIso) return;
+        
         const age = differenceInYears(new Date(), parseISO(birthdayIso));
-        const match = passengerTypes.find(t => {
+        
+        // Filter for types that actually have age limits defined
+        const ageRelatedTypes = typesToUse.filter(t => t.age_min !== null || (t.age_max !== null && t.age_max < 999));
+        
+        const match = ageRelatedTypes.find(t => {
             const minOk = t.age_min === null || age >= t.age_min;
             const maxOk = t.age_max === null || t.age_max >= 999 || age <= t.age_max;
             return minOk && maxOk;
         });
+
         if (match) {
             setFormData(prev => ({ ...prev, category: match.name, passenger_code: match.code }));
         }
@@ -182,10 +270,17 @@ export default function DependentForm({
         e.preventDefault();
         setError(null);
 
-        const phoneRegex = /^\+639\d{9}$/;
-        if (!phoneRegex.test(formData.phone)) {
-            setError("Phone number must start with +639 and be 13 characters long.");
-            return;
+        if (formData.phone) {
+            const match = defaultCountries.find(c => parseCountry(c).iso2 === countryCode) || defaultCountries[0];
+            const parsed = parseCountry(match);
+            const formatStr = typeof parsed.format === 'string' ? parsed.format : '';
+            const dotMatches = formatStr.match(/\./g);
+            const maxLength = dotMatches ? dotMatches.length : 10;
+
+            if (phoneDigits.length < maxLength) {
+                setError(`Phone number must be ${maxLength} digits.`);
+                return;
+            }
         }
 
         const finalForm = {
@@ -326,7 +421,10 @@ export default function DependentForm({
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Nationality *</label>
-                        <Combobox values={NATIONALITIES} value={formData.nationality} onChange={(v) => handleChange("nationality", v)} />
+                        <NationalitySelector
+                            value={formData.nationality}
+                            onChange={(v) => handleChange("nationality", v)}
+                        />
                     </div>
                 </div>
 
@@ -391,7 +489,33 @@ export default function DependentForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Phone Number *</label>
-                        <Input value={formData.phone || '+639'} onChange={(e) => handlePhoneChange(e.target.value)} maxLength={13} required />
+                        <div className="flex gap-2">
+                            <CountryCodeSelector 
+                                value={countryCode} 
+                                onChange={(country: CountryData) => {
+                                    setCountryCode(country.iso2);
+                                    const truncated = phoneDigits.slice(0, country.maxLength);
+                                    setPhoneDigits(truncated);
+                                    setFormData(prev => ({ ...prev, phone: '+' + country.dialCode + truncated }));
+                                }}
+                                className="w-[100px]"
+                            />
+                            <Input 
+                                value={phoneDigits} 
+                                onChange={(e) => handlePhoneChange(e.target.value)} 
+                                placeholder={
+                                    (() => {
+                                        const match = defaultCountries.find(c => parseCountry(c).iso2 === countryCode) || defaultCountries[0];
+                                        const parsed = parseCountry(match);
+                                        const formatStr = typeof parsed.format === 'string' ? parsed.format : '';
+                                        return formatStr.replace(/\./g, "0").replace(/\\/g, "") || "Phone Number";
+                                    })()
+                                }
+                                type="tel"
+                                required 
+                                className="flex-1"
+                            />
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Email (optional)</label>

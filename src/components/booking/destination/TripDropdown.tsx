@@ -49,15 +49,15 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
     <div ref={dropdownRef} className="relative inline-block w-full h-[40px] text-left">
       <button
         onClick={toggleDropdown}
-        className="flex text-sm justify-between items-center w-full h-full px-4 py-2 bg-white border rounded-md focus:outline-none focus:border-[rgba(var(--border-color),1)] focus:border-2"
+        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50"
         style={
           {
-            "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
+            "--primary-color": hexToRgb(themeSettings?.primary || "#8C1F21"),
           } as React.CSSProperties
         }
       >
         <span className="font-natural text-customText">{displayedValue}</span>
-        <FaAngleDown className="w-4 h-4 text-customText" />
+        <FaAngleDown className="w-4 h-4" style={{ color: `rgba(${hexToRgb(themeSettings?.primary || "#8C1F21")}, 1)` }} />
       </button>
 
       {isOpen && (

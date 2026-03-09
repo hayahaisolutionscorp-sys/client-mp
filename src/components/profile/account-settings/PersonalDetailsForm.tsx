@@ -8,13 +8,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import BirthDatePicker from "@/components/ui/BirthDatePicker"
 import Combobox from "@/components/ui/Combobox"
-import { NATIONALITIES } from "constants/default"
+import CountryCodeSelector, { CountryData } from "@/components/ui/CountryCodeSelector"
+import NationalitySelector from "@/components/ui/NationalitySelector"
+import { defaultCountries, parseCountry } from "react-international-phone"
 import { IPassenger, IPassengerType } from "@/models"
 import { updatePassenger } from "@/services"
 import { getPassengerTypes } from "@/services/user/passenger-type.service"
 import { useAuth } from "@/contexts/AuthContexts"
 import { SuccessModal } from "@/components/ui/SuccessModal"
 import { Loader2 } from "lucide-react"
+
 
 interface PersonalDetailsFormProps {
     passenger?: IPassenger;
@@ -25,23 +28,42 @@ interface PersonalDetailsFormProps {
 export default function PersonalDetailsForm({ passenger, email, onUpdate }: PersonalDetailsFormProps) {
     const { refreshProfile } = useAuth();
     const [isSaving, setIsSaving] = useState(false);
+    const ph = defaultCountries.find(c => parseCountry(c).iso2 === 'ph') || defaultCountries[0];
+    const defaultCountry = parseCountry(ph);
+
     const [formData, setFormData] = useState<Partial<IPassenger>>(passenger || {});
+    const [countryCode, setCountryCode] = useState(defaultCountry.iso2);
+    const [phoneDigits, setPhoneDigits] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [passengerTypes, setPassengerTypes] = useState<IPassengerType[]>([]);
 
     useEffect(() => {
-        if (passenger) {
-            setFormData({
-                ...passenger,
-                phone: passenger.phone && passenger.phone.startsWith('+63') 
-                    ? passenger.phone 
-                    : passenger.phone 
-                        ? '+639' + passenger.phone.replace(/^\+639/, '').replace(/\D/g, '').slice(0, 9)
-                        : ''
+        if (passenger && passenger.phone) {
+            const match = defaultCountries.find(c => {
+                const parsed = parseCountry(c);
+                const dialCode = parsed.dialCode;
+                return passenger.phone?.startsWith(dialCode) || passenger.phone?.startsWith('+' + dialCode);
             });
+            if (match) {
+                const parsed = parseCountry(match);
+                const dialCode = parsed.dialCode;
+                setCountryCode(parsed.iso2);
+                const digits = passenger.phone.startsWith('+') 
+                    ? passenger.phone.slice(dialCode.length + 1).replace(/\D/g, '')
+                    : passenger.phone.slice(dialCode.length).replace(/\D/g, '');
+                setPhoneDigits(digits);
+            } else {
+                setCountryCode(defaultCountry.iso2);
+                setPhoneDigits(passenger.phone.replace(/\D/g, ''));
+            }
+            setFormData(passenger);
+        } else if (passenger) {
+            setFormData(passenger);
+            setCountryCode(defaultCountry.iso2);
+            setPhoneDigits("");
         }
-    }, [passenger]);
+    }, [passenger, defaultCountry.iso2]);
 
     useEffect(() => {
         getPassengerTypes().then(types => {
@@ -111,16 +133,17 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
     };
 
     const handlePhoneChange = (value: string) => {
-        if (!value.startsWith('+639')) {
-            value = '+639';
-        }
-        const prefix = '+639';
-        const digitsOnly = value.slice(4).replace(/\D/g, '');
-        const limitedDigits = digitsOnly.slice(0, 9);
+        const match = defaultCountries.find(c => parseCountry(c).iso2 === countryCode) || defaultCountries[0];
+        const parsed = parseCountry(match);
+        const formatStr = typeof parsed.format === 'string' ? parsed.format : '';
+        const dotMatches = formatStr.match(/\./g);
+        const maxLength = dotMatches ? dotMatches.length : 10;
         
+        const digitsOnly = value.replace(/\D/g, '').slice(0, maxLength);
+        setPhoneDigits(digitsOnly);
         setFormData(prev => ({
             ...prev,
-            phone: prefix + limitedDigits
+            phone: '+' + parsed.dialCode + digitsOnly
         }));
     };
 
@@ -140,9 +163,14 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
         }
 
         if (formData.phone) {
-            const phoneRegex = /^\+639\d{9}$/;
-            if (!phoneRegex.test(formData.phone)) {
-                setError("Phone number must start with +639 and be 13 characters long.");
+            const match = defaultCountries.find(c => parseCountry(c).iso2 === countryCode) || defaultCountries[0];
+            const parsed = parseCountry(match);
+            const formatStr = typeof parsed.format === 'string' ? parsed.format : '';
+            const dotMatches = formatStr.match(/\./g);
+            const maxLength = dotMatches ? dotMatches.length : 10;
+
+            if (phoneDigits.length < maxLength) {
+                setError(`Phone number must be ${maxLength} digits.`);
                 return;
             }
         }
@@ -248,12 +276,32 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Phone Number <span className="text-red-500">*</span></label>
-                            <Input
-                                value={formData.phone || '+639'}
-                                onChange={(e) => handlePhoneChange(e.target.value)}
-                                placeholder="+639171234567"
-                                maxLength={13}
-                            />
+                            <div className="flex gap-2">
+                                <CountryCodeSelector 
+                                    value={countryCode} 
+                                    onChange={(country: CountryData) => {
+                                        setCountryCode(country.iso2);
+                                        const truncated = phoneDigits.slice(0, country.maxLength);
+                                        setPhoneDigits(truncated);
+                                        setFormData(prev => ({ ...prev, phone: '+' + country.dialCode + truncated }));
+                                    }}
+                                    className="w-[100px]"
+                                />
+                                <Input
+                                    value={phoneDigits}
+                                    onChange={(e) => handlePhoneChange(e.target.value)}
+                                    placeholder={
+                                        (() => {
+                                            const match = defaultCountries.find(c => parseCountry(c).iso2 === countryCode) || defaultCountries[0];
+                                            const parsed = parseCountry(match);
+                                            const formatStr = typeof parsed.format === 'string' ? parsed.format : '';
+                                            return formatStr.replace(/\./g, "0").replace(/\\/g, "") || "Phone Number";
+                                        })()
+                                    }
+                                    className="flex-1"
+                                    type="tel"
+                                />
+                            </div>
                         </div>
                         
                         <div className="space-y-2">
@@ -291,10 +339,8 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Nationality <span className="text-red-500">*</span></label>
-                            <Combobox
-                                values={NATIONALITIES}
+                            <NationalitySelector
                                 defaultValue={formData.nationality || ''}
-                                placeholder="Select nationality"
                                 onChange={(value) => handleInputChange('nationality', value)}
                             />
                         </div>

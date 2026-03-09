@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { GrCar } from 'react-icons/gr';
-import { FaMinus, FaPlus } from "react-icons/fa6";
+import { FaMinus, FaPlus, FaAngleDown } from "react-icons/fa6";
 
 import { DEFAULT_NUM_VEHICLES } from "constants/default";
 import { useThemeSettings } from "@/hooks/theme-settings";
@@ -53,10 +53,10 @@ const VehicleDropdown: React.FC<VehicleDropdownProps> = ({ value = DEFAULT_NUM_V
       {/* Button to toggle dropdown */}
       <button
         onClick={toggleDropdown}
-        className="flex text-sm items-center justify-between w-full h-full px-4 py-2 bg-white border rounded-md focus:outline-none focus:border-[rgba(var(--border-color),1)] focus:border-2"
+        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50"
         style={
           {
-            "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
+            "--primary-color": hexToRgb(themeSettings?.primary || "#8C1F21"),
           } as React.CSSProperties
         }
       >
@@ -67,6 +67,7 @@ const VehicleDropdown: React.FC<VehicleDropdownProps> = ({ value = DEFAULT_NUM_V
           />
           <span className="text-customText font-natural">{value} Vehicle{value !== 1 ? 's' : ''}</span>
         </div>
+        <FaAngleDown className="w-4 h-4 ml-1" style={{ color: `rgba(${hexToRgb(themeSettings?.primary || "#8C1F21")}, 1)` }} />
       </button>
 
       {/* Dropdown content */}

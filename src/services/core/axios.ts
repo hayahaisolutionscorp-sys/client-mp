@@ -75,13 +75,16 @@ instance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 Unauthorized errors
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      // If the user was never authenticated (no JWT), skip refresh entirely.
-      // This allows unauthenticated users to make API calls without
-      // triggering the "Session Expired" modal.
-      const existingToken = fetchItem<string>('jwt');
-      if (!existingToken) {
+    // Handle 401 Unauthorized errors and "invalid token" messages
+    const isUnauthorized = error.response?.status === 401;
+    const isInvalidToken = error.response?.data?.message?.toLowerCase().includes('invalid token') || 
+                          error.response?.data?.error?.toLowerCase().includes('invalid token');
+
+    if ((isUnauthorized || isInvalidToken) && !originalRequest._retry) {
+      // Use logged-in-account as the indicator for authenticated sessions.
+      // This is set in AuthContext and persistent in cache.
+      const isLoggedIn = !!fetchItem<any>('logged-in-account');
+      if (!isLoggedIn) {
         return Promise.reject(error);
       }
 
@@ -100,8 +103,11 @@ instance.interceptors.response.use(
 
           return instance(originalRequest);
         } catch (refreshError: any) {
-          // Only throw if not a 401, as 401 is handled by logout/redirect logic elsewhere
-          if (refreshError.response?.status === 401) {
+          // If refresh itself fails with 401 or invalid token, we're done
+          const isRefreshAuthError = refreshError.response?.status === 401 || 
+                                     refreshError.response?.data?.message?.toLowerCase().includes('invalid token');
+          
+          if (isRefreshAuthError) {
             return Promise.reject({ ...refreshError, _silent: true });
           }
           return Promise.reject(refreshError);

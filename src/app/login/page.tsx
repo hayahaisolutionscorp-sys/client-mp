@@ -5,6 +5,7 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { Suspense } from "react";
 
 export default function LoginPage() {
+
   return (
     <main className="grid min-h-screen md:grid-cols-2">
       <div className="flex items-center justify-center p-6 lg:p-8 relative">

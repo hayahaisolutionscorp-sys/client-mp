@@ -2,15 +2,14 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { getDestinations } from "@/services/ui/destinations.service"
 import { useBranding } from "@/hooks/branding"
-
-
+import { useTheme } from "@/components/ThemeProvider"
 
 export function AuthSidebar() {
+  const { destinations } = useTheme();
   const [currentSlide, setCurrentSlide] = useState(0)
-  // did not remove for fallback :)
-  const [slides, setSlides] = useState([
+  
+  const defaultSlides = [
     { image: '/assets/photogrid/palompon.png', title: 'Palompon, Leyte' },
     { image: '/assets/photogrid/camotes.jpg', title: 'Camotes Island, Cebu' },
     { image: '/assets/photogrid/coron.png', title: 'Coron, Palawan' },
@@ -19,29 +18,27 @@ export function AuthSidebar() {
     { image: '/assets/photogrid/mactan.png', title: 'Mactan, Cebu' },
     { image: '/assets/photogrid/santa-fe.png', title: 'Santa Fe, Bantayan' },
     { image: '/assets/photogrid/kawit.png', title: 'Kawit Medellin' },
-  ])
-  const [slogan, setSlogan] = useState("Kay Ang Pagsakay, Dapat AYAHAY!")
+  ];
 
+  const slides = destinations && destinations.length > 0
+    ? destinations.map(d => ({ image: d.image_url, title: d.image_alt || d.route }))
+    : defaultSlides;
+
+  const [slogan, setSlogan] = useState("Kay Ang Pagsakay, Dapat AYAHAY!")
   const branding = useBranding()
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const destinations = await getDestinations()
-
-        if (destinations && destinations.length > 0) {
-          setSlides(destinations.map(d => ({
-            image: d.image_url,
-            title: d.image_alt || d.route // Fallback title
-          })))
-        }
-      } catch (error) {
-        console.error("Failed to fetch destinations:", error)
-      }
+    if (branding?.slogan) {
+      setSlogan(branding.slogan)
     }
+  }, [branding])
 
-    fetchData()
-  }, [])
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [slides.length])
 
   useEffect(() => {
     if (branding?.slogan) {

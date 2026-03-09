@@ -38,7 +38,11 @@ export function LoginForm() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmailValid = emailRegex.test(email);
     setEmailValidation(prev => ({ ...prev, isValid: isEmailValid }));
-  }, [email]);
+
+    if (isEmailValid) {
+      router.prefetch('/login/verify');
+    }
+  }, [email, router]);
 
   const handleContinue = (e: FormEvent) => {
     e.preventDefault();
@@ -152,7 +156,12 @@ export function LoginForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="hover:underline" style={{ color: primaryColor }}>
+          <Link 
+            href="/register" 
+            onMouseEnter={() => router.prefetch('/register')}
+            className="hover:underline" 
+            style={{ color: primaryColor }}
+          >
             Register now
           </Link>
         </p>

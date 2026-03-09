@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Link from "next/link"
 import Image from "next/image"
@@ -18,7 +19,9 @@ import {
 import { RegisterForm as IRegisterForm } from "@/models";
 import BirthDatePicker from "@/components/ui/BirthDatePicker";
 import Combobox from "@/components/ui/Combobox";
-import { NATIONALITIES } from "constants/default";
+import CountryCodeSelector, { CountryData } from "@/components/ui/CountryCodeSelector";
+import { defaultCountries, parseCountry } from "react-international-phone";
+import NationalitySelector from "@/components/ui/NationalitySelector";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
 
@@ -32,6 +35,7 @@ export function RegisterForm() {
   const { clearSession, signInWithGoogle, signInWithFacebook } = useAuth();
   const [loading, setLoading] = useState(false);
 
+
   useEffect(() => {
     clearSession();
     sessionStorage.removeItem(REGISTER_STEP_KEY);
@@ -42,6 +46,19 @@ export function RegisterForm() {
   const defaultBirthday = new Date();
   defaultBirthday.setFullYear(defaultBirthday.getFullYear() - MIN_AGE);
 
+  const defaultCountryData = React.useMemo(() => {
+    const ph = defaultCountries.find(c => parseCountry(c).iso2 === 'ph') || defaultCountries[0];
+    const parsed = parseCountry(ph);
+    const formatStr = typeof parsed.format === 'string' ? parsed.format : '';
+    const dotMatches = formatStr.match(/\./g);
+    return {
+      iso2: parsed.iso2,
+      dialCode: parsed.dialCode,
+      maxLength: dotMatches ? dotMatches.length : 10,
+      placeholder: formatStr.replace(/\./g, "0").replace(/\\/g, "") || "917 123 4567"
+    };
+  }, []);
+
   const [formData, setFormData] = useState<Omit<IRegisterForm, 'email' | 'password' | 'confirm' | 'agreement' | 'emailConsent'>>({
     firstName: "",
     middleName: "",
@@ -51,7 +68,15 @@ export function RegisterForm() {
     birthday: defaultBirthday.toISOString().split('T')[0],
     address: "",
     nationality: "",
-    phone: "+639",
+    phone: "",
+    countryCode: defaultCountryData.iso2,
+  });
+  const [phoneDigits, setPhoneDigits] = useState("");
+
+  const [phoneConfig, setPhoneConfig] = useState({
+    maxLength: defaultCountryData.maxLength,
+    placeholder: defaultCountryData.placeholder,
+    dialCode: defaultCountryData.dialCode
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -62,11 +87,10 @@ export function RegisterForm() {
   };
 
   const handlePhoneChange = (value: string) => {
-    if (!value.startsWith('+639')) value = '+639';
-    const prefix = '+639';
-    const digitsOnly = value.slice(4).replace(/\D/g, '');
-    const limitedDigits = digitsOnly.slice(0, 9);
-    setFormData(prev => ({ ...prev, phone: prefix + limitedDigits }));
+    const digitsOnly = value.replace(/\D/g, '');
+    const limitedDigits = digitsOnly.slice(0, phoneConfig.maxLength);
+    setPhoneDigits(limitedDigits);
+    setFormData(prev => ({ ...prev, phone: '+' + phoneConfig.dialCode + limitedDigits }));
   };
 
   const setBirthday: Dispatch<SetStateAction<Date | undefined>> = (value) => {
@@ -82,7 +106,9 @@ export function RegisterForm() {
     if (!formData.lastName.trim()) errors.lastName = "Last Name is required";
     if (!formData.address.trim()) errors.address = "Address is required";
     if (!formData.nationality.trim()) errors.nationality = "Nationality is required";
-    if (!formData.phone || formData.phone.length < 13) errors.phone = "Valid phone number is required";
+    if (!phoneDigits || phoneDigits.length < phoneConfig.maxLength) {
+      errors.phone = `Phone number must be ${phoneConfig.maxLength} digits`;
+    }
 
     const birthDate = new Date(formData.birthday);
     const minAllowed = new Date();
@@ -191,9 +217,34 @@ export function RegisterForm() {
         </div>
         <div className="space-y-2">
           <div className="text-sm font-medium">Phone Number <span className="text-red-500">*</span></div>
-          <Input name="phone" placeholder="+639171234567" value={formData.phone || '+639'}
-            onChange={(e) => handlePhoneChange(e.target.value)} required maxLength={13}
-            className={validationErrors.phone ? "border-red-500" : ""} />
+          <div className="flex gap-2">
+            <CountryCodeSelector 
+              value={formData.countryCode}
+              onChange={(country: CountryData) => {
+                const truncated = phoneDigits.slice(0, country.maxLength);
+                setPhoneDigits(truncated);
+                setFormData(prev => ({ 
+                  ...prev, 
+                  countryCode: country.iso2, 
+                  phone: '+' + country.dialCode + truncated 
+                }));
+                setPhoneConfig({
+                  maxLength: country.maxLength,
+                  placeholder: country.placeholder,
+                  dialCode: country.dialCode
+                });
+              }}
+            />
+            <Input 
+              name="phone" 
+              placeholder={phoneConfig.placeholder} 
+              value={phoneDigits}
+              onChange={(e) => handlePhoneChange(e.target.value)} 
+              required 
+              type="tel"
+              className={`flex-1 ${validationErrors.phone ? "border-red-500" : ""}`} 
+            />
+          </div>
           {validationErrors.phone && <p className="text-xs text-red-500">{validationErrors.phone}</p>}
         </div>
         <div className="gap-3 flex w-full">
@@ -224,8 +275,10 @@ export function RegisterForm() {
         </div>
         <div className="space-y-2">
           <div className="text-sm font-medium">Nationality <span className="text-red-500">*</span></div>
-          <Combobox values={NATIONALITIES} placeholder="Select nationality" defaultValue={formData.nationality}
-            onChange={(value) => setFormData(prev => ({ ...prev, nationality: value }))} />
+          <NationalitySelector
+            defaultValue={formData.nationality}
+            onChange={(value) => setFormData(prev => ({ ...prev, nationality: value }))}
+          />
           {validationErrors.nationality && <p className="text-xs text-red-500">{validationErrors.nationality}</p>}
         </div>
         <Button type="submit" className="w-full text-white" style={{ backgroundColor: primaryColor }} disabled={loading}>
@@ -262,7 +315,14 @@ export function RegisterForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="hover:underline" style={{ color: primaryColor }}>Sign in</Link>
+          <Link 
+            href="/login" 
+            onMouseEnter={() => router.prefetch('/login')}
+            className="hover:underline" 
+            style={{ color: primaryColor }}
+          >
+            Sign in
+          </Link>
         </p>
       </div>
       <p className="text-center text-sm text-muted-foreground">

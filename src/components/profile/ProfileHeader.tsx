@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from "next/image"
 import { Camera, Check, Copy, LogOut } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/Card"
@@ -46,9 +46,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     fileInputRef,
     onImageChange
 }) => {
+    const [imageError, setImageError] = useState(false);
+
+    // Reset image error when profileImageUrl changes
+    useEffect(() => {
+        setImageError(false);
+    }, [profileImageUrl]);
+
     const { logout } = useAuth();
     const themeSettings = useThemeSettings();
-    const primaryColor = themeSettings?.primary || '#2563eb';
+    const primaryColor = themeSettings?.primaryColor || themeSettings?.primary || '#2563eb';
     return (
         <Card className="w-full border-none shadow-md" style={{
             background: `linear-gradient(to right, ${primaryColor}15, ${primaryColor}10)`
@@ -69,12 +76,13 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                             style={{ backgroundColor: primaryColor }}
                             onClick={onImageClick}
                         >
-                            {profileImageUrl ? (
+                            {profileImageUrl && !imageError ? (
                                 <Image
                                     src={profileImageUrl}
                                     alt="Profile"
                                     fill
                                     className="object-cover"
+                                    onError={() => setImageError(true)}
                                 />
                             ) : (
                                 <span className="text-4xl font-bold text-white">

@@ -8,12 +8,18 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useSearchParams } from 'next/navigation';
-import Combobox from '@/components/ui/Combobox';
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/Select';
+import { DEFAULT_NUM_VEHICLES } from 'constants/default';
+import NationalitySelector from '@/components/ui/NationalitySelector';
 import { AlertModal } from '@/components/ui/AlertModal';
 import type { DISCOUNT_TYPE } from 'constants/enum';
 import { getDefaultDOB } from 'helpers/date.helpers';
-import { NATIONALITIES } from 'constants/default';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import { hexToRgb } from 'helpers/theme.helpers';
 import { getRateTableRowsByRateTableId, getActivePassengerTypes, PassengerType } from '@/services';
@@ -132,7 +138,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
             fare: row.fare
           }))
           .sort((a: FareTypes, b: FareTypes) =>
-            a.discountType && b.discountType ? a.discountType.localeCompare(b.discountType) : 0
+            a.discountType && b.discountType ? String(a.discountType).localeCompare(String(b.discountType)) : 0
           );
 
         setFareTypes(fareTypesList);
@@ -460,39 +466,24 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
             )}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label htmlFor="sex" className="block text-sm font-medium text-customText">
               Sex
             </label>
-            <div className="flex items-center space-x-4 mt-2">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name={`sex-${companion.id}`}
-                  value="Male"
-                  checked={companion.sex?.toLowerCase() === 'male'}
-                  onChange={(e) => handleChange('sex', e.target.value, companion.id)}
-                  className="w-4 h-4 mr-2 cursor-pointer"
-                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
-                  disabled={companion.isDependent}
-                />
-                Male
-              </label>
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name={`sex-${companion.id}`}
-                  value="Female"
-                  checked={companion.sex?.toLowerCase() === 'female'}
-                  onChange={(e) => handleChange('sex', e.target.value, companion.id)}
-                  className="w-4 h-4 mr-2 cursor-pointer"
-                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
-                  disabled={companion.isDependent}
-                />
-                Female
-              </label>
-            </div>
-            {!companion.sex.trim() && errors[`${companion.id}-sex`] && (
+            <Select
+              value={companion.sex ? (companion.sex.charAt(0).toUpperCase() + companion.sex.slice(1).toLowerCase()) : ''}
+              onValueChange={(value) => handleChange('sex', value, companion.id)}
+              disabled={companion.isDependent}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select sex" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+              </SelectContent>
+            </Select>
+            {!companion.sex?.trim() && errors[`${companion.id}-sex`] && (
               <p className="text-red-500 text-sm mt-1">{errors[`${companion.id}-sex`]}</p>
             )}
           </div>
@@ -528,10 +519,8 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
                 disabled
               />
             ) : (
-              <Combobox
-                values={NATIONALITIES}
-                placeholder="Search nationality"
-                defaultValue={companion.nationality}
+              <NationalitySelector
+                value={companion.nationality}
                 onChange={(selectedValue) => handleChange('nationality', selectedValue, companion.id)}
               />
             )}
@@ -743,37 +732,23 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
             )}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label htmlFor="sex" className="block text-sm font-medium text-customText">
               Sex
             </label>
-            <div className="flex items-center space-x-4 mt-2">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="sex"
-                  value="Male"
-                  checked={passenger.sex?.toLowerCase() === 'male'}
-                  onChange={(e) => handleChange('sex', e.target.value, passenger.id)}
-                  className="w-4 h-4 mr-2 cursor-pointer"
-                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
-                />
-                Male
-              </label>
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="sex"
-                  value="Female"
-                  checked={passenger.sex?.toLowerCase() === 'female'}
-                  onChange={(e) => handleChange('sex', e.target.value, passenger.id)}
-                  className="w-4 h-4 mr-2 cursor-pointer"
-                  style={{ accentColor: themeSettings?.accent || '#23abff', colorScheme: 'light' }}
-                />
-                Female
-              </label>
-            </div>
-            {!passenger.sex.trim() && errors['sex'] && <p className="text-red-500 text-sm mt-1">{errors['sex']}</p>}
+            <Select
+              value={passenger.sex ? (passenger.sex.charAt(0).toUpperCase() + passenger.sex.slice(1).toLowerCase()) : ''}
+              onValueChange={(value) => handleChange('sex', value, passenger.id)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select sex" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+              </SelectContent>
+            </Select>
+            {!passenger.sex?.trim() && errors['sex'] && <p className="text-red-500 text-sm mt-1">{errors['sex']}</p>}
           </div>
 
           <div>
@@ -790,15 +765,13 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
             {!passenger.dob.trim() && errors['dob'] && <p className="text-red-500 text-sm mt-1">{errors['dob']}</p>}
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label htmlFor="nationality" className="block text-sm font-medium text-customText">
               Nationality
             </label>
-            <Combobox
-              values={NATIONALITIES}
-              placeholder="Search nationality"
-              defaultValue={passenger.nationality}
-              onChange={(selectedValue) => handleChange('nationality', selectedValue, passenger.id)}
+            <NationalitySelector
+              value={passenger.nationality}
+              onChange={(value) => handleChange('nationality', value, passenger.id)}
             />
             {!passenger.nationality.trim() && errors['nationality'] && (
               <p className="text-red-500 text-sm mt-1">{errors['nationality']}</p>

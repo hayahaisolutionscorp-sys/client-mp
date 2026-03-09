@@ -5,10 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContexts';
 import { useThemeSettings } from '@/hooks/theme-settings';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: boolean }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const { logout, currentUser, loggedInAccount, loading } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -64,6 +65,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
             {/* Desktop: Login Button */}
             <Link
               href="/login"
+              onMouseEnter={() => router.prefetch('/login')}
               className={`hidden lg:flex items-center justify-center px-6 py-2 text-white font-bold rounded-lg transition-all shadow-md whitespace-nowrap`}
               style={{
                 backgroundColor: themeSettings?.primary
@@ -102,6 +104,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
               </div>
               <Link
                 href="/profile"
+                onMouseEnter={() => router.prefetch('/profile')}
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => setIsDropdownOpen(false)}
               >

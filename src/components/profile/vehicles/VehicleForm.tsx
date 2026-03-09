@@ -34,26 +34,7 @@ const createVehicleSchema = (isMotorcycle: boolean) =>
     z.object({
         plate_number: z
             .string()
-            .min(1, "Plate number is required")
-            .transform((val) => val.trim().toUpperCase().replace(/[\s-]+/, " "))
-            .refine(
-                (val) => {
-                    if (isMotorcycle) {
-                        // MC Examples: AB 1234, ABC 123, 1A 1234
-                        return (
-                            /^[A-Z]{2,3}\s?\d{3,4}$/.test(val) || 
-                            /^[0-9][A-Z]\s?\d{4}$/.test(val)
-                        );
-                    }
-                    // Private Examples: AAA 1234, AAA 123
-                    return /^[A-Z]{3}\s?\d{3,4}$/.test(val);
-                },
-                {
-                    message: isMotorcycle
-                        ? "Enter a valid motorcycle plate (e.g. AB 1234, ABC 123, or 1A 1234)"
-                        : "Enter a valid plate number (e.g. ABC 1234 or ABC 123)",
-                }
-            ),
+            .min(1, "Plate number is required"),
         vehicle_model_id: z.string().min(1, "Vehicle model is required"),
         make: z.string().optional(),
         model: z.string().optional(),
@@ -156,11 +137,6 @@ export default function VehicleForm({ userId, vehicle, onSuccess, onCancel }: Ve
         setIsMotorcycle(motorcycle);
     }, [selectedModelId, selectedTypeId, models, vehicleTypes]);
 
-    // Re-validate plate number whenever isMotorcycle changes so the error message refreshes
-    useEffect(() => {
-        trigger("plate_number");
-    }, [isMotorcycle, trigger]);
-
     // ------------------------------------------------------------------
     // Submit
     // ------------------------------------------------------------------
@@ -219,10 +195,11 @@ export default function VehicleForm({ userId, vehicle, onSuccess, onCancel }: Ve
                         {...register("plate_number")}
                         placeholder={platePlaceholder}
                         className={errors.plate_number ? "border-red-500" : ""}
+                        style={{
+                            textTransform: "uppercase",
+                        }}
+                        onChange={(e) => setValue("plate_number", e.target.value.toUpperCase())}
                     />
-                    {errors.plate_number && (
-                        <p className="text-xs text-red-500">{errors.plate_number.message}</p>
-                    )}
                 </div>
 
                 {/* Vehicle Model */}

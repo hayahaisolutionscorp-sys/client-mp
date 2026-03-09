@@ -7,6 +7,7 @@ import BodyWrapper from '@/components/BodyWrapper';
 import ThemeProvider from '@/components/ThemeProvider';
 import { getHeadersSections } from '@/services/ui/header-section.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
+import { getDestinations } from '@/services/ui/destinations.service';
 import PwaInstallBanner from '@/components/pwa/PwaInstallBanner';
 import DevServiceWorkerReset from '@/components/pwa/DevServiceWorkerReset';
 import { ToasterProvider } from '@/components/ui/ToasterProvider';
@@ -32,6 +33,7 @@ export default async function RootLayout({
   // Fetch theme and header sections on server-side
   const brandingConfig = await getBrandingConfig();
   const headerSections = await getHeadersSections();
+  const destinations = await getDestinations();
 
   // Derive theme settings from branding config with fallback to local theme-settings.json
   const themeSettings: IThemeSettings = {
@@ -62,7 +64,7 @@ export default async function RootLayout({
         }} />
       </head>
       <body> {/* Ensure <body> is present */}
-        <ThemeProvider initialTheme={themeSettings}>
+        <ThemeProvider initialTheme={themeSettings} initialBranding={brandingConfig} initialDestinations={destinations}>
           <AuthContextProvider>
             <ThemeHydrator theme={themeSettings} />
             <BodyWrapper> {/* Wrap everything inside BodyWrapper */}

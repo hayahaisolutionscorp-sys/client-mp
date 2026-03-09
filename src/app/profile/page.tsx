@@ -40,6 +40,7 @@ export default function ProfilePage() {
     const [isCopied, setIsCopied] = useState(false);
 
     const [passenger, setPassenger] = useState<IPassenger | null>(null);
+    const [isProfileLoading, setIsProfileLoading] = useState(true);
     const [dependents, setDependents] = useState<IDependent[]>([]);
     const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>("unverified");
     const [account, setAccount] = useState<{
@@ -123,6 +124,8 @@ export default function ProfilePage() {
             }
         } catch (error) {
             console.error("Error fetching profile data:", error);
+        } finally {
+            setIsProfileLoading(false);
         }
     }, [loggedInAccount]);
 
@@ -136,6 +139,8 @@ export default function ProfilePage() {
 
         if (loggedInAccount?.role === 'Passenger') {
             fetchProfileData();
+        } else {
+            setIsProfileLoading(false);
         }
     }, [loggedInAccount, loading, fetchProfileData, router]);
 
@@ -237,8 +242,8 @@ export default function ProfilePage() {
         return imagePreview;
     }, [imagePreview]);
 
-    if (!loggedInAccount && loading) {
-        return null;
+    if ((!loggedInAccount && loading) || isProfileLoading) {
+        return <ProfileSkeleton />;
     }
 
     if (!loggedInAccount) {

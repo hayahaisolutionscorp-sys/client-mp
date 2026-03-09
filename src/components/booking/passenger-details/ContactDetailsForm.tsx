@@ -13,6 +13,8 @@ import { PassengerData } from "@/types/booking/passenger-data";
 import { ContactData } from "@/types/booking/contact-data";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useAuth } from "@/contexts/AuthContexts";
+import CountryCodeSelector, { CountryData } from "@/components/ui/CountryCodeSelector";
+import { defaultCountries, parseCountry } from "react-international-phone";
 
 
 interface ContactDetailsFormProps {
@@ -31,12 +33,25 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
   const themeSettings = useThemeSettings();
   const { loggedInAccount } = useAuth();
   const [usePassengerDetails, setUsePassengerDetails] = useState(false);
+  const ph = defaultCountries.find(c => parseCountry(c).iso2 === 'ph') || defaultCountries[0];
+  const defaultCountry = parseCountry(ph);
+
   const [contactDetails, setContactDetails] = useState<ContactData>(initialContact || {
     firstname: "",
     lastname: "",
     mobileNumber: "",
     email: "",
-    countryCode: "+639",
+    countryCode: defaultCountry.iso2,
+  });
+  const [phoneDigits, setPhoneDigits] = useState("");
+
+  const [phoneConfig, setPhoneConfig] = useState(() => {
+    const formatStr = typeof defaultCountry.format === 'string' ? defaultCountry.format : '';
+    const dotMatches = formatStr.match(/\./g);
+    return {
+      maxLength: dotMatches ? dotMatches.length : 10,
+      placeholder: formatStr.replace(/\./g, "0").replace(/\\/g, "") || "917 123 4567"
+    };
   });
 
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -54,12 +69,38 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
   useEffect(() => {
     if (loggedInAccount && !contactDetails.firstname && !contactDetails.lastname && !contactDetails.email) {
       const profile = loggedInAccount.passenger;
+      const phone = profile?.phone || "";
+      let countryIso = defaultCountry.iso2;
+      let digits = phone.replace(/\D/g, "");
+
+      if (phone) {
+        const match = defaultCountries.find(c => {
+          const parsed = parseCountry(c);
+          const dialCode = parsed.dialCode;
+          return phone.startsWith(dialCode) || phone.startsWith('+' + dialCode);
+        });
+        if (match) {
+          const parsed = parseCountry(match);
+          const dialCode = parsed.dialCode;
+          countryIso = parsed.iso2;
+          digits = phone.startsWith('+') 
+            ? phone.slice(dialCode.length + 1).replace(/\D/g, '')
+            : phone.slice(dialCode.length).replace(/\D/g, '');
+          
+          setPhoneConfig({
+            maxLength: digits.length > 10 ? digits.length : 10, // heuristic
+            placeholder: "" // will be updated by CountryCodeSelector if changed
+          });
+        }
+      }
+
+      setPhoneDigits(digits);
       setContactDetails({
         firstname: profile?.firstName || "",
         lastname: profile?.lastName || "",
-        mobileNumber: profile?.phone || "",
+        mobileNumber: phone.startsWith('+') ? phone : (phone ? `+${phone}` : ""),
         email: loggedInAccount.email || "",
-        countryCode: "+639", // Default
+        countryCode: countryIso,
       });
     }
   }, [loggedInAccount, contactDetails.firstname, contactDetails.lastname, contactDetails.email]);
@@ -105,7 +146,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
           lastname: passengerDetails.lastname,
           mobileNumber: "",
           email: "",
-          countryCode: "+639",
+          countryCode: "PH",
         });
       } else {
         setContactDetails({
@@ -113,7 +154,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
           lastname: "",
           mobileNumber: "",
           email: "",
-          countryCode: "+639",
+          countryCode: defaultCountry.iso2,
         });
       }
       return newValue;
@@ -141,6 +182,10 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
         !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(contactDetails.email)
       ) {
         errors.email = "Please enter a valid email address";
+      }
+
+      if (phoneDigits && phoneDigits.length < phoneConfig.maxLength) {
+        errors.mobileNumber = `Mobile number must be ${phoneConfig.maxLength} digits`;
       }
 
       // Update the errors state with all fields' errors
@@ -213,27 +258,40 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
             Mobile Number
           </label>
           <div className="flex flex-row items-center">
-            <Select value={contactDetails.countryCode} onValueChange={handleCountryCodeChange}>
-              <SelectTrigger className="pointer-events-none w-20 mr-2">
-                <SelectValue placeholder="+639" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="+639">+63</SelectItem>
-                {/* Add more country codes as needed */}
-              </SelectContent>
-            </Select>
+            <CountryCodeSelector 
+              value={contactDetails.countryCode}
+              onChange={(country: CountryData) => {
+                const truncated = phoneDigits.slice(0, country.maxLength);
+                setPhoneDigits(truncated);
+                const dial = country.dialCode;
+                setContactDetails(prev => ({ 
+                  ...prev, 
+                  countryCode: country.iso2, 
+                  mobileNumber: '+' + dial + truncated 
+                }));
+                setPhoneConfig({
+                  maxLength: country.maxLength,
+                  placeholder: country.placeholder
+                });
+              }}
+              className="w-[100px] mr-2"
+            />
             <Input
               id="contact-mobileNumber"
               name="mobileNumber"
               type="text"
-              placeholder="Mobile number"
-              value={contactDetails.mobileNumber}
+              placeholder={phoneConfig.placeholder}
+              value={phoneDigits}
               inputMode="numeric"
-              maxLength={10}
+              maxLength={phoneConfig.maxLength}
               className="w-full"
               onChange={(e) => {
-                const numericValue = e.target.value.replace(/[^0-9]/g, "");
-                setContactDetails((prev) => ({ ...prev, mobileNumber: numericValue }));
+                const numericValue = e.target.value.replace(/[^0-9]/g, "").slice(0, phoneConfig.maxLength);
+                setPhoneDigits(numericValue);
+                // We need to find the current dial code
+                const match = defaultCountries.find(c => parseCountry(c).iso2 === contactDetails.countryCode) || defaultCountries[0];
+                const dial = parseCountry(match).dialCode;
+                setContactDetails((prev) => ({ ...prev, mobileNumber: '+' + dial + numericValue }));
               }}
             />
           </div>
