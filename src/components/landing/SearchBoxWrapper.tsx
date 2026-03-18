@@ -38,7 +38,9 @@ export default function SearchBoxWrapper() {
                             transition={{ duration: 0.3 }}
                         >
                             <TripSearchWidget
-                                tenantId={Number(process.env.NEXT_PUBLIC_TENANT_ID) || 1}
+                                tenantId={process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
+                                    ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
+                                    : undefined}
                                 chatApiUrl="/api/chat-booking"
                                 routesApiUrl="/api/routes"
                                 tripsApiUrl="/api/trips"
