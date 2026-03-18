@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import SearchBox from "@/components/landing/SearchBox";
@@ -13,10 +13,68 @@ type Mode = "form" | "chat";
 export default function SearchBoxWrapper() {
     const [mode, setMode] = useState<Mode>("form"); // Default to AI chat
     const [bookingType, setBookingType] = useState<string | undefined>(DEFAULT_BOOKING_TYPE);
+    const [tripSearchEnabled, setTripSearchEnabled] = useState<boolean>(true);
+    const [portNameToCode, setPortNameToCode] = useState<Map<string, string>>(new Map());
     const router = useRouter();
 
+    const tenantId = process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
+        ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
+        : 1;
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const [configRes, routesRes] = await Promise.all([
+                    fetch(`/api/agent-config?tenantId=${tenantId}&type=trip-search`),
+                    fetch(`/api/routes`),
+                ]);
+
+                if (configRes.ok) {
+                    const data = await configRes.json();
+                    const cfg = data?.config;
+                    setTripSearchEnabled(cfg?.enabled ?? true);
+                }
+
+                if (routesRes.ok) {
+                    const routesData = await routesRes.json();
+                    const routes = routesData?.data ?? routesData ?? [];
+                    const lookup = new Map<string, string>();
+                    for (const r of routes) {
+                        if (r.src_port_name && r.src_port_code) {
+                            lookup.set(r.src_port_name.toLowerCase(), r.src_port_code);
+                        }
+                        if (r.dest_port_name && r.dest_port_code) {
+                            lookup.set(r.dest_port_name.toLowerCase(), r.dest_port_code);
+                        }
+                    }
+                    setPortNameToCode(lookup);
+                }
+            } catch {
+                // Default to enabled on error
+            }
+        })();
+    }, [tenantId]);
+
     const handleTripSelect = (trip: TripData) => {
-        router.push(`/trips/${trip.id}`);
+        const depDate = trip.departureTime
+            ? new Date(trip.departureTime).toISOString().split("T")[0]
+            : new Date().toISOString().split("T")[0];
+
+        const originCode = portNameToCode.get(trip.srcPort.toLowerCase());
+        const destCode = portNameToCode.get(trip.destPort.toLowerCase());
+
+        const params = new URLSearchParams({
+            departure_date: depDate,
+            passenger_count: "1",
+            vehicle_count: "0",
+            sort: "departureDate",
+            page: "1",
+        });
+
+        if (originCode) params.set("origin_code", originCode);
+        if (destCode) params.set("destination_code", destCode);
+
+        router.push(`/booking/destination?${params.toString()}`);
     };
 
     return (
@@ -29,7 +87,7 @@ export default function SearchBoxWrapper() {
         >
             <div className="w-full sm:w-[95%] md:w-[95%] lg:w-[1300px]">
                 <AnimatePresence mode="wait">
-                    {mode === "chat" ? (
+                    {mode === "chat" && tripSearchEnabled ? (
                         <motion.div
                             key="chat"
                             initial={{ opacity: 0, y: 20 }}
@@ -63,6 +121,7 @@ export default function SearchBoxWrapper() {
                                 onSwitchToChat={() => setMode("chat")}
                                 bookingType={bookingType}
                                 setBookingType={setBookingType}
+                                showChatToggle={tripSearchEnabled}
                             />
                         </motion.div>
                     )}
@@ -76,11 +135,13 @@ export default function SearchBoxWrapper() {
 function SearchBoxWithToggle({
     onSwitchToChat,
     bookingType,
-    setBookingType
+    setBookingType,
+    showChatToggle = true
 }: {
     onSwitchToChat: () => void;
     bookingType: string | undefined;
     setBookingType: (value: string | undefined) => void;
+    showChatToggle?: boolean;
 }) {
     return (
         <div className="relative">
@@ -95,25 +156,27 @@ function SearchBoxWithToggle({
                             Travel around the Philippines
                         </p>
                     </div>
-                    <button
-                        onClick={onSwitchToChat}
-                        className="flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 text-sm text-white hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
-                    >
-                        <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                    {showChatToggle && (
+                        <button
+                            onClick={onSwitchToChat}
+                            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 text-sm text-white hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
                         >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                            />
-                        </svg>
-                        <span className="hidden sm:inline">Ask AyahAI</span>
-                    </button>
+                            <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                />
+                            </svg>
+                            <span className="hidden sm:inline">Ask AyahAI</span>
+                        </button>
+                    )}
                 </div>
 
                 {/* Original SearchBox content - import the form parts */}
@@ -127,7 +190,7 @@ function SearchBoxWithToggle({
 }
 
 // Extracted form content from SearchBox (simplified inline version)
-import { useState as useStateForm, useEffect, SetStateAction, Dispatch } from "react";
+import { useState as useStateForm, SetStateAction, Dispatch } from "react";
 import { LuArrowRightLeft } from "react-icons/lu";
 import { BiSolidShip } from "react-icons/bi";
 import { FiLoader } from "react-icons/fi";
