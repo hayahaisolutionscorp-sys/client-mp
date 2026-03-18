@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveApiBaseUrl } from '../_utils/resolveApiBaseUrl';
+import { resolveKnowledgeBaseUrl } from '../_utils/resolveApiBaseUrl';
 
-const API_BASE_URL = resolveApiBaseUrl();
+const API_BASE_URL = resolveKnowledgeBaseUrl();
 const MARKETPLACE_TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || '1';
 
 export async function GET(request: NextRequest) {

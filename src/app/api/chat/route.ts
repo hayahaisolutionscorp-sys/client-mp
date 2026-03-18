@@ -1,9 +1,9 @@
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-import { resolveApiBaseUrl, isClientMode } from '../_utils/resolveApiBaseUrl';
+import { resolveKnowledgeBaseUrl, isClientMode } from '../_utils/resolveApiBaseUrl';
 
-const API_BASE_URL = resolveApiBaseUrl();
+const API_BASE_URL = resolveKnowledgeBaseUrl();
 const MARKETPLACE_TENANT_ID = parseInt(process.env.NEXT_PUBLIC_TENANT_ID || '1', 10);
 
 type ChatRole = 'user' | 'assistant' | 'system';

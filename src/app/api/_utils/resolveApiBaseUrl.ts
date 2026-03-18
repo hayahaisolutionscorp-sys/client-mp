@@ -9,3 +9,9 @@ export const resolveApiBaseUrl = () => {
 
   return isClientMode ? clientApiBaseUrl : defaultApiUrl;
 };
+
+// Knowledge-base endpoints (chat, agent-config) always live on api-v2,
+// regardless of client mode.
+export const resolveKnowledgeBaseUrl = () => {
+  return trimTrailingSlash(process.env.NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL || 'http://localhost:3002');
+};
