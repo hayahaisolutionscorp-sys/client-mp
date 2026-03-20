@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveApiBaseUrl } from '../_utils/resolveApiBaseUrl';
+import { resolveKnowledgeBaseUrl, isClientMode } from '../_utils/resolveApiBaseUrl';
 
-const API_BASE_URL = resolveApiBaseUrl();
+const API_BASE_URL = resolveKnowledgeBaseUrl();
 const MARKETPLACE_TENANT_ID = parseInt(process.env.NEXT_PUBLIC_TENANT_ID || '1', 10);
 
 export interface BookingContext {
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         query: latestMessage,
         agentType: 'trip-search',
         history,
-        tenantId: MARKETPLACE_TENANT_ID
+        ...(isClientMode ? { tenantId: MARKETPLACE_TENANT_ID } : {})
       })
     });
 

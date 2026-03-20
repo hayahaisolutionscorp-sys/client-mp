@@ -1,9 +1,9 @@
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-import { resolveApiBaseUrl } from '../_utils/resolveApiBaseUrl';
+import { resolveKnowledgeBaseUrl, isClientMode } from '../_utils/resolveApiBaseUrl';
 
-const API_BASE_URL = resolveApiBaseUrl();
+const API_BASE_URL = resolveKnowledgeBaseUrl();
 const MARKETPLACE_TENANT_ID = parseInt(process.env.NEXT_PUBLIC_TENANT_ID || '1', 10);
 
 type ChatRole = 'user' | 'assistant' | 'system';
@@ -33,7 +33,10 @@ export async function POST(req: Request) {
 
     // AI Configuration is the source of truth — pass agentType so backend resolves from agent_configs
     const agentType = 'chatbot';
-    const tenantId = queryTenantId ? parseInt(queryTenantId) : MARKETPLACE_TENANT_ID;
+    // In client mode, scope to tenant; in aggregator mode, omit tenantId to query all tenants
+    const tenantId = queryTenantId
+      ? parseInt(queryTenantId)
+      : (isClientMode ? MARKETPLACE_TENANT_ID : undefined);
     const scope = queryScope || undefined;
 
     // AI SDK v3+ can send in multiple formats depending on version/config
