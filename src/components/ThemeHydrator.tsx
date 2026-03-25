@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { IThemeSettings } from "@/models";
 
 const BRANDING_CACHE_KEY = "branding_config";
 
 export default function ThemeHydrator({ theme }: { theme: IThemeSettings }) {
+    const pathname = usePathname();
+
     useEffect(() => {
         if (typeof window === "undefined") return;
+        if (pathname.startsWith("/preview")) return;
 
         // Seed the cache with the server-fetched theme
         // We only need to store the essential fields
@@ -34,7 +38,7 @@ export default function ThemeHydrator({ theme }: { theme: IThemeSettings }) {
                 console.error("Failed to sync branding cache:", e);
             }
         }
-    }, [theme]);
+    }, [theme, pathname]);
 
     return null;
 }

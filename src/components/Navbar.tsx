@@ -18,16 +18,28 @@ import UserDropdown from './UserDropdown';
 import { useBranding } from '@/hooks/branding';
 import { useHeaders } from '@/hooks/headers';
 import { useAuth } from '@/contexts/AuthContexts';
+import type { IBrandingConfig } from '@/models/branding.model';
+import type { IHeaderSection } from '@/models';
 
-const Navbar = () => {
+interface NavbarProps {
+  forceHomeStyle?: boolean;
+  initialBranding?: IBrandingConfig | null;
+  initialHeaderSection?: IHeaderSection | null;
+}
+
+const Navbar = ({
+  forceHomeStyle = false,
+  initialBranding = null,
+  initialHeaderSection = null,
+}: NavbarProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const [activeNav, setActiveNav] = useState('Book');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
 
-  const branding = useBranding();
-  const headerSection = useHeaders();
+  const branding = useBranding() || initialBranding;
+  const headerSection = useHeaders() || initialHeaderSection;
   const { currentUser, logout } = useAuth();
 
 
@@ -81,12 +93,12 @@ const Navbar = () => {
 
   if (!branding) return null;
 
-  const isHome = pathname === '/';
+  const isHome = forceHomeStyle || pathname === '/';
   const shouldBeTransparent = isHome && !isMenuOpen;
   const position = isHome ? 'absolute' : 'relative';
   const backgroundColor = shouldBeTransparent ? 'text-white bg-transparent' : 'text-black bg-white';
 
-  const logoSrc = isHome ? branding.logo.light : branding.logo.dark;
+  const logoSrc = isHome ? branding.logo?.light : branding.logo?.dark;
 
   return (
     <>
@@ -99,13 +111,17 @@ const Navbar = () => {
             {/* Logo */}
             <div className="flex-shrink-0 relative z-50">
               <Link href="/">
-                <Image
-                  alt="Company Logo"
-                  src={logoSrc}
-                  width={150}
-                  height={150}
-                  className="w-auto h-[40px] object-contain sm:h-[55px] transition-all duration-300"
-                />
+                {logoSrc ? (
+                  <Image
+                    alt="Company Logo"
+                    src={logoSrc}
+                    width={150}
+                    height={150}
+                    className="w-auto h-[40px] object-contain sm:h-[55px] transition-all duration-300"
+                  />
+                ) : (
+                  <span className="text-xl font-semibold">{branding.brand_name}</span>
+                )}
               </Link>
             </div>
 

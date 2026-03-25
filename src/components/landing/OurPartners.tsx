@@ -1,9 +1,13 @@
 import Image from 'next/image';
 import { getPartners } from '@/services';
+import type { PreviewPartner } from '@/lib/preview/landing-preview';
 
+interface OurPartnersProps {
+  partnersOverride?: PreviewPartner[] | null;
+}
 
-export default async function OurPartners() {
-  const { data: partners } = await getPartners();
+export default async function OurPartners({ partnersOverride }: OurPartnersProps = {}) {
+  const partners = partnersOverride ?? (await getPartners()).data;
 
   return (
     <section className="flex flex-col items-center justify-start bg-white h-auto">

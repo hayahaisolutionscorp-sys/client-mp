@@ -3,18 +3,28 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import SearchBox from "@/components/landing/SearchBox";
 import { TripSearchWidget } from "@oltek/hayahai-sdk/react";
 import type { TripData } from "@oltek/hayahai-sdk/react";
 import { DEFAULT_BOOKING_TYPE } from "constants/default";
+import { IPort } from "@/models";
 
 type Mode = "form" | "chat";
 
-export default function SearchBoxWrapper() {
+interface SearchBoxWrapperProps {
+    initialTripSearchEnabled?: boolean;
+    initialPorts?: IPort[];
+}
+
+export default function SearchBoxWrapper({
+    initialTripSearchEnabled = true,
+    initialPorts = [],
+}: SearchBoxWrapperProps) {
     const [mode, setMode] = useState<Mode>("form"); // Default to AI chat
     const [bookingType, setBookingType] = useState<string | undefined>(DEFAULT_BOOKING_TYPE);
-    const [tripSearchEnabled, setTripSearchEnabled] = useState<boolean>(true);
-    const [portNameToCode, setPortNameToCode] = useState<Map<string, string>>(new Map());
+    const [tripSearchEnabled, setTripSearchEnabled] = useState<boolean>(initialTripSearchEnabled);
+    const [portNameToCode] = useState<Map<string, string>>(
+        () => new Map(initialPorts.map((port) => [port.name.toLowerCase(), port.code]))
+    );
     const router = useRouter();
 
     const tenantId = process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
@@ -24,30 +34,12 @@ export default function SearchBoxWrapper() {
     useEffect(() => {
         (async () => {
             try {
-                const [configRes, routesRes] = await Promise.all([
-                    fetch(`/api/agent-config?tenantId=${tenantId}&type=trip-search`),
-                    fetch(`/api/routes`),
-                ]);
+                const configRes = await fetch(`/api/agent-config?tenantId=${tenantId}&type=trip-search`);
 
                 if (configRes.ok) {
                     const data = await configRes.json();
                     const cfg = data?.config;
                     setTripSearchEnabled(cfg?.enabled ?? true);
-                }
-
-                if (routesRes.ok) {
-                    const routesData = await routesRes.json();
-                    const routes = routesData?.data ?? routesData ?? [];
-                    const lookup = new Map<string, string>();
-                    for (const r of routes) {
-                        if (r.src_port_name && r.src_port_code) {
-                            lookup.set(r.src_port_name.toLowerCase(), r.src_port_code);
-                        }
-                        if (r.dest_port_name && r.dest_port_code) {
-                            lookup.set(r.dest_port_name.toLowerCase(), r.dest_port_code);
-                        }
-                    }
-                    setPortNameToCode(lookup);
                 }
             } catch {
                 // Default to enabled on error
@@ -122,6 +114,7 @@ export default function SearchBoxWrapper() {
                                 bookingType={bookingType}
                                 setBookingType={setBookingType}
                                 showChatToggle={tripSearchEnabled}
+                                initialPorts={initialPorts}
                             />
                         </motion.div>
                     )}
@@ -136,12 +129,14 @@ function SearchBoxWithToggle({
     onSwitchToChat,
     bookingType,
     setBookingType,
-    showChatToggle = true
+    showChatToggle = true,
+    initialPorts = [],
 }: {
     onSwitchToChat: () => void;
     bookingType: string | undefined;
     setBookingType: (value: string | undefined) => void;
     showChatToggle?: boolean;
+    initialPorts?: IPort[];
 }) {
     return (
         <div className="relative">
@@ -183,6 +178,7 @@ function SearchBoxWithToggle({
                 <SearchBoxFormContent
                     bookingType={bookingType}
                     setBookingType={setBookingType}
+                    initialPorts={initialPorts}
                 />
             </div>
         </div>
@@ -201,7 +197,6 @@ import TripDropdown from "@/components/booking/destination/TripDropdown";
 import DatePickerFieldset from "@/components/ui/DatePickerFieldset";
 import { Button } from "@/components/ui/Button";
 
-import { IPort } from "@/models";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import {
     DEFAULT_NUM_VEHICLES,
@@ -209,13 +204,17 @@ import {
 } from "constants/default";
 import { getPorts, getDestinationPortsByOrigin } from "@/services";
 
-function SearchBoxFormContent({
-    bookingType,
-    setBookingType
-}: {
+export interface SearchBoxFormContentProps {
     bookingType: string | undefined;
     setBookingType: (value: string | undefined) => void;
-}) {
+    initialPorts?: IPort[];
+}
+
+export function SearchBoxFormContent({
+    bookingType,
+    setBookingType,
+    initialPorts = [],
+}: SearchBoxFormContentProps) {
     const router = useRouter();
 
     const [passengerCount, setPassengerCount] = useStateForm<number>(DEFAULT_NUM_PASSENGERS);
@@ -225,13 +224,17 @@ function SearchBoxFormContent({
     const [selectedOriginPort, setSelectedOriginPort] = useStateForm<IPort | undefined>();
     const [selectedDestinationPort, setSelectedDestinationPort] = useStateForm<IPort | undefined>();
     const [destinationPorts, setDestinationPorts] = useStateForm<IPort[] | undefined>([]);
-    const [ports, setPorts] = useStateForm<IPort[] | undefined>([]);
+    const [ports, setPorts] = useStateForm<IPort[] | undefined>(initialPorts);
     const [isFormValid, setIsFormValid] = useStateForm<boolean>(false);
     const [error, setError] = useStateForm<string | null>(null);
     const [isLoading, setIsLoading] = useStateForm(false);
     const themeSettings = useThemeSettings();
 
     useEffect(() => {
+        if (initialPorts.length > 0) {
+            return;
+        }
+
         const fetchPorts = async () => {
             try {
                 const allPorts = await getPorts();
@@ -242,7 +245,7 @@ function SearchBoxFormContent({
         };
 
         fetchPorts();
-    }, []);
+    }, [initialPorts]);
 
     useEffect(() => {
         const fetchDestinationPorts = async () => {

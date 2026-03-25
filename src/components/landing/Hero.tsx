@@ -2,16 +2,34 @@ import Navbar from '@/components/Navbar';
 import Media from '@/components/landing/Media';
 import SearchBoxWrapper from '@/components/landing/SearchBoxWrapper';
 import { HERO_SECTION_IMAGES } from 'constants/storage';
-import { getHeroSections } from '@/services';
+import { getHeadersSections, getHeroSections, getPorts } from '@/services';
+import type { PreviewPageSection } from '@/lib/preview/landing-preview';
+import type { IHeaderSection, IPort } from '@/models';
 
-export default async function Hero() {
-  const heroSection = await getHeroSections();
+interface HeroProps {
+  heroSectionOverride?: PreviewPageSection | null;
+  forceHomeNavbar?: boolean;
+  showNavbar?: boolean;
+  showBookingSearch?: boolean;
+}
+
+export default async function Hero({
+  heroSectionOverride,
+  forceHomeNavbar = false,
+  showNavbar = true,
+  showBookingSearch = true,
+}: HeroProps = {}) {
+  const [heroSection, headerSection, ports] = await Promise.all([
+    heroSectionOverride ? Promise.resolve(heroSectionOverride) : getHeroSections(),
+    getHeadersSections().catch(() => null) as Promise<IHeaderSection | null>,
+    getPorts().catch(() => []) as Promise<IPort[]>,
+  ]);
   let captionBackground;
 
   if (heroSection?.bg_type?.toLowerCase() == 'youtube') {
     captionBackground = (
       <Media
-        src={heroSection?.bg_url}
+        src={heroSection?.bg_url || ''}
         type="youtube"
         playing={true}
         loop={true}
@@ -44,7 +62,12 @@ export default async function Hero() {
   return (
     <header id="Book" className="relative bg-[#EEF8FC]">
       <div className="relative w-auto h-[650px] mx-4 mt-4 rounded-[32px] overflow-hidden">
-        <Navbar />
+        {showNavbar ? (
+          <Navbar
+            forceHomeStyle={forceHomeNavbar}
+            initialHeaderSection={headerSection}
+          />
+        ) : null}
 
         {captionBackground ? (
           captionBackground
@@ -72,7 +95,12 @@ export default async function Hero() {
         </div>
       </div>
 
-      <SearchBoxWrapper />
+      {showBookingSearch ? (
+        <SearchBoxWrapper
+          initialPorts={ports}
+          initialTripSearchEnabled={true}
+        />
+      ) : null}
     </header>
   );
 }

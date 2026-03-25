@@ -10,14 +10,27 @@ import {
   IGetToKnowData
 } from '@/services/ui/get-to-know.service';
 import { useThemeSettings } from '@/hooks/theme-settings';
+import type { IThemeSettings } from '@/models';
 
-export default function GetToKnowUs() {
+interface GetToKnowUsProps {
+  mainDataOverride?: IGetToKnowData | null;
+  missionDataOverride?: IGetToKnowData | null;
+  visionDataOverride?: IGetToKnowData | null;
+  themeSettingsOverride?: IThemeSettings | null;
+}
+
+export default function GetToKnowUs({
+  mainDataOverride,
+  missionDataOverride,
+  visionDataOverride,
+  themeSettingsOverride,
+}: GetToKnowUsProps = {}) {
   const [tab, setTab] = useState<'Mission' | 'Vision'>('Mission');
-  const [mainData, setMainData] = useState<IGetToKnowData | null>(null);
-  const [missionData, setMissionData] = useState<IGetToKnowData | null>(null);
-  const [visionData, setVisionData] = useState<IGetToKnowData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const themeSettings = useThemeSettings();
+  const [mainData, setMainData] = useState<IGetToKnowData | null>(mainDataOverride ?? null);
+  const [missionData, setMissionData] = useState<IGetToKnowData | null>(missionDataOverride ?? null);
+  const [visionData, setVisionData] = useState<IGetToKnowData | null>(visionDataOverride ?? null);
+  const [loading, setLoading] = useState(!(mainDataOverride && missionDataOverride && visionDataOverride));
+  const themeSettings = themeSettingsOverride ?? useThemeSettings();
 
   const TABS = {
     Mission: 'Mission',
@@ -27,6 +40,14 @@ export default function GetToKnowUs() {
   type TabName = keyof typeof TABS; // 'Mission' | 'Vision'
 
   useEffect(() => {
+    if (mainDataOverride && missionDataOverride && visionDataOverride) {
+      setMainData(mainDataOverride);
+      setMissionData(missionDataOverride);
+      setVisionData(visionDataOverride);
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const [mainRes, missionRes, visionRes] = await Promise.all([
@@ -47,7 +68,7 @@ export default function GetToKnowUs() {
     };
 
     fetchData();
-  }, []);
+  }, [mainDataOverride, missionDataOverride, visionDataOverride]);
 
   if (loading) {
     // Or return a skeleton/spinner

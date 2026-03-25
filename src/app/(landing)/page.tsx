@@ -1,4 +1,5 @@
 import Hero from '@/components/landing/Hero';
+import LandingPageBuilder from '@/components/landing/builder/LandingPageBuilder';
 import dynamic from 'next/dynamic';
 
 const Promos = dynamic(() => import('@/components/landing/Promos'), { ssr: true });
@@ -7,6 +8,7 @@ const WhyChooseUs = dynamic(() => import('@/components/landing/WhyChooseUs'), { 
 
 
 import { getPageMetadata } from '@/services/content/seo.service';
+import { getLandingBuilderContent } from '@/services/content/landing-builder.service';
 import { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,6 +34,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
+  const builderConfig = await getLandingBuilderContent();
+
+  if (builderConfig) {
+    return <LandingPageBuilder config={builderConfig} />;
+  }
+
   return (
     <div className="bg-[#EEF8FC]">
       <Hero />

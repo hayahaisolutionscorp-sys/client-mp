@@ -2,11 +2,27 @@ import PhotoGrid from '@/components/landing/photogrid/PhotoGrid';
 import { Suspense } from 'react';
 import RoutesPhotoGridSkeleton from './skeletons/RoutesPhotoGridSkeleton';
 import { getDestinations } from '@/services/ui/destinations.service';
+import { IThumbnail } from '@/models';
+import type { PreviewRouteRecommendation } from '@/lib/preview/landing-preview';
 
+interface PopularRoutesProps {
+  routesOverride?: PreviewRouteRecommendation[] | null;
+}
 
-export default async function PopularRoutes() {
+export default async function PopularRoutes({ routesOverride }: PopularRoutesProps = {}) {
   const shippingLineId = 3; // Default to Ayahay
-  const routeImages = getDestinations().then(destinations =>
+  const routeImages: Promise<IThumbnail[]> = routesOverride
+    ? Promise.resolve(
+      routesOverride.map((dest) => ({
+        id: 0,
+        shippingLineId,
+        label: dest.route,
+        filename: dest.image_url,
+        location: dest.route,
+        imageOrder: dest.display_order ?? 0,
+      }))
+    )
+    : getDestinations().then(destinations =>
     destinations.map(dest => ({
       id: 0, // Mock ID
       shippingLineId: shippingLineId,

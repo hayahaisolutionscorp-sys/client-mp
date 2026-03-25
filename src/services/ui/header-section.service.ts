@@ -1,16 +1,17 @@
 import { IHeaderSection } from '@/models';
 import { HEADER_SECTION_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { IS_BUILD_TIME } from '../config';
 
 import headerSectionsData from '@/data/header-sections.json';
 
 export async function getHeadersSections(): Promise<IHeaderSection | undefined> {
   try {
-    if (!IS_CLIENT) {
+    if (IS_BUILD_TIME) {
       return headerSectionsData[0] as IHeaderSection | undefined;
     }
 
     const res = await fetch(HEADER_SECTION_API, {
+      cache: 'no-store',
       // next: { tags: ['header-sections'], revalidate: 3600 }
     });
 

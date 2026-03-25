@@ -12,7 +12,8 @@ export default function LayoutWrapper({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const hideLayout = pathname === '/login' || pathname === '/register' || pathname.startsWith('/reset-password') || pathname.startsWith('/login/') || pathname.startsWith('/register/');
+  const isPreviewRoute = pathname.startsWith('/preview');
+  const hideLayout = isPreviewRoute || pathname === '/login' || pathname === '/register' || pathname.startsWith('/reset-password') || pathname.startsWith('/login/') || pathname.startsWith('/register/');
   const isProfilePage = pathname === '/profile';
 
   return (
@@ -28,7 +29,7 @@ export default function LayoutWrapper({
         </div>
       )}
       <SessionExpiredModal />
-      <ChatWidget tenantId={parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10)} />
+      {!isPreviewRoute && <ChatWidget tenantId={parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10)} />}
     </>
   );
 }

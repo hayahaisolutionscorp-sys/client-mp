@@ -3,12 +3,26 @@ import Image from 'next/image';
 import { getWhyChooseSection } from '@/services/content/features.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
+import type { IWhyChooseReason, IWhyChooseSection } from '@/services/content/features.service';
+import type { IThemeSettings, IBrandingConfig } from '@/models';
 
-export default async function Features({ reasons }: { reasons: import('@/services/content/features.service').IWhyChooseReason[] }) {
+interface FeaturesProps {
+  reasons: IWhyChooseReason[];
+  sectionOverride?: IWhyChooseSection | null;
+  themeSettingsOverride?: IThemeSettings | null;
+  brandingConfigOverride?: IBrandingConfig | null;
+}
+
+export default async function Features({
+  reasons,
+  sectionOverride,
+  themeSettingsOverride,
+  brandingConfigOverride,
+}: FeaturesProps) {
   const [section, themeSettings, brandingConfig] = await Promise.all([
-    getWhyChooseSection(),
-    getThemeSettings(),
-    getBrandingConfig()
+    sectionOverride ? Promise.resolve(sectionOverride) : getWhyChooseSection(),
+    themeSettingsOverride ? Promise.resolve(themeSettingsOverride) : getThemeSettings(),
+    brandingConfigOverride ? Promise.resolve(brandingConfigOverride) : getBrandingConfig()
   ]);
 
   if (!section || !reasons) return null;

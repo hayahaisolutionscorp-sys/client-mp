@@ -5,7 +5,6 @@ import AuthContextProvider from "@/contexts/AuthContexts";
 import LayoutWrapper from "./layoutWrapper";
 import BodyWrapper from '@/components/BodyWrapper';
 import ThemeProvider from '@/components/ThemeProvider';
-import { getHeadersSections } from '@/services/ui/header-section.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
 import { getDestinations } from '@/services/ui/destinations.service';
 import PwaInstallBanner from '@/components/pwa/PwaInstallBanner';
@@ -30,10 +29,10 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Fetch theme and header sections on server-side
-  const brandingConfig = await getBrandingConfig();
-  const headerSections = await getHeadersSections();
-  const destinations = await getDestinations();
+  const [brandingConfig, destinations] = await Promise.all([
+    getBrandingConfig(),
+    getDestinations(),
+  ]);
 
   // Derive theme settings from branding config with fallback to local theme-settings.json
   const themeSettings: IThemeSettings = {
