@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { TripData } from "@oltek/hayahai-sdk/react";
 import { DEFAULT_BOOKING_TYPE } from "constants/default";
@@ -218,6 +218,8 @@ export function SearchBoxFormContent({
     const [returnDate, setReturnDate] = useStateForm<Date | undefined>(new Date());
     const [selectedOriginPort, setSelectedOriginPort] = useStateForm<IPort | undefined>();
     const [selectedDestinationPort, setSelectedDestinationPort] = useStateForm<IPort | undefined>();
+    const selectedDestinationPortRef = useRef(selectedDestinationPort);
+    useEffect(() => { selectedDestinationPortRef.current = selectedDestinationPort; }, [selectedDestinationPort]);
     const [destinationPorts, setDestinationPorts] = useStateForm<IPort[] | undefined>([]);
     const [ports, setPorts] = useStateForm<IPort[] | undefined>(initialPorts);
     const [isFormValid, setIsFormValid] = useStateForm<boolean>(false);
@@ -267,8 +269,9 @@ export function SearchBoxFormContent({
                     setDestinationPorts(availableDestPorts.sort((a, b) => a.name.localeCompare(b.name)));
 
                     // Clear destination if it's no longer valid
-                    if (selectedDestinationPort && !validDestCodes.has(selectedDestinationPort.code)) {
+                    if (selectedDestinationPortRef.current && !validDestCodes.has(selectedDestinationPortRef.current.code)) {
                         setSelectedDestinationPort(undefined);
+                        selectedDestinationPortRef.current = undefined;
                     }
                 } catch (error) {
                     console.error("Failed to fetch destination ports:", error);
@@ -279,7 +282,7 @@ export function SearchBoxFormContent({
         };
 
         fetchDestinationPorts();
-    }, [initialRoutes, selectedOriginPort, ports, selectedDestinationPort]);
+    }, [initialRoutes, selectedOriginPort, ports]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         const isValid =

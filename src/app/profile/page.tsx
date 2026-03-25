@@ -34,9 +34,14 @@ export default function ProfilePage() {
     const tabParam = searchParams.get('tab');
 
     const SESSION_KEY = 'ayahay-profile-tab';
-    const [activeTab, setActiveTab] = useState(
-        tabParam || (typeof window !== 'undefined' ? sessionStorage.getItem(SESSION_KEY) : null) || 'overview'
-    );
+    const [activeTab, setActiveTab] = useState(tabParam || 'overview');
+
+    useEffect(() => {
+        if (!tabParam) {
+            const stored = sessionStorage.getItem(SESSION_KEY);
+            if (stored) setActiveTab(stored);
+        }
+    }, []);
     const [isCopied, setIsCopied] = useState(false);
 
     const [passenger, setPassenger] = useState<IPassenger | null>(null);
