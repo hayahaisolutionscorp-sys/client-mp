@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { BiSolidShip } from "react-icons/bi";
 import { IoMdPin } from "react-icons/io";
 import { IoMdClose } from "react-icons/io";
@@ -26,7 +26,9 @@ const PortDropdownFieldset = ({
 }: DestinationPortDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredPorts, setFilteredPorts] = useState<IPort[]>([]);
+  const [filteredPorts, setFilteredPorts] = useState<IPort[]>(() =>
+    ports ? [...ports].filter((p) => p.name.trim() !== "").sort((a, b) => a.name.localeCompare(b.name)) : []
+  );
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const themeSettings = useThemeSettings();
@@ -42,15 +44,14 @@ const PortDropdownFieldset = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const sortedPorts = useMemo(
+    () => (ports ? [...ports].filter((p) => p.name.trim() !== "").sort((a, b) => a.name.localeCompare(b.name)) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ports?.length]
+  );
   useEffect(() => {
-    if (ports) {
-      setFilteredPorts(
-        ports
-          .filter((port) => port.name.trim() !== "")
-          .sort((a, b) => a.name.localeCompare(b.name))
-      );
-    }
-  }, [ports]);
+    setFilteredPorts(sortedPorts);
+  }, [sortedPorts]);
 
   const toggleDropdown = () => {
     if (!disabled) {
