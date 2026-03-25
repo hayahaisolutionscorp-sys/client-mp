@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import UserDropdown from "@/components/UserDropdown";
 import { NAV_ITEMS } from "constants/index";
@@ -15,6 +17,8 @@ interface BuilderLandingHeaderProps {
 export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderProps) {
   const branding = useBranding();
   const headerSection = useHeaders();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const logoSrc = branding?.logo?.dark || branding?.logo?.light;
 
   const navItems = NAV_ITEMS.filter((item) => {
     if (!headerSection) return true;
@@ -37,15 +41,13 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
     }
   };
 
+  const handleScroll = (id: string) => {
+    scrollToElement(id);
+    setIsMenuOpen(false);
+  };
+
   if (variant === "floating") {
-    return (
-      <>
-        <HeaderFloating navItems={navItems} scrollToElement={scrollToElement} />
-        <div className="lg:hidden">
-          <Navbar />
-        </div>
-      </>
-    );
+    return <HeaderFloating navItems={navItems} scrollToElement={scrollToElement} />;
   }
 
   if (variant !== "centered") {
@@ -54,24 +56,34 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
 
   return (
     <>
-      <header className="hidden border-b border-slate-200 bg-white/95 backdrop-blur lg:block">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-5">
-          <div className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-500">
-            Marketplace
-          </div>
-
-          <Link href="/" className="text-lg font-bold text-customBlue">
-            {branding?.brand_name || "Ayahay"}
+      <header className="w-full border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="flex items-center justify-between gap-6 px-4 sm:px-6 lg:px-10 py-5">
+          {/* Logo */}
+          <Link href="/" className="flex-shrink-0">
+            {logoSrc ? (
+              <Image
+                alt="Company Logo"
+                src={logoSrc}
+                width={150}
+                height={150}
+                className="h-[40px] w-auto object-contain transition-all duration-300"
+              />
+            ) : (
+              <span className="text-xl font-semibold text-customText">
+                {branding?.brand_name || "Ayahay"}
+              </span>
+            )}
           </Link>
 
-          <div className="flex items-center gap-6 text-sm text-slate-600">
+          {/* Desktop Nav — centered */}
+          <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex lg:gap-8 text-sm text-customText">
             {navItems.map((item) =>
               item.trigger.toLowerCase() === "scroll" ? (
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => scrollToElement(item.id)}
-                  className="font-medium transition-colors hover:text-customBlue"
+                  onClick={() => handleScroll(item.id)}
+                  className="font-medium transition-all hover:border-b-2 border-transparent hover:border-current"
                 >
                   {item.name}
                 </button>
@@ -79,19 +91,83 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
                 <Link
                   key={item.id}
                   href={item.redirect_url}
-                  className="font-medium transition-colors hover:text-customBlue"
+                  className="font-medium transition-all hover:border-b-2 border-transparent hover:border-current"
                 >
                   {item.name}
                 </Link>
               )
             )}
-            <UserDropdown shouldBeTransparent={false} />
+          </nav>
+
+          {/* Right: UserDropdown + mobile hamburger */}
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex">
+              <UserDropdown shouldBeTransparent={false} />
+            </div>
+            <button
+              className="relative z-50 inline-flex items-center justify-center p-2 lg:hidden"
+              aria-label="Toggle menu"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <div className="relative h-6 w-6">
+                <span
+                  className={`absolute block h-0.5 w-6 bg-customText transform transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-0" : "-translate-y-2"}`}
+                />
+                <span
+                  className={`absolute block h-0.5 w-6 bg-customText transform transition-all duration-300 ${isMenuOpen ? "opacity-0" : "opacity-100"}`}
+                />
+                <span
+                  className={`absolute block h-0.5 w-6 bg-customText transform transition-all duration-300 ${isMenuOpen ? "-rotate-45 translate-y-0" : "translate-y-2"}`}
+                />
+              </div>
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="lg:hidden">
-        <Navbar />
+      {/* Mobile menu overlay */}
+      <div
+        className={`fixed inset-0 z-40 bg-white transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      >
+        {/* Close button */}
+        <button
+          className="absolute right-4 top-4 z-50 p-2"
+          aria-label="Close menu"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          <div className="relative h-6 w-6">
+            <span className="absolute block h-0.5 w-6 bg-customText rotate-45 translate-y-0" />
+            <span className="absolute block h-0.5 w-6 bg-customText -rotate-45 translate-y-0" />
+          </div>
+        </button>
+        <div className="h-full w-full overflow-y-auto px-4 pt-[100px]">
+          <div className="space-y-1">
+            {navItems.map((item) =>
+              item.trigger.toLowerCase() === "scroll" ? (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleScroll(item.id)}
+                  className="block w-full py-4 text-left text-lg font-medium text-customText transition-colors hover:opacity-80"
+                >
+                  {item.name}
+                </button>
+              ) : (
+                <Link
+                  key={item.id}
+                  href={item.redirect_url}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block py-4 text-lg font-medium text-customText transition-colors hover:opacity-80"
+                >
+                  {item.name}
+                </Link>
+              )
+            )}
+            <div className="pt-4">
+              <UserDropdown shouldBeTransparent={false} />
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

@@ -1,6 +1,7 @@
 'use client';
 
-import ScheduleAndFares from '@/components/schedule-and-fares/ScheduleAndFares';
+import dynamic from 'next/dynamic';
+const ScheduleAndFares = dynamic(() => import('@/components/schedule-and-fares/ScheduleAndFares'), { ssr: false });
 import { Card, CardContent, CardFooter } from '@/components/ui/Card';
 import { CalendarIcon } from 'lucide-react';
 

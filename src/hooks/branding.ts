@@ -17,6 +17,10 @@ export const useBranding = () => {
   }, [themeBranding]);
 
   useEffect(() => {
+    if (themeBranding) {
+      return;
+    }
+
     // Try to get cached branding first for fast initial paint
     const cached = localStorage.getItem(BRANDING_CACHE_KEY);
     if (cached) {

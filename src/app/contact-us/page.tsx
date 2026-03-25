@@ -1,6 +1,7 @@
 import { FaMobileAlt } from 'react-icons/fa';
 import { MdOutlineMail } from 'react-icons/md';
-import ContactUsForm from '@/components/contact-us/ContactUsForm';
+import dynamic from 'next/dynamic';
+const ContactUsForm = dynamic(() => import('@/components/contact-us/ContactUsForm'));
 import { getContactUs, getContactUsHero } from '@/services/content/contact-us.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
 import { getPageMetadata } from '@/services/content/seo.service';

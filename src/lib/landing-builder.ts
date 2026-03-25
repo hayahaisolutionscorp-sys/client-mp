@@ -39,13 +39,13 @@ export const LANDING_SECTION_LABELS: Record<LandingSectionKey, string> = {
 
 export const LANDING_VARIANTS: Record<LandingSectionKey, string[]> = {
   header: ["default", "centered", "floating"],
-  hero: ["default"],
-  booking: ["default"],
-  promotions: ["default"],
-  routes: ["default"],
-  why_choose: ["default"],
-  get_to_know: ["default"],
-  partners: ["default"],
+  hero: ["default", "split", "minimal", "cards"],
+  booking: ["default", "card", "banner"],
+  promotions: ["default", "grid", "banner"],
+  routes: ["default", "carousel"],
+  why_choose: ["default", "steps"],
+  get_to_know: ["default", "timeline"],
+  partners: ["default", "strip"],
 };
 
 export const DEFAULT_LANDING_BUILDER_CONTENT: LandingBuilderContent = {

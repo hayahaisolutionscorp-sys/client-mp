@@ -1,6 +1,7 @@
 import LandingPageBuilder from "@/components/landing/builder/LandingPageBuilder";
 import { getLandingDraft } from "@/lib/preview/landing-draft-store";
 import { normalizeLandingBuilderContent } from "@/lib/landing-builder";
+import { getLandingPageData } from "@/services/content/landing-page.service";
 
 interface LandingPreviewPageProps {
   searchParams: Promise<{
@@ -12,6 +13,7 @@ export default async function LandingPreviewPage({ searchParams }: LandingPrevie
   const params = await searchParams;
   const draftId = params.draftId;
   const payload = draftId ? getLandingDraft(draftId) : null;
+  const landingData = await getLandingPageData();
 
   if (!payload) {
     return (
@@ -24,6 +26,6 @@ export default async function LandingPreviewPage({ searchParams }: LandingPrevie
   const config = normalizeLandingBuilderContent(payload.builderConfig);
 
   return (
-    <LandingPageBuilder config={config} previewPayload={payload} />
+    <LandingPageBuilder config={config} previewPayload={payload} landingData={landingData} />
   );
 }

@@ -1,4 +1,5 @@
-import TermsContent from '@/components/terms/TermsContent'
+import dynamic from 'next/dynamic';
+const TermsContent = dynamic(() => import('@/components/terms/TermsContent'));
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
 

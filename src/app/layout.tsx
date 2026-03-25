@@ -62,7 +62,7 @@ export default async function RootLayout({
           `
         }} />
       </head>
-      <body> {/* Ensure <body> is present */}
+      <body suppressHydrationWarning> {/* Ensure <body> is present */}
         <ThemeProvider initialTheme={themeSettings} initialBranding={brandingConfig} initialDestinations={destinations}>
           <AuthContextProvider>
             <ThemeHydrator theme={themeSettings} />

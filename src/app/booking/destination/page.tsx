@@ -1,9 +1,11 @@
 import { Suspense } from 'react';
-import SearchHeader from '@/components/booking/destination/SearchHeader';
-import FilterSidebar from '@/components/booking/destination/FilterSidebar';
+import dynamic from 'next/dynamic';
 import { fetchFilters } from '@/services';
-import MobileFilterModal from '@/components/booking/destination/MobileFilter';
-import TripsSelector from '@/components/booking/destination/TripsSelector';
+
+const SearchHeader = dynamic(() => import('@/components/booking/destination/SearchHeader'));
+const FilterSidebar = dynamic(() => import('@/components/booking/destination/FilterSidebar'));
+const MobileFilterModal = dynamic(() => import('@/components/booking/destination/MobileFilter'));
+const TripsSelector = dynamic(() => import('@/components/booking/destination/TripsSelector'));
 
 export default function Destination() {
   const filters = fetchFilters();

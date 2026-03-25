@@ -1,4 +1,5 @@
-import PressList from '@/components/press/PressList';
+import dynamic from 'next/dynamic';
+const PressList = dynamic(() => import('@/components/press/PressList'));
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';

@@ -2,8 +2,28 @@ import { IPort } from '@/models';
 import { PORTS_API, SHIPPING_LINE_API } from 'constants/api';
 import { cacheItem, fetchItem } from 'helpers/cache.helpers';
 import axios from '@/services/core/axios';
+import type { IRoute } from '@/models/shipping-line/route.model';
 
 import portsData from '@/data/ports.json';
+
+let routesLookupPromise: Promise<IRoute[]> | null = null;
+
+async function getRoutesForDestinationLookup(): Promise<IRoute[]> {
+  if (!routesLookupPromise) {
+    routesLookupPromise = fetch('/api/routes?tenantId=1')
+      .then(async (res) => {
+        if (!res.ok) {
+          return [];
+        }
+
+        const data = await res.json();
+        return data?.data ?? data ?? [];
+      })
+      .catch(() => []);
+  }
+
+  return routesLookupPromise;
+}
 
 export async function getAllPorts(): Promise<IPort[]> {
   // const cached = fetchItem<IPort[]>('ports');
@@ -35,7 +55,7 @@ export async function getPorts(): Promise<IPort[] | undefined> {
   } catch (error) {
     console.error('Failed to fetch ports:', error);
   }
-  return [];
+  return portsData as IPort[];
 }
 
 export async function getPort(portId: number): Promise<IPort | undefined> {
@@ -45,45 +65,17 @@ export async function getPort(portId: number): Promise<IPort | undefined> {
 
 export async function getDestinationPortsByOrigin(originCode: string): Promise<IPort[]> {
   try {
-    const res = await fetch(`${PORTS_API}/${originCode}/trips`, {
-      next: { tags: ['ports', `ports-${originCode}`], revalidate: 300 } // shorter revalidate for dynamic nature
-    });
+    const routes = await getRoutesForDestinationLookup();
+    const destinations = routes
+      .filter((route) => route.src_port_code === originCode)
+      .map((route) => ({
+        id: route.dest_port_id,
+        name: route.dest_port_name,
+        code: route.dest_port_code,
+      }))
+      .filter((port) => port.code && port.name);
 
-    if (res.ok) {
-      const { data } = await res.json();
-      // The API returns distinct objects: { destination_port_name, destination_port_code }
-      // We need to map them to IPort interface if possible, or usually we need the IDs to match the selected object in dropdowns.
-      // However, the dropdowns uses IPort which has id, name, code.
-      // The API response shown by user:
-      // { "destination_port_name": "Talisay, Cebu", "destination_port_code": "TLSY" }
-      // It is missing 'id'.
-      // Strategy: The SearchBox.tsx has "ports" (all ports). We can filter "ports" based on the codes returned here.
-
-      const destinations: any[] = [];
-
-      data.forEach((item: any) => {
-        // Add direct destination
-        destinations.push({
-          name: item.destination_port_name,
-          code: item.destination_port_code,
-        });
-
-        // Add 2-hop destinations if they exist
-        if (item.next_destinations && Array.isArray(item.next_destinations)) {
-          item.next_destinations.forEach((next: any) => {
-            destinations.push({
-              name: next.destination_port_name,
-              code: next.destination_port_code,
-            });
-          });
-        }
-      });
-
-      // Deduplicate by code
-      const uniqueDestinations = Array.from(new Map(destinations.map((item) => [item.code, item])).values());
-
-      return uniqueDestinations;
-    }
+    return Array.from(new Map(destinations.map((item) => [item.code, item])).values());
   } catch (error) {
     console.error('Failed to fetch destination ports:', error);
   }

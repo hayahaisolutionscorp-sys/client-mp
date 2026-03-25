@@ -5,12 +5,17 @@ import { HERO_SECTION_IMAGES } from 'constants/storage';
 import { getHeadersSections, getHeroSections, getPorts } from '@/services';
 import type { PreviewPageSection } from '@/lib/preview/landing-preview';
 import type { IHeaderSection, IPort } from '@/models';
+import type { IRoute } from '@/models/shipping-line/route.model';
 
 interface HeroProps {
   heroSectionOverride?: PreviewPageSection | null;
   forceHomeNavbar?: boolean;
   showNavbar?: boolean;
   showBookingSearch?: boolean;
+  headerSectionOverride?: IHeaderSection | null;
+  portsOverride?: IPort[] | null;
+  bookingRoutesOverride?: IRoute[] | null;
+  tripSearchEnabledOverride?: boolean;
 }
 
 export default async function Hero({
@@ -18,11 +23,19 @@ export default async function Hero({
   forceHomeNavbar = false,
   showNavbar = true,
   showBookingSearch = true,
+  headerSectionOverride,
+  portsOverride,
+  bookingRoutesOverride,
+  tripSearchEnabledOverride = true,
 }: HeroProps = {}) {
   const [heroSection, headerSection, ports] = await Promise.all([
     heroSectionOverride ? Promise.resolve(heroSectionOverride) : getHeroSections(),
-    getHeadersSections().catch(() => null) as Promise<IHeaderSection | null>,
-    getPorts().catch(() => []) as Promise<IPort[]>,
+    headerSectionOverride !== undefined
+      ? Promise.resolve(headerSectionOverride)
+      : (getHeadersSections().catch(() => null) as Promise<IHeaderSection | null>),
+    portsOverride !== undefined
+      ? Promise.resolve(portsOverride ?? [])
+      : (getPorts().catch(() => []) as Promise<IPort[]>),
   ]);
   let captionBackground;
 
@@ -98,7 +111,8 @@ export default async function Hero({
       {showBookingSearch ? (
         <SearchBoxWrapper
           initialPorts={ports}
-          initialTripSearchEnabled={true}
+          initialRoutes={bookingRoutesOverride ?? []}
+          initialTripSearchEnabled={tripSearchEnabledOverride}
         />
       ) : null}
     </header>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -36,29 +36,22 @@ const Navbar = ({
   const router = useRouter();
   const [activeNav, setActiveNav] = useState('Book');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
 
   const branding = useBranding() || initialBranding;
-  const headerSection = useHeaders() || initialHeaderSection;
+  const headerSection = useHeaders(initialHeaderSection) || initialHeaderSection;
   const { currentUser, logout } = useAuth();
 
+  const filteredNavItems = useMemo(() => {
+    const itemsToRemove: string[] = [];
 
-  useEffect(() => {
-    const organizeHeaders = () => {
-      const itemsToRemove: string[] = [];
-
-      if (headerSection) {
-        if (!headerSection.showPromos) itemsToRemove.push('Promos');
-        if (!headerSection.showRoutes) itemsToRemove.push('Routes');
-        if (!headerSection.showResources) itemsToRemove.push('Resources');
-        if (!headerSection.showAboutUs) itemsToRemove.push('AboutUs');
-      }
-
-      const tempFilteredNavItems = NAV_ITEMS.filter((item) => !itemsToRemove.includes(item.id));
-      setFilteredNavItems(tempFilteredNavItems);
+    if (headerSection) {
+      if (!headerSection.showPromos) itemsToRemove.push('Promos');
+      if (!headerSection.showRoutes) itemsToRemove.push('Routes');
+      if (!headerSection.showResources) itemsToRemove.push('Resources');
+      if (!headerSection.showAboutUs) itemsToRemove.push('AboutUs');
     }
 
-    organizeHeaders();
+    return NAV_ITEMS.filter((item) => !itemsToRemove.includes(item.id));
   }, [headerSection]);
 
   // Handle scroll lock when menu is open

@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { IAccount, RegisterForm } from '@/models';
 import { AuthService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
-import { invalidateItem } from 'helpers/cache.helpers';
+import { cacheItem, fetchItem, invalidateItem } from 'helpers/cache.helpers';
 import { accountRelatedCacheKeys } from 'constants/cache';
 import { useBranding } from "@/hooks/branding";
 import { useThemeSettings } from "@/hooks/theme-settings";
@@ -47,13 +47,14 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     const router = useRouter();
     const branding = useBranding();
     const theme = useThemeSettings();
+    const cachedAccount = fetchItem<IAccount>('logged-in-account') || null;
 
     // In-memory auth state — never written to localStorage or any storage.
     // The HTTP-only JWT cookie is sent automatically on every request.
     // Login state is determined solely by whether GET /auth/me succeeds.
     const [currentUser, setCurrentUser] = useState<any | null>(null);
-    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(cachedAccount);
+    const [loading, setLoading] = useState(Boolean(cachedAccount));
 
     const [notification, setNotification] = useState<{
         type: 'success' | 'error' | null;
@@ -114,6 +115,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
 
             setCurrentUser(sanitizedUser);
             setLoggedInAccount(account);
+            cacheItem('logged-in-account', account);
 
             return user;
         } catch (error: any) {
@@ -131,8 +133,13 @@ export default function AuthContextProvider({ children }: { children: React.Reac
 
     // Initial load — checks the HTTP-only cookie implicitly via /auth/me
     useEffect(() => {
+        if (!cachedAccount) {
+            setLoading(false);
+            return;
+        }
+
         loadProfile();
-    }, [loadProfile]);
+    }, [cachedAccount, loadProfile]);
 
     const register = async (email: string, password: string, values: RegisterForm) => {
         try {

@@ -1,8 +1,10 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
-import { AuthSidebar } from "@/components/auth/AuthSidebar";
+import dynamic from "next/dynamic";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { Suspense } from "react";
+
+const AuthSidebar = dynamic(() => import("@/components/auth/AuthSidebar").then(m => ({ default: m.AuthSidebar })));
 
 export default function LoginPage() {
 

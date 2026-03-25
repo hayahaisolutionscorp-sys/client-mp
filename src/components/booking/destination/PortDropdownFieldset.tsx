@@ -25,8 +25,6 @@ const PortDropdownFieldset = ({
   disabled = false,
 }: DestinationPortDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [isDelayedEnabled, setIsDelayedEnabled] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredPorts, setFilteredPorts] = useState<IPort[]>([]);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -34,15 +32,6 @@ const PortDropdownFieldset = ({
   const themeSettings = useThemeSettings();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsDelayedEnabled(true);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    setIsHydrated(true);
-
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
@@ -64,7 +53,7 @@ const PortDropdownFieldset = ({
   }, [ports]);
 
   const toggleDropdown = () => {
-    if (!disabled && isDelayedEnabled) {
+    if (!disabled) {
       setIsOpen((prev) => !prev);
       clearSearch();
       if (!isOpen) {
@@ -74,7 +63,7 @@ const PortDropdownFieldset = ({
   };
 
   const handleSelection = (port: IPort) => {
-    if (!disabled && isDelayedEnabled) {
+    if (!disabled) {
       onPortSelect(port);
       setIsOpen(false);
     }
@@ -118,20 +107,20 @@ const PortDropdownFieldset = ({
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
-          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${disabled || !isDelayedEnabled ? "cursor-not-allowed" : ""
+          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${disabled ? "cursor-not-allowed" : ""
             }`}
-          disabled={disabled || !isDelayedEnabled}
+          disabled={disabled}
         >
           <BiSolidShip
             className="w-5 h-5 mr-3"
             style={{ color: themeSettings?.accent || "#051036" }}
           />
           <span className="text-customText font-natural">
-            {isHydrated ? (selectedPort ? selectedPort.name : "Select Port") : "Loading..."}
+            {selectedPort ? selectedPort.name : "Select Port"}
           </span>
         </button>
 
-        {isOpen && !disabled && isDelayedEnabled && (
+        {isOpen && !disabled && (
           <div className="absolute z-10 mt-2 w-full bg-white border rounded-md shadow-sm">
             <div className="p-2 relative">
               <input

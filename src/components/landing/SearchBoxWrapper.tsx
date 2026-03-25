@@ -1,23 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { TripSearchWidget } from "@oltek/hayahai-sdk/react";
 import type { TripData } from "@oltek/hayahai-sdk/react";
 import { DEFAULT_BOOKING_TYPE } from "constants/default";
 import { IPort } from "@/models";
+import dynamic from "next/dynamic";
+import type { IRoute } from "@/models/shipping-line/route.model";
+
+const TripSearchWidget = dynamic(
+    () => import("@oltek/hayahai-sdk/react").then((mod) => mod.TripSearchWidget),
+    { ssr: false }
+);
 
 type Mode = "form" | "chat";
 
 interface SearchBoxWrapperProps {
     initialTripSearchEnabled?: boolean;
     initialPorts?: IPort[];
+    initialRoutes?: IRoute[];
 }
 
 export default function SearchBoxWrapper({
     initialTripSearchEnabled = true,
     initialPorts = [],
+    initialRoutes = [],
 }: SearchBoxWrapperProps) {
     const [mode, setMode] = useState<Mode>("form"); // Default to AI chat
     const [bookingType, setBookingType] = useState<string | undefined>(DEFAULT_BOOKING_TYPE);
@@ -78,47 +85,30 @@ export default function SearchBoxWrapper({
                 } sm:top-[230px] md:top-[340px] lg:top-[600px]`}
         >
             <div className="w-full sm:w-[95%] md:w-[95%] lg:w-[1300px]">
-                <AnimatePresence mode="wait">
-                    {mode === "chat" && tripSearchEnabled ? (
-                        <motion.div
-                            key="chat"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <TripSearchWidget
-                                tenantId={process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
-                                    ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
-                                    : undefined}
-                                chatApiUrl="/api/chat-booking"
-                                routesApiUrl="/api/routes"
-                                tripsApiUrl="/api/trips"
-                                configApiUrl="/api/agent-config"
-                                onSwitchToForm={() => setMode("form")}
-                                onTripSelect={handleTripSelect}
-                                showFormToggle={true}
-                                poweredByText="Powered by AyahAI"
-                            />
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="form"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <SearchBoxWithToggle
-                                onSwitchToChat={() => setMode("chat")}
-                                bookingType={bookingType}
-                                setBookingType={setBookingType}
-                                showChatToggle={tripSearchEnabled}
-                                initialPorts={initialPorts}
-                            />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {mode === "chat" && tripSearchEnabled ? (
+                    <TripSearchWidget
+                        tenantId={process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
+                            ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
+                            : undefined}
+                        chatApiUrl="/api/chat-booking"
+                        routesApiUrl="/api/routes"
+                        tripsApiUrl="/api/trips"
+                        configApiUrl="/api/agent-config"
+                        onSwitchToForm={() => setMode("form")}
+                        onTripSelect={handleTripSelect}
+                        showFormToggle={true}
+                        poweredByText="Powered by AyahAI"
+                    />
+                ) : (
+                    <SearchBoxWithToggle
+                        onSwitchToChat={() => setMode("chat")}
+                        bookingType={bookingType}
+                        setBookingType={setBookingType}
+                        showChatToggle={tripSearchEnabled}
+                        initialPorts={initialPorts}
+                        initialRoutes={initialRoutes}
+                    />
+                )}
             </div>
         </div>
     );
@@ -131,12 +121,14 @@ function SearchBoxWithToggle({
     setBookingType,
     showChatToggle = true,
     initialPorts = [],
+    initialRoutes = [],
 }: {
     onSwitchToChat: () => void;
     bookingType: string | undefined;
     setBookingType: (value: string | undefined) => void;
     showChatToggle?: boolean;
     initialPorts?: IPort[];
+    initialRoutes?: IRoute[];
 }) {
     return (
         <div className="relative">
@@ -179,6 +171,7 @@ function SearchBoxWithToggle({
                     bookingType={bookingType}
                     setBookingType={setBookingType}
                     initialPorts={initialPorts}
+                    initialRoutes={initialRoutes}
                 />
             </div>
         </div>
@@ -208,12 +201,14 @@ export interface SearchBoxFormContentProps {
     bookingType: string | undefined;
     setBookingType: (value: string | undefined) => void;
     initialPorts?: IPort[];
+    initialRoutes?: IRoute[];
 }
 
 export function SearchBoxFormContent({
     bookingType,
     setBookingType,
     initialPorts = [],
+    initialRoutes = [],
 }: SearchBoxFormContentProps) {
     const router = useRouter();
 
@@ -251,14 +246,22 @@ export function SearchBoxFormContent({
         const fetchDestinationPorts = async () => {
             if (selectedOriginPort) {
                 try {
-                    // Clear destinations while fetching
-                    setDestinationPorts([]);
+                    let validDestCodes: Set<string>;
 
-                    const destPorts = await getDestinationPortsByOrigin(selectedOriginPort.code);
+                    if (initialRoutes.length > 0) {
+                        validDestCodes = new Set(
+                            initialRoutes
+                                .filter((route) => route.src_port_code === selectedOriginPort.code)
+                                .map((route) => route.dest_port_code)
+                                .filter(Boolean)
+                        );
+                    } else {
+                        // Clear destinations while fetching
+                        setDestinationPorts([]);
+                        const destPorts = await getDestinationPortsByOrigin(selectedOriginPort.code);
+                        validDestCodes = new Set(destPorts.map(p => p.code));
+                    }
 
-                    // Filter the main ports list using the codes returned from the service
-                    // This ensures we have the full IPort object with IDs
-                    const validDestCodes = new Set(destPorts.map(p => p.code));
                     const availableDestPorts = ports?.filter(port => validDestCodes.has(port.code)) ?? [];
 
                     setDestinationPorts(availableDestPorts.sort((a, b) => a.name.localeCompare(b.name)));
@@ -276,7 +279,7 @@ export function SearchBoxFormContent({
         };
 
         fetchDestinationPorts();
-    }, [selectedOriginPort, ports, selectedDestinationPort]);
+    }, [initialRoutes, selectedOriginPort, ports, selectedDestinationPort]);
 
     useEffect(() => {
         const isValid =

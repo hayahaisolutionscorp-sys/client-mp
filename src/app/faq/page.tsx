@@ -1,5 +1,6 @@
-import FAQ from '@/components/faq/FAQ';
-import FAQHeroSection from '@/components/faq/FAQHeroSection';
+import dynamic from 'next/dynamic';
+const FAQ = dynamic(() => import('@/components/faq/FAQ'));
+const FAQHeroSection = dynamic(() => import('@/components/faq/FAQHeroSection'));
 import { getPageMetadata } from '@/services/content/seo.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
 import { Metadata } from 'next';
