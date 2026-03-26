@@ -4,7 +4,7 @@ export default function PartnersGridPremium({ partners, theme }: PartnersTemplat
   if (partners.length === 0) return null;
 
   return (
-    <section className="bg-slate-50 py-24 px-6 lg:px-10 overflow-hidden">
+    <section className="py-24 px-6 lg:px-10 overflow-hidden" style={{ backgroundColor: theme.surfaceAlt }}>
       <div className="container mx-auto max-w-7xl">
         <div className="flex flex-col lg:flex-row items-end justify-between gap-12 mb-20">
           <div className="max-w-2xl">
@@ -22,12 +22,13 @@ export default function PartnersGridPremium({ partners, theme }: PartnersTemplat
             We work with the most trusted shipping and logistic providers in the industry.
           </p>
         </div>
-
+ 
         <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-12 sm:gap-x-10">
           {partners.map((partner, index) => (
             <div key={`${partner.id}-${index}`} className="group flex flex-col items-center">
                 <div
-                className="relative bg-white aspect-square w-full rounded-[40px] p-6 flex items-center justify-center transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2 border border-slate-100 group-hover:border-transparent"
+                className="relative aspect-square w-full rounded-[40px] p-6 flex items-center justify-center transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2 border border-black/5 group-hover:border-transparent"
+                style={{ backgroundColor: theme.surface }}
                 >
                     {/* Micro Icon / Tag Decoration */}
                     <div 

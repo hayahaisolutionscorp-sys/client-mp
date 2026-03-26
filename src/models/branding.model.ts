@@ -4,6 +4,8 @@ export interface IBrandingColors {
     secondaryColor?: string;
     primary?: string;
     secondary?: string;
+    surface?: string;
+    surfaceAlt?: string;
 }
 
 export interface IBrandingLogo {
@@ -17,6 +19,10 @@ export interface IBrandingConfig {
     domain_name: string;
     subdomain_name: string;
     favicon_url: string;
+    fontFamily?: string;
+    fontFamilyTitle?: string;
+    font_family?: string; // from API
+    font_family_title?: string; // from API
     colors: IBrandingColors;
     logo: IBrandingLogo;
     slogan: string | null;

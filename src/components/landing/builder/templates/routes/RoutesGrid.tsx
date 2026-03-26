@@ -9,7 +9,7 @@ export default function RoutesGrid({ routes, theme }: RoutesTemplateProps) {
   if (routes.length === 0) return null;
 
   return (
-    <section id="Routes" className="bg-white px-6 py-14">
+    <section id="Routes" className="px-6 py-14" style={{ backgroundColor: theme.surface }}>
       <div className="container mx-auto max-w-7xl">
         <h2 className="text-3xl font-bold" style={{ color: theme.text }}>
           Most Popular Routes Recommended For You
@@ -18,8 +18,8 @@ export default function RoutesGrid({ routes, theme }: RoutesTemplateProps) {
           {items.map((route) => (
             <div
               key={route.id}
-              className="overflow-hidden rounded-[28px] border bg-slate-50"
-              style={{ borderColor: `color-mix(in srgb, ${theme.primary} 12%, #e2e8f0)` }}
+              className="overflow-hidden rounded-[28px] border"
+              style={{ backgroundColor: theme.surfaceAlt, borderColor: `color-mix(in srgb, ${theme.primary} 12%, #e2e8f0)` }}
             >
               <div className="h-40 bg-slate-200">
                 {route.image_url ? (

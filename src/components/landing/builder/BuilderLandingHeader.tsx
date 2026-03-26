@@ -12,9 +12,10 @@ import HeaderFloating from "./templates/header/HeaderFloating";
 
 interface BuilderLandingHeaderProps {
   variant: string;
+  theme: any;
 }
 
-export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderProps) {
+export default function BuilderLandingHeader({ variant, theme }: BuilderLandingHeaderProps) {
   const branding = useBranding();
   const headerSection = useHeaders();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -47,7 +48,7 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
   };
 
   if (variant === "floating") {
-    return <HeaderFloating navItems={navItems} scrollToElement={scrollToElement} />;
+    return <HeaderFloating navItems={navItems} scrollToElement={scrollToElement} theme={theme} />;
   }
 
   if (variant !== "centered") {
@@ -56,7 +57,10 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
 
   return (
     <>
-      <header className="w-full border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header 
+        className="w-full border-b border-black/5 backdrop-blur"
+        style={{ backgroundColor: `${theme.surface}F2` }} // ~95% opacity
+      >
         <div className="flex items-center justify-between gap-6 px-4 sm:px-6 lg:px-10 py-5">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
@@ -69,21 +73,24 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
                 className="h-[40px] w-auto object-contain transition-all duration-300"
               />
             ) : (
-              <span className="text-xl font-semibold text-customText">
+              <span className="text-xl font-semibold capitalize" style={{ color: theme.text, fontFamily: 'var(--font-title)' }}>
                 {branding?.brand_name || "Ayahay"}
               </span>
             )}
           </Link>
 
           {/* Desktop Nav — centered */}
-          <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex lg:gap-8 text-sm text-customText">
+          <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex lg:gap-8 text-sm" style={{ color: theme.text }}>
             {navItems.map((item) =>
               item.trigger.toLowerCase() === "scroll" ? (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => handleScroll(item.id)}
-                  className="font-medium transition-all hover:border-b-2 border-transparent hover:border-current"
+                  className="font-medium transition-all hover:border-b-2 border-transparent"
+                  style={{ "--hover-color": theme.primary } as any}
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.primary)}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'transparent')}
                 >
                   {item.name}
                 </button>
@@ -91,7 +98,9 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
                 <Link
                   key={item.id}
                   href={item.redirect_url}
-                  className="font-medium transition-all hover:border-b-2 border-transparent hover:border-current"
+                  className="font-medium transition-all hover:border-b-2 border-transparent"
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.primary)}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'transparent')}
                 >
                   {item.name}
                 </Link>
@@ -127,7 +136,8 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
 
       {/* Mobile menu overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-white transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-40 transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        style={{ backgroundColor: theme.surface }}
       >
         {/* Close button */}
         <button
@@ -136,8 +146,8 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
           onClick={() => setIsMenuOpen(false)}
         >
           <div className="relative h-6 w-6">
-            <span className="absolute block h-0.5 w-6 bg-customText rotate-45 translate-y-0" />
-            <span className="absolute block h-0.5 w-6 bg-customText -rotate-45 translate-y-0" />
+            <span className="absolute block h-0.5 w-6 rotate-45 translate-y-0" style={{ backgroundColor: theme.text }} />
+            <span className="absolute block h-0.5 w-6 -rotate-45 translate-y-0" style={{ backgroundColor: theme.text }} />
           </div>
         </button>
         <div className="h-full w-full overflow-y-auto px-4 pt-[100px]">
@@ -148,7 +158,8 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
                   key={item.id}
                   type="button"
                   onClick={() => handleScroll(item.id)}
-                  className="block w-full py-4 text-left text-lg font-medium text-customText transition-colors hover:opacity-80"
+                  className="block w-full py-4 text-left text-lg font-medium transition-colors hover:opacity-80"
+                  style={{ color: theme.text }}
                 >
                   {item.name}
                 </button>
@@ -157,7 +168,8 @@ export default function BuilderLandingHeader({ variant }: BuilderLandingHeaderPr
                   key={item.id}
                   href={item.redirect_url}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block py-4 text-lg font-medium text-customText transition-colors hover:opacity-80"
+                  className="block py-4 text-lg font-medium transition-colors hover:opacity-80"
+                  style={{ color: theme.text }}
                 >
                   {item.name}
                 </Link>

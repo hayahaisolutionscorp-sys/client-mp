@@ -7,6 +7,8 @@ export const LANDING_SECTION_KEYS = [
   "why_choose",
   "get_to_know",
   "partners",
+  "footer",
+  "floating_cta",
 ] as const;
 
 export type LandingSectionKey = (typeof LANDING_SECTION_KEYS)[number];
@@ -35,6 +37,8 @@ export const LANDING_SECTION_LABELS: Record<LandingSectionKey, string> = {
   why_choose: "Why Choose Us",
   get_to_know: "About / Get To Know Us",
   partners: "Partners",
+  footer: "Footer",
+  floating_cta: "Floating CTA",
 };
 
 export const LANDING_VARIANTS: Record<LandingSectionKey, string[]> = {
@@ -46,6 +50,8 @@ export const LANDING_VARIANTS: Record<LandingSectionKey, string[]> = {
   why_choose: ["default", "steps", "grid", "minimal"],
   get_to_know: ["default", "timeline", "modern", "center"],
   partners: ["default", "strip", "marquee", "grid-premium"],
+  footer: ["default", "default-no-banner", "centered", "premium"],
+  floating_cta: ["default", "modern-dark", "minimal-light"],
 };
 
 export const DEFAULT_LANDING_BUILDER_CONTENT: LandingBuilderContent = {
@@ -115,6 +121,22 @@ export const DEFAULT_LANDING_BUILDER_CONTENT: LandingBuilderContent = {
       variant: "default",
       enabled: false,
       display_order: 7,
+    },
+    {
+      id: "footer",
+      section_key: "footer",
+      label: LANDING_SECTION_LABELS.footer,
+      variant: "default",
+      enabled: true,
+      display_order: 8,
+    },
+    {
+      id: "floating_cta",
+      section_key: "floating_cta",
+      label: LANDING_SECTION_LABELS.floating_cta,
+      variant: "default",
+      enabled: true,
+      display_order: 9,
     },
   ],
 };

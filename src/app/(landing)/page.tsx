@@ -1,7 +1,6 @@
 import Hero from '@/components/landing/Hero';
 import LandingPageBuilder from '@/components/landing/builder/LandingPageBuilder';
 import Footer from '@/components/Footer';
-import SubscribeBanner from '@/components/landing/SubscribeBanner';
 import dynamic from 'next/dynamic';
 
 const Promos = dynamic(() => import('@/components/landing/Promos'), { ssr: true });
@@ -72,12 +71,7 @@ export default async function Home() {
           />
         </div>
       </div>
-      <div id="Resources" className="w-full lg:pt-56">
-        <div className="flex items-center justify-center w-full">
-          <SubscribeBanner />
-        </div>
-        <Footer />
-      </div>
+      <Footer />
     </>
   );
 }

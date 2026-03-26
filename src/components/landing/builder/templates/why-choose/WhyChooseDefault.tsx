@@ -5,7 +5,7 @@ export default function WhyChooseDefault({ section, reasons, theme }: WhyChooseT
   if (items.length === 0) return null;
 
   return (
-    <section id="WhyChooseUs" className="bg-white px-6 py-16">
+    <section id="WhyChooseUs" className="px-6 py-16" style={{ backgroundColor: theme.surface }}>
       <div className="container mx-auto max-w-7xl">
         <div className="max-w-3xl">
           <h2 className="text-3xl font-bold" style={{ color: theme.text }}>

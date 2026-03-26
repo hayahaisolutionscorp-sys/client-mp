@@ -16,9 +16,10 @@ interface NavItem {
 interface HeaderFloatingProps {
   navItems: NavItem[];
   scrollToElement: (id: string) => void;
+  theme: any;
 }
 
-export default function HeaderFloating({ navItems, scrollToElement }: HeaderFloatingProps) {
+export default function HeaderFloating({ navItems, scrollToElement, theme }: HeaderFloatingProps) {
   const branding = useBranding();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -32,7 +33,12 @@ export default function HeaderFloating({ navItems, scrollToElement }: HeaderFloa
   return (
     <>
       <div className="fixed top-6 left-0 right-0 z-50 w-full px-4 sm:px-6 lg:px-10">
-        <header className="flex items-center justify-between gap-6 rounded-2xl border border-white/20 bg-white/70 px-6 py-4 shadow-lg backdrop-blur-md transition-all hover:bg-white/80 w-full">
+        <header 
+            className="flex items-center justify-between gap-6 rounded-2xl border border-white/20 px-6 py-4 shadow-lg backdrop-blur-md transition-all w-full"
+            style={{ backgroundColor: `${theme.surface}B3` }} // ~70% opacity
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${theme.surface}CC`)} // ~80% opacity
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = `${theme.surface}B3`)}
+        >
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             {logoSrc ? (
@@ -44,21 +50,23 @@ export default function HeaderFloating({ navItems, scrollToElement }: HeaderFloa
                 className="h-[40px] w-auto object-contain transition-all duration-300"
               />
             ) : (
-              <span className="text-xl font-semibold text-customText">
+              <span className="text-xl font-semibold capitalize" style={{ color: theme.text, fontFamily: 'var(--font-title)' }}>
                 {branding?.brand_name || "Ayahay"}
               </span>
             )}
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex lg:gap-8 text-customText">
+          <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex lg:gap-8" style={{ color: theme.text }}>
             {navItems.map((item) =>
               item.trigger.toLowerCase() === "scroll" ? (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => handleScroll(item.id)}
-                  className="text-sm font-medium transition-all hover:border-b-2 border-transparent hover:border-current"
+                  className="text-sm font-medium transition-all hover:border-b-2 border-transparent"
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.primary)}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'transparent')}
                 >
                   {item.name}
                 </button>
@@ -66,7 +74,9 @@ export default function HeaderFloating({ navItems, scrollToElement }: HeaderFloa
                 <Link
                   key={item.id}
                   href={item.redirect_url}
-                  className="text-sm font-medium transition-all hover:border-b-2 border-transparent hover:border-current"
+                  className="text-sm font-medium transition-all hover:border-b-2 border-transparent"
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.primary)}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'transparent')}
                 >
                   {item.name}
                 </Link>
@@ -102,7 +112,8 @@ export default function HeaderFloating({ navItems, scrollToElement }: HeaderFloa
 
       {/* Mobile menu overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-white transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-40 transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        style={{ backgroundColor: theme.surface }}
       >
         {/* Close button */}
         <button
@@ -111,8 +122,8 @@ export default function HeaderFloating({ navItems, scrollToElement }: HeaderFloa
           onClick={() => setIsMenuOpen(false)}
         >
           <div className="relative h-6 w-6">
-            <span className="absolute block h-0.5 w-6 bg-customText rotate-45 translate-y-0" />
-            <span className="absolute block h-0.5 w-6 bg-customText -rotate-45 translate-y-0" />
+            <span className="absolute block h-0.5 w-6 rotate-45 translate-y-0" style={{ backgroundColor: theme.text }} />
+            <span className="absolute block h-0.5 w-6 -rotate-45 translate-y-0" style={{ backgroundColor: theme.text }} />
           </div>
         </button>
         <div className="h-full w-full overflow-y-auto px-4 pt-[100px]">
@@ -123,7 +134,8 @@ export default function HeaderFloating({ navItems, scrollToElement }: HeaderFloa
                   key={item.id}
                   type="button"
                   onClick={() => handleScroll(item.id)}
-                  className="block w-full py-4 text-left text-lg font-medium text-customText transition-colors hover:opacity-80"
+                  className="block w-full text-left text-lg font-medium transition-colors hover:opacity-80"
+                  style={{ color: theme.text }}
                 >
                   {item.name}
                 </button>
@@ -132,7 +144,8 @@ export default function HeaderFloating({ navItems, scrollToElement }: HeaderFloa
                   key={item.id}
                   href={item.redirect_url}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block py-4 text-lg font-medium text-customText transition-colors hover:opacity-80"
+                  className="block py-4 text-lg font-medium transition-colors hover:opacity-80"
+                  style={{ color: theme.text }}
                 >
                   {item.name}
                 </Link>

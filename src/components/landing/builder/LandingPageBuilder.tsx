@@ -32,6 +32,11 @@ import PartnersStrip from "./templates/partners/PartnersStrip";
 import PartnersMarquee from "./templates/partners/PartnersMarquee";
 import PartnersGridPremium from "./templates/partners/PartnersGridPremium";
 import PartnersDefault from "./templates/partners/PartnersDefault";
+import FooterCentered from "./templates/footer/FooterCentered";
+import FooterPremium from "./templates/footer/FooterPremium";
+import dynamic from 'next/dynamic';
+
+const ChatWidget = dynamic(() => import('@/components/chat/ChatWidget'), { ssr: false });
 import { createBuilderTheme } from "./theme";
 import type { LandingBuilderContent } from "@/lib/landing-builder";
 import { normalizeLandingBuilderContent } from "@/lib/landing-builder";
@@ -75,10 +80,27 @@ export default function LandingPageBuilder({
   const partners = previewPayload?.partners ?? landingData?.partners ?? null;
   const theme = createBuilderTheme((landingData?.brandingConfig ?? {}) as any);
 
+  const hasCustomFooter = visibleSections.some(s => s.section_key === "footer");
+  const contentSections = visibleSections.filter(s => s.section_key !== "footer");
+  const footerSection = visibleSections.find(s => s.section_key === "footer");
+
   return (
     <>
-    <div className="bg-[#EEF8FC]">
-      {visibleSections.map((section) => {
+    <div 
+      style={{ 
+        fontFamily: theme.fontFamily, 
+        backgroundColor: theme.surface,
+        '--font-title': theme.fontFamilyTitle,
+        '--font-body': theme.fontFamily
+      } as any}
+    >
+      <style dangerouslySetInnerHTML={{ __html: `
+        h1, h2, h3, h4, h5, h6, .brand-title {
+          font-family: var(--font-title), var(--font-body) !important;
+        }
+      ` }} />
+
+      {contentSections.map((section) => {
         switch (section.section_key) {
           case "header":
             // The real default homepage navbar is rendered inside Hero.
@@ -88,7 +110,13 @@ export default function LandingPageBuilder({
               return null;
             }
 
-            return <BuilderLandingHeader key={section.id} variant={section.variant} />;
+            return (
+              <BuilderLandingHeader 
+                key={section.id} 
+                variant={section.variant} 
+                theme={theme} 
+              />
+            );
           case "hero":
             if (section.variant === "minimal") {
               return (
@@ -245,12 +273,24 @@ export default function LandingPageBuilder({
         }
       })}
     </div>
-    <div id="Resources" className="w-full lg:pt-56">
-      <div className="flex items-center justify-center w-full">
-        <SubscribeBanner />
-      </div>
-      <Footer />
+
+    {/* Footer Area: Footer variants include their own SubscribeBanner internally */}
+    <div id="Resources" className="w-full">
+      {footerSection ? (
+        <>
+          {footerSection.variant === "centered" && <FooterCentered key={footerSection.id} theme={theme} />}
+          {footerSection.variant === "premium" && <FooterPremium key={footerSection.id} theme={theme} />}
+          {footerSection.variant === "default" && <Footer key={footerSection.id} />}
+          {footerSection.variant === "default-no-banner" && <Footer key={footerSection.id} showSubscribeBanner={false} />}
+        </>
+      ) : (
+        <Footer />
+      )}
     </div>
+    <ChatWidget 
+      tenantId={parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10)} 
+      builderConfigOverride={builder}
+    />
     </>
   );
 }

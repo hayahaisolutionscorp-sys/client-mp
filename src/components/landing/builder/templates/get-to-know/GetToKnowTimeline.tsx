@@ -5,7 +5,7 @@ export default function GetToKnowTimeline({ main, mission, vision, theme }: GetT
   const hasMedia = (main.bg_type === "video" || main.bg_type === "image" || main.bg_type === "youtube") && main.bg_url;
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-10 bg-white">
+    <section className="py-20 px-4 sm:px-6 lg:px-10" style={{ backgroundColor: theme.surface }}>
       <div className="container mx-auto max-w-7xl">
         <div className="mb-12">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] mb-3" style={{ color: theme.primary }}>
@@ -15,12 +15,12 @@ export default function GetToKnowTimeline({ main, mission, vision, theme }: GetT
             {main.title || "Our Story"}
           </h2>
         </div>
-
+ 
         <div className="grid lg:grid-cols-12 gap-12 items-start">
           {/* Left / Top Side: Media & Description */}
           <div className="lg:col-span-7 space-y-8">
             {hasMedia && (
-              <div className="aspect-video w-full rounded-[40px] overflow-hidden shadow-2xl bg-slate-100 border-8 border-slate-50">
+              <div className="aspect-video w-full rounded-[40px] overflow-hidden shadow-2xl border-8" style={{ backgroundColor: theme.surfaceAlt, borderColor: theme.surfaceAlt }}>
                 <Media
                   src={main.bg_url!}
                   type={main.bg_type as "image" | "video" | "youtube"}
@@ -48,7 +48,7 @@ export default function GetToKnowTimeline({ main, mission, vision, theme }: GetT
               </p>
             </div>
           </div>
-
+ 
           {/* Right Side: Mission + Vision Timeline */}
           <div className="lg:col-span-5 flex flex-col gap-8 relative mt-4">
             <div
@@ -67,8 +67,8 @@ export default function GetToKnowTimeline({ main, mission, vision, theme }: GetT
                   </div>
                 </div>
                 <div
-                  className="flex-1 rounded-[30px] p-8 border bg-white transition-all duration-500 group-hover:shadow-2xl group-hover:border-transparent group-hover:-translate-y-1"
-                  style={{ borderColor: `color-mix(in srgb, ${theme.primary} 10%, #f1f5f9)` }}
+                  className="flex-1 rounded-[30px] p-8 border transition-all duration-500 group-hover:shadow-2xl group-hover:border-transparent group-hover:-translate-y-1"
+                  style={{ backgroundColor: theme.surface, borderColor: `color-mix(in srgb, ${theme.primary} 10%, #f1f5f9)` }}
                 >
                   <p
                     className="text-xs font-black uppercase tracking-[0.25em] mb-4"

@@ -16,6 +16,8 @@ export interface BuilderThemeTokens {
   surfaceAlt: string;
   text: string;
   muted: string;
+  fontFamily: string;
+  fontFamilyTitle: string;
 }
 
 export interface HeroTemplateProps {

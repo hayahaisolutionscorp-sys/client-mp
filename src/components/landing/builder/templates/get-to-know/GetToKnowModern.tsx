@@ -5,7 +5,7 @@ export default function GetToKnowModern({ main, mission, vision, theme }: GetToK
   const hasMedia = (main.bg_type === "video" || main.bg_type === "image" || main.bg_type === "youtube") && main.bg_url;
 
   return (
-    <section className="py-24 px-6 lg:px-10 bg-slate-50 overflow-hidden">
+    <section className="py-24 px-6 lg:px-10 overflow-hidden" style={{ backgroundColor: theme.surfaceAlt }}>
       <div className="container mx-auto max-w-7xl">
         <div className="flex flex-col lg:flex-row gap-16 lg:items-center">
           {/* Media Column (Sticky on LG) */}
@@ -33,7 +33,7 @@ export default function GetToKnowModern({ main, mission, vision, theme }: GetToK
                 </div>
               </div>
             ) : (
-              <div className="aspect-[4/5] bg-white rounded-[40px] shadow-sm animate-pulse" />
+              <div className="aspect-[4/5] rounded-[40px] shadow-sm animate-pulse" style={{ backgroundColor: theme.surface }} />
             )}
           </div>
 
@@ -57,7 +57,8 @@ export default function GetToKnowModern({ main, mission, vision, theme }: GetToK
               {[mission, vision].map((entry, i) => (
                 <div 
                     key={entry.id || i}
-                    className="p-8 rounded-[32px] bg-white border border-slate-100 shadow-sm transition-all duration-500 hover:shadow-2xl hover:-translate-y-1"
+                    className="p-8 rounded-[32px] border border-black/5 shadow-sm transition-all duration-500 hover:shadow-2xl hover:-translate-y-1"
+                    style={{ backgroundColor: theme.surface }}
                 >
                   <div 
                     className="h-12 w-12 rounded-2xl mb-6 flex items-center justify-center font-black text-xl text-white shadow-lg"

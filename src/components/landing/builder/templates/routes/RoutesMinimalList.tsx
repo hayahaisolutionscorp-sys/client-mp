@@ -36,25 +36,29 @@ export default function RoutesMinimalList({ routes, theme }: RoutesTemplateProps
                 )}
                 
                 {/* Clean Bottom Label Overlay */}
-                <div className="absolute bottom-6 left-6 right-6 p-6 rounded-3xl bg-white/95 backdrop-blur-sm shadow-xl flex items-center justify-between border border-white/40">
+                <div 
+                    className="absolute bottom-6 left-6 right-6 p-6 rounded-3xl backdrop-blur-sm shadow-xl flex items-center justify-between border border-white/40"
+                    style={{ backgroundColor: `${theme.surface}F2` }} // ~95% opacity
+                >
                     <div className="flex flex-col gap-1">
                         <span className="text-[10px] font-bold uppercase tracking-widest opacity-60" style={{ color: theme.primary }}>Route 01</span>
-                        <h3 className="text-xl md:text-2xl font-black text-slate-900 line-clamp-1">{featured.route}</h3>
+                        <h3 className="text-xl md:text-2xl font-black line-clamp-1" style={{ color: theme.text }}>{featured.route}</h3>
                     </div>
                 </div>
             </div>
           )}
-
+ 
           {/* Side List Cards */}
           {rest.length > 0 && (
             <div className="flex flex-col gap-4 w-full lg:w-[420px] lg:self-start">
               {rest.map((route, i) => (
                 <div
                   key={route.id || i}
-                  className="group bg-white rounded-3xl p-4 flex items-center gap-5 border border-slate-100 transition-all duration-300 hover:shadow-lg hover:border-transparent cursor-pointer"
+                  className="group rounded-3xl p-4 flex items-center gap-5 border border-black/5 transition-all duration-300 hover:shadow-lg hover:border-transparent cursor-pointer"
+                  style={{ backgroundColor: theme.surface }}
                 >
                   {/* Thumbnail Side */}
-                  <div className="size-16 rounded-2xl overflow-hidden bg-slate-50 flex-none relative">
+                  <div className="size-16 rounded-2xl overflow-hidden flex-none relative" style={{ backgroundColor: theme.surfaceAlt }}>
                     {route.image_url ? (
                       <img
                         src={route.image_url}

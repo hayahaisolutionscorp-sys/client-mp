@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Import all fonts at once */
-@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;700&family=Roboto:wght@100;400;900&family=League+Spartan:wght@400;700;900&family=Mountains+of+Christmas:wght@400;700&family=Great+Vibes:wght@400&family=Henny+Penny:wght@400&family=Rubik+Gemstones:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;700&family=Roboto:wght@100;400;900&family=League+Spartan:wght@400;700;900&family=Montserrat:wght@400;700;900&family=Inter:wght@400;700;900&family=Poppins:wght@400;700;900&family=Manrope:wght@400;700;800&family=Urbanist:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;700;800&family=Mountains+of+Christmas:wght@400;700&family=Great+Vibes:wght@400&family=Henny+Penny:wght@400&family=Rubik+Gemstones:wght@400&display=swap');
 
 @layer base {
   :root {
@@ -53,6 +53,12 @@
     --font-jost: "Jost", sans-serif;
     --font-roboto: "Roboto", sans-serif;
     --font-league-spartan: "League Spartan", sans-serif;
+    --font-montserrat: "Montserrat", sans-serif;
+    --font-inter: "Inter", sans-serif;
+    --font-poppins: "Poppins", sans-serif;
+    --font-manrope: "Manrope", sans-serif;
+    --font-urbanist: "Urbanist", sans-serif;
+    --font-plus-jakarta-sans: "Plus Jakarta Sans", sans-serif;
     --font-mountains-of-christmas: "Mountains of Christmas", cursive;
     --font-great-vibes: "Great Vibes", cursive;
     --font-henny-penny: "Henny Penny", cursive;

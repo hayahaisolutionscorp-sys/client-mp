@@ -8,9 +8,11 @@ export function createBuilderTheme(branding: IBrandingConfig): BuilderThemeToken
     primary: withFallback(branding.colors?.primaryColor || branding.colors?.primary, "#004C70"),
     secondary: withFallback(branding.colors?.secondaryColor || branding.colors?.secondary, "#7ACCFA"),
     accent: withFallback(branding.colors?.accent, "#042B3F"),
-    surface: "#ffffff",
-    surfaceAlt: "#EEF8FC",
+    surface: withFallback(branding.colors?.surface, "#FFFFFF"),
+    surfaceAlt: withFallback(branding.colors?.surfaceAlt, "#EEF8FC"),
     text: "#0f172a",
     muted: "#64748b",
+    fontFamily: withFallback(branding.font_family || branding.fontFamily, "Jost"),
+    fontFamilyTitle: withFallback(branding.font_family_title || branding.fontFamilyTitle || branding.font_family || branding.fontFamily, "Jost"),
   };
 }

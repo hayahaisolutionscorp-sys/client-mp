@@ -18,10 +18,15 @@ export default function GetToKnowCenter({ main, mission, vision, theme }: GetToK
             loop
             playsInline
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white" />
+          <div 
+            className="absolute inset-0 z-0" 
+            style={{ 
+              background: `linear-gradient(to bottom, ${theme.surface}, transparent 30%, ${theme.surface})` 
+            }} 
+          />
         </div>
       ) : (
-        <div className="absolute inset-0 bg-slate-50 z-0" />
+        <div className="absolute inset-0 z-0" style={{ backgroundColor: theme.surfaceAlt }} />
       )}
 
       <div className="container mx-auto max-w-7xl relative z-10">

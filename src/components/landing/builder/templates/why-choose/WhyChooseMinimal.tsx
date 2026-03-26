@@ -5,7 +5,7 @@ export default function WhyChooseMinimal({ section, reasons, theme }: WhyChooseT
   if (items.length === 0) return null;
 
   return (
-    <section id="WhyChooseUs" className="bg-white px-6 py-20 lg:py-32 overflow-hidden">
+    <section id="WhyChooseUs" className="px-6 py-20 lg:py-32 overflow-hidden" style={{ backgroundColor: theme.surface }}>
       <div className="container mx-auto max-w-7xl">
         <div className="flex flex-col lg:flex-row gap-16 lg:items-start">
           {/* Static Header Column */}
@@ -18,13 +18,14 @@ export default function WhyChooseMinimal({ section, reasons, theme }: WhyChooseT
               {section?.description || "Experience the most reliable ferry booking platform in the Philippines."}
             </p>
           </div>
-
+ 
           {/* Dynamic List Column */}
           <div className="lg:w-2/3 space-y-12">
             {items.map((reason, index) => (
               <div 
                 key={reason.id} 
-                className="group flex flex-col sm:flex-row gap-8 items-start sm:items-center p-8 rounded-[40px] transition-all hover:bg-slate-50 duration-500 hover:shadow-xl hover:-translate-x-1"
+                className="group flex flex-col sm:flex-row gap-8 items-start sm:items-center p-8 rounded-[40px] transition-all duration-500 hover:shadow-xl hover:-translate-x-1"
+                style={{ backgroundColor: theme.surfaceAlt }}
               >
                 {/* Number / Icon Compound */}
                 <div className="relative shrink-0 flex items-center justify-center">
@@ -32,7 +33,10 @@ export default function WhyChooseMinimal({ section, reasons, theme }: WhyChooseT
                     className="absolute inset-0 scale-150 rotate-45 opacity-0 group-hover:opacity-10 transition-all duration-700 blur-xl"
                     style={{ backgroundColor: theme.primary }}
                    />
-                    <div className="size-20 rounded-[28px] bg-slate-50 border border-slate-100 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:border-transparent group-hover:shadow-lg">
+                    <div 
+                        className="size-20 rounded-[28px] border border-black/5 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:border-transparent group-hover:shadow-lg"
+                        style={{ backgroundColor: theme.surface }}
+                    >
                         <img src={reason.icon_url} alt={reason.icon_alt} className="h-10 w-10 object-contain" />
                     </div>
                     <span 

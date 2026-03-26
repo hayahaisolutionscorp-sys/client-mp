@@ -5,7 +5,7 @@ export default function WhyChooseGrid({ section, reasons, theme }: WhyChooseTemp
   if (items.length === 0) return null;
 
   return (
-    <section id="WhyChooseUs" className="bg-slate-50 px-4 sm:px-6 lg:px-10 py-24">
+    <section id="WhyChooseUs" className="px-4 sm:px-6 lg:px-10 py-24" style={{ backgroundColor: theme.surfaceAlt }}>
       <div className="container mx-auto max-w-7xl">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16 px-4">
           <div className="max-w-2xl">
@@ -25,12 +25,13 @@ export default function WhyChooseGrid({ section, reasons, theme }: WhyChooseTemp
             </p>
           )}
         </div>
-
+ 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {items.map((reason, index) => (
             <div
               key={reason.id}
-              className="group relative bg-white p-10 rounded-[40px] border border-slate-100 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 overflow-hidden"
+              className="group relative p-10 rounded-[40px] border border-black/5 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 overflow-hidden"
+              style={{ backgroundColor: theme.surface }}
             >
               {/* Background Glow */}
               <div 

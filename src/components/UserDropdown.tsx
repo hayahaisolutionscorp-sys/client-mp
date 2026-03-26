@@ -27,7 +27,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (pathname !== '/') {
+  if (pathname !== '/' && !pathname.startsWith('/preview')) {
     return null;
   }
 

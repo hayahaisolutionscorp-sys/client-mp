@@ -9,7 +9,7 @@ export default function PartnersMarquee({ partners, theme }: PartnersTemplatePro
   const items = [...partners, ...partners, ...partners];
 
   return (
-    <section className="bg-white py-20 px-4 sm:px-6 lg:px-10 overflow-hidden">
+    <section className="py-20 px-4 sm:px-6 lg:px-10 overflow-hidden" style={{ backgroundColor: theme.surface }}>
       <div className="container mx-auto max-w-7xl">
         <div className="text-center mb-16">
           <p className="text-xs font-black uppercase tracking-[0.35em] mb-4" style={{ color: theme.primary }}>
@@ -47,8 +47,14 @@ export default function PartnersMarquee({ partners, theme }: PartnersTemplatePro
           </div>
 
           {/* Side Fades for Marquee */}
-          <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
-          <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
+          <div 
+            className="absolute inset-y-0 left-0 w-32 pointer-events-none z-10" 
+            style={{ background: `linear-gradient(to right, ${theme.surface}, transparent)` }}
+          />
+          <div 
+            className="absolute inset-y-0 right-0 w-32 pointer-events-none z-10" 
+            style={{ background: `linear-gradient(to left, ${theme.surface}, transparent)` }}
+          />
         </div>
 
         <style jsx>{`

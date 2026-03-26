@@ -12,8 +12,13 @@ import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
 import { useFooter } from "@/hooks/footer";
 import { useContactUs } from "@/hooks/contact-us";
+import SubscribeBanner from "@/components/landing/SubscribeBanner";
 
-const Footer = () => {
+interface FooterProps {
+  showSubscribeBanner?: boolean;
+}
+
+const Footer = ({ showSubscribeBanner = true }: FooterProps) => {
   const themeSettings = useThemeSettings();
   const branding = useBranding();
   const footerSection = useFooter();
@@ -33,10 +38,16 @@ const Footer = () => {
 
   return (
     <>
-      <footer
-        className="bg-[#13357B] text-white py-10 px-6 sm:px-10 lg:pt-48"
-        style={{ backgroundColor: themeSettings?.primaryColor }}
-      >
+      <div className={`w-full relative ${showSubscribeBanner ? "lg:pt-56" : ""}`} id="Resources">
+        {showSubscribeBanner && (
+          <div className="flex items-center justify-center w-full">
+            <SubscribeBanner />
+          </div>
+        )}
+        <footer
+          className="bg-[#13357B] text-white py-10 px-6 sm:px-10 lg:pt-48"
+          style={{ backgroundColor: themeSettings?.primaryColor }}
+        >
         {/* Main content area */}
         <div className="flex flex-col lg:flex-row lg:justify-between gap-8">
 
@@ -127,28 +138,29 @@ const Footer = () => {
           </p>
           <div className="flex space-x-4">
             {socialLinks.twitter && (
-              <a href={`${socialLinks.twitter.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Twitter">
+              <a href={`${socialLinks.twitter.value}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-60" aria-label="Visit us on Twitter">
                 <FaXTwitter className="opacity-80 w-5 h-5" />
               </a>
             )}
             {socialLinks.linkedin && (
-              <a href={`${socialLinks.linkedin.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on LinkedIn">
+              <a href={`${socialLinks.linkedin.value}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-60" aria-label="Visit us on LinkedIn">
                 <FaLinkedin className="opacity-80 w-5 h-5" />
               </a>
             )}
             {socialLinks.facebook && (
-              <a href={`${socialLinks.facebook.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Facebook">
+              <a href={`${socialLinks.facebook.value}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-60" aria-label="Visit us on Facebook">
                 <FaFacebook className="opacity-80 w-5 h-5" />
               </a>
             )}
             {socialLinks.instagram && (
-              <a href={`${socialLinks.instagram.value}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-400" aria-label="Visit us on Instagram">
+              <a href={`${socialLinks.instagram.value}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-60" aria-label="Visit us on Instagram">
                 <FaInstagram className="opacity-80 w-5 h-5" />
               </a>
             )}
           </div>
         </div>
       </footer>
+      </div>
     </>
   );
 };
