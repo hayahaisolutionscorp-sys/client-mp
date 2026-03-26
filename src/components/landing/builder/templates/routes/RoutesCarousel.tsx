@@ -1,8 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import type { RoutesTemplateProps } from "../../types";
 
 export default function RoutesCarousel({ routes, theme }: RoutesTemplateProps) {
-  const items = routes.slice(0, 6);
-  if (items.length === 0) return null;
+  const [visibleCount, setVisibleCount] = useState(6);
+  const items = routes.slice(0, visibleCount);
+  if (routes.length === 0) return null;
   return (
     <section id="Routes" className="py-16 px-4 sm:px-6 lg:px-10" style={{ backgroundColor: theme.surfaceAlt }}>
       <div className="container mx-auto max-w-7xl">
@@ -49,6 +53,19 @@ export default function RoutesCarousel({ routes, theme }: RoutesTemplateProps) {
             </div>
           ))}
         </div>
+
+        {/* Show More Button */}
+        {routes.length > visibleCount && (
+          <div className="mt-12 flex justify-center">
+            <button
+              onClick={() => setVisibleCount(routes.length)}
+              className="px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:scale-105"
+              style={{ backgroundColor: theme.primary }}
+            >
+              See All {routes.length - items.length} More Routes
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Navbar from "@/components/Navbar";
 import Media from "@/components/landing/Media";
 import SearchBoxWrapper from "@/components/landing/SearchBoxWrapper";
@@ -17,7 +20,7 @@ interface HeroSplitProps {
   tripSearchEnabledOverride?: boolean;
 }
 
-export default async function HeroSplit({
+export default function HeroSplit({
   heroSectionOverride,
   forceHomeNavbar = false,
   showNavbar = true,
@@ -27,15 +30,38 @@ export default async function HeroSplit({
   bookingRoutesOverride,
   tripSearchEnabledOverride = true,
 }: HeroSplitProps = {}) {
-  const [heroSection, headerSection, ports] = await Promise.all([
-    heroSectionOverride ? Promise.resolve(heroSectionOverride) : getHeroSections(),
-    headerSectionOverride !== undefined
-      ? Promise.resolve(headerSectionOverride)
-      : (getHeadersSections().catch(() => null) as Promise<IHeaderSection | null>),
-    portsOverride !== undefined
-      ? Promise.resolve(portsOverride ?? [])
-      : (getPorts().catch(() => []) as Promise<IPort[]>),
-  ]);
+  const [heroSection, setHeroSection] = useState<PreviewPageSection | null>(heroSectionOverride ?? null);
+  const [headerSection, setHeaderSection] = useState<IHeaderSection | null>(headerSectionOverride ?? null);
+  const [ports, setPorts] = useState<IPort[]>(portsOverride ?? []);
+  const [loading, setLoading] = useState(!(heroSectionOverride && headerSectionOverride !== undefined && portsOverride !== undefined));
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [heroRes, headerRes, portsRes] = await Promise.all([
+          heroSectionOverride ? Promise.resolve({ data: heroSectionOverride }) : getHeroSections(),
+          headerSectionOverride !== undefined
+            ? Promise.resolve({ data: headerSectionOverride })
+            : (getHeadersSections().catch(() => ({ data: null })) as Promise<any>),
+          portsOverride !== undefined
+            ? Promise.resolve({ data: portsOverride ?? [] })
+            : (getPorts().catch(() => ({ data: [] })) as Promise<any>),
+        ]);
+        
+        setHeroSection(heroRes.data || (heroRes as any));
+        setHeaderSection(headerRes.data || (headerRes as any));
+        setPorts(portsRes.data || (portsRes as any));
+      } catch (error) {
+        console.error("Failed to load HeroSplit data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [heroSectionOverride, headerSectionOverride, portsOverride]);
+
+  if (loading) return null;
 
   return (
     <header id="Book" className="relative bg-[#EEF8FC]">

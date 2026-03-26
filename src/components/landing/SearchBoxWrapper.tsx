@@ -195,7 +195,7 @@ import {
     DEFAULT_NUM_VEHICLES,
     DEFAULT_NUM_PASSENGERS,
 } from "constants/default";
-import { getPorts, getDestinationPortsByOrigin } from "@/services";
+import { getPorts, getDestinationPortsByOrigin } from "@/services/shipping-line/port.service";
 
 export interface SearchBoxFormContentProps {
     bookingType: string | undefined;
@@ -222,10 +222,16 @@ export function SearchBoxFormContent({
     useEffect(() => { selectedDestinationPortRef.current = selectedDestinationPort; }, [selectedDestinationPort]);
     const [destinationPorts, setDestinationPorts] = useStateForm<IPort[] | undefined>([]);
     const [ports, setPorts] = useStateForm<IPort[] | undefined>(initialPorts);
+    const portsRef = useRef(ports);
+    useEffect(() => { portsRef.current = ports; }, [ports]);
     const [isFormValid, setIsFormValid] = useStateForm<boolean>(false);
     const [error, setError] = useStateForm<string | null>(null);
     const [isLoading, setIsLoading] = useStateForm(false);
     const themeSettings = useThemeSettings();
+    
+    useEffect(() => {
+        router.prefetch("/booking/destination");
+    }, [router]);
 
     useEffect(() => {
         if (initialPorts.length > 0) {
@@ -264,7 +270,7 @@ export function SearchBoxFormContent({
                         validDestCodes = new Set(destPorts.map(p => p.code));
                     }
 
-                    const availableDestPorts = ports?.filter(port => validDestCodes.has(port.code)) ?? [];
+                    const availableDestPorts = portsRef.current?.filter(port => validDestCodes.has(port.code)) ?? [];
 
                     setDestinationPorts(availableDestPorts.sort((a, b) => a.name.localeCompare(b.name)));
 
@@ -282,7 +288,7 @@ export function SearchBoxFormContent({
         };
 
         fetchDestinationPorts();
-    }, [initialRoutes, selectedOriginPort, ports]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [initialRoutes, selectedOriginPort]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         const isValid =

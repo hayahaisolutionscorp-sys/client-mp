@@ -1,4 +1,6 @@
-import { Suspense } from 'react';
+'use client';
+
+import { Suspense, useEffect, useState, useMemo } from 'react';
 import Carousel from '@/components/landing/Carousel';
 import CarouselSkeleton from './skeletons/CarouselSkeleton';
 import { getPromos } from '@/services/ui/promos.service';
@@ -9,26 +11,38 @@ interface PromosProps {
   promosOverride?: PreviewTravelPromotion[] | null;
 }
 
-export default async function Promos({ promosOverride }: PromosProps = {}) {
-  const promoImages: Promise<IThumbnail[]> = promosOverride
-    ? Promise.resolve(
-      promosOverride.map((promo) => ({
+export default function Promos({ promosOverride }: PromosProps = {}) {
+  const [promos, setPromos] = useState<IThumbnail[]>([]);
+  const [loading, setLoading] = useState(!promosOverride);
+
+  useEffect(() => {
+    if (promosOverride) {
+      setPromos(promosOverride.map((promo) => ({
         id: 0,
         label: promo.image_alt || '',
         filename: promo.image_url,
         location: '',
         imageOrder: promo.display_order ?? 0,
-      }))
-    )
-    : getPromos().then(promos =>
-    promos.map(promo => ({
-      id: 0, // Mock ID as IThumbnail expects number, but API returns UUID
-      label: promo.image_alt || '',
-      filename: promo.image_url,
-      location: '',
-      imageOrder: promo.display_order
-    }))
-  );
+      })));
+      setLoading(false);
+      return;
+    }
+
+    getPromos().then(rawPromos => {
+      setPromos(rawPromos.map(promo => ({
+        id: 0, 
+        label: promo.image_alt || '',
+        filename: promo.image_url,
+        location: '',
+        imageOrder: promo.display_order
+      })));
+      setLoading(false);
+    });
+  }, [promosOverride]);
+
+  const promoImagesPromise = useMemo(() => Promise.resolve(promos), [promos]);
+
+  if (loading) return <CarouselSkeleton />;
 
   return (
     <div id="Promos" className="relative w-full overflow-hidden mt-40">
@@ -38,7 +52,7 @@ export default async function Promos({ promosOverride }: PromosProps = {}) {
         </div>
         <div className="relative mt-10">
           <Suspense fallback={<CarouselSkeleton />}>
-            <Carousel images={promoImages} />
+            <Carousel images={promoImagesPromise} />
           </Suspense>
         </div>
       </div>

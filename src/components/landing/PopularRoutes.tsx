@@ -1,5 +1,7 @@
+'use client';
+
 import PhotoGrid from '@/components/landing/photogrid/PhotoGrid';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState, useMemo } from 'react';
 import RoutesPhotoGridSkeleton from './skeletons/RoutesPhotoGridSkeleton';
 import { getDestinations } from '@/services/ui/destinations.service';
 import { IThumbnail } from '@/models';
@@ -9,29 +11,41 @@ interface PopularRoutesProps {
   routesOverride?: PreviewRouteRecommendation[] | null;
 }
 
-export default async function PopularRoutes({ routesOverride }: PopularRoutesProps = {}) {
+export default function PopularRoutes({ routesOverride }: PopularRoutesProps = {}) {
   const shippingLineId = 3; // Default to Ayahay
-  const routeImages: Promise<IThumbnail[]> = routesOverride
-    ? Promise.resolve(
-      routesOverride.map((dest) => ({
+  const [routeImages, setRouteImages] = useState<IThumbnail[]>([]);
+  const [loading, setLoading] = useState(!routesOverride);
+
+  useEffect(() => {
+    if (routesOverride) {
+      setRouteImages(routesOverride.map((dest) => ({
         id: 0,
         shippingLineId,
         label: dest.route,
         filename: dest.image_url,
         location: dest.route,
         imageOrder: dest.display_order ?? 0,
-      }))
-    )
-    : getDestinations().then(destinations =>
-    destinations.map(dest => ({
-      id: 0, // Mock ID
-      shippingLineId: shippingLineId,
-      label: dest.route,
-      filename: dest.image_url,
-      location: dest.route,
-      imageOrder: dest.display_order
-    }))
-  );
+      })));
+      setLoading(false);
+      return;
+    }
+
+    getDestinations().then(destinations => {
+      setRouteImages(destinations.map(dest => ({
+        id: 0, // Mock ID
+        shippingLineId: shippingLineId,
+        label: dest.route,
+        filename: dest.image_url,
+        location: dest.route,
+        imageOrder: dest.display_order
+      })));
+      setLoading(false);
+    });
+  }, [routesOverride]);
+
+  const imagesPromise = useMemo(() => Promise.resolve(routeImages), [routeImages]);
+
+  if (loading) return <RoutesPhotoGridSkeleton />;
 
   return (
     <div id="Routes" className="container max-w-7xl mx-auto px-6 mt-16 sm:px-8 lg:px-10 pb-5">
@@ -40,7 +54,7 @@ export default async function PopularRoutes({ routesOverride }: PopularRoutesPro
       </h1>
       <div className="mt-10">
         <Suspense fallback={<RoutesPhotoGridSkeleton />}>
-          <PhotoGrid images={routeImages} />
+          <PhotoGrid images={imagesPromise} />
         </Suspense>
       </div>
     </div>

@@ -1,4 +1,6 @@
 import type { IBrandingConfig } from "@/models/branding.model";
+import type { IPort } from "@/models";
+import type { IRoute } from "@/models/shipping-line/route.model";
 import type { IHeroSection } from "@/services/ui/hero-section.service";
 import type { IPromo } from "@/services/ui/promos.service";
 import type { IDestination } from "@/services/ui/destinations.service";
@@ -24,6 +26,8 @@ export interface HeroTemplateProps {
 
 export interface BookingTemplateProps {
   theme: BuilderThemeTokens;
+  ports?: IPort[];
+  routes?: IRoute[];
 }
 
 export interface PromotionsTemplateProps {

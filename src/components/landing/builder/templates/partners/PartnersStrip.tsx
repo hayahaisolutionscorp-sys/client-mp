@@ -37,7 +37,7 @@ export default function PartnersStrip({ partners, theme }: PartnersTemplateProps
               <img
                 src={partner.logo_url}
                 alt={partner.name}
-                className="h-12 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
+                className="h-12 w-auto object-contain transition-all duration-300"
               />
               <p className="text-xs font-medium text-center" style={{ color: theme.muted }}>
                 {partner.name}

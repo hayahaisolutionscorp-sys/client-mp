@@ -14,8 +14,11 @@ export function OPTIONS() {
 }
 
 export async function POST(request: NextRequest) {
-  const payload = (await request.json()) as LandingPreviewPayload;
-  const draftId = randomUUID();
+  const json = await request.json();
+  const payload = json as LandingPreviewPayload;
+  
+  // Reuse existing draftId if provided to prevent iframe re-loading in builder
+  const draftId = json.draftId || randomUUID();
 
   setLandingDraft(draftId, payload);
 

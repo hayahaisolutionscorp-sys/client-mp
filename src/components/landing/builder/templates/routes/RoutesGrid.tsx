@@ -1,8 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import type { RoutesTemplateProps } from "../../types";
 
 export default function RoutesGrid({ routes, theme }: RoutesTemplateProps) {
-  const items = routes.slice(0, 6);
-  if (items.length === 0) return null;
+  const [visibleCount, setVisibleCount] = useState(6);
+  const items = routes.slice(0, visibleCount);
+  if (routes.length === 0) return null;
 
   return (
     <section id="Routes" className="bg-white px-6 py-14">
@@ -28,6 +32,19 @@ export default function RoutesGrid({ routes, theme }: RoutesTemplateProps) {
             </div>
           ))}
         </div>
+
+        {/* Show More Button */}
+        {routes.length > visibleCount && (
+          <div className="mt-10 flex justify-center">
+            <button
+              onClick={() => setVisibleCount(routes.length)}
+              className="px-6 py-2 rounded-lg text-sm font-semibold border-2 transition-all hover:bg-slate-50"
+              style={{ borderColor: theme.primary, color: theme.primary }}
+            >
+              See All {routes.length - items.length} More Routes
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

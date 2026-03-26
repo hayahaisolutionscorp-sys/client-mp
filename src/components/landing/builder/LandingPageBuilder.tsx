@@ -1,3 +1,5 @@
+'use client';
+
 import Hero from "@/components/landing/Hero";
 import Footer from "@/components/Footer";
 import SubscribeBanner from "@/components/landing/SubscribeBanner";
@@ -11,14 +13,25 @@ import HeroSplit from "./templates/hero/HeroSplit";
 import HeroMinimal from "./templates/hero/HeroMinimal";
 import HeroCards from "./templates/hero/HeroCards";
 import RoutesCarousel from "./templates/routes/RoutesCarousel";
+import RoutesModernGrid from "./templates/routes/RoutesModernGrid";
+import RoutesMinimalList from "./templates/routes/RoutesMinimalList";
 import LandingBookingSection from "./LandingBookingSection";
-import BookingCard from "./templates/booking/BookingCard";
-import BookingBanner from "./templates/booking/BookingBanner";
+import BookingOverlay from "./templates/booking/BookingOverlay";
+import BookingPremiumDark from "./templates/booking/BookingPremiumDark";
 import PromotionsGrid from "./templates/promotions/PromotionsGrid";
 import PromotionsBanner from "./templates/promotions/PromotionsBanner";
 import WhyChooseSteps from "./templates/why-choose/WhyChooseSteps";
+import WhyChooseGrid from "./templates/why-choose/WhyChooseGrid";
+import WhyChooseMinimal from "./templates/why-choose/WhyChooseMinimal";
+import WhyChooseDefault from "./templates/why-choose/WhyChooseDefault";
 import GetToKnowTimeline from "./templates/get-to-know/GetToKnowTimeline";
+import GetToKnowModern from "./templates/get-to-know/GetToKnowModern";
+import GetToKnowCenter from "./templates/get-to-know/GetToKnowCenter";
+import GetToKnowDefault from "./templates/get-to-know/GetToKnowDefault";
 import PartnersStrip from "./templates/partners/PartnersStrip";
+import PartnersMarquee from "./templates/partners/PartnersMarquee";
+import PartnersGridPremium from "./templates/partners/PartnersGridPremium";
+import PartnersDefault from "./templates/partners/PartnersDefault";
 import { createBuilderTheme } from "./theme";
 import type { LandingBuilderContent } from "@/lib/landing-builder";
 import { normalizeLandingBuilderContent } from "@/lib/landing-builder";
@@ -31,7 +44,7 @@ interface LandingPageBuilderProps {
   landingData?: LandingPageData | null;
 }
 
-export default async function LandingPageBuilder({
+export default function LandingPageBuilder({
   config,
   previewPayload,
   landingData,
@@ -44,7 +57,7 @@ export default async function LandingPageBuilder({
     .sort((left, right) => left.display_order - right.display_order);
   const hasHeroSection = visibleSections.some((section) => section.section_key === "hero");
   const shouldShowDefaultHeaderInHero = headerConfig?.enabled !== false && (headerConfig?.variant === "default" || !headerConfig?.variant);
-  const shouldShowBookingInHero = bookingConfig?.enabled === true;
+  const shouldShowBookingInHero = bookingConfig?.enabled !== false && (bookingConfig?.variant === "default" || !bookingConfig?.variant);
 
   const sections = previewPayload?.sections ?? [];
   const heroSection = sections.find((section) => section.type === "hero") ?? landingData?.heroSection ?? null;
@@ -136,13 +149,28 @@ export default async function LandingPageBuilder({
               />
             );
           case "booking":
-            if (section.variant === "card") {
-              return <BookingCard key={section.id} theme={theme} />;
+            if (section.variant === "overlay") {
+              return (
+                <BookingOverlay
+                  key={section.id}
+                  theme={theme}
+                  ports={landingData?.ports ?? []}
+                  routes={landingData?.bookingRoutes ?? []}
+                />
+              );
             }
-            if (section.variant === "banner") {
-              return <BookingBanner key={section.id} theme={theme} />;
+            if (section.variant === "compact-dark") {
+              return (
+                <BookingPremiumDark
+                  key={section.id}
+                  theme={theme}
+                  ports={landingData?.ports ?? []}
+                  routes={landingData?.bookingRoutes ?? []}
+                />
+              );
             }
-            return <LandingBookingSection key={section.id} variant="default" />;
+            // default booking search is rendered inside Hero
+            return null;
           case "promotions":
             if (section.variant === "grid") {
               return <PromotionsGrid key={section.id} promos={(promotions as any) ?? []} theme={theme} />;
@@ -155,51 +183,62 @@ export default async function LandingPageBuilder({
             if (section.variant === "carousel") {
               return <RoutesCarousel key={section.id} routes={(routes as any) ?? []} theme={theme} />;
             }
+            if (section.variant === "cards") {
+              return <RoutesModernGrid key={section.id} routes={(routes as any) ?? []} theme={theme} />;
+            }
+            if (section.variant === "list") {
+              return <RoutesMinimalList key={section.id} routes={(routes as any) ?? []} theme={theme} />;
+            }
             return <PopularRoutes key={section.id} routesOverride={routes as any} />;
           case "why_choose":
             if (section.variant === "steps") {
               return <WhyChooseSteps key={section.id} section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             }
+            if (section.variant === "grid") {
+              return <WhyChooseGrid key={section.id} section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            }
+            if (section.variant === "minimal") {
+              return <WhyChooseMinimal key={section.id} section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            }
             return (
-              <WhyChooseUs
+              <WhyChooseDefault
                 key={section.id}
-                reasonsOverride={whyChooseReasons as any}
-                sectionOverride={whyChooseSection as any}
-                getToKnowMainOverride={getToKnowMain as any}
-                getToKnowMissionOverride={getToKnowMission as any}
-                getToKnowVisionOverride={getToKnowVision as any}
-                partnersOverride={partners as any}
-                themeSettingsOverride={landingData?.themeSettings ?? null}
-                brandingConfigOverride={landingData?.brandingConfig ?? null}
+                section={whyChooseSection as any}
+                reasons={(whyChooseReasons as any) ?? []}
+                theme={theme}
               />
             );
           case "get_to_know":
             if (section.variant === "timeline" && getToKnowMain && getToKnowMission && getToKnowVision) {
               return <GetToKnowTimeline key={section.id} main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             }
+            if (section.variant === "modern" && getToKnowMain && getToKnowMission && getToKnowVision) {
+                return <GetToKnowModern key={section.id} main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+            }
+            if (section.variant === "center" && getToKnowMain && getToKnowMission && getToKnowVision) {
+                return <GetToKnowCenter key={section.id} main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+            }
             return (
-              <GetToKnowUs
+              <GetToKnowDefault
                 key={section.id}
-                mainDataOverride={getToKnowMain as any}
-                missionDataOverride={getToKnowMission as any}
-                visionDataOverride={getToKnowVision as any}
+                main={getToKnowMain as any}
+                mission={getToKnowMission as any}
+                vision={getToKnowVision as any}
+                theme={theme}
               />
             );
           case "partners":
             if (section.variant === "strip") {
               return <PartnersStrip key={section.id} partners={(partners as any) ?? []} theme={theme} />;
             }
+            if (section.variant === "marquee") {
+                return <PartnersMarquee key={section.id} partners={(partners as any) ?? []} theme={theme} />;
+            }
+            if (section.variant === "grid-premium") {
+                return <PartnersGridPremium key={section.id} partners={(partners as any) ?? []} theme={theme} />;
+            }
             return (
-              <section key={section.id} id="Partner" className="bg-white px-6 py-10">
-                <div className="container max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
-                  <h1 className="font-bold text-center text-customText text-2xl sm:text-3xl lg:text-4xl">
-                    Our Partners
-                  </h1>
-                  <div className="mt-5">
-                    <OurPartners partnersOverride={partners as any} />
-                  </div>
-                </div>
-              </section>
+                <PartnersDefault key={section.id} partners={(partners as any) ?? []} theme={theme} />
             );
           default:
             return null;

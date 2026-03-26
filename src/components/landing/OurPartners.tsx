@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { getPartners } from '@/services';
 import type { PreviewPartner } from '@/lib/preview/landing-preview';
 
@@ -6,8 +9,24 @@ interface OurPartnersProps {
   partnersOverride?: PreviewPartner[] | null;
 }
 
-export default async function OurPartners({ partnersOverride }: OurPartnersProps = {}) {
-  const partners = partnersOverride ?? (await getPartners()).data;
+export default function OurPartners({ partnersOverride }: OurPartnersProps = {}) {
+  const [partners, setPartners] = useState<PreviewPartner[]>(partnersOverride || []);
+  const [loading, setLoading] = useState(!partnersOverride);
+
+  useEffect(() => {
+    if (partnersOverride) {
+      setPartners(partnersOverride);
+      setLoading(false);
+      return;
+    }
+
+    getPartners().then(res => {
+      setPartners(res.data || []);
+      setLoading(false);
+    });
+  }, [partnersOverride]);
+
+  if (loading) return null;
 
   return (
     <section className="flex flex-col items-center justify-start bg-white h-auto">
@@ -27,4 +46,3 @@ export default async function OurPartners({ partnersOverride }: OurPartnersProps
     </section>
   );
 }
-

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import { fetchFilters } from '@/services';
+import { fetchFilters } from '@/services/shipping-line/trip.service';
 
 const SearchHeader = dynamic(() => import('@/components/booking/destination/SearchHeader'));
 const FilterSidebar = dynamic(() => import('@/components/booking/destination/FilterSidebar'));
