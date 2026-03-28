@@ -6,17 +6,32 @@ import type { LandingBuilderContent } from "@/lib/landing-builder";
 
 const LANDING_BUILDER_CACHE_KEY = "landing_builder_config";
 
-export const useLandingBuilder = () => {
-  const [config, setConfig] = useState<LandingBuilderContent | null>(null);
+const getCachedLandingBuilderConfig = (): LandingBuilderContent | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const cached = localStorage.getItem(LANDING_BUILDER_CACHE_KEY);
+  if (!cached) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(cached) as LandingBuilderContent;
+  } catch (e) {
+    console.error("Failed to parse cached landing builder:", e);
+    return null;
+  }
+};
+
+export const useLandingBuilder = (initialConfig: LandingBuilderContent | null = null) => {
+  const [config, setConfig] = useState<LandingBuilderContent | null>(
+    () => initialConfig ?? getCachedLandingBuilderConfig()
+  );
 
   useEffect(() => {
-    const cached = localStorage.getItem(LANDING_BUILDER_CACHE_KEY);
-    if (cached) {
-      try {
-        setConfig(JSON.parse(cached));
-      } catch (e) {
-        console.error("Failed to parse cached landing builder:", e);
-      }
+    if (initialConfig) {
+      setConfig(initialConfig);
     }
 
     getLandingBuilderContent()
@@ -27,7 +42,7 @@ export const useLandingBuilder = () => {
         }
       })
       .catch((error) => console.error("Error fetching landing builder:", error));
-  }, []);
+  }, [initialConfig]);
 
   return config;
 };

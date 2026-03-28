@@ -69,7 +69,7 @@ export default function ChatWidget({ agentId, threadId, tenantId = 1, builderCon
   // Still loading config or explicitly disabled
   if (enabled === null || enabled === false) return null;
 
-  const ctaSection = builderConfig?.sections?.find(s => s.section_key === "floating_cta");
+  const ctaSection = builderConfig?.sections?.find((s: any) => s.section_key === "floating_cta");
   if (ctaSection && !ctaSection.enabled) return null;
 
   const ctaVariant = ctaSection?.variant || "default";

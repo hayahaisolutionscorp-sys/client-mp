@@ -14,7 +14,6 @@ export const useContactUs = () => {
       try {
         setContactInfo(JSON.parse(cached));
         setIsHydrated(true);
-        return;
       } catch (e) {
         console.error("Failed to parse cached contact info:", e);
       }

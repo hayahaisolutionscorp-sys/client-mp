@@ -62,10 +62,6 @@ export default async function Home() {
           <WhyChooseUs
             reasonsOverride={landingData.whyChooseReasons}
             sectionOverride={landingData.whyChooseSection}
-            getToKnowMainOverride={landingData.getToKnowMain}
-            getToKnowMissionOverride={landingData.getToKnowMission}
-            getToKnowVisionOverride={landingData.getToKnowVision}
-            partnersOverride={landingData.partners as any}
             themeSettingsOverride={landingData.themeSettings}
             brandingConfigOverride={landingData.brandingConfig}
           />

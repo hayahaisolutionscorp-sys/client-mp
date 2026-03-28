@@ -42,6 +42,7 @@ import type { LandingBuilderContent } from "@/lib/landing-builder";
 import { normalizeLandingBuilderContent } from "@/lib/landing-builder";
 import type { LandingPreviewPayload } from "@/lib/preview/landing-preview";
 import type { LandingPageData } from "@/services/content/landing-page.service";
+import type { IBrandingConfig } from "@/models";
 
 interface LandingPageBuilderProps {
   config: LandingBuilderContent;
@@ -78,7 +79,39 @@ export default function LandingPageBuilder({
   const routes = previewPayload?.routes ?? landingData?.routes ?? null;
   const whyChooseReasons = previewPayload?.whyChooseCards ?? landingData?.whyChooseReasons ?? null;
   const partners = previewPayload?.partners ?? landingData?.partners ?? null;
-  const theme = createBuilderTheme((landingData?.brandingConfig ?? {}) as any);
+  const baseBranding = landingData?.brandingConfig;
+  const previewBranding = previewPayload?.config;
+  const effectiveBranding = previewBranding
+    ? ({
+        ...(baseBranding ?? {}),
+        ...previewBranding,
+        colors: {
+          ...(baseBranding?.colors ?? {}),
+          ...(previewBranding.colors ?? {}),
+        },
+        logo: {
+          ...(baseBranding?.logo ?? {}),
+          ...(previewBranding.logo ?? {}),
+        },
+        font_family:
+          previewBranding.font_family ||
+          previewBranding.fontFamily ||
+          baseBranding?.font_family ||
+          baseBranding?.fontFamily ||
+          "Jost",
+        font_family_title:
+          previewBranding.font_family_title ||
+          previewBranding.fontFamilyTitle ||
+          baseBranding?.font_family_title ||
+          baseBranding?.fontFamilyTitle ||
+          previewBranding.font_family ||
+          previewBranding.fontFamily ||
+          baseBranding?.font_family ||
+          baseBranding?.fontFamily ||
+          "Jost",
+      } as IBrandingConfig)
+    : ((baseBranding ?? {}) as IBrandingConfig);
+  const theme = createBuilderTheme(effectiveBranding);
 
   const hasCustomFooter = visibleSections.some(s => s.section_key === "footer");
   const contentSections = visibleSections.filter(s => s.section_key !== "footer");
@@ -115,6 +148,7 @@ export default function LandingPageBuilder({
                 key={section.id} 
                 variant={section.variant} 
                 theme={theme} 
+                headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
               />
             );
           case "hero":
@@ -126,7 +160,7 @@ export default function LandingPageBuilder({
                   forceHomeNavbar={Boolean(previewPayload)}
                   showNavbar={shouldShowDefaultHeaderInHero}
                   showBookingSearch={shouldShowBookingInHero}
-                  headerSectionOverride={landingData?.headerSection}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                   portsOverride={landingData?.ports ?? null}
                   bookingRoutesOverride={landingData?.bookingRoutes ?? null}
                   tripSearchEnabledOverride={true}
@@ -141,7 +175,7 @@ export default function LandingPageBuilder({
                   forceHomeNavbar={Boolean(previewPayload)}
                   showNavbar={shouldShowDefaultHeaderInHero}
                   showBookingSearch={shouldShowBookingInHero}
-                  headerSectionOverride={landingData?.headerSection}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                   portsOverride={landingData?.ports ?? null}
                   bookingRoutesOverride={landingData?.bookingRoutes ?? null}
                   tripSearchEnabledOverride={true}
@@ -156,7 +190,7 @@ export default function LandingPageBuilder({
                   forceHomeNavbar={Boolean(previewPayload)}
                   showNavbar={shouldShowDefaultHeaderInHero}
                   showBookingSearch={shouldShowBookingInHero}
-                  headerSectionOverride={landingData?.headerSection}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                   portsOverride={landingData?.ports ?? null}
                   bookingRoutesOverride={landingData?.bookingRoutes ?? null}
                   tripSearchEnabledOverride={true}
@@ -170,7 +204,7 @@ export default function LandingPageBuilder({
                 forceHomeNavbar={Boolean(previewPayload)}
                 showNavbar={shouldShowDefaultHeaderInHero}
                 showBookingSearch={shouldShowBookingInHero}
-                headerSectionOverride={landingData?.headerSection}
+                headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                 portsOverride={landingData?.ports ?? null}
                 bookingRoutesOverride={landingData?.bookingRoutes ?? null}
                 tripSearchEnabledOverride={true}

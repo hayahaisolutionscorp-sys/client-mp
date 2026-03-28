@@ -1,6 +1,12 @@
 export interface PreviewGeneralConfig {
   brand_name?: string | null;
+  domain_name?: string | null;
+  subdomain_name?: string | null;
   favicon_url?: string | null;
+  font_family?: string | null;
+  font_family_title?: string | null;
+  fontFamily?: string | null;
+  fontFamilyTitle?: string | null;
   logo?: {
     light?: string;
     dark?: string;
@@ -11,6 +17,8 @@ export interface PreviewGeneralConfig {
     primary?: string;
     secondary?: string;
     accent?: string;
+    surface?: string;
+    surfaceAlt?: string;
   } | null;
   slogan?: string | null;
   motto?: string | null;

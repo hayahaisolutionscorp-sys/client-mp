@@ -26,8 +26,8 @@ export const FAQ_SECTION_LABELS: Record<FaqSectionKey, string> = {
 };
 
 export const FAQ_VARIANTS: Record<FaqSectionKey, string[]> = {
-  hero: ["default"],
-  faq_list: ["default", "accordion"],
+  hero: ["default", "minimal", "centered", "gradient", "compact"],
+  faq_list: ["default", "accordion", "cards", "compact", "minimal"],
 };
 
 export const DEFAULT_FAQ_BUILDER_CONTENT: FaqBuilderContent = {

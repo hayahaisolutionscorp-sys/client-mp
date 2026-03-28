@@ -64,7 +64,7 @@ module.exports = {
 				},
 				customGreen: '#58dc88',
 				customBlue: "#0060df",
-				customText: '#051036',
+				customText: 'rgb(var(--text-default-rgb) / <alpha-value>)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

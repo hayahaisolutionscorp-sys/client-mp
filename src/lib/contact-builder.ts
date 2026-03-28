@@ -1,6 +1,5 @@
 export const CONTACT_SECTION_KEYS = [
   "hero",
-  "contact_info",
   "contact_form",
 ] as const;
 
@@ -23,14 +22,12 @@ export interface ContactBuilderContent {
 
 export const CONTACT_SECTION_LABELS: Record<ContactSectionKey, string> = {
   hero: "Hero Banner",
-  contact_info: "Contact Information",
   contact_form: "Contact Form",
 };
 
 export const CONTACT_VARIANTS: Record<ContactSectionKey, string[]> = {
-  hero: ["default"],
-  contact_info: ["default", "cards"],
-  contact_form: ["default"],
+  hero: ["default", "minimal", "centered", "gradient", "split"],
+  contact_form: ["default", "side-by-side", "minimal", "floating", "premium"],
 };
 
 export const DEFAULT_CONTACT_BUILDER_CONTENT: ContactBuilderContent = {
@@ -38,8 +35,7 @@ export const DEFAULT_CONTACT_BUILDER_CONTENT: ContactBuilderContent = {
   page_key: "contact",
   sections: [
     { id: "hero", section_key: "hero", label: CONTACT_SECTION_LABELS.hero, variant: "default", enabled: true, display_order: 0 },
-    { id: "contact_info", section_key: "contact_info", label: CONTACT_SECTION_LABELS.contact_info, variant: "default", enabled: true, display_order: 1 },
-    { id: "contact_form", section_key: "contact_form", label: CONTACT_SECTION_LABELS.contact_form, variant: "default", enabled: true, display_order: 2 },
+    { id: "contact_form", section_key: "contact_form", label: CONTACT_SECTION_LABELS.contact_form, variant: "default", enabled: true, display_order: 1 },
   ],
 };
 

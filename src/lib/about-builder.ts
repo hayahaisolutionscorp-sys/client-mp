@@ -4,7 +4,6 @@ export const ABOUT_SECTION_KEYS = [
   "our_story",
   "our_expertise",
   "core_values",
-  "get_to_know",
 ] as const;
 
 export type AboutSectionKey = (typeof ABOUT_SECTION_KEYS)[number];
@@ -30,16 +29,14 @@ export const ABOUT_SECTION_LABELS: Record<AboutSectionKey, string> = {
   our_story: "Our Story",
   our_expertise: "Our Expertise",
   core_values: "Core Values",
-  get_to_know: "Get To Know Us",
 };
 
 export const ABOUT_VARIANTS: Record<AboutSectionKey, string[]> = {
-  hero: ["default"],
-  welcome: ["default"],
-  our_story: ["default"],
-  our_expertise: ["default"],
-  core_values: ["default"],
-  get_to_know: ["default", "timeline"],
+  hero: ["default", "split", "minimal", "overlay", "cards", "centered"],
+  welcome: ["default", "spotlight", "highlight", "quote", "side-accent"],
+  our_story: ["default", "timeline", "milestone", "narrative", "journey"],
+  our_expertise: ["default", "checklist", "grid", "showcase", "badges"],
+  core_values: ["default", "pillars", "icon-grid", "timeline", "accordion", "compact"],
 };
 
 export const DEFAULT_ABOUT_BUILDER_CONTENT: AboutBuilderContent = {
@@ -51,7 +48,6 @@ export const DEFAULT_ABOUT_BUILDER_CONTENT: AboutBuilderContent = {
     { id: "our_story", section_key: "our_story", label: ABOUT_SECTION_LABELS.our_story, variant: "default", enabled: true, display_order: 2 },
     { id: "our_expertise", section_key: "our_expertise", label: ABOUT_SECTION_LABELS.our_expertise, variant: "default", enabled: true, display_order: 3 },
     { id: "core_values", section_key: "core_values", label: ABOUT_SECTION_LABELS.core_values, variant: "default", enabled: true, display_order: 4 },
-    { id: "get_to_know", section_key: "get_to_know", label: ABOUT_SECTION_LABELS.get_to_know, variant: "default", enabled: false, display_order: 5 },
   ],
 };
 

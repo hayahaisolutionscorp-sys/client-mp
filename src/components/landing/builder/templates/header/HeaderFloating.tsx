@@ -19,7 +19,11 @@ interface HeaderFloatingProps {
   theme: any;
 }
 
-export default function HeaderFloating({ navItems, scrollToElement, theme }: HeaderFloatingProps) {
+export default function HeaderFloating({
+  navItems,
+  scrollToElement,
+  theme,
+}: HeaderFloatingProps) {
   const branding = useBranding();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -34,7 +38,7 @@ export default function HeaderFloating({ navItems, scrollToElement, theme }: Hea
     <>
       <div className="fixed top-6 left-0 right-0 z-50 w-full px-4 sm:px-6 lg:px-10">
         <header 
-            className="flex items-center justify-between gap-6 rounded-2xl border border-white/20 px-6 py-4 shadow-lg backdrop-blur-md transition-all w-full"
+            className="flex items-center justify-between gap-4 rounded-2xl border border-white/20 px-6 py-4 shadow-lg backdrop-blur-md transition-all w-full max-w-7xl mx-auto"
             style={{ backgroundColor: `${theme.surface}B3` }} // ~70% opacity
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${theme.surface}CC`)} // ~80% opacity
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = `${theme.surface}B3`)}
@@ -50,14 +54,14 @@ export default function HeaderFloating({ navItems, scrollToElement, theme }: Hea
                 className="h-[40px] w-auto object-contain transition-all duration-300"
               />
             ) : (
-              <span className="text-xl font-semibold capitalize" style={{ color: theme.text, fontFamily: 'var(--font-title)' }}>
+              <span className="text-xl font-semibold capitalize whitespace-nowrap" style={{ color: theme.text, fontFamily: 'var(--font-title)' }}>
                 {branding?.brand_name || "Ayahay"}
               </span>
             )}
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex lg:gap-8" style={{ color: theme.text }}>
+          <nav className="hidden flex-1 flex-wrap items-center justify-center gap-4 lg:flex lg:gap-6" style={{ color: theme.text }}>
             {navItems.map((item) =>
               item.trigger.toLowerCase() === "scroll" ? (
                 <button
@@ -127,14 +131,14 @@ export default function HeaderFloating({ navItems, scrollToElement, theme }: Hea
           </div>
         </button>
         <div className="h-full w-full overflow-y-auto px-4 pt-[100px]">
-          <div className="space-y-1">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center">
             {navItems.map((item) =>
               item.trigger.toLowerCase() === "scroll" ? (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => handleScroll(item.id)}
-                  className="block w-full text-left text-lg font-medium transition-colors hover:opacity-80"
+                  className="block w-full text-center text-lg font-medium transition-colors hover:opacity-80"
                   style={{ color: theme.text }}
                 >
                   {item.name}
@@ -144,14 +148,14 @@ export default function HeaderFloating({ navItems, scrollToElement, theme }: Hea
                   key={item.id}
                   href={item.redirect_url}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block py-4 text-lg font-medium transition-colors hover:opacity-80"
+                  className="block w-full py-4 text-center text-lg font-medium transition-colors hover:opacity-80"
                   style={{ color: theme.text }}
                 >
                   {item.name}
                 </Link>
               )
             )}
-            <div className="pt-4">
+            <div className="pt-6 flex justify-center w-full">
               <UserDropdown shouldBeTransparent={false} />
             </div>
           </div>

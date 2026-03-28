@@ -3,43 +3,43 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import UserDropdown from "@/components/UserDropdown";
-import { NAV_ITEMS } from "constants/index";
 import { useBranding } from "@/hooks/branding";
 import { useHeaders } from "@/hooks/headers";
 import HeaderFloating from "./templates/header/HeaderFloating";
+import {
+  getFilteredLandingNavItems,
+  scrollToLandingTarget,
+  type HeaderNavigationConfig,
+} from "@/lib/landing-nav";
 
 interface BuilderLandingHeaderProps {
   variant: string;
   theme: any;
+  headerSectionOverride?: HeaderNavigationConfig | null;
 }
 
-export default function BuilderLandingHeader({ variant, theme }: BuilderLandingHeaderProps) {
+export default function BuilderLandingHeader({
+  variant,
+  theme,
+  headerSectionOverride,
+}: BuilderLandingHeaderProps) {
+  const pathname = usePathname();
+  const router = useRouter();
   const branding = useBranding();
-  const headerSection = useHeaders();
+  const headerSection = useHeaders(headerSectionOverride) || headerSectionOverride;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const logoSrc = branding?.logo?.dark || branding?.logo?.light;
-
-  const navItems = NAV_ITEMS.filter((item) => {
-    if (!headerSection) return true;
-    if (item.id === "Promos") return headerSection.showPromos;
-    if (item.id === "Routes") return headerSection.showRoutes;
-    if (item.id === "Resources") return headerSection.showResources;
-    if (item.id === "AboutUs") return headerSection.showAboutUs;
-    return true;
-  });
+  const navItems = getFilteredLandingNavItems(headerSection);
 
   const scrollToElement = (id: string) => {
-    if (id === "Resources") {
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
-      return;
-    }
-
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    scrollToLandingTarget({
+      id,
+      pathname,
+      navigate: (href) => router.push(href),
+    });
   };
 
   const handleScroll = (id: string) => {
@@ -48,11 +48,22 @@ export default function BuilderLandingHeader({ variant, theme }: BuilderLandingH
   };
 
   if (variant === "floating") {
-    return <HeaderFloating navItems={navItems} scrollToElement={scrollToElement} theme={theme} />;
+    return (
+      <HeaderFloating
+        navItems={navItems}
+        scrollToElement={scrollToElement}
+        theme={theme}
+      />
+    );
   }
 
   if (variant !== "centered") {
-    return <Navbar />;
+    return (
+      <Navbar
+        initialHeaderSection={headerSectionOverride}
+        showLandingNav
+      />
+    );
   }
 
   return (

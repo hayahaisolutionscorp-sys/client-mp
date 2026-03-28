@@ -1,9 +1,8 @@
-import { FaMobileAlt } from 'react-icons/fa';
-import { MdOutlineMail } from 'react-icons/md';
-import dynamic from 'next/dynamic';
-const ContactUsForm = dynamic(() => import('@/components/contact-us/ContactUsForm'));
-import { getContactUs, getContactUsHero } from '@/services/content/contact-us.service';
+import { ContactPageContent } from '@/components/contact-us/ContactPageContent';
+import ContactPageBuilder from '@/components/contact-us/builder/ContactPageBuilder';
+import { getContactPage, getContactSections, getContactUs } from '@/services/content/contact-us.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
+import { getBrandingConfig } from '@/services/ui/branding.service';
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
 
@@ -30,68 +29,35 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactUs() {
-  const [themeSettings, contactInfo, contactUsHero] = await Promise.all([
+  const [themeSettings, branding, contactPage, contactSections, contactInfo] = await Promise.all([
     getThemeSettings(),
+    getBrandingConfig(),
+    getContactPage(),
+    getContactSections(),
     getContactUs(),
-    getContactUsHero(),
   ]);
 
-  const phoneNumbers = contactInfo.filter(c => c.type === 'phone' && c.is_active);
-  const emails = contactInfo.filter(c => c.type === 'email' && c.is_active);
+  // If there's builder configuration, use the new builder
+  if (contactPage?.content && typeof contactPage.content === 'object' && 'sections' in contactPage.content) {
+    return (
+      <ContactPageBuilder
+        contactPage={contactPage}
+        sections={contactSections}
+        contactInfo={contactInfo}
+        themeSettings={themeSettings ?? null}
+        branding={branding ?? null}
+      />
+    );
+  }
 
-  const primary = themeSettings?.primary;
-  const secondary = themeSettings?.secondary;
-
+  // Fallback to old rendering
   return (
-    <section
-      className="relative bg-cover bg-no-repeat bg-center min-h-screen flex items-center"
-      style={{
-        backgroundImage: `url('${contactUsHero?.bg_url || ''}')`,
-        '--primary-color': primary,
-        '--secondary-color': secondary
-      } as React.CSSProperties}
-    >
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(to right, color-mix(in srgb, var(--primary-color) 80%, transparent), color-mix(in srgb, var(--secondary-color) 80%, transparent))`
-        }}
-      ></div>
-
-      <div className="container mx-auto p-6 relative z-10">
-        {/* Centered Heading */}
-        <h1 className="text-2xl font-bold text-white text-center mb-6 sm:text-4xl sm:mb-16">
-          {contactUsHero?.title || 'Contact Us'}
-        </h1>
-
-        <div className="grid md:grid-cols-2 gap-10">
-          {/* Left Side - Contact Info */}
-          <div className="space-y-4 text-white sm:space-y-6">
-            <h2 className="text-xl font-bold sm:text-2xl text-white">
-              {contactUsHero?.subtitle || 'Have Any Questions?'}
-            </h2>
-            <p className="text-md text-white">{contactUsHero?.description}</p>
-
-            <ul className="space-y-4">
-              {phoneNumbers.map(phone => (
-                <li key={phone.id} className="flex items-center space-x-4">
-                  <FaMobileAlt className="text-2xl text-white" />
-                  <h3>{phone.label}: {phone.value}</h3>
-                </li>
-              ))}
-
-              {emails.map(email => (
-                <li key={email.id} className="flex items-center space-x-4">
-                  <MdOutlineMail className="text-2xl text-white" />
-                  <h3>{email.value}</h3>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <ContactUsForm />
-        </div>
-      </div>
-    </section>
+    <ContactPageContent
+      contactPage={contactPage}
+      sections={contactSections}
+      contacts={contactInfo}
+      themeSettings={themeSettings ?? null}
+      branding={branding ?? null}
+    />
   );
 }

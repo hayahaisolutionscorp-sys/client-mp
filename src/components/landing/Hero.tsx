@@ -6,15 +6,16 @@ import Media from '@/components/landing/Media';
 import SearchBoxWrapper from '@/components/landing/SearchBoxWrapper';
 import { getHeadersSections, getHeroSections, getPorts } from '@/services';
 import type { PreviewPageSection } from '@/lib/preview/landing-preview';
-import type { IHeaderSection, IPort } from '@/models';
+import type { IPort } from '@/models';
 import type { IRoute } from '@/models/shipping-line/route.model';
+import type { HeaderNavigationConfig } from '@/lib/landing-nav';
 
 interface HeroProps {
   heroSectionOverride?: PreviewPageSection | null;
   forceHomeNavbar?: boolean;
   showNavbar?: boolean;
   showBookingSearch?: boolean;
-  headerSectionOverride?: IHeaderSection | null;
+  headerSectionOverride?: HeaderNavigationConfig | null;
   portsOverride?: IPort[] | null;
   bookingRoutesOverride?: IRoute[] | null;
   tripSearchEnabledOverride?: boolean;
@@ -31,7 +32,9 @@ export default function Hero({
   tripSearchEnabledOverride = true,
 }: HeroProps = {}) {
   const [heroSection, setHeroSection] = useState<PreviewPageSection | null>(heroSectionOverride ?? null);
-  const [headerSection, setHeaderSection] = useState<IHeaderSection | null>(headerSectionOverride ?? null);
+  const [headerSection, setHeaderSection] = useState<HeaderNavigationConfig | null>(
+    headerSectionOverride ?? null
+  );
   const [ports, setPorts] = useState<IPort[]>(portsOverride ?? []);
   const [loading, setLoading] = useState(!(heroSectionOverride && headerSectionOverride !== undefined && portsOverride !== undefined));
 

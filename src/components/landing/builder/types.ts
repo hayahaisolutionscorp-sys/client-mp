@@ -15,7 +15,11 @@ export interface BuilderThemeTokens {
   surface: string;
   surfaceAlt: string;
   text: string;
+  textOnPrimary: string;
+  textOnSecondary: string;
+  textOnSurfaceAlt: string;
   muted: string;
+  mutedOnSurfaceAlt: string;
   fontFamily: string;
   fontFamilyTitle: string;
 }

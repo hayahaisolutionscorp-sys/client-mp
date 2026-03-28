@@ -6,15 +6,16 @@ import Media from "@/components/landing/Media";
 import SearchBoxWrapper from "@/components/landing/SearchBoxWrapper";
 import { getHeadersSections, getHeroSections, getPorts } from "@/services";
 import type { PreviewPageSection } from "@/lib/preview/landing-preview";
-import type { IHeaderSection, IPort } from "@/models";
+import type { IPort } from "@/models";
 import type { IRoute } from "@/models/shipping-line/route.model";
+import type { HeaderNavigationConfig } from "@/lib/landing-nav";
 
 interface HeroSplitProps {
   heroSectionOverride?: PreviewPageSection | null;
   forceHomeNavbar?: boolean;
   showNavbar?: boolean;
   showBookingSearch?: boolean;
-  headerSectionOverride?: IHeaderSection | null;
+  headerSectionOverride?: HeaderNavigationConfig | null;
   portsOverride?: IPort[] | null;
   bookingRoutesOverride?: IRoute[] | null;
   tripSearchEnabledOverride?: boolean;
@@ -31,7 +32,9 @@ export default function HeroSplit({
   tripSearchEnabledOverride = true,
 }: HeroSplitProps = {}) {
   const [heroSection, setHeroSection] = useState<PreviewPageSection | null>(heroSectionOverride ?? null);
-  const [headerSection, setHeaderSection] = useState<IHeaderSection | null>(headerSectionOverride ?? null);
+  const [headerSection, setHeaderSection] = useState<HeaderNavigationConfig | null>(
+    headerSectionOverride ?? null
+  );
   const [ports, setPorts] = useState<IPort[]>(portsOverride ?? []);
   const [loading, setLoading] = useState(!(heroSectionOverride && headerSectionOverride !== undefined && portsOverride !== undefined));
 
@@ -39,18 +42,18 @@ export default function HeroSplit({
     const fetchData = async () => {
       try {
         const [heroRes, headerRes, portsRes] = await Promise.all([
-          heroSectionOverride ? Promise.resolve({ data: heroSectionOverride }) : getHeroSections(),
+          heroSectionOverride ? Promise.resolve(heroSectionOverride) : getHeroSections().then((res: any) => res?.data || res),
           headerSectionOverride !== undefined
-            ? Promise.resolve({ data: headerSectionOverride })
-            : (getHeadersSections().catch(() => ({ data: null })) as Promise<any>),
+            ? Promise.resolve(headerSectionOverride)
+            : getHeadersSections().catch(() => null).then((res: any) => res?.data || res),
           portsOverride !== undefined
-            ? Promise.resolve({ data: portsOverride ?? [] })
-            : (getPorts().catch(() => ({ data: [] })) as Promise<any>),
+            ? Promise.resolve(portsOverride ?? [])
+            : getPorts().catch(() => []).then((res: any) => res?.data || res),
         ]);
         
-        setHeroSection(heroRes.data || (heroRes as any));
-        setHeaderSection(headerRes.data || (headerRes as any));
-        setPorts(portsRes.data || (portsRes as any));
+        setHeroSection(heroRes as any);
+        setHeaderSection(headerRes as any);
+        setPorts(portsRes as any);
       } catch (error) {
         console.error("Failed to load HeroSplit data", error);
       } finally {

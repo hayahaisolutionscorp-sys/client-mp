@@ -26,6 +26,8 @@ export const useThemeSettings = () => {
             primary: branding.colors.primaryColor || branding.colors.primary || '',
             secondary: branding.colors.secondaryColor || branding.colors.secondary || '',
             accent: branding.colors.accent,
+            surface: branding.colors.surface || '#FFFFFF',
+            surfaceAlt: branding.colors.surfaceAlt || '#EEF8FC',
             fontStyle: 'Inter'
           };
           setThemeSettings(derivedTheme);
