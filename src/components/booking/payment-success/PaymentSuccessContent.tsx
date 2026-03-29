@@ -11,6 +11,7 @@ export default function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = searchParams.get('booking_id');
+  const tenantId = searchParams.get('tenant_id');
   const themeSettings = useThemeSettings();
   const [countdown, setCountdown] = useState(5);
 
@@ -25,7 +26,7 @@ export default function PaymentSuccessContent() {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          router.push(`/booking/confirmed/${bookingId}`);
+          router.push(`/booking/confirmed/${bookingId}${tenantId ? `?tenant_id=${tenantId}` : ''}`);
           return 0;
         }
         return prev - 1;
@@ -67,7 +68,7 @@ export default function PaymentSuccessContent() {
         </p>
 
         <Button
-          onClick={() => router.push(`/booking/confirmed/${bookingId}`)}
+          onClick={() => router.push(`/booking/confirmed/${bookingId}${tenantId ? `?tenant_id=${tenantId}` : ''}`)}
           style={{ backgroundColor: themeSettings?.primaryColor || '#23abff' }}
           className="w-full"
         >

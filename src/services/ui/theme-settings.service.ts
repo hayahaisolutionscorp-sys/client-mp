@@ -2,7 +2,7 @@ import { IThemeSettings } from '@/models';
 import { IBrandingResponse } from '@/models/branding.model';
 import { THEME_SETTINGS_API } from 'constants/api';
 import brandingData from '@/data/branding.json';
-import { IS_BROWSER, IS_BUILD_TIME } from '../config';
+import { IS_BROWSER, IS_BUILD_TIME, IS_CLIENT } from '../config';
 
 const DEFAULT_THEME: IThemeSettings = {
   primary: brandingData.colors.primary,
@@ -14,7 +14,7 @@ const DEFAULT_THEME: IThemeSettings = {
 };
 
 export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
-  if (IS_BUILD_TIME) {
+  if (IS_BUILD_TIME || !IS_CLIENT) {
     return DEFAULT_THEME;
   }
 

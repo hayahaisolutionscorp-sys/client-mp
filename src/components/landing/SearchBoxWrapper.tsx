@@ -228,7 +228,6 @@ function SearchBoxFormContent({
     const [ports, setPorts] = useStateForm<IPort[] | undefined>([]);
     const [isFormValid, setIsFormValid] = useStateForm<boolean>(false);
     const [error, setError] = useStateForm<string | null>(null);
-    const [isLoading, setIsLoading] = useStateForm(false);
     const themeSettings = useThemeSettings();
 
     useEffect(() => {
@@ -284,7 +283,12 @@ function SearchBoxFormContent({
             (bookingType.toLowerCase() !== "Round Trip".toLowerCase() || (bookingType.toLowerCase() === "Round Trip".toLowerCase() && returnDate));
 
         setIsFormValid(Boolean(isValid));
-    }, [bookingType, selectedOriginPort, selectedDestinationPort, departureDate, returnDate]);
+
+        // Prefetch destination page when form is valid
+        if (isValid) {
+            router.prefetch('/booking/destination');
+        }
+    }, [bookingType, selectedOriginPort, selectedDestinationPort, departureDate, returnDate, router]);
 
     const handleOriginPortSelect = (port: IPort | undefined) => {
         setSelectedOriginPort(port);
@@ -316,8 +320,6 @@ function SearchBoxFormContent({
             return;
         }
 
-        setIsLoading(true);
-
         try {
             const searchValues = {
                 bookingType: bookingType?.replace("Trip", "").trim() ?? undefined,
@@ -340,7 +342,6 @@ function SearchBoxFormContent({
             router.push(`/booking/destination?${queryParams}`);
         } catch (error) {
             console.error("Error occurred while searching:", error);
-            setIsLoading(false);
         }
     };
 
@@ -398,14 +399,11 @@ function SearchBoxFormContent({
                     <Button
                         variant="default"
                         onClick={handleSearchClick}
-                        disabled={!isFormValid || isLoading}
+                        disabled={!isFormValid}
                         className={`${!isFormValid ? "bg-gray-400" : ""
                             } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
                         <BiSolidShip className="h-5 w-5 text-white" />
                         <span>Search Trip</span>
-                        {isLoading && (
-                            <FiLoader className="h-5 w-5 text-white animate-spin" />
-                        )}
                     </Button>
                 </div>
             </div>
@@ -430,14 +428,11 @@ function SearchBoxFormContent({
                     <Button
                         variant="default"
                         onClick={handleSearchClick}
-                        disabled={!isFormValid || isLoading}
+                        disabled={!isFormValid}
                         className={`${!isFormValid ? "bg-gray-400" : ""
                             } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
                         <BiSolidShip className="h-5 w-5 text-white" />
                         <span>Search Trip</span>
-                        {isLoading && (
-                            <FiLoader className="h-5 w-5 text-white animate-spin" />
-                        )}
                     </Button>
                 </div>
             </div>

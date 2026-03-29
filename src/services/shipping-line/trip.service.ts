@@ -1,8 +1,10 @@
-import { TRIP_API } from 'constants/api';
+import { TRIP_API, CORE_API_URL } from 'constants/api';
 import { toPhilippinesTime } from 'helpers/date.helpers';
 
 import { getAllCabinTypes } from './cabin-type.service';
 import { getAllShippingLinesServer } from './shipping-line.service';
+import { fetchTripsViaSSE } from './sse-trips.service';
+import { IS_CLIENT } from 'constants/api';
 import { SearchAvailableTrips } from '@/types/trip/trip-management';
 import { PaginatedRequest, PaginatedResponse } from '@/types/common/pagination';
 import { IPort, ITrip, ICabinType, IShippingLine } from '@/models';
@@ -47,6 +49,11 @@ export async function getAvailableTrips(
     if (searchQuery.srcPortId && !searchQuery.origin_code) params.append('srcPortId', searchQuery.srcPortId.toString());
     if (searchQuery.destPortId && !searchQuery.destination_code) params.append('destPortId', searchQuery.destPortId.toString());
 
+    if (!IS_CLIENT) {
+      // V2 Server API Mode (SSE)
+      return await fetchTripsViaSSE(CORE_API_URL, searchQuery, pagination.page || 1);
+    }
+
     const res = await fetch(`${TRIP_API}/marketplace?${params.toString()}`, {
       cache: 'no-store'
     });
@@ -55,28 +62,50 @@ export async function getAvailableTrips(
       const responseData = await res.json();
       const rawTrips = responseData.data || [];
       const allRates = responseData.rates || {};
-      const lightLogo = responseData.light_logo;
+      const lightLogo = responseData.logo || responseData.light_logo;
 
       const mappedTrips: ITrip[] = rawTrips.map((t: any) => {
-        const segments = t.segments || [];
+        const isConnecting = t.type === 'connecting';
 
-        const mappedSegments = segments.map((seg: any) => {
-          const routeCode = `${seg.source_port_code}-${seg.destination_port_code}`;
-          const routeRates = allRates[routeCode] || {};
-          const passengerRates = routeRates.passenger_rates || [];
-          const rateSnapshotId = routeRates.snapshot?.id ? parseInt(routeRates.snapshot.id, 10) : 0;
+        // Connecting trips use `legs`; direct trips use `segments`
+        const segmentsToMap: any[] = isConnecting && t.legs ? t.legs : (t.segments || []);
 
-          // Create a map of cabin type code to adult rate amount for this specific segment/route
-          const segRatesMap = new Map<string, number>();
-          if (Array.isArray(passengerRates)) {
-            passengerRates.forEach((rate: any) => {
-              if (rate.passenger_type_code === 'ADULT' && rate.accom_code) {
-                segRatesMap.set(rate.accom_code.toUpperCase(), parseFloat(rate.amount));
-              }
-            });
+        const mappedSegments = segmentsToMap.map((seg: any) => {
+          // Each leg of a connecting trip wraps its actual data in a nested segments[0]
+          const actualSegment = seg.segments && Array.isArray(seg.segments) && seg.segments.length > 0
+            ? seg.segments[0]
+            : seg;
+
+          let segRatesMap = new Map<string, number>();
+          let rateSnapshotId = 0;
+
+          if (isConnecting) {
+            // Connecting trip segments carry rates directly
+            const passengerRates = actualSegment.passenger_rates || seg.passenger_rates || [];
+            rateSnapshotId = actualSegment.rate_table_id || seg.rate_table_id || 0;
+            if (Array.isArray(passengerRates)) {
+              passengerRates.forEach((rate: any) => {
+                if (rate.passenger_type_code === 'ADULT' && rate.accom_code) {
+                  segRatesMap.set(rate.accom_code.toUpperCase(), parseFloat(rate.amount));
+                }
+              });
+            }
+          } else {
+            // Direct trips look up rates from the top-level allRates map by route code
+            const routeCode = `${actualSegment.source_port_code}-${actualSegment.destination_port_code}`;
+            const routeRates = allRates[routeCode] || {};
+            const passengerRates = routeRates.passenger_rates || [];
+            rateSnapshotId = routeRates.snapshot?.id ? parseInt(routeRates.snapshot.id, 10) : 0;
+            if (Array.isArray(passengerRates)) {
+              passengerRates.forEach((rate: any) => {
+                if (rate.passenger_type_code === 'ADULT' && rate.accom_code) {
+                  segRatesMap.set(rate.accom_code.toUpperCase(), parseFloat(rate.amount));
+                }
+              });
+            }
           }
 
-          const segCabins = seg.cabins || [];
+          const segCabins = actualSegment.cabins || seg.cabins || [];
           const availableCabins: any[] = segCabins
             .map((c: any) => {
               const cabinTypeName = c.cabin_type_name?.toUpperCase();
@@ -89,7 +118,7 @@ export async function getAvailableTrips(
                 cabinId: c.id,
                 cabin: {
                   id: c.id,
-                  shipId: c.ship_id,
+                  shipId: actualSegment.ship_id || seg.ship_id,
                   cabinTypeId: c.cabin_type_id,
                   cabinType: {
                     id: c.cabin_type_id,
@@ -107,34 +136,34 @@ export async function getAvailableTrips(
                 adultFare: adultFare
               };
             })
-            .filter((c: any) => c !== null); // Filter out cabins without rates
+            .filter((c: any) => c !== null);
 
-          const remainingVehicles = seg.remaining_capacities?.vehicles || {};
+          const remainingVehicles = actualSegment.remaining_capacities?.vehicles || seg.remaining_capacities?.vehicles || {};
           const totalVehicleCapacity = Object.values(remainingVehicles).reduce((sum: number, val: any) => sum + (val || 0), 0);
 
           return {
-            id: seg.id,
+            id: seg.id || actualSegment.id,
             tripId: t.id,
-            shipId: seg.ship_id,
-            shipName: seg.ship_name,
-            shippingLineId: seg.shipping_line_id || 0,
-            shippingLine: seg.shipping_line,
+            shipId: actualSegment.ship_id || seg.ship_id,
+            shipName: actualSegment.ship_name || seg.ship_name,
+            shippingLineId: actualSegment.shipping_line_id || seg.shipping_line_id || 0,
+            shippingLine: actualSegment.shipping_line || seg.shipping_line,
             srcPortId: 0,
-            srcPortName: seg.source_port_name,
+            srcPortName: actualSegment.source_port_name || seg.source_port_name || seg.origin_name,
             destPortId: 0,
-            destPortName: seg.destination_port_name,
-            departureDateIso: seg.scheduled_departure,
-            arrivalTimeDateIso: seg.scheduled_arrival,
-            referenceNo: seg.reference_number,
+            destPortName: actualSegment.destination_port_name || seg.destination_port_name || seg.destination_name,
+            departureDateIso: actualSegment.scheduled_departure || seg.scheduled_departure || seg.total_departure_time,
+            arrivalTimeDateIso: actualSegment.scheduled_arrival || seg.scheduled_arrival || seg.total_arrival_time,
+            referenceNo: actualSegment.reference_number || seg.reference_number || '',
             availableCabins: availableCabins,
             availableVehicleCapacity: totalVehicleCapacity,
             remainingVehicleCapacity: remainingVehicles,
             vehicleCapacity: totalVehicleCapacity,
-            bookingStartDateIso: seg.booking_start_date,
-            bookingCutOffDateIso: seg.booking_cut_off_date,
-            seatSelection: seg.is_seat_can_be_selected,
+            bookingStartDateIso: actualSegment.booking_start_date || seg.booking_start_date,
+            bookingCutOffDateIso: actualSegment.booking_cut_off_date || seg.booking_cut_off_date,
+            seatSelection: actualSegment.is_seat_can_be_selected || seg.is_seat_can_be_selected || false,
             rateTableId: rateSnapshotId,
-            status: seg.status || 'pending'
+            status: actualSegment.status || seg.status || 'pending'
           };
         });
 
@@ -142,6 +171,9 @@ export async function getAvailableTrips(
         const totalTripVehicleCapacity = mappedSegments.length > 0
           ? Math.min(...mappedSegments.map((s: any) => s.availableVehicleCapacity))
           : 0;
+
+        // For connecting trips, the logo lives on each leg rather than a top-level field
+        const connectingLogo = isConnecting && t.legs?.[0]?.logo;
 
         return {
           id: t.id,
@@ -154,7 +186,7 @@ export async function getAvailableTrips(
           srcPortName: t.origin_name,
           destPortId: 0,
           destPortName: t.destination_name,
-          lightLogoUrl: lightLogo,
+          lightLogoUrl: connectingLogo || lightLogo,
           departureDateIso: t.total_departure_time,
           arrivalTimeDateIso: t.total_arrival_time,
           status: t.status || firstSegment.status || 'pending',

@@ -1,26 +1,24 @@
 import { Suspense } from 'react';
 import SearchHeader from '@/components/booking/destination/SearchHeader';
 import FilterSidebar from '@/components/booking/destination/FilterSidebar';
-import { fetchFilters } from '@/services';
 import MobileFilterModal from '@/components/booking/destination/MobileFilter';
 import TripsSelector from '@/components/booking/destination/TripsSelector';
+import { TripsProvider } from '@/context/TripsContext';
 
 export default function Destination() {
-  const filters = fetchFilters();
-
   return (
-    <>
+    <TripsProvider>
       <SearchHeader />
       <div className="flex flex-col bg-gray-50 px-3 pt-2 pb-8 lg:flex-row lg:px-10">
         {/* Sidebar - Hidden on mobile */}
         <div className="hidden lg:block lg:w-[300px] pt-[140px]">
           <Suspense fallback={<div className="w-72 h-96 bg-gray-100 animate-pulse rounded-lg" />}>
-            <FilterSidebar filtersPromise={filters} />
+            <FilterSidebar />
           </Suspense>
         </div>
 
         <Suspense fallback={null}>
-          <MobileFilterModal filtersPromise={filters} />
+          <MobileFilterModal />
         </Suspense>
 
         <div className="flex-1 lg:pl-8 space-y-4 sm:space-y-6">
@@ -35,6 +33,6 @@ export default function Destination() {
           </Suspense>
         </div>
       </div>
-    </>
+    </TripsProvider>
   );
 }

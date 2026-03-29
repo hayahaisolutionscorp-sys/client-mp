@@ -73,4 +73,5 @@ export interface IBooking {
 
   bookingTrips?: IBookingTrip[];
   bookingPaymentItems?: IBookingPaymentItem[];
+  tenantId?: number;
 }

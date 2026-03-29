@@ -1,51 +1,74 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { format } from 'date-fns';
 import { Button } from '@/components/ui/Button';
-
-import DateTimePickerFieldset from '@/components/ui/DateTimePickerFieldset';
-import { Filters } from '@/services';
+import { useTrips } from '@/context/TripsContext';
+import { ICabinType, IShippingLine } from '@/models';
 
 interface FilterSidebarProps {
-  filtersPromise: Promise<Filters | undefined>;
   isModal?: boolean;
   onClose?: () => void;
 }
 
-export default function FilterSidebar({ isModal, onClose, filtersPromise }: FilterSidebarProps) {
-  const filters = use(filtersPromise);
-
+export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { departureTrips, returnTrips } = useTrips();
 
-  const [departureDateTime, setDepartureDateTime] = useState<Date>();
   const [checkedCabinTypes, setCheckedCabinTypes] = useState<Set<number>>(new Set());
   const [checkedShippingLines, setCheckedShippingLines] = useState<Set<number>>(new Set());
 
+  const filters = useMemo(() => {
+    const allTrips = [...departureTrips, ...returnTrips];
 
+    // Extract unique cabin types
+    const cabinTypeMap = new Map<number, ICabinType>();
+    allTrips.forEach(trip => {
+      trip.availableCabins?.forEach(ac => {
+        if (ac.cabin?.cabinType) {
+          cabinTypeMap.set(ac.cabin.cabinType.id, ac.cabin.cabinType);
+        }
+      });
+      // Also check segments for cabins
+      trip.segments?.forEach(seg => {
+        seg.availableCabins?.forEach(ac => {
+          if (ac.cabin?.cabinType) {
+            cabinTypeMap.set(ac.cabin.cabinType.id, ac.cabin.cabinType);
+          }
+        });
+      });
+    });
+
+    // Extract unique shipping lines
+    const shippingLineMap = new Map<number, IShippingLine>();
+    allTrips.forEach(trip => {
+      if (trip.shippingLine) {
+        shippingLineMap.set(trip.shippingLine.id, trip.shippingLine);
+      }
+      trip.segments?.forEach(seg => {
+        if (seg.shippingLine) {
+          shippingLineMap.set(seg.shippingLine.id, seg.shippingLine);
+        }
+      });
+    });
+
+    return {
+      cabinTypes: Array.from(cabinTypeMap.values()),
+      shippingLines: Array.from(shippingLineMap.values()).filter(line => !line.name.toLowerCase().includes('ayahay'))
+    };
+  }, [departureTrips, returnTrips]);
 
   // Sync state with query parameters
   useEffect(() => {
-    if (filters) {
-      const selectedCabinTypes = searchParams.get('cabinTypes')?.split(',').map(Number) || [];
-      const selectedShippingLineIds = searchParams.get('shippingLineIds')?.split(',').map(Number) || [];
-      const filterDepartureDateTime = searchParams.get('filterDepartureDateTime');
+    const selectedCabinTypes = searchParams.get('cabinTypes')?.split(',').map(Number) || [];
+    const selectedShippingLineIds = searchParams.get('shippingLineIds')?.split(',').map(Number) || [];
 
-      setCheckedCabinTypes(new Set(selectedCabinTypes));
-      setCheckedShippingLines(new Set(selectedShippingLineIds));
-
-      if (filterDepartureDateTime) {
-        setDepartureDateTime(new Date(filterDepartureDateTime));
-      } else {
-        setDepartureDateTime(undefined);
-      }
-    }
-  }, [searchParams, filters]);
+    setCheckedCabinTypes(new Set(selectedCabinTypes));
+    setCheckedShippingLines(new Set(selectedShippingLineIds));
+  }, [searchParams]);
 
   const resetFilters = () => {
-    setDepartureDateTime(undefined);
     setCheckedCabinTypes(new Set());
     setCheckedShippingLines(new Set());
 
@@ -82,14 +105,10 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
 
   const cleanQueryParams = (queryParams: URLSearchParams) => {
     for (const [key, value] of queryParams.entries()) {
-      if (value === 'undefined') {
+      if (value === 'undefined' || value === '') {
         queryParams.delete(key);
       }
     }
-  };
-
-  const formatDateTime = (date: Date) => {
-    return format(date, 'yyyy-MM-dd HH:mm:ss');
   };
 
   const handleApplyFilters = () => {
@@ -110,11 +129,8 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
       queryParams.delete('shippingLineIds');
     }
 
-    if (departureDateTime) {
-      queryParams.set('filterDepartureDateTime', formatDateTime(departureDateTime));
-    } else {
-      queryParams.delete('filterDepartureDateTime');
-    }
+    // Explicitly delete filterDepartureDateTime as it's no longer used
+    queryParams.delete('filterDepartureDateTime');
 
     cleanQueryParams(queryParams);
     router.push(`/booking/destination?${queryParams.toString()}`);
@@ -125,16 +141,6 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
   };
 
   const containerClasses = isModal ? 'w-full h-full overflow-y-auto bg-white' : 'w-72 bg-white rounded-lg shadow-md';
-
-  if (!filters) {
-    return (
-      <div className={containerClasses}>
-        <div className="px-6 py-4">
-          <p className="text-sm text-red-600">Failed to load filters</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={containerClasses}>
@@ -154,34 +160,38 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
 
       <div className="px-6 py-4 space-y-6">
         {/* Accommodation Section */}
-        <div>
-          <h4 className="font-bold text-base text-gray-800 mb-3">Accommodation</h4>
-          <div className="space-y-3">
-            {filters.cabinTypes.map((cabinType) => (
-              <div key={cabinType.id} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id={`${isModal ? 'modal-' : ''}${cabinType.name}`}
-                  checked={checkedCabinTypes.has(cabinType.id)}
-                  onChange={() => handleCabinTypeChange(cabinType.id)}
-                  className="h-4 w-4 rounded border-gray-300 text-customBlue focus:ring-customBlue"
-                  style={{ colorScheme: 'light' }}
-                />
-                <label
-                  htmlFor={`${isModal ? 'modal-' : ''}${cabinType.name}`}
-                  className="text-sm font-medium text-gray-700"
-                >
-                  {cabinType.name}
-                </label>
-              </div>
-            ))}
+        {filters.cabinTypes.length > 0 && (
+          <div>
+            <h4 className="font-bold text-base text-gray-800 mb-3">Accommodation</h4>
+            <div className="space-y-3">
+              {filters.cabinTypes.map((cabinType) => (
+                <div key={cabinType.id} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id={`${isModal ? 'modal-' : ''}${cabinType.name}`}
+                    checked={checkedCabinTypes.has(cabinType.id)}
+                    onChange={() => handleCabinTypeChange(cabinType.id)}
+                    className="h-4 w-4 rounded border-gray-300 text-customBlue focus:ring-customBlue"
+                    style={{ colorScheme: 'light' }}
+                  />
+                  <label
+                    htmlFor={`${isModal ? 'modal-' : ''}${cabinType.name}`}
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    {cabinType.name}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="border-t border-gray-200" />
+        {filters.cabinTypes.length > 0 && filters.shippingLines.length > 0 && (
+          <div className="border-t border-gray-200" />
+        )}
 
         {/* Shipping Lines Section */}
-        {process.env.NEXT_PUBLIC_IS_CLIENT !== 'true' && (
+        {process.env.NEXT_PUBLIC_IS_CLIENT !== 'true' && filters.shippingLines.length > 0 && (
           <div>
             <h4 className="font-bold text-base text-gray-800 mb-3">Shipping Lines</h4>
             <div className="space-y-3">
@@ -206,17 +216,6 @@ export default function FilterSidebar({ isModal, onClose, filtersPromise }: Filt
             </div>
           </div>
         )}
-
-        {process.env.NEXT_PUBLIC_IS_CLIENT !== 'false' && <div className="border-t border-gray-200" />}
-
-        {/* Date & Time Sections */}
-        <div>
-          <DateTimePickerFieldset
-            legendText="Departure Date & Time"
-            date={departureDateTime}
-            setDate={setDepartureDateTime}
-          />
-        </div>
       </div>
 
       {/* Buttons Section - Fixed at bottom for modal */}

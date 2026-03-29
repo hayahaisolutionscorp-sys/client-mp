@@ -1,4 +1,4 @@
-import { PAYMENT_API, BOOKING_API, PAYMONGO_API, MAYA_API, PAYMENT_PROVIDERS_API } from "constants/api";
+import { PAYMENT_API, BOOKING_API, PAYMONGO_API, MAYA_API, PAYMENT_PROVIDERS_API, IS_CLIENT } from "constants/api";
 import { PaymentInitiationRequest, PaymentInitiationResponse, PaymongoCreateCheckoutRequest, PaymongoCheckoutApiResponse, MayaCreateCheckoutRequest, MayaCheckoutApiResponse, PaymongoInitiateRequest, PaymongoInitiateApiResponse } from "@/types/payment/payment";
 import axios from '@/services/core/axios';
 
@@ -42,11 +42,14 @@ export async function startPaymentForBookingRequest(
 /**
  * Get booking payment ID for a booking
  */
-export async function getBookingPaymentId(bookingId: string): Promise<string | undefined> {
+export async function getBookingPaymentId(bookingId: string, shippingLineId?: string): Promise<string | undefined> {
   try {
     console.log('Fetching booking payment ID for booking:', bookingId);
-    
-    const { data } = await axios.get(`${BOOKING_API}/${bookingId}`);
+
+    const url = !IS_CLIENT && shippingLineId
+      ? `${BOOKING_API}/${bookingId}?shipping_line_id=${shippingLineId}`
+      : `${BOOKING_API}/${bookingId}`;
+    const { data } = await axios.get(url);
     console.log('Booking data received:', data);
     
     // The backend returns { data: { booking: {...}, payments: [...] } }
@@ -76,13 +79,17 @@ export async function getBookingPaymentId(bookingId: string): Promise<string | u
  * Create a PayMongo checkout session
  */
 export async function createPaymongoCheckout(
-  request: PaymongoCreateCheckoutRequest
+  request: PaymongoCreateCheckoutRequest,
+  shippingLineId?: string
 ): Promise<PaymongoCheckoutApiResponse | undefined> {
   try {
-    console.log('PayMongo Request URL:', `${PAYMONGO_API}/checkout-session`);
+    const url = !IS_CLIENT && shippingLineId
+      ? `${PAYMONGO_API}/checkout-session?shipping_line_id=${shippingLineId}`
+      : `${PAYMONGO_API}/checkout-session`;
+    console.log('PayMongo Request URL:', url);
     console.log('PayMongo Request Payload:', JSON.stringify(request, null, 2));
-    
-    const { data } = await axios.post(`${PAYMONGO_API}/checkout-session`, request);
+
+    const { data } = await axios.post(url, request);
     
     console.log('PayMongo Response:', data);
     return data;
@@ -99,13 +106,17 @@ export async function createPaymongoCheckout(
  * Create a Maya hosted checkout session
  */
 export async function createMayaCheckout(
-  request: MayaCreateCheckoutRequest
+  request: MayaCreateCheckoutRequest,
+  shippingLineId?: string
 ): Promise<MayaCheckoutApiResponse | undefined> {
   try {
-    console.log('Maya Request URL:', `${MAYA_API}/checkout`);
+    const url = !IS_CLIENT && shippingLineId
+      ? `${MAYA_API}/checkout?shipping_line_id=${shippingLineId}`
+      : `${MAYA_API}/checkout`;
+    console.log('Maya Request URL:', url);
     console.log('Maya Request Payload:', JSON.stringify(request, null, 2));
 
-    const { data } = await axios.post(`${MAYA_API}/checkout`, request);
+    const { data } = await axios.post(url, request);
 
     console.log('Maya Response:', data);
     return data;
@@ -140,13 +151,17 @@ export async function getEnabledPaymentProviders(): Promise<string[]> {
  * Returns the redirect URL to send the customer to.
  */
 export async function initiatePaymongoPaymentIntent(
-  request: PaymongoInitiateRequest
+  request: PaymongoInitiateRequest,
+  shippingLineId?: string
 ): Promise<PaymongoInitiateApiResponse | undefined> {
   try {
-    console.log('PayMongo Intent Request URL:', `${PAYMONGO_API}/initiate`);
+    const url = !IS_CLIENT && shippingLineId
+      ? `${PAYMONGO_API}/initiate?shipping_line_id=${shippingLineId}`
+      : `${PAYMONGO_API}/initiate`;
+    console.log('PayMongo Intent Request URL:', url);
     console.log('PayMongo Intent Payload:', JSON.stringify(request, null, 2));
 
-    const { data } = await axios.post<PaymongoInitiateApiResponse>(`${PAYMONGO_API}/initiate`, request);
+    const { data } = await axios.post<PaymongoInitiateApiResponse>(url, request);
 
     console.log('PayMongo Intent Response:', data);
     return data;

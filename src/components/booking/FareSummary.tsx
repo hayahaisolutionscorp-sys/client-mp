@@ -26,6 +26,18 @@ interface PassengerDetails {
   companions: PassengerData[];
 }
 
+export interface LegPricingInfo {
+  shippingLineId: string;
+  tenantName?: string;
+  pricingData: PricingResponse['data'] | null;
+  prepareBookingData: any;
+  bookingState?: any;
+  isLoading: boolean;
+  passengerDetails?: { passenger: PassengerData; companions: PassengerData[] } | null;
+  vehicleDetails?: VehicleData[];
+  cargoDetails?: CargoData[];
+}
+
 interface FareSummaryProps {
   departureTrips?: ITrip[];
   returnTrips?: ITrip[];
@@ -40,10 +52,13 @@ interface FareSummaryProps {
   prepareBookingData?: any;
   cargoDetails?: CargoData[];
   commodityId?: string;
+  shippingLineId?: string;
   isLoading?: boolean;
   onPay?: () => Promise<boolean | void>;
   enabledProviders?: string[];
   selectedMethod?: string | null;
+  isCrossTenant?: boolean;
+  legPricingData?: LegPricingInfo[];
 }
 
 const ObscuredPrice = ({ price, isLoading }: { price: number; isLoading?: boolean }) => {
@@ -67,10 +82,13 @@ const FareSummary: FC<FareSummaryProps> = ({
   prepareBookingData,
   cargoDetails,
   commodityId,
+  shippingLineId,
   isLoading = false,
   onPay,
   enabledProviders = [],
   selectedMethod = null,
+  isCrossTenant = false,
+  legPricingData,
 }) => {
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -98,20 +116,42 @@ const FareSummary: FC<FareSummaryProps> = ({
   const returnCabinName = searchParams.get('returnCabinName');
 
   useEffect(() => {
-    const isValid = !!(
-      passengerDetails?.passenger?.firstname &&
-      passengerDetails?.passenger?.lastname &&
-      passengerDetails?.passenger?.sex &&
-      passengerDetails?.passenger?.dob &&
-      passengerDetails?.passenger?.nationality &&
-      passengerDetails?.passenger?.address &&
-      contactDetails?.firstname &&
-      contactDetails?.lastname &&
-      contactDetails?.email &&
-      contactDetails?.mobileNumber
+    const mainPassengerValid = !!(
+      passengerDetails?.passenger?.firstname?.trim() &&
+      passengerDetails?.passenger?.lastname?.trim() &&
+      passengerDetails?.passenger?.sex?.trim() &&
+      passengerDetails?.passenger?.dob?.trim() &&
+      passengerDetails?.passenger?.nationality?.trim() &&
+      passengerDetails?.passenger?.address?.trim()
     );
-    setIsFormValid(isValid);
-  }, [passengerDetails, contactDetails]);
+
+    const companionsValid = (passengerDetails?.companions ?? []).every(
+      (c) =>
+        c.firstname?.trim() &&
+        c.lastname?.trim() &&
+        c.sex?.trim() &&
+        c.dob?.trim() &&
+        c.nationality?.trim() &&
+        c.address?.trim()
+    );
+
+    const contactValid = !!(
+      contactDetails?.firstname?.trim() &&
+      contactDetails?.lastname?.trim() &&
+      contactDetails?.email?.trim() &&
+      contactDetails?.mobileNumber?.trim()
+    );
+
+    const vehiclesValid = (vehicleDepartureDetails ?? []).every(
+      (v) => v.vehicleTypeId && v.plateNumber?.trim()
+    );
+
+    const cargosValid = (cargoDetails ?? []).every(
+      (c) => c.commodityId && c.quantity > 0
+    );
+
+    setIsFormValid(mainPassengerValid && companionsValid && contactValid && vehiclesValid && cargosValid);
+  }, [passengerDetails, contactDetails, vehicleDepartureDetails, cargoDetails]);
 
   const handleProceedToPayment = () => {
     setIsNavigatingToPayment(true);
@@ -120,25 +160,58 @@ const FareSummary: FC<FareSummaryProps> = ({
 
     setError(null);
 
-    // Cache raw details for the payment confirmation page
-    const bookingJson = {
-      passengerDetails,
-      contactDetails,
-      vehicleDepartureDetails,
-      vehicleReturnDetails,
-      cargoDetails,
-      bookingState,
-      prepareBookingData,
-      pricingData
-    };
-    cacheItem('booking-json', bookingJson, 60);
+    if (isCrossTenant && legPricingData) {
+      // Cache cross-tenant format with per-leg data
+      const bookingJson = {
+        isCrossTenant: true,
+        contactDetails,
+        passengerDetails,
+        vehicleDepartureDetails,
+        cargoDetails,
+        legForms: legPricingData.map(leg => ({
+          shippingLineId: leg.shippingLineId,
+          tenantName: leg.tenantName,
+          bookingState: leg.bookingState,
+          pricingData: leg.pricingData,
+          prepareBookingData: leg.prepareBookingData,
+          passengerDetails: leg.passengerDetails,
+          vehicleDetails: leg.vehicleDetails,
+          cargoDetails: leg.cargoDetails,
+        })),
+      };
+      cacheItem('booking-json', bookingJson, 60);
 
-    const queryParams = new URLSearchParams();
-    if (departureTripIds) queryParams.append('departureTripId', departureTripIds);
-    if (returnTripIds) queryParams.append('returnTripId', returnTripIds);
-    if (commodityId) queryParams.append('commodityId', commodityId);
+      const queryParams = new URLSearchParams();
+      if (departureTripIds) queryParams.append('departureTripId', departureTripIds);
+      if (returnTripIds) queryParams.append('returnTripId', returnTripIds);
+      if (commodityId) queryParams.append('commodityId', commodityId);
+      // Pass pipe-separated shippingLineIds for cross-tenant
+      const allSlIds = legPricingData.map(l => l.shippingLineId).join('|');
+      queryParams.append('shippingLineId', allSlIds);
 
-    router.push(`/booking/payment-confirmation?${queryParams.toString()}`);
+      router.push(`/booking/payment-confirmation?${queryParams.toString()}`);
+    } else {
+      // Standard single-tenant cache
+      const bookingJson = {
+        passengerDetails,
+        contactDetails,
+        vehicleDepartureDetails,
+        vehicleReturnDetails,
+        cargoDetails,
+        bookingState,
+        prepareBookingData,
+        pricingData,
+      };
+      cacheItem('booking-json', bookingJson, 60);
+
+      const queryParams = new URLSearchParams();
+      if (departureTripIds) queryParams.append('departureTripId', departureTripIds);
+      if (returnTripIds) queryParams.append('returnTripId', returnTripIds);
+      if (commodityId) queryParams.append('commodityId', commodityId);
+      if (shippingLineId) queryParams.append('shippingLineId', shippingLineId);
+
+      router.push(`/booking/payment-confirmation?${queryParams.toString()}`);
+    }
   };
 
   const handlePayment = async () => {
@@ -182,14 +255,85 @@ const FareSummary: FC<FareSummaryProps> = ({
   };
 
   // --- Process Pricing Data ---
+  interface CrossTenantLegPricing {
+    shippingLineId: string;
+    tenantName?: string;
+    depTrips: any[];
+    retTrips: any[];
+    depSubtotal: number;
+    retSubtotal: number;
+    legTotal: number;
+    isLoading: boolean;
+  }
+
   const {
     effectivePricingData,
     depTripsPricing,
     retTripsPricing,
     depSubtotal,
     retSubtotal,
-    grandTotal
+    grandTotal,
+    crossTenantLegs
   } = useMemo(() => {
+    // Cross-tenant: produce per-leg pricing breakdown
+    if (isCrossTenant && legPricingData) {
+      const legs: CrossTenantLegPricing[] = legPricingData.map((leg) => {
+        const trips = (leg.pricingData?.trips || []).map((t: any) => ({
+          ...t,
+          _tenantName: leg.tenantName,
+          _shippingLineId: leg.shippingLineId
+        }));
+
+        // Split into departure and return using prepareBookingData
+        let depTrips: any[] = [];
+        let retTrips: any[] = [];
+
+        if (leg.prepareBookingData) {
+          const depIds = (leg.prepareBookingData.departure || []).map((t: any) => String(t.id));
+          const retIds = (leg.prepareBookingData.return || []).map((t: any) => String(t.id));
+          const depRouteCodes = (leg.prepareBookingData.departure || []).map((t: any) => String(t.route_code));
+          const retRouteCodes = (leg.prepareBookingData.return || []).map((t: any) => String(t.route_code));
+
+          depTrips = trips.filter((t: any) =>
+            depIds.includes(String(t.tripId)) || depRouteCodes.includes(String(t.routeCode))
+          );
+          retTrips = trips.filter((t: any) =>
+            retIds.includes(String(t.tripId)) || retRouteCodes.includes(String(t.routeCode))
+          );
+        } else {
+          depTrips = trips;
+        }
+
+        const depSub = depTrips.reduce((sum: number, t: any) => sum + (t.subtotal || 0), 0);
+        const retSub = retTrips.reduce((sum: number, t: any) => sum + (t.subtotal || 0), 0);
+
+        return {
+          shippingLineId: leg.shippingLineId,
+          tenantName: leg.tenantName,
+          depTrips,
+          retTrips,
+          depSubtotal: depSub,
+          retSubtotal: retSub,
+          legTotal: leg.pricingData?.grandTotal || depSub + retSub,
+          isLoading: leg.isLoading
+        };
+      });
+
+      const allDepTrips = legs.flatMap(l => l.depTrips);
+      const allRetTrips = legs.flatMap(l => l.retTrips);
+      const total = legs.reduce((sum, l) => sum + l.legTotal, 0);
+
+      return {
+        effectivePricingData: { trips: [...allDepTrips, ...allRetTrips], grandTotal: total },
+        depTripsPricing: allDepTrips,
+        retTripsPricing: allRetTrips,
+        depSubtotal: allDepTrips.reduce((sum, t) => sum + (t.subtotal || 0), 0),
+        retSubtotal: allRetTrips.reduce((sum, t) => sum + (t.subtotal || 0), 0),
+        grandTotal: total,
+        crossTenantLegs: legs
+      };
+    }
+
     let effective = pricingData;
 
     // If no pricingData (breakdown) is provided but we have a booking,
@@ -314,154 +458,279 @@ const FareSummary: FC<FareSummaryProps> = ({
       retTripsPricing: ret,
       depSubtotal: depSub,
       retSubtotal: retSub,
-      grandTotal: gTotal
+      grandTotal: gTotal,
+      crossTenantLegs: undefined as CrossTenantLegPricing[] | undefined
     };
-  }, [pricingData, booking, prepareBookingData]);
+  }, [pricingData, booking, prepareBookingData, isCrossTenant, legPricingData]);
 
   return (
     <div className={`bg-white border shadow rounded-lg w-full min-w-[300px] sm:min-w-[400px] sm:max-w-[500px] h-auto p-4 sm:p-6 mb-10 ${pathname === '/booking/confirmed' ? 'border-2 border-green-500' : ''}`}>
       <h1 className="text-lg font-bold text-customText">Fare Summary</h1>
 
       <div className="mt-4 space-y-4">
-        {/* Departure Section */}
-        {(returnCabinName || retTripsPricing.length > 0) && (
-          <div className="flex items-center justify-center border-t-2 border-gray-300 py-1">
-            <label className="text-mb font-semibold text-customText mt-2">Departure Trip</label>
-          </div>
-        )}
-
-        {depTripsPricing.map((trip: any, tIdx: number) => {
-          const tPassengers = trip.passengerPrices || [];
-          const tCargos = trip.cargoPrices || [];
-          const tCharges = trip.charges || [];
-          const isConnecting = depTripsPricing.length > 1;
-
-          return (
-            <div key={trip.tripId || tIdx} className="space-y-4">
-              {isConnecting && (
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4 -mb-2">
-                  Leg: {trip.routeCode || trip.tripId}
-                </div>
-              )}
-
-              {/* Passengers */}
-              {tPassengers.length > 0 && (
-                <div>
-                  <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsAdultDepExpanded(!isAdultDepExpanded)}>
-                    <span className="flex items-center gap-2 text-customText">
-                      Adult Fare ({tPassengers.length})
-                      {isAdultDepExpanded ? <FiChevronUp /> : <FiChevronDown />}
-                    </span>
-                    <ObscuredPrice price={tPassengers.reduce((sum: any, p: any) => sum + p.baseFare, 0)} isLoading={isLoading} />
-                  </div>
-                  {isAdultDepExpanded && (
-                    <div className="pl-4 mt-2 space-y-1">
-                      {tPassengers.map((p: any, i: number) => (
-                        <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
-                          <span>
-                            Passenger {i + 1} ({p.passengerType})
-                            {p.accommodationCode && <span className="ml-1 opacity-70">| {p.accommodationCode}</span>}
-                          </span>
-                          <ObscuredPrice price={p.baseFare} isLoading={isLoading} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Charges */}
-              {tCharges.length > 0 && (
-                <div>
-                  <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsChargesDepExpanded(!isChargesDepExpanded)}>
-                    <span className="flex items-center gap-2 text-customText">
-                      Additional Charges: <ObscuredPrice price={tCharges.reduce((sum: any, c: any) => sum + c.amount, 0)} isLoading={isLoading} />
-                      {isChargesDepExpanded ? <FiChevronUp /> : <FiChevronDown />}
-                    </span>
-                  </div>
-                  {isChargesDepExpanded && (
-                    <div className="pl-4 mt-2 space-y-1">
-                      {tCharges.map((c: any) => (
-                        <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
-                          <span>{c.chargeName}</span>
-                          <ObscuredPrice price={c.amount} isLoading={isLoading} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Vehicles */}
-              {tCargos.length > 0 && (
-                <div>
-                  <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsVehicleDepExpanded(!isVehicleDepExpanded)}>
-                    <span className="flex items-center gap-2 text-customText">
-                      Vehicle/Cargo ({tCargos.length})
-                      {isVehicleDepExpanded ? <FiChevronUp /> : <FiChevronDown />}
-                    </span>
-                    <ObscuredPrice price={tCargos.reduce((sum: any, c: any) => sum + c.baseFare, 0)} isLoading={isLoading} />
-                  </div>
-                  {isVehicleDepExpanded && (
-                    <div className="pl-4 mt-2 space-y-1">
-                      {tCargos.map((c: any) => (
-                        <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
-                          <span>{c.cargoClassCode} ({c.cargoType})</span>
-                          <ObscuredPrice price={c.baseFare} isLoading={isLoading} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-            </div>
-          );
-        })}
-
-        {depTripsPricing.length > 0 && (
-          <div className="flex justify-between font-bold text-md pt-2 border-t border-dashed mt-4">
-            <span>{depTripsPricing.length > 1 ? 'Departure Sub-Total' : 'Sub-Total'}</span>
-            <span style={{ color: themeSettings?.accent || '#0060df' }}>{formatCurrency(depSubtotal)}</span>
-          </div>
-        )}
-
-        {/* Return Section */}
-        {retTripsPricing.length > 0 && (
+        {/* Cross-Tenant Per-Leg Sections */}
+        {isCrossTenant && crossTenantLegs ? (
           <>
-            <div className="flex items-center justify-center border-t-2 border-gray-300 py-1 mt-4">
-              <label className="text-mb font-semibold text-customText mt-2">Return Trip</label>
-            </div>
+            {crossTenantLegs.map((leg, legIdx) => {
+              const hasReturn = leg.retTrips.length > 0;
+              const hasDeparture = leg.depTrips.length > 0;
 
-            {retTripsPricing.map((trip: any, tIdx: number) => {
+              return (
+                <div key={leg.shippingLineId + legIdx}>
+                  {/* Leg Header */}
+                  <div
+                    className="flex items-center justify-center border-t-2 py-1"
+                    style={{ borderColor: themeSettings?.accent || '#23abff' }}
+                  >
+                    <label className="text-sm font-semibold text-customText mt-2">
+                      Leg {legIdx + 1}{leg.tenantName ? `: ${leg.tenantName}` : ''}
+                    </label>
+                  </div>
+
+                  {/* Departure Trips for this Leg */}
+                  {hasDeparture && hasReturn && (
+                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-3 mb-1">Departure</div>
+                  )}
+                  {leg.depTrips.map((trip: any, tIdx: number) => {
+                    const tPassengers = trip.passengerPrices || [];
+                    const tCargos = trip.cargoPrices || [];
+                    const tCharges = trip.charges || [];
+
+                    return (
+                      <div key={trip.tripId || `dep-${legIdx}-${tIdx}`} className="space-y-4 mt-2">
+                        {leg.depTrips.length > 1 && (
+                          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider -mb-2">
+                            Route: {trip.routeCode || trip.tripId}
+                          </div>
+                        )}
+
+                        {tPassengers.length > 0 && (
+                          <div>
+                            <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsAdultDepExpanded(!isAdultDepExpanded)}>
+                              <span className="flex items-center gap-2 text-customText">
+                                Adult Fare ({tPassengers.length})
+                                {isAdultDepExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                              </span>
+                              <ObscuredPrice price={tPassengers.reduce((sum: any, p: any) => sum + p.baseFare, 0)} isLoading={leg.isLoading} />
+                            </div>
+                            {isAdultDepExpanded && (
+                              <div className="pl-4 mt-2 space-y-1">
+                                {tPassengers.map((p: any, i: number) => (
+                                  <div key={`${legIdx}-dep-p-${i}`} className="flex justify-between text-sm text-gray-500">
+                                    <span>
+                                      Passenger {i + 1} ({p.passengerType})
+                                      {p.accommodationCode && <span className="ml-1 opacity-70">| {p.accommodationCode}</span>}
+                                    </span>
+                                    <ObscuredPrice price={p.baseFare} isLoading={leg.isLoading} />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {tCharges.length > 0 && (
+                          <div>
+                            <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsChargesDepExpanded(!isChargesDepExpanded)}>
+                              <span className="flex items-center gap-2 text-customText">
+                                Additional Charges: <ObscuredPrice price={tCharges.filter((c: any) => !c.isInclusive).reduce((sum: any, c: any) => sum + c.amount, 0)} isLoading={leg.isLoading} />
+                                {isChargesDepExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                              </span>
+                            </div>
+                            {isChargesDepExpanded && (
+                              <div className="pl-4 mt-2 space-y-1">
+                                {tCharges.map((c: any, cIdx: number) => (
+                                  <div key={`${legIdx}-dep-ch-${cIdx}`} className="flex justify-between text-sm text-gray-500">
+                                    <span>{c.chargeName}{c.isInclusive && <span className="ml-1 text-xs text-gray-400">(incl.)</span>}</span>
+                                    <ObscuredPrice price={c.amount} isLoading={leg.isLoading} />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {tCargos.length > 0 && (
+                          <div>
+                            <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsVehicleDepExpanded(!isVehicleDepExpanded)}>
+                              <span className="flex items-center gap-2 text-customText">
+                                Vehicle/Cargo ({tCargos.length})
+                                {isVehicleDepExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                              </span>
+                              <ObscuredPrice price={tCargos.reduce((sum: any, c: any) => sum + c.baseFare, 0)} isLoading={leg.isLoading} />
+                            </div>
+                            {isVehicleDepExpanded && (
+                              <div className="pl-4 mt-2 space-y-1">
+                                {tCargos.map((c: any, cIdx: number) => (
+                                  <div key={`${legIdx}-dep-v-${cIdx}`} className="flex justify-between text-sm text-gray-500">
+                                    <span>{c.cargoClassCode} ({c.cargoType})</span>
+                                    <ObscuredPrice price={c.baseFare} isLoading={leg.isLoading} />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Fallback: show baseFare breakdown when cargoPrices is empty */}
+                        {tCargos.length === 0 && trip.baseFare && ((trip.baseFare.vehicles || 0) > 0 || (trip.baseFare.cargo || 0) > 0) && (
+                          <div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-customText">Vehicle/Cargo</span>
+                              <ObscuredPrice price={(trip.baseFare.vehicles || 0) + (trip.baseFare.cargo || 0)} isLoading={leg.isLoading} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Return Trips for this Leg */}
+                  {hasReturn && (
+                    <>
+                      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-4 mb-1">Return</div>
+                      {leg.retTrips.map((trip: any, tIdx: number) => {
+                        const tPassengers = trip.passengerPrices || [];
+                        const tCargos = trip.cargoPrices || [];
+                        const tCharges = trip.charges || [];
+
+                        return (
+                          <div key={trip.tripId || `ret-${legIdx}-${tIdx}`} className="space-y-4 mt-2">
+                            {leg.retTrips.length > 1 && (
+                              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider -mb-2">
+                                Route: {trip.routeCode || trip.tripId}
+                              </div>
+                            )}
+
+                            {tPassengers.length > 0 && (
+                              <div>
+                                <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsAdultRetExpanded(!isAdultRetExpanded)}>
+                                  <span className="flex items-center gap-2 text-customText">
+                                    Adult Fare ({tPassengers.length})
+                                    {isAdultRetExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                                  </span>
+                                  <ObscuredPrice price={tPassengers.reduce((sum: any, p: any) => sum + p.baseFare, 0)} isLoading={leg.isLoading} />
+                                </div>
+                                {isAdultRetExpanded && (
+                                  <div className="pl-4 mt-2 space-y-1">
+                                    {tPassengers.map((p: any, i: number) => (
+                                      <div key={`${legIdx}-ret-p-${i}`} className="flex justify-between text-sm text-gray-500">
+                                        <span>Passenger {i + 1} ({p.passengerType})</span>
+                                        <ObscuredPrice price={p.baseFare} isLoading={leg.isLoading} />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {tCharges.length > 0 && (
+                              <div>
+                                <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsChargesRetExpanded(!isChargesRetExpanded)}>
+                                  <span className="flex items-center gap-2 text-customText">
+                                    Additional Charges: <ObscuredPrice price={tCharges.filter((c: any) => !c.isInclusive).reduce((sum: any, c: any) => sum + c.amount, 0)} isLoading={leg.isLoading} />
+                                    {isChargesRetExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                                  </span>
+                                </div>
+                                {isChargesRetExpanded && (
+                                  <div className="pl-4 mt-2 space-y-1">
+                                    {tCharges.map((c: any, cIdx: number) => (
+                                      <div key={`${legIdx}-ret-ch-${cIdx}`} className="flex justify-between text-sm text-gray-500">
+                                        <span>{c.chargeName}{c.isInclusive && <span className="ml-1 text-xs text-gray-400">(incl.)</span>}</span>
+                                        <ObscuredPrice price={c.amount} isLoading={leg.isLoading} />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {tCargos.length > 0 && (
+                              <div>
+                                <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsVehicleRetExpanded(!isVehicleRetExpanded)}>
+                                  <span className="flex items-center gap-2 text-customText">
+                                    Vehicle/Cargo ({tCargos.length})
+                                    {isVehicleRetExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                                  </span>
+                                  <ObscuredPrice price={tCargos.reduce((sum: any, c: any) => sum + c.baseFare, 0)} isLoading={leg.isLoading} />
+                                </div>
+                                {isVehicleRetExpanded && (
+                                  <div className="pl-4 mt-2 space-y-1">
+                                    {tCargos.map((c: any, cIdx: number) => (
+                                      <div key={`${legIdx}-ret-v-${cIdx}`} className="flex justify-between text-sm text-gray-500">
+                                        <span>{c.cargoClassCode} ({c.cargoType})</span>
+                                        <ObscuredPrice price={c.baseFare} isLoading={leg.isLoading} />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Fallback: show baseFare breakdown when cargoPrices is empty */}
+                            {tCargos.length === 0 && trip.baseFare && ((trip.baseFare.vehicles || 0) > 0 || (trip.baseFare.cargo || 0) > 0) && (
+                              <div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-customText">Vehicle/Cargo</span>
+                                  <ObscuredPrice price={(trip.baseFare.vehicles || 0) + (trip.baseFare.cargo || 0)} isLoading={leg.isLoading} />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+
+                  {/* Per-Leg Subtotal */}
+                  <div className="flex justify-between font-bold text-md pt-2 border-t border-dashed mt-4">
+                    <span>Leg {legIdx + 1} Sub-Total</span>
+                    <span style={{ color: themeSettings?.accent || '#0060df' }}>{formatCurrency(leg.legTotal)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        ) : (
+          <>
+            {/* Standard Departure Section */}
+            {(returnCabinName || retTripsPricing.length > 0) && (
+              <div className="flex items-center justify-center border-t-2 border-gray-300 py-1">
+                <label className="text-mb font-semibold text-customText mt-2">Departure Trip</label>
+              </div>
+            )}
+
+            {depTripsPricing.map((trip: any, tIdx: number) => {
               const tPassengers = trip.passengerPrices || [];
               const tCargos = trip.cargoPrices || [];
               const tCharges = trip.charges || [];
-              const isConnecting = retTripsPricing.length > 1;
+              const isConnecting = depTripsPricing.length > 1;
 
               return (
                 <div key={trip.tripId || tIdx} className="space-y-4">
                   {isConnecting && (
                     <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4 -mb-2">
-                      Leg: {trip.routeCode || trip.tripId}
+                      Leg {tIdx + 1}: {trip._tenantName || trip.routeCode || trip.tripId}
                     </div>
                   )}
 
-                  {/* Return Passengers */}
                   {tPassengers.length > 0 && (
                     <div>
-                      <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsAdultRetExpanded(!isAdultRetExpanded)}>
+                      <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsAdultDepExpanded(!isAdultDepExpanded)}>
                         <span className="flex items-center gap-2 text-customText">
                           Adult Fare ({tPassengers.length})
-                          {isAdultRetExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                          {isAdultDepExpanded ? <FiChevronUp /> : <FiChevronDown />}
                         </span>
                         <ObscuredPrice price={tPassengers.reduce((sum: any, p: any) => sum + p.baseFare, 0)} isLoading={isLoading} />
                       </div>
-                      {isAdultRetExpanded && (
+                      {isAdultDepExpanded && (
                         <div className="pl-4 mt-2 space-y-1">
                           {tPassengers.map((p: any, i: number) => (
                             <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
-                              <span>Passenger {i + 1} ({p.passengerType})</span>
+                              <span>
+                                Passenger {i + 1} ({p.passengerType})
+                                {p.accommodationCode && <span className="ml-1 opacity-70">| {p.accommodationCode}</span>}
+                              </span>
                               <ObscuredPrice price={p.baseFare} isLoading={isLoading} />
                             </div>
                           ))}
@@ -470,20 +739,19 @@ const FareSummary: FC<FareSummaryProps> = ({
                     </div>
                   )}
 
-                  {/* Return Charges */}
                   {tCharges.length > 0 && (
                     <div>
-                      <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsChargesRetExpanded(!isChargesRetExpanded)}>
+                      <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsChargesDepExpanded(!isChargesDepExpanded)}>
                         <span className="flex items-center gap-2 text-customText">
-                          Additional Charges: <ObscuredPrice price={tCharges.reduce((sum: any, c: any) => sum + c.amount, 0)} isLoading={isLoading} />
-                          {isChargesRetExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                          Additional Charges: <ObscuredPrice price={tCharges.filter((c: any) => !c.isInclusive).reduce((sum: any, c: any) => sum + c.amount, 0)} isLoading={isLoading} />
+                          {isChargesDepExpanded ? <FiChevronUp /> : <FiChevronDown />}
                         </span>
                       </div>
-                      {isChargesRetExpanded && (
+                      {isChargesDepExpanded && (
                         <div className="pl-4 mt-2 space-y-1">
                           {tCharges.map((c: any) => (
                             <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
-                              <span>{c.chargeName}</span>
+                              <span>{c.chargeName}{c.isInclusive && <span className="ml-1 text-xs text-gray-400">(incl.)</span>}</span>
                               <ObscuredPrice price={c.amount} isLoading={isLoading} />
                             </div>
                           ))}
@@ -492,17 +760,16 @@ const FareSummary: FC<FareSummaryProps> = ({
                     </div>
                   )}
 
-                  {/* Return Vehicles */}
                   {tCargos.length > 0 && (
                     <div>
-                      <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsVehicleRetExpanded(!isVehicleRetExpanded)}>
+                      <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsVehicleDepExpanded(!isVehicleDepExpanded)}>
                         <span className="flex items-center gap-2 text-customText">
                           Vehicle/Cargo ({tCargos.length})
-                          {isVehicleRetExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                          {isVehicleDepExpanded ? <FiChevronUp /> : <FiChevronDown />}
                         </span>
                         <ObscuredPrice price={tCargos.reduce((sum: any, c: any) => sum + c.baseFare, 0)} isLoading={isLoading} />
                       </div>
-                      {isVehicleRetExpanded && (
+                      {isVehicleDepExpanded && (
                         <div className="pl-4 mt-2 space-y-1">
                           {tCargos.map((c: any) => (
                             <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
@@ -519,10 +786,109 @@ const FareSummary: FC<FareSummaryProps> = ({
               );
             })}
 
-            <div className="flex justify-between font-bold text-md pt-2 border-t border-dashed mt-4">
-              <span>{retTripsPricing.length > 1 ? 'Return Sub-Total' : 'Sub-Total'}</span>
-              <span style={{ color: themeSettings?.accent || '#0060df' }}>{formatCurrency(retSubtotal)}</span>
-            </div>
+            {depTripsPricing.length > 0 && (
+              <div className="flex justify-between font-bold text-md pt-2 border-t border-dashed mt-4">
+                <span>{depTripsPricing.length > 1 ? 'Departure Sub-Total' : 'Sub-Total'}</span>
+                <span style={{ color: themeSettings?.accent || '#0060df' }}>{formatCurrency(depSubtotal)}</span>
+              </div>
+            )}
+
+            {/* Standard Return Section */}
+            {retTripsPricing.length > 0 && (
+              <>
+                <div className="flex items-center justify-center border-t-2 border-gray-300 py-1 mt-4">
+                  <label className="text-mb font-semibold text-customText mt-2">Return Trip</label>
+                </div>
+
+                {retTripsPricing.map((trip: any, tIdx: number) => {
+                  const tPassengers = trip.passengerPrices || [];
+                  const tCargos = trip.cargoPrices || [];
+                  const tCharges = trip.charges || [];
+                  const isConnecting = retTripsPricing.length > 1;
+
+                  return (
+                    <div key={trip.tripId || tIdx} className="space-y-4">
+                      {isConnecting && (
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mt-4 -mb-2">
+                          Leg: {trip.routeCode || trip.tripId}
+                        </div>
+                      )}
+
+                      {tPassengers.length > 0 && (
+                        <div>
+                          <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsAdultRetExpanded(!isAdultRetExpanded)}>
+                            <span className="flex items-center gap-2 text-customText">
+                              Adult Fare ({tPassengers.length})
+                              {isAdultRetExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                            </span>
+                            <ObscuredPrice price={tPassengers.reduce((sum: any, p: any) => sum + p.baseFare, 0)} isLoading={isLoading} />
+                          </div>
+                          {isAdultRetExpanded && (
+                            <div className="pl-4 mt-2 space-y-1">
+                              {tPassengers.map((p: any, i: number) => (
+                                <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
+                                  <span>Passenger {i + 1} ({p.passengerType})</span>
+                                  <ObscuredPrice price={p.baseFare} isLoading={isLoading} />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {tCharges.length > 0 && (
+                        <div>
+                          <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsChargesRetExpanded(!isChargesRetExpanded)}>
+                            <span className="flex items-center gap-2 text-customText">
+                              Additional Charges: <ObscuredPrice price={tCharges.filter((c: any) => !c.isInclusive).reduce((sum: any, c: any) => sum + c.amount, 0)} isLoading={isLoading} />
+                              {isChargesRetExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                            </span>
+                          </div>
+                          {isChargesRetExpanded && (
+                            <div className="pl-4 mt-2 space-y-1">
+                              {tCharges.map((c: any) => (
+                                <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
+                                  <span>{c.chargeName}{c.isInclusive && <span className="ml-1 text-xs text-gray-400">(incl.)</span>}</span>
+                                  <ObscuredPrice price={c.amount} isLoading={isLoading} />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {tCargos.length > 0 && (
+                        <div>
+                          <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsVehicleRetExpanded(!isVehicleRetExpanded)}>
+                            <span className="flex items-center gap-2 text-customText">
+                              Vehicle/Cargo ({tCargos.length})
+                              {isVehicleRetExpanded ? <FiChevronUp /> : <FiChevronDown />}
+                            </span>
+                            <ObscuredPrice price={tCargos.reduce((sum: any, c: any) => sum + c.baseFare, 0)} isLoading={isLoading} />
+                          </div>
+                          {isVehicleRetExpanded && (
+                            <div className="pl-4 mt-2 space-y-1">
+                              {tCargos.map((c: any) => (
+                                <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
+                                  <span>{c.cargoClassCode} ({c.cargoType})</span>
+                                  <ObscuredPrice price={c.baseFare} isLoading={isLoading} />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                    </div>
+                  );
+                })}
+
+                <div className="flex justify-between font-bold text-md pt-2 border-t border-dashed mt-4">
+                  <span>{retTripsPricing.length > 1 ? 'Return Sub-Total' : 'Sub-Total'}</span>
+                  <span style={{ color: themeSettings?.accent || '#0060df' }}>{formatCurrency(retSubtotal)}</span>
+                </div>
+              </>
+            )}
           </>
         )}
 

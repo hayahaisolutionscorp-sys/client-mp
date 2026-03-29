@@ -158,8 +158,9 @@ export default function PassengerTripCard({ departureTrips, returnTrips, trips }
               </p>
             </div>
             <p className="text-xs text-gray-700 text-center font-medium w-full truncate">
-              {trip.srcPort?.name}
+              {getPortLabel(trip.srcPort as any)}
             </p>
+            {trip.srcPort?.name && <p className="text-xs text-gray-400 text-center w-full truncate">{trip.srcPort.name}</p>}
           </div>
         </div>
 
@@ -192,13 +193,22 @@ export default function PassengerTripCard({ departureTrips, returnTrips, trips }
               </p>
             </div>
             <p className="text-xs text-gray-700 text-center font-medium w-full truncate">
-              {trip.destPort?.name}
+              {getPortLabel(trip.destPort as any)}
             </p>
+            {trip.destPort?.name && <p className="text-xs text-gray-400 text-center w-full truncate">{trip.destPort.name}</p>}
           </div>
         </div>
       </div>
     </div>
   );
+
+  const getPortLabel = (port?: { name: string; municipality?: string; province?: string }) => {
+    if (!port) return '';
+    if (port.province && port.municipality) return `${port.province}, ${port.municipality}`;
+    if (port.province) return port.province;
+    if (port.municipality) return port.municipality;
+    return port.name;
+  };
 
   const renderTripBlock = (trip: ITrip, title: string, cabinName?: string | null, cabinId?: string | null) => (
     <div className="flex flex-col bg-gray-50 p-3 sm:p-4 rounded-lg flex-1 shadow-sm w-full">
@@ -220,16 +230,18 @@ export default function PassengerTripCard({ departureTrips, returnTrips, trips }
         </div>
         <div className="flex flex-col items-center sm:items-start w-full">
           <div className="flex items-center p-2 bg-white rounded-lg shadow-sm mb-2">
-            <span className="max-w-[150px] sm:max-w-[250px] truncate font-medium text-gray-700">
-              {trip.srcPort?.name}
-            </span>
+            <div className="flex flex-col max-w-[150px] sm:max-w-[250px]">
+              <span className="truncate font-medium text-gray-700">{getPortLabel(trip.srcPort as any)}</span>
+              {trip.srcPort?.name && <span className="truncate text-xs text-gray-400">{trip.srcPort.name}</span>}
+            </div>
             <FaArrowRight
               className="w-3 h-3 mx-1 sm:mx-2 flex-shrink-0"
               style={{ color: primaryColor }}
             />
-            <span className="max-w-[150px] sm:max-w-[250px] truncate font-medium text-gray-700">
-              {trip.destPort?.name}
-            </span>
+            <div className="flex flex-col max-w-[150px] sm:max-w-[250px]">
+              <span className="truncate font-medium text-gray-700">{getPortLabel(trip.destPort as any)}</span>
+              {trip.destPort?.name && <span className="truncate text-xs text-gray-400">{trip.destPort.name}</span>}
+            </div>
           </div>
 
           <div className="flex items-center mb-2">

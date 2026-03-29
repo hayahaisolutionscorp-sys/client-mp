@@ -14,13 +14,15 @@ import { SearchAvailableTrips } from '@/types/trip/trip-management';
 import { SelectedTrip } from '@/types/trip/selected-trip';
 import { PaginatedRequest } from '@/types/common/pagination';
 import { ITrip } from '@/models';
+import { useTrips } from '@/context/TripsContext';
 
 export default function TripsSelector() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [departureTrips, setDepartureTrips] = useState<ITrip[]>([]);
-  const [returnTrips, setReturnTrips] = useState<ITrip[]>([]);
+  const [departureTrips, setDepartureTripsState] = useState<ITrip[]>([]);
+  const [returnTrips, setReturnTripsState] = useState<ITrip[]>([]);
+  const { setDepartureTrips, setReturnTrips } = useTrips();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedDepartureCabin, setSelectedDepartureCabin] = useState<SelectedTrip | null>(null);
@@ -45,12 +47,22 @@ export default function TripsSelector() {
   };
 
   useEffect(() => {
-    // Update selected dates when search parameters change
+    // Update selected dates when search parameters change.
+    // Normalize to noon local time so the UTC date never crosses midnight into the previous day
+    // (e.g. PH midnight → UTC March 25, but noon PH → UTC March 26, matching the trip date).
+    const normalizeToNoon = (dateStr: string | null): string | null => {
+      if (!dateStr) return null;
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      d.setHours(12, 0, 0, 0);
+      return d.toISOString();
+    };
+
     const departureDate = searchParams.get('filterSpecificDepartureDate') || searchParams.get('departure_date') || searchParams.get('departureDate');
     const returnDate = searchParams.get('filterSpecificReturnDate') || searchParams.get('returnDate');
 
-    setSelectedDepartureDate(departureDate);
-    setSelectedReturnDate(returnDate);
+    setSelectedDepartureDate(normalizeToNoon(departureDate));
+    setSelectedReturnDate(normalizeToNoon(returnDate));
   }, [searchParams]);
 
   const fetchTrips = useCallback(async () => {
@@ -68,6 +80,10 @@ export default function TripsSelector() {
         destPortId: searchParams.get('destPortId') ? parseInt(searchParams.get('destPortId')!, 10) : 0,
         origin_code: searchParams.get('origin_code') ?? undefined,
         destination_code: searchParams.get('destination_code') ?? undefined,
+        origin_province: searchParams.get('origin_province') ?? undefined,
+        origin_municipality: searchParams.get('origin_municipality') ?? undefined,
+        destination_province: searchParams.get('destination_province') ?? undefined,
+        destination_municipality: searchParams.get('destination_municipality') ?? undefined,
         departureDate: searchParams.get('filterSpecificDepartureDate') ?? searchParams.get('departure_date') ?? '',
         passengerCount: searchParams.get('passenger_count') ? parseInt(searchParams.get('passenger_count')!, 10) : 1,
         vehicleCount: searchParams.get('vehicle_count') ? parseInt(searchParams.get('vehicle_count')!, 10) : 0,
@@ -88,12 +104,18 @@ export default function TripsSelector() {
       const cleanedSearchDepartureQuery = cleanSearchQuery(searchQuery);
 
       const availableDepartureTrips = await getAvailableTrips(undefined, cleanedSearchDepartureQuery, pagination);
-      setDepartureTrips(availableDepartureTrips?.data ?? []);
+      const depTrips = availableDepartureTrips?.data ?? [];
+      setDepartureTripsState(depTrips);
+      setDepartureTrips(depTrips);
 
       if (searchParams.get('returnDate')) {
         // Swap origin/dest for return trip
         searchQuery.destination_code = searchParams.get('origin_code') ?? undefined;
         searchQuery.origin_code = searchParams.get('destination_code') ?? undefined;
+        searchQuery.origin_province = searchParams.get('destination_province') ?? undefined;
+        searchQuery.origin_municipality = searchParams.get('destination_municipality') ?? undefined;
+        searchQuery.destination_province = searchParams.get('origin_province') ?? undefined;
+        searchQuery.destination_municipality = searchParams.get('origin_municipality') ?? undefined;
         searchQuery.destPortId = searchParams.get('srcPortId') ? parseInt(searchParams.get('srcPortId')!, 10) : 0;
         searchQuery.srcPortId = searchParams.get('destPortId') ? parseInt(searchParams.get('destPortId')!, 10) : 0;
         searchQuery.departureDate = searchParams.get('filterSpecificReturnDate') ?? searchParams.get('returnDate') ?? '';
@@ -104,7 +126,12 @@ export default function TripsSelector() {
         const cleanedSearchReturnQuery = cleanSearchQuery(searchQuery);
 
         const availableReturnTrips = await getAvailableTrips(undefined, cleanedSearchReturnQuery, pagination);
-        setReturnTrips(availableReturnTrips?.data ?? []);
+        const retTrips = availableReturnTrips?.data ?? [];
+        setReturnTripsState(retTrips);
+        setReturnTrips(retTrips);
+      } else {
+        setReturnTripsState([]);
+        setReturnTrips([]);
       }
     } catch (err) {
       setError('Failed to fetch trips');
@@ -112,7 +139,7 @@ export default function TripsSelector() {
     } finally {
       setLoading(false);
     }
-  }, [searchParams]);
+  }, [searchParams, setDepartureTrips, setReturnTrips]);
 
   useEffect(() => {
     fetchTrips();
@@ -130,6 +157,17 @@ export default function TripsSelector() {
       return selection.segmentSelections.map(s => s.cabinType).join('|');
     }
 
+    const getShippingLineIds = (selection: SelectedTrip | null): string | undefined => {
+      if (!selection) return undefined;
+      if (selection.segmentSelections && selection.segmentSelections.length > 1) {
+        const ids = selection.segmentSelections
+          .map(s => s.shippingLineId ?? selection.shippingLineId)
+          .filter((id): id is number => id !== undefined);
+        if (ids.length > 0) return ids.join('|');
+      }
+      return selection.shippingLineId?.toString();
+    }
+
     const queryValues = {
       departureTripId: selectedDepartureCabin?.tripId?.toString() ?? undefined,
       departureCabinName: getJoinedNames(selectedDepartureCabin),
@@ -137,6 +175,7 @@ export default function TripsSelector() {
       returnTripId: selectedReturnCabin?.tripId?.toString() ?? undefined,
       returnCabinName: getJoinedNames(selectedReturnCabin),
       returnCabinId: getJoinedIds(selectedReturnCabin),
+      shippingLineId: getShippingLineIds(selectedDepartureCabin),
       passengerCount: searchParams.get('passengerCount') || searchParams.get('passenger_count') || undefined,
       vehicleCount: searchParams.get('vehicleCount') || searchParams.get('vehicle_count') || undefined,
       commodityId: searchParams.get('commodity_id') || searchParams.get('commodityId') || undefined

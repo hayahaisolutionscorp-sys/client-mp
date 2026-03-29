@@ -11,9 +11,13 @@ interface CommoditiesResponse {
     };
 }
 
-export async function getCommodities(): Promise<ICommodity[] | undefined> {
+export async function getCommodities(shippingLineId?: string): Promise<ICommodity[] | undefined> {
     try {
-        const response = await fetch(`${COMMODITIES_API}?page=1&page_size=500&order_by=+name`, {
+        const params = new URLSearchParams({ page: '1', page_size: '500', order_by: '+name' });
+        if (shippingLineId) {
+            params.append('shipping_line_id', shippingLineId);
+        }
+        const response = await fetch(`${COMMODITIES_API}?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,8 +1,9 @@
 import TripSummary from '@/components/booking/passenger-details/TripSummary';
+import CrossTenantTripSummary from '@/components/booking/passenger-details/CrossTenantTripSummary';
 import { prepareBooking } from '@/services/booking/booking.service';
 import { getShip } from '@/services/shipping-line/ship.service';
 import { ITrip } from '@/models';
-import { ITripSummary } from '@/models/booking/prepare-booking.model';
+import { ITripSummary, IPrepareBookingData } from '@/models/booking/prepare-booking.model';
 
 interface PassengerDetailsContentProps {
   departureTripId?: string;
@@ -11,7 +12,12 @@ interface PassengerDetailsContentProps {
   departureCabinId?: string;
   returnCabinName?: string;
   returnCabinId?: string;
+  shippingLineId?: string;
   commodityId?: string;
+  isCrossTenant?: boolean;
+  legTripIds?: string[];
+  shippingLineIds?: string[];
+  legReturnTripIds?: string[];
 }
 
 export default async function PassengerDetailsContent({
@@ -21,8 +27,29 @@ export default async function PassengerDetailsContent({
   departureCabinId,
   returnCabinName,
   returnCabinId,
-  commodityId
+  shippingLineId,
+  commodityId,
+  isCrossTenant,
+  legTripIds,
+  shippingLineIds,
+  legReturnTripIds
 }: PassengerDetailsContentProps) {
+  // Cross-tenant connecting trip: two separate prepareBooking calls
+  if (isCrossTenant && legTripIds && legTripIds.length >= 2 && shippingLineIds && shippingLineIds.length >= 2) {
+    return renderCrossTenant({
+      legTripIds,
+      shippingLineIds,
+      departureCabinName,
+      departureCabinId,
+      commodityId,
+      legReturnTripIds
+    });
+  }
+
+  // Standard flow (direct or same-tenant connecting)
+  // Normalize pipe-separated shippingLineId (e.g. "44|44") to a single value
+  const normalizedShippingLineId = shippingLineId?.split('|')[0];
+
   let initialDepartureTrips: ITrip[] = [];
   let initialReturnTrips: ITrip[] = [];
   let prepareBookingData;
@@ -31,7 +58,7 @@ export default async function PassengerDetailsContent({
     const response = await prepareBooking({
       departure: departureTripId ? [departureTripId] : [],
       return: returnTripId ? [returnTripId] : [],
-    }, commodityId);
+    }, commodityId, undefined, normalizedShippingLineId);
 
     if (response.data) {
       prepareBookingData = response.data;
@@ -66,6 +93,97 @@ export default async function PassengerDetailsContent({
       departureCabinId={departureCabinId}
       returnCabinName={returnCabinName}
       returnCabinId={returnCabinId}
+      shippingLineId={normalizedShippingLineId}
+      commodityId={commodityId}
+    />
+  );
+}
+
+async function renderCrossTenant({
+  legTripIds,
+  shippingLineIds,
+  departureCabinName,
+  departureCabinId,
+  commodityId,
+  legReturnTripIds
+}: {
+  legTripIds: string[];
+  shippingLineIds: string[];
+  departureCabinName?: string;
+  departureCabinId?: string;
+  commodityId?: string;
+  legReturnTripIds?: string[];
+}) {
+  const cabinNames = (departureCabinName || '').split('|');
+  const cabinIds = (departureCabinId || '').split('|');
+
+  type LegData = {
+    shippingLineId: string;
+    tripId: string;
+    returnTripId?: string;
+    trips: ITrip[];
+    returnTrips: ITrip[];
+    prepareBookingData: IPrepareBookingData | undefined;
+    cabinName: string;
+    cabinId: string;
+  };
+
+  const legs: LegData[] = [];
+
+  // Fetch prepareBooking for each leg in parallel (with return trips if available)
+  const responses = await Promise.allSettled(
+    legTripIds.map((tripId, index) => {
+      const returnId = legReturnTripIds?.[index];
+      return prepareBooking(
+        { departure: [tripId], return: returnId ? [returnId] : [] },
+        commodityId,
+        undefined,
+        shippingLineIds[index]
+      );
+    })
+  );
+
+  for (let i = 0; i < legTripIds.length; i++) {
+    const result = responses[i];
+    let trips: ITrip[] = [];
+    let returnTrips: ITrip[] = [];
+    let pbData: IPrepareBookingData | undefined;
+
+    if (result.status === 'fulfilled' && result.value.data) {
+      pbData = result.value.data;
+      const depPromises = (result.value.data.departure || []).map(async (tripSummary) => {
+        const ship = await getShip(tripSummary.ship.id);
+        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId);
+      });
+      const retPromises = (result.value.data.return || []).map(async (tripSummary) => {
+        const ship = await getShip(tripSummary.ship.id);
+        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId);
+      });
+      [trips, returnTrips] = await Promise.all([
+        Promise.all(depPromises),
+        Promise.all(retPromises)
+      ]);
+    } else if (result.status === 'rejected') {
+      console.error(`Failed to prepare booking for leg ${i + 1}:`, result.reason);
+    }
+
+    legs.push({
+      shippingLineId: shippingLineIds[i],
+      tripId: legTripIds[i],
+      returnTripId: legReturnTripIds?.[i],
+      trips,
+      returnTrips,
+      prepareBookingData: pbData,
+      cabinName: cabinNames[i] || cabinNames[0] || '',
+      cabinId: cabinIds[i] || cabinIds[0] || ''
+    });
+  }
+
+  return (
+    <CrossTenantTripSummary
+      legs={legs}
+      departureCabinName={departureCabinName}
+      departureCabinId={departureCabinId}
       commodityId={commodityId}
     />
   );
@@ -123,8 +241,16 @@ function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId: number = 0)
     totalLayoverMinutes: 0,
     intermediatePorts: [],
     // Map objects
-    srcPort: { name: summary.origin } as any,
-    destPort: { name: summary.destination } as any,
+    srcPort: {
+      name: summary.origin,
+      municipality: summary.origin_municipality,
+      province: summary.origin_province
+    } as any,
+    destPort: {
+      name: summary.destination,
+      municipality: summary.destination_municipality,
+      province: summary.destination_province
+    } as any,
     ship: {
       id: summary.ship.id,
       name: summary.ship.name,

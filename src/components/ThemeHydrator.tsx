@@ -5,9 +5,9 @@ import { IThemeSettings } from "@/models";
 
 const BRANDING_CACHE_KEY = "branding_config";
 
-export default function ThemeHydrator({ theme }: { theme: IThemeSettings }) {
+export default function ThemeHydrator({ theme, isFallback }: { theme: IThemeSettings, isFallback?: boolean }) {
     useEffect(() => {
-        if (typeof window === "undefined") return;
+        if (typeof window === "undefined" || isFallback) return;
 
         // Seed the cache with the server-fetched theme
         // We only need to store the essential fields

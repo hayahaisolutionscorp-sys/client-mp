@@ -46,11 +46,12 @@ interface PassengerDetailsFormProps {
   title?: string;
   vehicleCount?: number;
   passengerDetails?: PassengerDetails | undefined;
+  shippingLineId?: string;
   onChange?: (data: { passenger: PassengerData; companions: PassengerData[] }) => void;
   onAddVehicle?: () => void;
 }
 
-const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () => void }, PassengerDetailsFormProps> = ({ rateTableId, vehicleCount = 0, passengerDetails, onChange, onAddVehicle }, ref) => {
+const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () => void }, PassengerDetailsFormProps> = ({ rateTableId, vehicleCount = 0, passengerDetails, shippingLineId, onChange, onAddVehicle }, ref) => {
   const generateUniqueNumber = (): number => {
     return (Date.now() + Math.floor(Math.random() * 1000)) * -1;
   };
@@ -96,8 +97,8 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
   }, [formData, onChange]);
 
   useEffect(() => {
-    getActivePassengerTypes().then(setPassengerTypes);
-  }, []);
+    getActivePassengerTypes(shippingLineId).then(setPassengerTypes);
+  }, [shippingLineId]);
 
   useEffect(() => {
     if (loggedInAccount?.id) {

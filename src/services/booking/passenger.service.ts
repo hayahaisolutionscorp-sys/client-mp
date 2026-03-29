@@ -1,4 +1,4 @@
-import { PASSENGER_TYPES_ACTIVE_API } from '../../../constants/api';
+import { PASSENGER_TYPES_ACTIVE_API, IS_CLIENT } from '../../../constants/api';
 import axios from 'axios';
 
 export interface PassengerType {
@@ -13,9 +13,12 @@ export interface PassengerType {
     is_active: boolean;
 }
 
-export const getActivePassengerTypes = async (): Promise<PassengerType[]> => {
+export const getActivePassengerTypes = async (shippingLineId?: string): Promise<PassengerType[]> => {
     try {
-        const response = await axios.get(PASSENGER_TYPES_ACTIVE_API);
+        const url = !IS_CLIENT && shippingLineId
+            ? `${PASSENGER_TYPES_ACTIVE_API}?shipping_line_id=${shippingLineId}`
+            : PASSENGER_TYPES_ACTIVE_API;
+        const response = await axios.get(url);
         return response.data.data;
     } catch (error) {
         console.error('Failed to fetch active passenger types:', error);

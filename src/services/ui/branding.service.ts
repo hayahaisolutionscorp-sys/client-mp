@@ -1,7 +1,7 @@
 import { BRANDING_API } from 'constants/api';
 import { IBrandingConfig, IBrandingResponse } from '@/models/branding.model';
 import brandingData from '@/data/branding.json';
-import { IS_BUILD_TIME } from '../config';
+import { IS_BUILD_TIME, IS_CLIENT } from '../config';
 
 export type BrandingSource = 'api' | 'fallback';
 
@@ -38,7 +38,7 @@ const withBrandingCacheBuster = (config: IBrandingConfig): IBrandingConfig => {
 };
 
 export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<BrandingConfigResult> => {
-    if (IS_BUILD_TIME) {
+    if (IS_BUILD_TIME || !IS_CLIENT) {
         return {
             data: brandingData as unknown as IBrandingConfig,
             source: 'fallback'

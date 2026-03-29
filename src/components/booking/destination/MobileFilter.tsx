@@ -3,13 +3,8 @@
 import { HiOutlineFilter } from 'react-icons/hi';
 import { Button } from '@/components/ui/Button';
 import FilterSidebar from '@/components/booking/destination/FilterSidebar';
-import { Filters } from '@/services';
 
-interface MobileFilterModalProps {
-  filtersPromise: Promise<Filters | undefined>;
-}
-
-export default function MobileFilterModal({ filtersPromise }: MobileFilterModalProps) {
+export default function MobileFilterModal() {
   const handleOpenModal = () => {
     const modal = document.getElementById('filter-modal') as HTMLDialogElement;
     modal?.showModal();
@@ -36,15 +31,14 @@ export default function MobileFilterModal({ filtersPromise }: MobileFilterModalP
       </div>
 
       {/* Filter Modal for Mobile */}
-      <dialog 
-        id="filter-modal" 
+      <dialog
+        id="filter-modal"
         className="modal w-full h-full max-w-full max-h-full m-0 p-0 bg-transparent"
       >
         <div className="w-full h-full">
-          <FilterSidebar 
-            filtersPromise={filtersPromise} 
-            isModal 
-            onClose={handleCloseModal} 
+          <FilterSidebar
+            isModal
+            onClose={handleCloseModal}
           />
         </div>
       </dialog>

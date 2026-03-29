@@ -169,17 +169,28 @@ export default function ConnectingTripCard({
 
                 {/* Journey Details */}
                 <div className="grid grid-cols-1 md:grid-cols-[200px_1fr_150px] gap-6 items-center">
-                    {/* Shipping Line Logo */}
-                    <div className="hidden md:flex justify-center items-center gap-2">
-                        {trip.lightLogoUrl && (
-                            <Image
-                                src={trip.lightLogoUrl}
-                                alt="Shipping Company Logo"
-                                width={100}
-                                height={250}
-                                className="w-auto h-[100px] object-contain"
-                            />
-                        )}
+                    {/* Shipping Line Logo(s) */}
+                    <div className="hidden md:flex flex-row justify-center items-center gap-2 w-full overflow-hidden">
+                        {(() => {
+                            const logos = trip.type === 'connecting'
+                                ? trip.segments
+                                    .map(s => s.shippingLine?.logoFilename)
+                                    .filter((logo, idx, arr): logo is string => !!logo && arr.indexOf(logo) === idx)
+                                : trip.lightLogoUrl ? [trip.lightLogoUrl] : [];
+
+                            if (logos.length === 0) return null;
+
+                            return logos.map((logo, idx) => (
+                                <Image
+                                    key={idx}
+                                    src={logo}
+                                    alt="Shipping Company Logo"
+                                    width={100}
+                                    height={250}
+                                    className={`object-contain min-w-0 flex-1 ${logos.length > 1 ? 'h-[60px] max-w-[90px]' : 'h-[100px] w-auto'}`}
+                                />
+                            ));
+                        })()}
                     </div>
 
                     {/* Journey Timeline */}
@@ -189,7 +200,7 @@ export default function ConnectingTripCard({
                             <p className="text-lg font-bold text-gray-900">
                                 {toPhilippinesTime(trip.departureDateIso, TIME_DEFAULT_FORMAT)}
                             </p>
-                            <p className="text-sm text-gray-600">{trip.srcPort?.name}</p>
+                            <p className="text-sm text-gray-600">{trip.srcPort?.name || trip.srcPortName}</p>
                         </div>
 
                         {/* Journey Line with Stops */}
@@ -214,7 +225,7 @@ export default function ConnectingTripCard({
                             <p className="text-lg font-bold text-gray-900">
                                 {toPhilippinesTime(trip.arrivalTimeDateIso, TIME_DEFAULT_FORMAT)}
                             </p>
-                            <p className="text-sm text-gray-600">{trip.destPort?.name}</p>
+                            <p className="text-sm text-gray-600">{trip.destPort?.name || trip.destPortName}</p>
                         </div>
                     </div>
 
