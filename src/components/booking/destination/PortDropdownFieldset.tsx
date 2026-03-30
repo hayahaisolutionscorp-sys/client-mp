@@ -118,7 +118,7 @@ const PortDropdownFieldset = ({
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
-          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${disabled || !isDelayedEnabled ? "cursor-not-allowed" : ""
+          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${disabled || !isDelayedEnabled ? "cursor-not-allowed opacity-60" : ""
             }`}
           disabled={disabled || !isDelayedEnabled}
         >
@@ -127,7 +127,17 @@ const PortDropdownFieldset = ({
             style={{ color: themeSettings?.accent || "#051036" }}
           />
           <span className="text-customText font-natural">
-            {isHydrated ? (selectedPort ? selectedPort.name : "Select Port") : "Loading..."}
+            {!isHydrated
+              ? "Loading..."
+              : selectedPort
+                ? selectedPort.name
+                : disabled
+                  ? "Select origin first"
+                  : ports === undefined
+                    ? "Loading ports..."
+                    : ports.length === 0
+                      ? "No destinations available"
+                      : "Select Port"}
           </span>
         </button>
 
