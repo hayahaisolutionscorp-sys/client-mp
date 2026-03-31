@@ -1,13 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { SearchBoxFormContent } from "@/components/landing/SearchBoxWrapper";
+import dynamic from "next/dynamic";
+import type { TripData } from "@oltek/hayahai-sdk/react";
+import { HayahAIButton, SearchBoxFormContent } from "@/components/landing/SearchBoxWrapper";
 import type { BookingTemplateProps } from "../../types";
 import { DEFAULT_BOOKING_TYPE } from "constants/default";
 
+const TripSearchWidget = dynamic(
+  () => import("@oltek/hayahai-sdk/react").then((mod) => mod.TripSearchWidget),
+  { ssr: false }
+);
+
 export default function BookingCleanMinimal({ theme, ports = [], routes = [] }: BookingTemplateProps) {
+  const [mode, setMode] = useState<"form" | "chat">("form");
   const [bookingType, setBookingType] = useState<string | undefined>(DEFAULT_BOOKING_TYPE);
+  const [tripSearchEnabled, setTripSearchEnabled] = useState(true);
+
+  const tenantId = process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
+    ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
+    : 1;
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const configRes = await fetch(`/api/agent-config?tenantId=${tenantId}&type=trip-search`);
+
+        if (configRes.ok) {
+          const data = await configRes.json();
+          const cfg = data?.config;
+          setTripSearchEnabled(cfg?.enabled ?? true);
+        }
+      } catch {
+        setTripSearchEnabled(true);
+      }
+    })();
+  }, [tenantId]);
+
+  const portNameToCode = new Map(ports.map((port) => [port.name.toLowerCase(), port.code]));
+
+  const handleTripSelect = (trip: TripData) => {
+    const depDate = trip.departureTime
+      ? new Date(trip.departureTime).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0];
+
+    const originCode = portNameToCode.get(trip.srcPort.toLowerCase());
+    const destinationCode = portNameToCode.get(trip.destPort.toLowerCase());
+    const params = new URLSearchParams({
+      departure_date: depDate,
+      passenger_count: "1",
+      vehicle_count: "0",
+      sort: "departureDate",
+      page: "1",
+    });
+
+    if (originCode) params.set("origin_code", originCode);
+    if (destinationCode) params.set("destination_code", destinationCode);
+
+    window.location.href = `/booking/destination?${params.toString()}`;
+  };
 
   return (
     <section id="Book" className="relative z-30 -mt-20 px-4 pb-12 sm:px-6 lg:px-10">
@@ -28,25 +80,46 @@ export default function BookingCleanMinimal({ theme, ports = [], routes = [] }: 
           />
 
           <div className="flex flex-col gap-6">
-             <div className="flex items-center gap-3">
-               <div className="p-2 rounded-xl" style={{ backgroundColor: `${theme.primary}15` }}>
+             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+               <div className="flex items-center gap-3">
+                 <div className="p-2 rounded-xl" style={{ backgroundColor: `${theme.primary}15` }}>
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 10L12 15L17 10" stroke={theme.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
+                 </div>
+                 <h2 className="text-xl font-bold text-slate-900">
+                   Find Your Trip
+                 </h2>
                </div>
-               <h2 className="text-xl font-bold text-slate-900">
-                 Find Your Trip
-               </h2>
+               {mode === "form" && tripSearchEnabled && (
+                 <HayahAIButton onClick={() => setMode("chat")} variant="premium" />
+               )}
              </div>
 
-             <div className="clean-minimal-form-wrapper">
-               <SearchBoxFormContent
-                 bookingType={bookingType}
-                 setBookingType={setBookingType}
-                 initialPorts={ports}
-                 initialRoutes={routes}
-               />
-             </div>
+             {mode === "chat" && tripSearchEnabled ? (
+               <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white p-3 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.35)]">
+                 <TripSearchWidget
+                   tenantId={tenantId}
+                   chatApiUrl="/api/chat-booking"
+                   routesApiUrl="/api/routes"
+                   tripsApiUrl="/api/trips"
+                   configApiUrl="/api/agent-config"
+                   onSwitchToForm={() => setMode("form")}
+                   onTripSelect={handleTripSelect}
+                   showFormToggle={true}
+                   poweredByText="Powered by HayahAI"
+                 />
+               </div>
+             ) : (
+               <div className="clean-minimal-form-wrapper">
+                 <SearchBoxFormContent
+                   bookingType={bookingType}
+                   setBookingType={setBookingType}
+                   initialPorts={ports}
+                   initialRoutes={routes}
+                 />
+               </div>
+             )}
           </div>
         </div>
       </motion.div>

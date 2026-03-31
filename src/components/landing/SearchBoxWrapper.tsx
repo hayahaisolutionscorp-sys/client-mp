@@ -21,6 +21,13 @@ interface SearchBoxWrapperProps {
     initialRoutes?: IRoute[];
 }
 
+interface HayahAIButtonProps {
+    onClick?: () => void;
+    className?: string;
+    labelClassName?: string;
+    variant?: "default" | "overlay" | "premium";
+}
+
 export default function SearchBoxWrapper({
     initialTripSearchEnabled = true,
     initialPorts = [],
@@ -97,7 +104,7 @@ export default function SearchBoxWrapper({
                         onSwitchToForm={() => setMode("form")}
                         onTripSelect={handleTripSelect}
                         showFormToggle={true}
-                        poweredByText="Powered by AyahAI"
+                        poweredByText="Powered by HayahAI"
                     />
                 ) : (
                     <SearchBoxWithToggle
@@ -111,6 +118,40 @@ export default function SearchBoxWrapper({
                 )}
             </div>
         </div>
+    );
+}
+
+export function HayahAIButton({
+    onClick,
+    className,
+    labelClassName,
+    variant = "default",
+}: HayahAIButtonProps) {
+    const variantClasses = {
+        default:
+            "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md transition-all hover:from-blue-600 hover:to-blue-700 hover:shadow-lg",
+        overlay:
+            "border border-white/60 bg-white/85 text-slate-900 shadow-[0_18px_40px_-20px_rgba(15,23,42,0.45)] backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white",
+        premium:
+            "border border-slate-200 bg-slate-50 text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white",
+    };
+
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${variantClasses[variant]} ${className ?? ""}`.trim()}
+        >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+            </svg>
+            <span className={labelClassName}>Ask HayahAI</span>
+        </button>
     );
 }
 
@@ -144,25 +185,7 @@ function SearchBoxWithToggle({
                         </p>
                     </div>
                     {showChatToggle && (
-                        <button
-                            onClick={onSwitchToChat}
-                            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 text-sm text-white hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
-                        >
-                            <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                                />
-                            </svg>
-                            <span className="hidden sm:inline">Ask AyahAI</span>
-                        </button>
+                        <HayahAIButton onClick={onSwitchToChat} labelClassName="hidden sm:inline" />
                     )}
                 </div>
 
