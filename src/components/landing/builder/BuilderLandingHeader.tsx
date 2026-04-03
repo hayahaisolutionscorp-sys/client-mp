@@ -57,6 +57,67 @@ export default function BuilderLandingHeader({
     );
   }
 
+  if (variant === "professional-slate") {
+    return (
+      <header
+        className="mx-4 mt-4 rounded-[28px] border px-5 py-4 shadow-[0_20px_60px_-20px_rgba(15,23,42,0.18)] backdrop-blur"
+        style={{
+          borderColor: `${theme.text}14`,
+          background: `linear-gradient(135deg, ${theme.surface}F4, ${theme.surfaceAlt}F2)`,
+          color: theme.text,
+        }}
+      >
+        <div className="flex items-center justify-between gap-6">
+          <Link href="/" className="flex items-center gap-3">
+            {logoSrc ? (
+              <Image
+                alt="Company Logo"
+                src={logoSrc}
+                width={150}
+                height={150}
+                className="h-[40px] w-auto object-contain"
+              />
+            ) : (
+              <span className="text-lg font-semibold capitalize" style={{ fontFamily: 'var(--font-title)' }}>
+                {branding?.brand_name || "Ayahay"}
+              </span>
+            )}
+          </Link>
+          <div className="hidden items-center gap-6 lg:flex">
+            {navItems.map((item) =>
+              item.trigger.toLowerCase() === "scroll" ? (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleScroll(item.id)}
+                  className="text-sm font-medium transition-colors"
+                  style={{ color: `${theme.text}BF` }}
+                >
+                  {item.name}
+                </button>
+              ) : (
+                <Link key={item.id} href={item.redirect_url} className="text-sm font-medium transition-colors" style={{ color: `${theme.text}BF` }}>
+                  {item.name}
+                </Link>
+              )
+            )}
+          </div>
+          <button
+            type="button"
+            className="rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em]"
+            style={{
+              borderColor: `${theme.primary}33`,
+              backgroundColor: `${theme.primary}14`,
+              color: theme.primary,
+            }}
+          >
+            Login
+          </button>
+        </div>
+      </header>
+    );
+  }
+
   if (variant !== "centered") {
     return (
       <Navbar

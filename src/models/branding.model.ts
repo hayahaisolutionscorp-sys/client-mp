@@ -6,6 +6,7 @@ export interface IBrandingColors {
     secondary?: string;
     surface?: string;
     surfaceAlt?: string;
+    cornerRadiusClass?: string;
 }
 
 export interface IBrandingLogo {

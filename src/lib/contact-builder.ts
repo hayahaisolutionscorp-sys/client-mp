@@ -1,24 +1,20 @@
-export const CONTACT_SECTION_KEYS = [
-  "hero",
-  "contact_form",
-] as const;
+import {
+  createSectionedBuilderContent,
+  createSectionedBuilderContentFromPreset,
+  normalizeSectionedBuilderContent,
+  replaceSectionedBuilderSectionOrder,
+  type SectionedBuilderContent,
+  type SectionedBuilderPresetSectionDefaults,
+  type SectionedBuilderSectionConfig,
+} from "./sectioned-builder";
+import { normalizeLandingTemplatePreset } from "./landing-builder";
+
+export const CONTACT_SECTION_KEYS = ["hero", "contact_form"] as const;
 
 export type ContactSectionKey = (typeof CONTACT_SECTION_KEYS)[number];
 
-export interface ContactBuilderSectionConfig {
-  id: ContactSectionKey;
-  section_key: ContactSectionKey;
-  label: string;
-  variant: string;
-  enabled: boolean;
-  display_order: number;
-}
-
-export interface ContactBuilderContent {
-  schema_version: 1;
-  page_key: "contact";
-  sections: ContactBuilderSectionConfig[];
-}
+export type ContactBuilderSectionConfig = SectionedBuilderSectionConfig<ContactSectionKey>;
+export type ContactBuilderContent = SectionedBuilderContent<"contact", ContactSectionKey>;
 
 export const CONTACT_SECTION_LABELS: Record<ContactSectionKey, string> = {
   hero: "Hero Banner",
@@ -30,67 +26,49 @@ export const CONTACT_VARIANTS: Record<ContactSectionKey, string[]> = {
   contact_form: ["default", "side-by-side", "minimal", "floating", "premium"],
 };
 
-export const DEFAULT_CONTACT_BUILDER_CONTENT: ContactBuilderContent = {
-  schema_version: 1,
-  page_key: "contact",
-  sections: [
-    { id: "hero", section_key: "hero", label: CONTACT_SECTION_LABELS.hero, variant: "default", enabled: true, display_order: 0 },
-    { id: "contact_form", section_key: "contact_form", label: CONTACT_SECTION_LABELS.contact_form, variant: "default", enabled: true, display_order: 1 },
-  ],
+const CONTACT_SECTION_DEFINITIONS = CONTACT_SECTION_KEYS.map((sectionKey) => ({
+  section_key: sectionKey,
+  label: CONTACT_SECTION_LABELS[sectionKey],
+  variant_values: CONTACT_VARIANTS[sectionKey],
+}))
+
+const CONTACT_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
+  string,
+  Partial<Record<ContactSectionKey, SectionedBuilderPresetSectionDefaults>>
+> = {
+  default: {
+    hero: { enabled: true, variant: "default" },
+    contact_form: { enabled: true, variant: "default" },
+  },
+  "rounded-modern": {
+    hero: { enabled: true, variant: "centered" },
+    contact_form: { enabled: true, variant: "side-by-side" },
+  },
+  professional: {
+    hero: { enabled: true, variant: "centered" },
+    contact_form: { enabled: true, variant: "side-by-side" },
+  },
+  "editorial-sharp": {
+    hero: { enabled: true, variant: "gradient" },
+    contact_form: { enabled: true, variant: "premium" },
+  },
 };
 
-const isContactSectionKey = (value: unknown): value is ContactSectionKey =>
-  typeof value === "string" && CONTACT_SECTION_KEYS.includes(value as ContactSectionKey);
+export const DEFAULT_CONTACT_BUILDER_CONTENT = createSectionedBuilderContent("contact", CONTACT_SECTION_DEFINITIONS);
+
+export function createContactBuilderContentFromPreset(preset: string): ContactBuilderContent {
+  const normalizedPreset = normalizeLandingTemplatePreset(preset);
+  return createSectionedBuilderContentFromPreset(
+    "contact",
+    CONTACT_SECTION_DEFINITIONS,
+    CONTACT_TEMPLATE_PRESET_SECTION_DEFAULTS[normalizedPreset] ?? CONTACT_TEMPLATE_PRESET_SECTION_DEFAULTS.default
+  );
+}
+
+export function replaceContactBuilderSectionOrder(sections: ContactBuilderSectionConfig[]): ContactBuilderSectionConfig[] {
+  return replaceSectionedBuilderSectionOrder(sections);
+}
 
 export function normalizeContactBuilderContent(value: unknown): ContactBuilderContent {
-  if (!value || typeof value !== "object") {
-    return DEFAULT_CONTACT_BUILDER_CONTENT;
-  }
-
-  const candidate = value as Partial<ContactBuilderContent>;
-  const sectionMap = new Map<ContactSectionKey, ContactBuilderSectionConfig>();
-
-  if (Array.isArray(candidate.sections)) {
-    for (const section of candidate.sections) {
-      if (!section || typeof section !== "object") continue;
-      const sectionKey = (section as Partial<ContactBuilderSectionConfig>).section_key;
-      if (!isContactSectionKey(sectionKey)) continue;
-      const variants = CONTACT_VARIANTS[sectionKey];
-      const variant =
-        typeof (section as Partial<ContactBuilderSectionConfig>).variant === "string" &&
-        variants.includes((section as Partial<ContactBuilderSectionConfig>).variant!)
-          ? (section as Partial<ContactBuilderSectionConfig>).variant!
-          : "default";
-      sectionMap.set(sectionKey, {
-        id: sectionKey,
-        section_key: sectionKey,
-        label: CONTACT_SECTION_LABELS[sectionKey],
-        variant,
-        enabled:
-          typeof (section as Partial<ContactBuilderSectionConfig>).enabled === "boolean"
-            ? (section as Partial<ContactBuilderSectionConfig>).enabled!
-            : true,
-        display_order:
-          typeof (section as Partial<ContactBuilderSectionConfig>).display_order === "number"
-            ? (section as Partial<ContactBuilderSectionConfig>).display_order!
-            : DEFAULT_CONTACT_BUILDER_CONTENT.sections.find((s) => s.section_key === sectionKey)?.display_order ?? 0,
-      });
-    }
-  }
-
-  const normalizedSections = CONTACT_SECTION_KEYS.map((sectionKey, index) => {
-    const existing = sectionMap.get(sectionKey);
-    return {
-      ...(existing || DEFAULT_CONTACT_BUILDER_CONTENT.sections[index]),
-      display_order: existing?.display_order ?? DEFAULT_CONTACT_BUILDER_CONTENT.sections[index].display_order,
-    };
-  });
-
-  return {
-    schema_version: 1,
-    page_key: "contact",
-    sections: normalizedSections
-      .sort((a, b) => a.display_order - b.display_order)
-      .map((section, index) => ({ ...section, display_order: index })),
-  };
+  return normalizeSectionedBuilderContent(value, "contact", CONTACT_SECTION_DEFINITIONS);
 }

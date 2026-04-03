@@ -95,7 +95,7 @@ const PortDropdownFieldset = ({
 
   return (
     <fieldset
-      className="border rounded-md bg-white w-full h-[55px] focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2"
+      className="relative z-10 border rounded-md bg-white w-full h-[55px] overflow-visible focus-within:z-[140] focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2"
       style={
         {
           "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
@@ -103,7 +103,7 @@ const PortDropdownFieldset = ({
       }
     >
       <legend className="font-natural text-xs text-customText">{legendText}</legend>
-      <div ref={dropdownRef} className="relative w-full h-full">
+      <div ref={dropdownRef} className="relative z-[140] w-full h-full overflow-visible">
         <button
           onClick={toggleDropdown}
           aria-expanded={isOpen}
@@ -122,7 +122,7 @@ const PortDropdownFieldset = ({
         </button>
 
         {isOpen && !disabled && (
-          <div className="absolute z-10 mt-2 w-full bg-white border rounded-md shadow-sm">
+          <div className="absolute left-0 top-full z-[160] mt-2 w-full bg-white border rounded-md shadow-lg">
             <div className="p-2 relative">
               <input
                 ref={searchInputRef}

@@ -12,7 +12,11 @@ import { useBranding } from "@/hooks/branding";
 
 const STEP_KEY = 'login-step';
 
-export function LoginForm() {
+interface LoginFormProps {
+  mode?: "default" | "immersive" | "canvas";
+}
+
+export function LoginForm({ mode = "default" }: LoginFormProps) {
   const router = useRouter();
   const branding = useBranding();
   const theme = useThemeSettings();
@@ -83,18 +87,22 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md space-y-6">
       <h1 className="sr-only">Login</h1>
-      <div className="flex justify-center">
-        <Image
-          src={branding?.logo.dark || branding?.logo.light || "/assets/icons/Ayahay_blue_vertical.svg"}
-          alt={`${branding?.brand_name || "Hayahai"} Logo`}
-          width={210}
-          height={210}
-          className="h-15 w-15"
-        />
-      </div>
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground">Enter your Email to Continue</p>
-      </div>
+      {mode === "default" ? (
+        <>
+          <div className="flex justify-center">
+            <Image
+              src={branding?.logo.dark || branding?.logo.light || "/assets/icons/Ayahay_blue_vertical.svg"}
+              alt={`${branding?.brand_name || "Hayahai"} Logo`}
+              width={210}
+              height={210}
+              className="h-15 w-15"
+            />
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">Enter your Email to Continue</p>
+          </div>
+        </>
+      ) : null}
 
       <form className="space-y-4" onSubmit={handleContinue}>
         <div className="space-y-2">

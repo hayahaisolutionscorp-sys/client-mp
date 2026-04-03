@@ -8,8 +8,9 @@ import { normalizeLandingBuilderContent } from "@/lib/landing-builder";
 import type { LandingBuilderContent } from "@/lib/landing-builder";
 import type { LandingPreviewPayload } from "@/lib/preview/landing-preview";
 import type { LandingPageData } from "@/services/content/landing-page.service";
-import type { IBrandingConfig, IThemeSettings } from "@/models";
-import type { IBrandingColors, IBrandingLogo } from "@/models/branding.model";
+import { buildPreviewBranding } from "@/lib/preview/theme";
+import { usePreviewSyncPayload } from "@/lib/preview/use-preview-sync-payload";
+import type { IThemeSettings } from "@/models";
 
 interface LandingPreviewClientProps {
   initialPayload: LandingPreviewPayload;
@@ -21,100 +22,26 @@ export default function LandingPreviewClient({
   initialLandingData,
 }: LandingPreviewClientProps) {
   const { setBranding, setThemeSettings } = useTheme();
-  const [payload, setPayload] = useState<LandingPreviewPayload>(initialPayload);
+  const payload = usePreviewSyncPayload(initialPayload, "AYAHAY_LANDING_PREVIEW_SYNC");
   const [config, setConfig] = useState<LandingBuilderContent>(
     normalizeLandingBuilderContent(initialPayload.builderConfig)
   );
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // Security check: Trust origin from TMS
-      if (typeof event.data !== "object" || event.data.type !== "AYAHAY_LANDING_PREVIEW_SYNC") {
-        return;
-      }
-
-      const rawPayload = event.data.payload as LandingPreviewPayload;
-      if (rawPayload) {
-        setPayload(rawPayload);
-        setConfig(normalizeLandingBuilderContent(rawPayload.builderConfig));
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
+    setConfig(normalizeLandingBuilderContent(payload.builderConfig));
+  }, [payload.builderConfig]);
 
   useEffect(() => {
     const previewConfig = payload.config;
-    if (!previewConfig) {
-      return;
-    }
+    if (!previewConfig) return;
 
-    const baseBranding = initialLandingData?.brandingConfig;
-    const incomingColors = {
-      ...(baseBranding?.colors ?? {}),
-      ...(previewConfig.colors ?? {}),
-    };
-    const colors: IBrandingColors = {
-      primaryColor: incomingColors.primaryColor || incomingColors.primary || "#004C70",
-      secondaryColor: incomingColors.secondaryColor || incomingColors.secondary || "#7ACCFA",
-      primary: incomingColors.primary || incomingColors.primaryColor || "#004C70",
-      secondary: incomingColors.secondary || incomingColors.secondaryColor || "#7ACCFA",
-      accent: incomingColors.accent || baseBranding?.colors?.accent || "#042B3F",
-      surface: incomingColors.surface || baseBranding?.colors?.surface || "#FFFFFF",
-      surfaceAlt: incomingColors.surfaceAlt || baseBranding?.colors?.surfaceAlt || "#EEF8FC",
-    };
-    const logo: IBrandingLogo = {
-      light:
-        previewConfig.logo?.light ||
-        baseBranding?.logo?.light ||
-        previewConfig.logo?.dark ||
-        baseBranding?.logo?.dark ||
-        "",
-      dark:
-        previewConfig.logo?.dark ||
-        baseBranding?.logo?.dark ||
-        previewConfig.logo?.light ||
-        baseBranding?.logo?.light ||
-        "",
-    };
-
-    const mergedBranding: IBrandingConfig = {
-      id: baseBranding?.id ?? "preview-branding",
-      brand_name: previewConfig.brand_name ?? baseBranding?.brand_name ?? "Ayahay",
-      domain_name: previewConfig.domain_name ?? baseBranding?.domain_name ?? "",
-      subdomain_name: previewConfig.subdomain_name ?? baseBranding?.subdomain_name ?? "",
-      favicon_url: previewConfig.favicon_url ?? baseBranding?.favicon_url ?? "",
-      font_family:
-        previewConfig.font_family ??
-        previewConfig.fontFamily ??
-        baseBranding?.font_family ??
-        baseBranding?.fontFamily ??
-        "Jost",
-      font_family_title:
-        previewConfig.font_family_title ??
-        previewConfig.fontFamilyTitle ??
-        baseBranding?.font_family_title ??
-        baseBranding?.fontFamilyTitle ??
-        previewConfig.font_family ??
-        previewConfig.fontFamily ??
-        baseBranding?.font_family ??
-        baseBranding?.fontFamily ??
-        "Jost",
-      colors,
-      logo,
-      slogan: previewConfig.slogan ?? baseBranding?.slogan ?? null,
-      motto: previewConfig.motto ?? baseBranding?.motto ?? null,
-      tagline: previewConfig.tagline ?? baseBranding?.tagline ?? null,
-      created_at: baseBranding?.created_at ?? "",
-      updated_at: baseBranding?.updated_at ?? "",
-    };
-
-    const primary = colors.primaryColor || colors.primary || "#004C70";
-    const secondary = colors.secondaryColor || colors.secondary || "#7ACCFA";
-    const accent = colors.accent || "#042B3F";
-    const surface = colors.surface || "#FFFFFF";
-    const surfaceAlt = colors.surfaceAlt || "#EEF8FC";
+    const mergedBranding = buildPreviewBranding(previewConfig, initialLandingData?.brandingConfig);
+    const colors = mergedBranding.colors;
+    const primary = colors?.primaryColor || colors?.primary || "#004C70";
+    const secondary = colors?.secondaryColor || colors?.secondary || "#7ACCFA";
+    const accent = colors?.accent || "#042B3F";
+    const surface = colors?.surface || "#FFFFFF";
+    const surfaceAlt = colors?.surfaceAlt || "#EEF8FC";
     const textOnSurface = getReadableTextColor(surface);
     const textOnSurfaceAlt = getReadableTextColor(surfaceAlt);
     const mutedOnSurface = textOnSurface === "#f8fafc" ? "#cbd5e1" : "#64748b";
@@ -151,11 +78,5 @@ export default function LandingPreviewClient({
     root.style.setProperty("--text-default-rgb", toRgbCssValue(textOnSurface));
   }, [initialLandingData?.brandingConfig, payload.config, setBranding, setThemeSettings]);
 
-  return (
-    <LandingPageBuilder 
-      config={config} 
-      previewPayload={payload} 
-      landingData={initialLandingData} 
-    />
-  );
+  return <LandingPageBuilder config={config} previewPayload={payload} landingData={initialLandingData} />;
 }

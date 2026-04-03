@@ -14,7 +14,11 @@ const TripSearchWidget = dynamic(
   { ssr: false }
 );
 
-export default function BookingOverlay({ theme, ports = [], routes = [] }: BookingTemplateProps) {
+interface BookingOverlayProps extends BookingTemplateProps {
+  variant?: string;
+}
+
+export default function BookingOverlay({ theme, ports = [], routes = [], variant = "overlay" }: BookingOverlayProps) {
   const [mode, setMode] = useState<"form" | "chat">("form");
   const [bookingType, setBookingType] = useState<string | undefined>(DEFAULT_BOOKING_TYPE);
   const [tripSearchEnabled, setTripSearchEnabled] = useState(true);
@@ -192,4 +196,3 @@ export default function BookingOverlay({ theme, ports = [], routes = [] }: Booki
     </section>
   );
 }
-

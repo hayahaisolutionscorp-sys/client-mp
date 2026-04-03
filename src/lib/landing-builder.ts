@@ -25,7 +25,153 @@ export interface LandingBuilderSectionConfig {
 export interface LandingBuilderContent {
   schema_version: 1;
   page_key: "landing";
+  templatePreset: string;
   sections: LandingBuilderSectionConfig[];
+}
+
+export interface LandingTemplatePresetTokens {
+  fontFamily: string;
+  fontFamilyTitle: string;
+  radiusClass: string;
+  surfaceClass: string;
+}
+
+export interface LandingTemplatePresetOption {
+  key: string;
+  label: string;
+  description: string;
+  tokens: LandingTemplatePresetTokens;
+}
+
+export interface LandingTemplatePresetSectionDefaults {
+  enabled: boolean;
+  variant: string;
+}
+
+export interface LandingBuilderLayoutState {
+  templatePreset: LandingTemplatePresetOption;
+  headerSection: LandingBuilderSectionConfig | undefined;
+  bookingSection: LandingBuilderSectionConfig | undefined;
+  footerSection: LandingBuilderSectionConfig | undefined;
+  visibleSections: LandingBuilderSectionConfig[];
+  contentSections: LandingBuilderSectionConfig[];
+  showNavbarInHero: boolean;
+  showBookingInHero: boolean;
+}
+
+export const DEFAULT_TEMPLATE_PRESET = "default";
+
+export const LANDING_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
+  string,
+  Partial<Record<LandingSectionKey, LandingTemplatePresetSectionDefaults>>
+> = {
+  default: {
+    header: { enabled: true, variant: "default" },
+    hero: { enabled: true, variant: "default" },
+    booking: { enabled: true, variant: "default" },
+    promotions: { enabled: true, variant: "default" },
+    routes: { enabled: true, variant: "default" },
+    why_choose: { enabled: true, variant: "default" },
+    get_to_know: { enabled: false, variant: "default" },
+    partners: { enabled: false, variant: "default" },
+    footer: { enabled: true, variant: "default" },
+    floating_cta: { enabled: true, variant: "default" },
+  },
+  "rounded-modern": {
+    header: { enabled: true, variant: "centered" },
+    hero: { enabled: true, variant: "split" },
+    booking: { enabled: true, variant: "overlay" },
+    promotions: { enabled: true, variant: "grid" },
+    routes: { enabled: true, variant: "carousel" },
+    why_choose: { enabled: true, variant: "grid" },
+    get_to_know: { enabled: true, variant: "modern" },
+    partners: { enabled: true, variant: "strip" },
+    footer: { enabled: true, variant: "default" },
+    floating_cta: { enabled: true, variant: "default" },
+  },
+  professional: {
+    header: { enabled: true, variant: "professional-slate" },
+    hero: { enabled: true, variant: "professional-editorial" },
+    booking: { enabled: true, variant: "professional-card" },
+    promotions: { enabled: true, variant: "professional-banner" },
+    routes: { enabled: true, variant: "professional-wall" },
+    why_choose: { enabled: true, variant: "professional-stack" },
+    get_to_know: { enabled: true, variant: "professional-panel" },
+    partners: { enabled: true, variant: "professional-rail" },
+    footer: { enabled: true, variant: "professional-anchored" },
+    floating_cta: { enabled: true, variant: "professional-pill" },
+  },
+  "editorial-sharp": {
+    header: { enabled: true, variant: "floating" },
+    hero: { enabled: true, variant: "minimal" },
+    booking: { enabled: true, variant: "compact-dark" },
+    promotions: { enabled: true, variant: "banner" },
+    routes: { enabled: true, variant: "list" },
+    why_choose: { enabled: true, variant: "steps" },
+    get_to_know: { enabled: true, variant: "timeline" },
+    partners: { enabled: true, variant: "grid-premium" },
+    footer: { enabled: true, variant: "default" },
+    floating_cta: { enabled: true, variant: "modern-dark" },
+  },
+}
+
+export const LANDING_TEMPLATE_PRESETS: LandingTemplatePresetOption[] = [
+  {
+    key: "default",
+    label: "Default",
+    description: "Current Ayahay baseline look and feel.",
+    tokens: {
+      fontFamily: "Jost",
+      fontFamilyTitle: "Jost",
+      radiusClass: "rounded-2xl",
+      surfaceClass: "bg-white",
+    },
+  },
+  {
+    key: "rounded-modern",
+    label: "Rounded Modern",
+    description: "Softer corners with clean, modern typography.",
+    tokens: {
+      fontFamily: "Inter",
+      fontFamilyTitle: "Inter",
+      radiusClass: "rounded-3xl",
+      surfaceClass: "bg-slate-50",
+    },
+  },
+  {
+    key: "professional",
+    label: "Professional",
+    description: "Polished, corporate styling with a crisp, balanced layout.",
+    tokens: {
+      fontFamily: "Manrope",
+      fontFamilyTitle: "Montserrat",
+      radiusClass: "rounded-3xl",
+      surfaceClass: "bg-slate-50",
+    },
+  },
+  {
+    key: "editorial-sharp",
+    label: "Editorial Sharp",
+    description: "Sharper corners with contrast-heavy editorial style.",
+    tokens: {
+      fontFamily: "Lato",
+      fontFamilyTitle: "Merriweather",
+      radiusClass: "rounded-md",
+      surfaceClass: "bg-white",
+    },
+  },
+];
+
+const LANDING_TEMPLATE_PRESET_MAP = new Map(
+  LANDING_TEMPLATE_PRESETS.map((preset) => [preset.key, preset])
+);
+
+export const isLandingTemplatePresetKey = (value: unknown): value is string => {
+  return typeof value === "string" && LANDING_TEMPLATE_PRESET_MAP.has(value);
+}
+
+export const normalizeLandingTemplatePreset = (value: unknown): string => {
+  return isLandingTemplatePresetKey(value) ? value : DEFAULT_TEMPLATE_PRESET;
 }
 
 export const LANDING_SECTION_LABELS: Record<LandingSectionKey, string> = {
@@ -39,24 +185,25 @@ export const LANDING_SECTION_LABELS: Record<LandingSectionKey, string> = {
   partners: "Partners",
   footer: "Footer",
   floating_cta: "Floating CTA",
-};
+}
 
 export const LANDING_VARIANTS: Record<LandingSectionKey, string[]> = {
-  header: ["default", "centered", "floating"],
-  hero: ["default", "split", "minimal", "cards"],
-  booking: ["default", "overlay", "compact-dark"],
-  promotions: ["default", "grid", "banner"],
-  routes: ["default", "carousel", "cards", "list"],
-  why_choose: ["default", "steps", "grid", "minimal"],
-  get_to_know: ["default", "timeline", "modern", "center"],
-  partners: ["default", "strip", "marquee", "grid-premium"],
-  footer: ["default", "default-no-banner", "centered", "premium"],
-  floating_cta: ["default", "modern-dark", "minimal-light"],
-};
+  header: ["default", "centered", "floating", "professional-slate"],
+  hero: ["default", "split", "minimal", "cards", "professional-editorial"],
+  booking: ["default", "overlay", "compact-dark", "professional-card"],
+  promotions: ["default", "grid", "banner", "professional-banner"],
+  routes: ["default", "carousel", "cards", "list", "professional-wall"],
+  why_choose: ["default", "steps", "grid", "minimal", "professional-stack"],
+  get_to_know: ["default", "timeline", "modern", "center", "professional-panel"],
+  partners: ["default", "strip", "marquee", "grid-premium", "professional-rail"],
+  footer: ["default", "default-no-banner", "centered", "premium", "professional-anchored"],
+  floating_cta: ["default", "modern-dark", "minimal-light", "professional-pill"],
+}
 
 export const DEFAULT_LANDING_BUILDER_CONTENT: LandingBuilderContent = {
   schema_version: 1,
   page_key: "landing",
+  templatePreset: DEFAULT_TEMPLATE_PRESET,
   sections: [
     {
       id: "header",
@@ -139,11 +286,95 @@ export const DEFAULT_LANDING_BUILDER_CONTENT: LandingBuilderContent = {
       display_order: 9,
     },
   ],
-};
+}
+
+export const LANDING_FIXED_SECTION_KEYS = ["header", "booking", "footer", "floating_cta"] as const;
+
+export type LandingFixedSectionKey = (typeof LANDING_FIXED_SECTION_KEYS)[number];
+
+const LANDING_DEFAULT_SECTION_ORDER = new Map(
+  DEFAULT_LANDING_BUILDER_CONTENT.sections.map((section) => [section.section_key, section.display_order])
+);
+
+const LANDING_FIXED_SECTION_ORDER = new Map(
+  LANDING_FIXED_SECTION_KEYS.map((sectionKey) => [
+    sectionKey,
+    LANDING_DEFAULT_SECTION_ORDER.get(sectionKey) ?? 0,
+  ])
+);
+
+const LANDING_MUTABLE_SECTION_ORDER = DEFAULT_LANDING_BUILDER_CONTENT.sections
+  .filter((section) => !isLandingFixedSectionKey(section.section_key))
+  .map((section) => section.display_order);
+
+const getTemplatePresetSectionDefaults = (preset: string) => {
+  return (
+    LANDING_TEMPLATE_PRESET_SECTION_DEFAULTS[preset] ??
+    LANDING_TEMPLATE_PRESET_SECTION_DEFAULTS[DEFAULT_TEMPLATE_PRESET]
+  );
+}
+
+export function createLandingBuilderContentFromPreset(
+  preset: string
+): LandingBuilderContent {
+  const normalizedPreset = normalizeLandingTemplatePreset(preset);
+  const defaults = getTemplatePresetSectionDefaults(normalizedPreset);
+
+  return {
+    schema_version: 1,
+    page_key: "landing",
+    templatePreset: normalizedPreset,
+    sections: DEFAULT_LANDING_BUILDER_CONTENT.sections.map((section, index) => {
+      const presetSection = defaults[section.section_key];
+
+      return {
+        ...section,
+        enabled: presetSection?.enabled ?? section.enabled,
+        variant: presetSection?.variant ?? section.variant,
+        display_order: index,
+      };
+    }),
+  };
+}
+
+export function getLandingBuilderLayoutState(
+  builder: LandingBuilderContent
+): LandingBuilderLayoutState {
+  const templatePreset =
+    LANDING_TEMPLATE_PRESETS.find((preset) => preset.key === builder.templatePreset) ??
+    LANDING_TEMPLATE_PRESETS.find((preset) => preset.key === DEFAULT_TEMPLATE_PRESET) ??
+    LANDING_TEMPLATE_PRESETS[0];
+  const visibleSections = builder.sections
+    .filter((section) => section.enabled)
+    .sort((left, right) => left.display_order - right.display_order);
+  const headerSection = visibleSections.find((section) => section.section_key === "header");
+  const bookingSection = visibleSections.find((section) => section.section_key === "booking");
+  const footerSection = visibleSections.find((section) => section.section_key === "footer");
+  const contentSections = visibleSections.filter((section) => section.section_key !== "footer");
+
+  return {
+    templatePreset,
+    headerSection,
+    bookingSection,
+    footerSection,
+    visibleSections,
+    contentSections,
+    showNavbarInHero:
+      headerSection?.enabled !== false &&
+      (headerSection?.variant === "default" || !headerSection?.variant),
+    showBookingInHero:
+      bookingSection?.enabled !== false &&
+      (bookingSection?.variant === "default" || !bookingSection?.variant),
+  };
+}
 
 const isLandingSectionKey = (value: unknown): value is LandingSectionKey => {
   return typeof value === "string" && LANDING_SECTION_KEYS.includes(value as LandingSectionKey);
-};
+}
+
+export function isLandingFixedSectionKey(value: unknown): value is LandingFixedSectionKey {
+  return typeof value === "string" && LANDING_FIXED_SECTION_KEYS.includes(value as LandingFixedSectionKey);
+}
 
 function isLegacyAllEnabledDefault(
   sections: LandingBuilderSectionConfig[] | undefined
@@ -162,12 +393,65 @@ function isLegacyAllEnabledDefault(
   );
 }
 
+export function getLandingBuilderFixedSections(
+  builder: LandingBuilderContent
+): LandingBuilderSectionConfig[] {
+  return builder.sections
+    .filter((section) => isLandingFixedSectionKey(section.section_key))
+    .sort((left, right) => left.display_order - right.display_order);
+}
+
+export function getLandingBuilderMutableSections(
+  builder: LandingBuilderContent
+): LandingBuilderSectionConfig[] {
+  return builder.sections
+    .filter((section) => !isLandingFixedSectionKey(section.section_key))
+    .sort((left, right) => left.display_order - right.display_order);
+}
+
+export function composeLandingBuilderSectionOrder(
+  sections: LandingBuilderSectionConfig[]
+): LandingBuilderSectionConfig[] {
+  const sectionMap = new Map<LandingSectionKey, LandingBuilderSectionConfig>();
+  for (const section of sections) {
+    sectionMap.set(section.section_key, section);
+  }
+
+  const fixedSections = LANDING_FIXED_SECTION_KEYS.map((sectionKey) => {
+    const existing = sectionMap.get(sectionKey);
+    const fallbackSection = DEFAULT_LANDING_BUILDER_CONTENT.sections.find(
+      (section) => section.section_key === sectionKey
+    );
+
+    if (!fallbackSection) {
+      throw new Error(`Missing landing fallback section for ${sectionKey}`);
+    }
+
+    return {
+      ...(existing || fallbackSection),
+      display_order: LANDING_FIXED_SECTION_ORDER.get(sectionKey) ?? fallbackSection.display_order,
+    };
+  });
+
+  const mutableSections = sections
+    .filter((section) => !isLandingFixedSectionKey(section.section_key))
+    .sort((left, right) => left.display_order - right.display_order)
+    .map((section, index) => ({
+      ...section,
+      display_order: LANDING_MUTABLE_SECTION_ORDER[index] ?? section.display_order,
+    }));
+
+  return [...fixedSections, ...mutableSections].sort((left, right) => left.display_order - right.display_order);
+}
+
 export function normalizeLandingBuilderContent(value: unknown): LandingBuilderContent {
   if (!value || typeof value !== "object") {
     return DEFAULT_LANDING_BUILDER_CONTENT;
   }
 
   const candidate = value as Partial<LandingBuilderContent>;
+  const templatePreset = normalizeLandingTemplatePreset(candidate.templatePreset);
+  const defaults = getTemplatePresetSectionDefaults(templatePreset);
   const sectionMap = new Map<LandingSectionKey, LandingBuilderSectionConfig>();
 
   if (Array.isArray(candidate.sections)) {
@@ -209,25 +493,26 @@ export function normalizeLandingBuilderContent(value: unknown): LandingBuilderCo
 
   const normalizedSections = LANDING_SECTION_KEYS.map((sectionKey, index) => {
     const existing = sectionMap.get(sectionKey);
+    const presetSection = defaults[sectionKey];
+    const fallbackSection = DEFAULT_LANDING_BUILDER_CONTENT.sections[index];
+
     return {
-      ...(existing || DEFAULT_LANDING_BUILDER_CONTENT.sections[index]),
+      ...(existing || fallbackSection),
+      enabled: existing?.enabled ?? presetSection?.enabled ?? fallbackSection.enabled,
+      variant: existing?.variant ?? presetSection?.variant ?? fallbackSection.variant,
       display_order:
-        existing?.display_order ?? DEFAULT_LANDING_BUILDER_CONTENT.sections[index].display_order,
+        existing?.display_order ?? fallbackSection.display_order,
     };
   });
 
   if (isLegacyAllEnabledDefault(normalizedSections)) {
-    return DEFAULT_LANDING_BUILDER_CONTENT;
+    return createLandingBuilderContentFromPreset(templatePreset);
   }
 
   return {
     schema_version: 1,
     page_key: "landing",
-    sections: normalizedSections
-      .sort((left, right) => left.display_order - right.display_order)
-      .map((section, index) => ({
-        ...section,
-        display_order: index,
-      })),
+    templatePreset,
+    sections: composeLandingBuilderSectionOrder(normalizedSections),
   };
 }

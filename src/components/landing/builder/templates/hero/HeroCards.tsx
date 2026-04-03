@@ -15,6 +15,7 @@ interface HeroCardsProps {
   forceHomeNavbar?: boolean;
   showNavbar?: boolean;
   showBookingSearch?: boolean;
+  variant?: string;
   headerSectionOverride?: HeaderNavigationConfig | null;
   portsOverride?: IPort[] | null;
   bookingRoutesOverride?: IRoute[] | null;
@@ -31,6 +32,7 @@ export default function HeroCards({
   forceHomeNavbar = false,
   showNavbar = true,
   showBookingSearch = true,
+  variant = "cards",
   headerSectionOverride,
   portsOverride,
   bookingRoutesOverride,

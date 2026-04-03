@@ -12,12 +12,13 @@ import BuilderLandingHeader from "./BuilderLandingHeader";
 import HeroSplit from "./templates/hero/HeroSplit";
 import HeroMinimal from "./templates/hero/HeroMinimal";
 import HeroCards from "./templates/hero/HeroCards";
+import HeroProfessional from "./templates/hero/HeroProfessional";
 import RoutesCarousel from "./templates/routes/RoutesCarousel";
 import RoutesModernGrid from "./templates/routes/RoutesModernGrid";
 import RoutesMinimalList from "./templates/routes/RoutesMinimalList";
-import LandingBookingSection from "./LandingBookingSection";
 import BookingOverlay from "./templates/booking/BookingOverlay";
 import BookingPremiumDark from "./templates/booking/BookingPremiumDark";
+import BookingProfessional from "./templates/booking/BookingProfessional";
 import PromotionsGrid from "./templates/promotions/PromotionsGrid";
 import PromotionsBanner from "./templates/promotions/PromotionsBanner";
 import WhyChooseSteps from "./templates/why-choose/WhyChooseSteps";
@@ -39,7 +40,10 @@ import dynamic from 'next/dynamic';
 const ChatWidget = dynamic(() => import('@/components/chat/ChatWidget'), { ssr: false });
 import { createBuilderTheme } from "./theme";
 import type { LandingBuilderContent } from "@/lib/landing-builder";
-import { normalizeLandingBuilderContent } from "@/lib/landing-builder";
+import {
+  getLandingBuilderLayoutState,
+  normalizeLandingBuilderContent,
+} from "@/lib/landing-builder";
 import type { LandingPreviewPayload } from "@/lib/preview/landing-preview";
 import type { LandingPageData } from "@/services/content/landing-page.service";
 import type { IBrandingConfig } from "@/models";
@@ -56,14 +60,8 @@ export default function LandingPageBuilder({
   landingData,
 }: LandingPageBuilderProps) {
   const builder = normalizeLandingBuilderContent(config);
-  const headerConfig = builder.sections.find((section) => section.section_key === "header");
-  const bookingConfig = builder.sections.find((section) => section.section_key === "booking");
-  const visibleSections = builder.sections
-    .filter((section) => section.enabled)
-    .sort((left, right) => left.display_order - right.display_order);
-  const hasHeroSection = visibleSections.some((section) => section.section_key === "hero");
-  const shouldShowDefaultHeaderInHero = headerConfig?.enabled !== false && (headerConfig?.variant === "default" || !headerConfig?.variant);
-  const shouldShowBookingInHero = bookingConfig?.enabled !== false && (bookingConfig?.variant === "default" || !bookingConfig?.variant);
+  const layout = getLandingBuilderLayoutState(builder);
+  const templatePreset = layout.templatePreset;
 
   const sections = previewPayload?.sections ?? [];
   const heroSection = sections.find((section) => section.type === "hero") ?? landingData?.heroSection ?? null;
@@ -111,20 +109,22 @@ export default function LandingPageBuilder({
           "Jost",
       } as IBrandingConfig)
     : ((baseBranding ?? {}) as IBrandingConfig);
-  const theme = createBuilderTheme(effectiveBranding);
-
-  const hasCustomFooter = visibleSections.some(s => s.section_key === "footer");
-  const contentSections = visibleSections.filter(s => s.section_key !== "footer");
-  const footerSection = visibleSections.find(s => s.section_key === "footer");
+  const landingBranding = effectiveBranding;
+  const theme = createBuilderTheme(landingBranding);
+  const cornerRadiusClass =
+    landingBranding?.colors?.cornerRadiusClass ||
+    templatePreset?.tokens.radiusClass ||
+    "rounded-2xl";
 
   return (
     <>
-    <div 
+    <div
+      className={templatePreset ? `${templatePreset.tokens.surfaceClass} ${cornerRadiusClass}` : cornerRadiusClass}
       style={{ 
-        fontFamily: theme.fontFamily, 
+        fontFamily: templatePreset?.tokens.fontFamily || theme.fontFamily,
         backgroundColor: theme.surface,
-        '--font-title': theme.fontFamilyTitle,
-        '--font-body': theme.fontFamily
+        '--font-title': templatePreset?.tokens.fontFamilyTitle || theme.fontFamilyTitle,
+        '--font-body': templatePreset?.tokens.fontFamily || theme.fontFamily
       } as any}
     >
       <style dangerouslySetInnerHTML={{ __html: `
@@ -133,7 +133,7 @@ export default function LandingPageBuilder({
         }
       ` }} />
 
-      {contentSections.map((section) => {
+      {layout.contentSections.map((section) => {
         switch (section.section_key) {
           case "header":
             // The real default homepage navbar is rendered inside Hero.
@@ -158,8 +158,8 @@ export default function LandingPageBuilder({
                   key={section.id}
                   heroSectionOverride={heroSection}
                   forceHomeNavbar={Boolean(previewPayload)}
-                  showNavbar={shouldShowDefaultHeaderInHero}
-                  showBookingSearch={shouldShowBookingInHero}
+                  showNavbar={layout.showNavbarInHero}
+                  showBookingSearch={layout.showBookingInHero}
                   headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                   portsOverride={landingData?.ports ?? null}
                   bookingRoutesOverride={landingData?.bookingRoutes ?? null}
@@ -171,14 +171,26 @@ export default function LandingPageBuilder({
               return (
                 <HeroCards
                   key={section.id}
+                  variant={section.variant}
                   heroSectionOverride={heroSection}
                   forceHomeNavbar={Boolean(previewPayload)}
-                  showNavbar={shouldShowDefaultHeaderInHero}
-                  showBookingSearch={shouldShowBookingInHero}
+                  showNavbar={layout.showNavbarInHero}
+                  showBookingSearch={layout.showBookingInHero}
                   headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                   portsOverride={landingData?.ports ?? null}
                   bookingRoutesOverride={landingData?.bookingRoutes ?? null}
                   tripSearchEnabledOverride={true}
+                />
+              );
+            }
+            if (section.variant === "professional-editorial") {
+              return (
+                <HeroProfessional
+                  key={section.id}
+                  heroSectionOverride={heroSection}
+                  forceHomeNavbar={Boolean(previewPayload)}
+                  showNavbar={layout.showNavbarInHero}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                 />
               );
             }
@@ -188,8 +200,8 @@ export default function LandingPageBuilder({
                   key={section.id}
                   heroSectionOverride={heroSection}
                   forceHomeNavbar={Boolean(previewPayload)}
-                  showNavbar={shouldShowDefaultHeaderInHero}
-                  showBookingSearch={shouldShowBookingInHero}
+                  showNavbar={layout.showNavbarInHero}
+                  showBookingSearch={layout.showBookingInHero}
                   headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                   portsOverride={landingData?.ports ?? null}
                   bookingRoutesOverride={landingData?.bookingRoutes ?? null}
@@ -202,8 +214,8 @@ export default function LandingPageBuilder({
                 key={section.id}
                 heroSectionOverride={heroSection}
                 forceHomeNavbar={Boolean(previewPayload)}
-                showNavbar={shouldShowDefaultHeaderInHero}
-                showBookingSearch={shouldShowBookingInHero}
+                showNavbar={layout.showNavbarInHero}
+                showBookingSearch={layout.showBookingInHero}
                 headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                 portsOverride={landingData?.ports ?? null}
                 bookingRoutesOverride={landingData?.bookingRoutes ?? null}
@@ -231,10 +243,20 @@ export default function LandingPageBuilder({
                 />
               );
             }
+            if (section.variant === "professional-card") {
+              return (
+                <BookingProfessional
+                  key={section.id}
+                  theme={theme}
+                  ports={landingData?.ports ?? []}
+                  routes={landingData?.bookingRoutes ?? []}
+                />
+              );
+            }
             // default booking search is rendered inside Hero
             return null;
           case "promotions":
-            if (section.variant === "grid") {
+            if (section.variant === "grid" || section.variant === "professional-banner") {
               return <PromotionsGrid key={section.id} promos={(promotions as any) ?? []} theme={theme} />;
             }
             if (section.variant === "banner") {
@@ -245,7 +267,7 @@ export default function LandingPageBuilder({
             if (section.variant === "carousel") {
               return <RoutesCarousel key={section.id} routes={(routes as any) ?? []} theme={theme} />;
             }
-            if (section.variant === "cards") {
+            if (section.variant === "cards" || section.variant === "professional-wall") {
               return <RoutesModernGrid key={section.id} routes={(routes as any) ?? []} theme={theme} />;
             }
             if (section.variant === "list") {
@@ -253,7 +275,7 @@ export default function LandingPageBuilder({
             }
             return <PopularRoutes key={section.id} routesOverride={routes as any} />;
           case "why_choose":
-            if (section.variant === "steps") {
+            if (section.variant === "steps" || section.variant === "professional-stack") {
               return <WhyChooseSteps key={section.id} section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             }
             if (section.variant === "grid") {
@@ -274,7 +296,7 @@ export default function LandingPageBuilder({
             if (section.variant === "timeline" && getToKnowMain && getToKnowMission && getToKnowVision) {
               return <GetToKnowTimeline key={section.id} main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             }
-            if (section.variant === "modern" && getToKnowMain && getToKnowMission && getToKnowVision) {
+            if ((section.variant === "modern" || section.variant === "professional-panel") && getToKnowMain && getToKnowMission && getToKnowVision) {
                 return <GetToKnowModern key={section.id} main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             }
             if (section.variant === "center" && getToKnowMain && getToKnowMission && getToKnowVision) {
@@ -290,7 +312,7 @@ export default function LandingPageBuilder({
               />
             );
           case "partners":
-            if (section.variant === "strip") {
+            if (section.variant === "strip" || section.variant === "professional-rail") {
               return <PartnersStrip key={section.id} partners={(partners as any) ?? []} theme={theme} />;
             }
             if (section.variant === "marquee") {
@@ -310,12 +332,13 @@ export default function LandingPageBuilder({
 
     {/* Footer Area: Footer variants include their own SubscribeBanner internally */}
     <div id="Resources" className="w-full">
-      {footerSection ? (
+    {layout.footerSection ? (
         <>
-          {footerSection.variant === "centered" && <FooterCentered key={footerSection.id} theme={theme} />}
-          {footerSection.variant === "premium" && <FooterPremium key={footerSection.id} theme={theme} />}
-          {footerSection.variant === "default" && <Footer key={footerSection.id} />}
-          {footerSection.variant === "default-no-banner" && <Footer key={footerSection.id} showSubscribeBanner={false} />}
+          {layout.footerSection.variant === "centered" && <FooterCentered key={layout.footerSection.id} theme={theme} />}
+          {layout.footerSection.variant === "premium" && <FooterPremium key={layout.footerSection.id} theme={theme} />}
+          {layout.footerSection.variant === "professional-anchored" && <FooterPremium key={layout.footerSection.id} theme={theme} />}
+          {layout.footerSection.variant === "default" && <Footer key={layout.footerSection.id} />}
+          {layout.footerSection.variant === "default-no-banner" && <Footer key={layout.footerSection.id} showSubscribeBanner={false} />}
         </>
       ) : (
         <Footer />

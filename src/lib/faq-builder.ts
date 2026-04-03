@@ -1,24 +1,20 @@
-export const FAQ_SECTION_KEYS = [
-  "hero",
-  "faq_list",
-] as const;
+import {
+  createSectionedBuilderContent,
+  createSectionedBuilderContentFromPreset,
+  normalizeSectionedBuilderContent,
+  replaceSectionedBuilderSectionOrder,
+  type SectionedBuilderContent,
+  type SectionedBuilderPresetSectionDefaults,
+  type SectionedBuilderSectionConfig,
+} from "./sectioned-builder";
+import { normalizeLandingTemplatePreset } from "./landing-builder";
+
+export const FAQ_SECTION_KEYS = ["hero", "faq_list"] as const;
 
 export type FaqSectionKey = (typeof FAQ_SECTION_KEYS)[number];
 
-export interface FaqBuilderSectionConfig {
-  id: FaqSectionKey;
-  section_key: FaqSectionKey;
-  label: string;
-  variant: string;
-  enabled: boolean;
-  display_order: number;
-}
-
-export interface FaqBuilderContent {
-  schema_version: 1;
-  page_key: "faq";
-  sections: FaqBuilderSectionConfig[];
-}
+export type FaqBuilderSectionConfig = SectionedBuilderSectionConfig<FaqSectionKey>;
+export type FaqBuilderContent = SectionedBuilderContent<"faq", FaqSectionKey>;
 
 export const FAQ_SECTION_LABELS: Record<FaqSectionKey, string> = {
   hero: "Hero Banner",
@@ -30,67 +26,49 @@ export const FAQ_VARIANTS: Record<FaqSectionKey, string[]> = {
   faq_list: ["default", "accordion", "cards", "compact", "minimal"],
 };
 
-export const DEFAULT_FAQ_BUILDER_CONTENT: FaqBuilderContent = {
-  schema_version: 1,
-  page_key: "faq",
-  sections: [
-    { id: "hero", section_key: "hero", label: FAQ_SECTION_LABELS.hero, variant: "default", enabled: true, display_order: 0 },
-    { id: "faq_list", section_key: "faq_list", label: FAQ_SECTION_LABELS.faq_list, variant: "default", enabled: true, display_order: 1 },
-  ],
+const FAQ_SECTION_DEFINITIONS = FAQ_SECTION_KEYS.map((sectionKey) => ({
+  section_key: sectionKey,
+  label: FAQ_SECTION_LABELS[sectionKey],
+  variant_values: FAQ_VARIANTS[sectionKey],
+}))
+
+const FAQ_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
+  string,
+  Partial<Record<FaqSectionKey, SectionedBuilderPresetSectionDefaults>>
+> = {
+  default: {
+    hero: { enabled: true, variant: "default" },
+    faq_list: { enabled: true, variant: "default" },
+  },
+  "rounded-modern": {
+    hero: { enabled: true, variant: "centered" },
+    faq_list: { enabled: true, variant: "accordion" },
+  },
+  professional: {
+    hero: { enabled: true, variant: "centered" },
+    faq_list: { enabled: true, variant: "accordion" },
+  },
+  "editorial-sharp": {
+    hero: { enabled: true, variant: "minimal" },
+    faq_list: { enabled: true, variant: "minimal" },
+  },
 };
 
-const isFaqSectionKey = (value: unknown): value is FaqSectionKey =>
-  typeof value === "string" && FAQ_SECTION_KEYS.includes(value as FaqSectionKey);
+export const DEFAULT_FAQ_BUILDER_CONTENT = createSectionedBuilderContent("faq", FAQ_SECTION_DEFINITIONS);
+
+export function createFaqBuilderContentFromPreset(preset: string): FaqBuilderContent {
+  const normalizedPreset = normalizeLandingTemplatePreset(preset);
+  return createSectionedBuilderContentFromPreset(
+    "faq",
+    FAQ_SECTION_DEFINITIONS,
+    FAQ_TEMPLATE_PRESET_SECTION_DEFAULTS[normalizedPreset] ?? FAQ_TEMPLATE_PRESET_SECTION_DEFAULTS.default
+  );
+}
+
+export function replaceFaqBuilderSectionOrder(sections: FaqBuilderSectionConfig[]): FaqBuilderSectionConfig[] {
+  return replaceSectionedBuilderSectionOrder(sections);
+}
 
 export function normalizeFaqBuilderContent(value: unknown): FaqBuilderContent {
-  if (!value || typeof value !== "object") {
-    return DEFAULT_FAQ_BUILDER_CONTENT;
-  }
-
-  const candidate = value as Partial<FaqBuilderContent>;
-  const sectionMap = new Map<FaqSectionKey, FaqBuilderSectionConfig>();
-
-  if (Array.isArray(candidate.sections)) {
-    for (const section of candidate.sections) {
-      if (!section || typeof section !== "object") continue;
-      const sectionKey = (section as Partial<FaqBuilderSectionConfig>).section_key;
-      if (!isFaqSectionKey(sectionKey)) continue;
-      const variants = FAQ_VARIANTS[sectionKey];
-      const variant =
-        typeof (section as Partial<FaqBuilderSectionConfig>).variant === "string" &&
-        variants.includes((section as Partial<FaqBuilderSectionConfig>).variant!)
-          ? (section as Partial<FaqBuilderSectionConfig>).variant!
-          : "default";
-      sectionMap.set(sectionKey, {
-        id: sectionKey,
-        section_key: sectionKey,
-        label: FAQ_SECTION_LABELS[sectionKey],
-        variant,
-        enabled:
-          typeof (section as Partial<FaqBuilderSectionConfig>).enabled === "boolean"
-            ? (section as Partial<FaqBuilderSectionConfig>).enabled!
-            : true,
-        display_order:
-          typeof (section as Partial<FaqBuilderSectionConfig>).display_order === "number"
-            ? (section as Partial<FaqBuilderSectionConfig>).display_order!
-            : DEFAULT_FAQ_BUILDER_CONTENT.sections.find((s) => s.section_key === sectionKey)?.display_order ?? 0,
-      });
-    }
-  }
-
-  const normalizedSections = FAQ_SECTION_KEYS.map((sectionKey, index) => {
-    const existing = sectionMap.get(sectionKey);
-    return {
-      ...(existing || DEFAULT_FAQ_BUILDER_CONTENT.sections[index]),
-      display_order: existing?.display_order ?? DEFAULT_FAQ_BUILDER_CONTENT.sections[index].display_order,
-    };
-  });
-
-  return {
-    schema_version: 1,
-    page_key: "faq",
-    sections: normalizedSections
-      .sort((a, b) => a.display_order - b.display_order)
-      .map((section, index) => ({ ...section, display_order: index })),
-  };
+  return normalizeSectionedBuilderContent(value, "faq", FAQ_SECTION_DEFINITIONS);
 }

@@ -1,30 +1,34 @@
 "use client"
 
 import { useEffect, useState, FormEvent } from "react";
-import Link from "next/link"
-import Image from "next/image"
-import { EyeIcon, EyeOffIcon } from "lucide-react"
-import { Button } from "@/components/ui/Button"
-import { Input } from "@/components/ui/Input"
-import { useRouter } from 'next/navigation';
+import Link from "next/link";
+import Image from "next/image";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContexts";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPassword";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
 
-const STEP_KEY = 'login-step';
+const STEP_KEY = "login-step";
 const TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-export function LoginVerifyForm() {
+interface LoginVerifyFormProps {
+  mode?: "default" | "immersive" | "canvas";
+}
+
+export function LoginVerifyForm({ mode = "default" }: LoginVerifyFormProps) {
   const router = useRouter();
   const branding = useBranding();
   const theme = useThemeSettings();
-  const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
+  const primaryColor = theme?.primaryColor || theme?.primary || "oklch(34.38% 0.118 262.34)";
 
   const { signIn } = useAuth();
 
   const [email, setEmail] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
     const raw = sessionStorage.getItem(STEP_KEY);
     if (!raw) return null;
     try {
@@ -43,33 +47,34 @@ export function LoginVerifyForm() {
   const [error, setError] = useState<string | null>(null);
   const [cooldownTime, setCooldownTime] = useState(0);
 
-  // Guard: require valid sessionStorage step data
   useEffect(() => {
     const raw = sessionStorage.getItem(STEP_KEY);
     if (!raw) {
-      router.replace('/login');
+      router.replace("/login");
       return;
     }
     try {
       const { email: storedEmail, ts } = JSON.parse(raw);
       if (!storedEmail || Date.now() - ts > TTL_MS) {
         sessionStorage.removeItem(STEP_KEY);
-        router.replace('/login');
+        router.replace("/login");
         return;
       }
       setEmail(storedEmail);
     } catch {
       sessionStorage.removeItem(STEP_KEY);
-      router.replace('/login');
+      router.replace("/login");
     }
   }, [router]);
 
-  // Cooldown timer
   useEffect(() => {
     if (cooldownTime <= 0) return;
     const interval = setInterval(() => {
-      setCooldownTime(prev => {
-        if (prev <= 1) { clearInterval(interval); return 0; }
+      setCooldownTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
         return prev - 1;
       });
     }, 1000);
@@ -79,7 +84,7 @@ export function LoginVerifyForm() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleLogin = async (e: FormEvent) => {
@@ -90,11 +95,10 @@ export function LoginVerifyForm() {
 
     try {
       await signIn(email, password);
-      // Clear step data after successful login
       sessionStorage.removeItem(STEP_KEY);
-      router.push('/');
+      router.push("/");
     } catch (err: any) {
-      console.error('Login error:', err);
+      console.error("Login error:", err);
       const retryAfter = err.response?.data?.retryAfter;
       if (retryAfter) {
         const remaining = Math.max(0, Math.floor((retryAfter - Date.now()) / 1000));
@@ -107,27 +111,30 @@ export function LoginVerifyForm() {
     }
   };
 
-  // Show nothing until email is confirmed from sessionStorage
   if (email === null) return null;
 
   return (
     <div className="w-full max-w-md space-y-6">
-      <h1 className="sr-only">Login — Enter Password</h1>
-      <div className="flex justify-center">
-        <Image
-          src={branding?.logo.dark || branding?.logo.light || "/assets/icons/Ayahay_blue_vertical.svg"}
-          alt={`${branding?.brand_name || "Hayahai"} Logo`}
-          width={210}
-          height={210}
-          className="h-15 w-15"
-        />
-      </div>
-      <div className="text-center space-y-1">
-        <p className="text-sm text-muted-foreground">Enter your Password to Continue</p>
-        <p className="text-xs text-gray-500 font-medium">{email}</p>
-      </div>
+      <h1 className="sr-only">Login - Enter Password</h1>
+      {mode === "default" ? (
+        <>
+          <div className="flex justify-center">
+            <Image
+              src={branding?.logo.dark || branding?.logo.light || "/assets/icons/Ayahay_blue_vertical.svg"}
+              alt={`${branding?.brand_name || "Hayahai"} Logo`}
+              width={210}
+              height={210}
+              className="h-15 w-15"
+            />
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-sm text-muted-foreground">Enter your Password to Continue</p>
+            <p className="text-xs text-gray-500 font-medium">{email}</p>
+          </div>
+        </>
+      ) : null}
 
-      {error && (
+      {error ? (
         <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm text-center">
           {cooldownTime > 0 ? (
             <>
@@ -136,9 +143,11 @@ export function LoginVerifyForm() {
                 Please try again in {formatTime(cooldownTime)}
               </div>
             </>
-          ) : error}
+          ) : (
+            error
+          )}
         </div>
-      )}
+      ) : null}
 
       <form className="space-y-4" onSubmit={handleLogin}>
         <div className="space-y-2">
@@ -191,7 +200,13 @@ export function LoginVerifyForm() {
           style={{ backgroundColor: primaryColor }}
           disabled={loading || cooldownTime > 0 || !password || isNavigating}
         >
-          {isNavigating ? "Please wait..." : (cooldownTime > 0 ? `Wait ${formatTime(cooldownTime)}` : (loading ? "Signing in..." : "Sign In"))}
+          {isNavigating
+            ? "Please wait..."
+            : cooldownTime > 0
+              ? `Wait ${formatTime(cooldownTime)}`
+              : loading
+                ? "Signing in..."
+                : "Sign In"}
         </Button>
       </form>
 

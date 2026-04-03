@@ -1,28 +1,21 @@
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import dynamic from "next/dynamic";
-import { LoginForm } from "@/components/auth/LoginForm";
-import { Suspense } from "react";
+import { getBrandingConfig } from "@/services/ui/branding.service";
+import { getThemeSettings } from "@/services/ui/theme-settings.service";
+import { getLoginPage } from "@/services/content/login.service";
+import { LoginPageBuilder } from "@/components/auth/builder/LoginPageBuilder";
 
-const AuthSidebar = dynamic(() => import("@/components/auth/AuthSidebar").then(m => ({ default: m.AuthSidebar })));
-
-export default function LoginPage() {
+export default async function LoginPage() {
+  const [loginPage, branding, themeSettings] = await Promise.all([
+    getLoginPage(),
+    getBrandingConfig().catch(() => null),
+    getThemeSettings().catch(() => null),
+  ]);
 
   return (
-    <main className="grid min-h-screen md:grid-cols-2">
-      <div className="flex items-center justify-center p-6 lg:p-8 relative">
-        <Link
-          href="/"
-          className="absolute top-4 left-4 p-2 text-gray-600 hover:text-gray-900 transition-colors"
-          aria-label="Back to homepage"
-        >
-          <ArrowLeft className="h-6 w-6" />
-        </Link>
-        <LoginForm />
-      </div>
-      <Suspense fallback={<div className="hidden md:block bg-blue-500/10 animate-pulse w-full h-full" />}>
-        <AuthSidebar />
-      </Suspense>
-    </main>
-  )
+    <LoginPageBuilder
+      loginPage={loginPage}
+      step="email"
+      themeSettings={themeSettings ?? null}
+      branding={branding ?? null}
+    />
+  );
 }

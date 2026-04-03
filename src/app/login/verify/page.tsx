@@ -1,25 +1,21 @@
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import { AuthSidebar } from "@/components/auth/AuthSidebar";
-import { LoginVerifyForm } from "@/components/auth/LoginVerifyForm";
-import { Suspense } from "react";
+import { getBrandingConfig } from "@/services/ui/branding.service";
+import { getThemeSettings } from "@/services/ui/theme-settings.service";
+import { getLoginPage } from "@/services/content/login.service";
+import { LoginPageBuilder } from "@/components/auth/builder/LoginPageBuilder";
 
-export default function LoginVerifyPage() {
+export default async function LoginVerifyPage() {
+  const [loginPage, branding, themeSettings] = await Promise.all([
+    getLoginPage(),
+    getBrandingConfig().catch(() => null),
+    getThemeSettings().catch(() => null),
+  ]);
+
   return (
-    <main className="grid min-h-screen md:grid-cols-2">
-      <div className="flex items-center justify-center p-6 lg:p-8 relative">
-        <Link
-          href="/login"
-          className="absolute top-4 left-4 p-2 text-gray-600 hover:text-gray-900 transition-colors"
-          aria-label="Back to email step"
-        >
-          <ArrowLeft className="h-6 w-6" />
-        </Link>
-        <LoginVerifyForm />
-      </div>
-      <Suspense fallback={<div className="hidden md:block bg-blue-500/10 animate-pulse w-full h-full" />}>
-        <AuthSidebar />
-      </Suspense>
-    </main>
-  )
+    <LoginPageBuilder
+      loginPage={loginPage}
+      step="verify"
+      themeSettings={themeSettings ?? null}
+      branding={branding ?? null}
+    />
+  );
 }

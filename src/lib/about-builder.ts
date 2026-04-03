@@ -1,27 +1,20 @@
-export const ABOUT_SECTION_KEYS = [
-  "hero",
-  "welcome",
-  "our_story",
-  "our_expertise",
-  "core_values",
-] as const;
+import {
+  createSectionedBuilderContent,
+  createSectionedBuilderContentFromPreset,
+  normalizeSectionedBuilderContent,
+  replaceSectionedBuilderSectionOrder,
+  type SectionedBuilderContent,
+  type SectionedBuilderPresetSectionDefaults,
+  type SectionedBuilderSectionConfig,
+} from "./sectioned-builder";
+import { normalizeLandingTemplatePreset } from "./landing-builder";
+
+export const ABOUT_SECTION_KEYS = ["hero", "welcome", "our_story", "our_expertise", "core_values"] as const;
 
 export type AboutSectionKey = (typeof ABOUT_SECTION_KEYS)[number];
 
-export interface AboutBuilderSectionConfig {
-  id: AboutSectionKey;
-  section_key: AboutSectionKey;
-  label: string;
-  variant: string;
-  enabled: boolean;
-  display_order: number;
-}
-
-export interface AboutBuilderContent {
-  schema_version: 1;
-  page_key: "about";
-  sections: AboutBuilderSectionConfig[];
-}
+export type AboutBuilderSectionConfig = SectionedBuilderSectionConfig<AboutSectionKey>;
+export type AboutBuilderContent = SectionedBuilderContent<"about", AboutSectionKey>;
 
 export const ABOUT_SECTION_LABELS: Record<AboutSectionKey, string> = {
   hero: "Hero Banner",
@@ -39,70 +32,61 @@ export const ABOUT_VARIANTS: Record<AboutSectionKey, string[]> = {
   core_values: ["default", "pillars", "icon-grid", "timeline", "accordion", "compact"],
 };
 
-export const DEFAULT_ABOUT_BUILDER_CONTENT: AboutBuilderContent = {
-  schema_version: 1,
-  page_key: "about",
-  sections: [
-    { id: "hero", section_key: "hero", label: ABOUT_SECTION_LABELS.hero, variant: "default", enabled: true, display_order: 0 },
-    { id: "welcome", section_key: "welcome", label: ABOUT_SECTION_LABELS.welcome, variant: "default", enabled: true, display_order: 1 },
-    { id: "our_story", section_key: "our_story", label: ABOUT_SECTION_LABELS.our_story, variant: "default", enabled: true, display_order: 2 },
-    { id: "our_expertise", section_key: "our_expertise", label: ABOUT_SECTION_LABELS.our_expertise, variant: "default", enabled: true, display_order: 3 },
-    { id: "core_values", section_key: "core_values", label: ABOUT_SECTION_LABELS.core_values, variant: "default", enabled: true, display_order: 4 },
-  ],
+const ABOUT_SECTION_DEFINITIONS = ABOUT_SECTION_KEYS.map((sectionKey) => ({
+  section_key: sectionKey,
+  label: ABOUT_SECTION_LABELS[sectionKey],
+  variant_values: ABOUT_VARIANTS[sectionKey],
+}))
+
+const ABOUT_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
+  string,
+  Partial<Record<AboutSectionKey, SectionedBuilderPresetSectionDefaults>>
+> = {
+  default: {
+    hero: { enabled: true, variant: "default" },
+    welcome: { enabled: true, variant: "default" },
+    our_story: { enabled: true, variant: "default" },
+    our_expertise: { enabled: true, variant: "default" },
+    core_values: { enabled: true, variant: "default" },
+  },
+  "rounded-modern": {
+    hero: { enabled: true, variant: "split" },
+    welcome: { enabled: true, variant: "spotlight" },
+    our_story: { enabled: true, variant: "journey" },
+    our_expertise: { enabled: true, variant: "grid" },
+    core_values: { enabled: true, variant: "compact" },
+  },
+  professional: {
+    hero: { enabled: true, variant: "split" },
+    welcome: { enabled: true, variant: "highlight" },
+    our_story: { enabled: true, variant: "narrative" },
+    our_expertise: { enabled: true, variant: "showcase" },
+    core_values: { enabled: true, variant: "pillars" },
+  },
+  "editorial-sharp": {
+    hero: { enabled: true, variant: "minimal" },
+    welcome: { enabled: true, variant: "quote" },
+    our_story: { enabled: true, variant: "timeline" },
+    our_expertise: { enabled: true, variant: "checklist" },
+    core_values: { enabled: true, variant: "accordion" },
+  },
 };
 
-const isAboutSectionKey = (value: unknown): value is AboutSectionKey =>
-  typeof value === "string" && ABOUT_SECTION_KEYS.includes(value as AboutSectionKey);
+export const DEFAULT_ABOUT_BUILDER_CONTENT = createSectionedBuilderContent("about", ABOUT_SECTION_DEFINITIONS);
+
+export function createAboutBuilderContentFromPreset(preset: string): AboutBuilderContent {
+  const normalizedPreset = normalizeLandingTemplatePreset(preset);
+  return createSectionedBuilderContentFromPreset(
+    "about",
+    ABOUT_SECTION_DEFINITIONS,
+    ABOUT_TEMPLATE_PRESET_SECTION_DEFAULTS[normalizedPreset] ?? ABOUT_TEMPLATE_PRESET_SECTION_DEFAULTS.default
+  );
+}
+
+export function replaceAboutBuilderSectionOrder(sections: AboutBuilderSectionConfig[]): AboutBuilderSectionConfig[] {
+  return replaceSectionedBuilderSectionOrder(sections);
+}
 
 export function normalizeAboutBuilderContent(value: unknown): AboutBuilderContent {
-  if (!value || typeof value !== "object") {
-    return DEFAULT_ABOUT_BUILDER_CONTENT;
-  }
-
-  const candidate = value as Partial<AboutBuilderContent>;
-  const sectionMap = new Map<AboutSectionKey, AboutBuilderSectionConfig>();
-
-  if (Array.isArray(candidate.sections)) {
-    for (const section of candidate.sections) {
-      if (!section || typeof section !== "object") continue;
-      const sectionKey = (section as Partial<AboutBuilderSectionConfig>).section_key;
-      if (!isAboutSectionKey(sectionKey)) continue;
-      const variants = ABOUT_VARIANTS[sectionKey];
-      const variant =
-        typeof (section as Partial<AboutBuilderSectionConfig>).variant === "string" &&
-        variants.includes((section as Partial<AboutBuilderSectionConfig>).variant!)
-          ? (section as Partial<AboutBuilderSectionConfig>).variant!
-          : "default";
-      sectionMap.set(sectionKey, {
-        id: sectionKey,
-        section_key: sectionKey,
-        label: ABOUT_SECTION_LABELS[sectionKey],
-        variant,
-        enabled:
-          typeof (section as Partial<AboutBuilderSectionConfig>).enabled === "boolean"
-            ? (section as Partial<AboutBuilderSectionConfig>).enabled!
-            : true,
-        display_order:
-          typeof (section as Partial<AboutBuilderSectionConfig>).display_order === "number"
-            ? (section as Partial<AboutBuilderSectionConfig>).display_order!
-            : DEFAULT_ABOUT_BUILDER_CONTENT.sections.find((s) => s.section_key === sectionKey)?.display_order ?? 0,
-      });
-    }
-  }
-
-  const normalizedSections = ABOUT_SECTION_KEYS.map((sectionKey, index) => {
-    const existing = sectionMap.get(sectionKey);
-    return {
-      ...(existing || DEFAULT_ABOUT_BUILDER_CONTENT.sections[index]),
-      display_order: existing?.display_order ?? DEFAULT_ABOUT_BUILDER_CONTENT.sections[index].display_order,
-    };
-  });
-
-  return {
-    schema_version: 1,
-    page_key: "about",
-    sections: normalizedSections
-      .sort((a, b) => a.display_order - b.display_order)
-      .map((section, index) => ({ ...section, display_order: index })),
-  };
+  return normalizeSectionedBuilderContent(value, "about", ABOUT_SECTION_DEFINITIONS);
 }
