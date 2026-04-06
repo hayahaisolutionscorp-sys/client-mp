@@ -53,7 +53,7 @@ const nextConfig: NextConfig = {
   // Add this for now para ma build ang project remove when good to go
   eslint: {
     ignoreDuringBuilds: true
-  }
+  },
 };
 
 export default withPWA(nextConfig);

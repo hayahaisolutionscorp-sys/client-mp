@@ -17,6 +17,8 @@ import RoutesCarousel from "./templates/routes/RoutesCarousel";
 import RoutesModernGrid from "./templates/routes/RoutesModernGrid";
 import RoutesMinimalList from "./templates/routes/RoutesMinimalList";
 import BookingOverlay from "./templates/booking/BookingOverlay";
+import BookingBanner from "./templates/booking/BookingBanner";
+import BookingCard from "./templates/booking/BookingCard";
 import BookingPremiumDark from "./templates/booking/BookingPremiumDark";
 import BookingProfessional from "./templates/booking/BookingProfessional";
 import PromotionsGrid from "./templates/promotions/PromotionsGrid";
@@ -223,6 +225,26 @@ export default function LandingPageBuilder({
               />
             );
           case "booking":
+            if (section.variant === "banner") {
+              return (
+                <BookingBanner
+                  key={section.id}
+                  theme={theme}
+                  ports={landingData?.ports ?? []}
+                  routes={landingData?.bookingRoutes ?? []}
+                />
+              );
+            }
+            if (section.variant === "card") {
+              return (
+                <BookingCard
+                  key={section.id}
+                  theme={theme}
+                  ports={landingData?.ports ?? []}
+                  routes={landingData?.bookingRoutes ?? []}
+                />
+              );
+            }
             if (section.variant === "overlay") {
               return (
                 <BookingOverlay

@@ -7,3 +7,4 @@ export * from './landing-builder.service';
 export * from './landing-page.service';
 export * from './press.service';
 export * from './privacy-policy.service';
+export * from './schedule.service';
