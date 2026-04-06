@@ -52,6 +52,10 @@ const CONTACT_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
     hero: { enabled: true, variant: "gradient" },
     contact_form: { enabled: true, variant: "premium" },
   },
+  "maritime-elite": {
+    hero: { enabled: true, variant: "split" },
+    contact_form: { enabled: true, variant: "premium" },
+  },
 };
 
 export const DEFAULT_CONTACT_BUILDER_CONTENT = createSectionedBuilderContent("contact", CONTACT_SECTION_DEFINITIONS);

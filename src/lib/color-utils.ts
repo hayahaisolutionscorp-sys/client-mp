@@ -74,7 +74,16 @@ export function parseColorToRgb(value: string | null | undefined): RGB | null {
         return null;
     }
 
-    const input = value.trim();
+    let input = value.trim();
+
+    // If it's a gradient, try to extract the first hex color for luminance calculation
+    if (input.includes("gradient")) {
+        const hexMatch = input.match(/#[a-fA-F0-9]{3,8}/);
+        if (hexMatch) {
+            input = hexMatch[0];
+        }
+    }
+
     const normalizedHex = normalizeHex(input);
     if (normalizedHex) {
         return {

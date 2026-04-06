@@ -5,7 +5,7 @@ export default function PromotionsGrid({ promos, theme }: PromotionsTemplateProp
   if (items.length === 0) return null;
 
   return (
-    <section id="Promos" className="px-4 sm:px-6 lg:px-10 py-16" style={{ backgroundColor: theme.surface }}>
+    <section id="Promos" className="px-4 sm:px-6 lg:px-10 py-16" style={{ background: theme.surface }}>
       <div className="container mx-auto max-w-7xl">
         <div className="mb-10 text-center md:text-left">
           <p className="text-sm font-semibold uppercase tracking-[0.22em]" style={{ color: theme.muted }}>

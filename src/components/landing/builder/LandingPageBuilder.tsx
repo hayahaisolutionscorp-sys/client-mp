@@ -122,7 +122,7 @@ export default function LandingPageBuilder({
       className={templatePreset ? `${templatePreset.tokens.surfaceClass} ${cornerRadiusClass}` : cornerRadiusClass}
       style={{ 
         fontFamily: templatePreset?.tokens.fontFamily || theme.fontFamily,
-        backgroundColor: theme.surface,
+        background: theme.surface,
         '--font-title': templatePreset?.tokens.fontFamilyTitle || theme.fontFamilyTitle,
         '--font-body': templatePreset?.tokens.fontFamily || theme.fontFamily
       } as any}

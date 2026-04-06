@@ -52,6 +52,10 @@ const PRESS_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
     hero: { enabled: true, variant: "minimal" },
     press_list: { enabled: true, variant: "compact" },
   },
+  "maritime-elite": {
+    hero: { enabled: true, variant: "centered" },
+    press_list: { enabled: true, variant: "cards" },
+  },
 };
 
 export const DEFAULT_PRESS_BUILDER_CONTENT = createSectionedBuilderContent("press", PRESS_SECTION_DEFINITIONS);

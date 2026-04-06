@@ -138,6 +138,13 @@ const LOGIN_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<string, LoginPresetDefaults
     sidebar: { enabled: true, variant: "testimonial" },
     footer: { enabled: true, variant: "minimal" },
   },
+  "maritime-elite": {
+    page_variant: "brand-immersive",
+    hero: { enabled: true, variant: "split" },
+    form: { enabled: true, variant: "elevated" },
+    sidebar: { enabled: true, variant: "gradient" },
+    footer: { enabled: true, variant: "minimal" },
+  },
 };
 
 function normalizeLoginPageVariant(value: unknown): LoginPageVariant {

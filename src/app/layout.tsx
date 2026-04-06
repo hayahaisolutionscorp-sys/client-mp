@@ -94,7 +94,7 @@ export default async function RootLayout({
               --font-title: "${themeSettings.fontTitle || themeSettings.fontStyle}", sans-serif;
             }
             body, html {
-              background-color: var(--surface);
+              background: var(--surface);
               color: var(--text-on-surface);
             }
             body, html, * {

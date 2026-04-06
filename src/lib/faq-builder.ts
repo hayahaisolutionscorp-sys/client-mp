@@ -52,6 +52,10 @@ const FAQ_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
     hero: { enabled: true, variant: "minimal" },
     faq_list: { enabled: true, variant: "minimal" },
   },
+  "maritime-elite": {
+    hero: { enabled: true, variant: "gradient" },
+    faq_list: { enabled: true, variant: "accordion" },
+  },
 };
 
 export const DEFAULT_FAQ_BUILDER_CONTENT = createSectionedBuilderContent("faq", FAQ_SECTION_DEFINITIONS);

@@ -70,6 +70,13 @@ const ABOUT_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
     our_expertise: { enabled: true, variant: "checklist" },
     core_values: { enabled: true, variant: "accordion" },
   },
+  "maritime-elite": {
+    hero: { enabled: true, variant: "cards" },
+    welcome: { enabled: true, variant: "spotlight" },
+    our_story: { enabled: true, variant: "journey" },
+    our_expertise: { enabled: true, variant: "showcase" },
+    core_values: { enabled: true, variant: "pillars" },
+  },
 };
 
 export const DEFAULT_ABOUT_BUILDER_CONTENT = createSectionedBuilderContent("about", ABOUT_SECTION_DEFINITIONS);

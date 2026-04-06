@@ -9,7 +9,7 @@ export default function RoutesModernGrid({ routes, theme }: RoutesTemplateProps)
   if (routes.length === 0) return null;
 
   return (
-    <section id="Routes" className="px-4 sm:px-6 lg:px-10 py-20" style={{ backgroundColor: theme.surface }}>
+    <section id="Routes" className="px-4 sm:px-6 lg:px-10 py-20" style={{ background: theme.surface }}>
       <div className="container mx-auto max-w-7xl">
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="max-w-2xl">

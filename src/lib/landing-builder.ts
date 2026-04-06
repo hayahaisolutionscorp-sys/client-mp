@@ -113,6 +113,18 @@ export const LANDING_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
     footer: { enabled: true, variant: "default" },
     floating_cta: { enabled: true, variant: "modern-dark" },
   },
+  "maritime-elite": {
+    header: { enabled: true, variant: "floating" },
+    hero: { enabled: true, variant: "cards" },
+    booking: { enabled: true, variant: "overlay" },
+    promotions: { enabled: true, variant: "grid" },
+    routes: { enabled: true, variant: "cards" },
+    why_choose: { enabled: true, variant: "grid" },
+    get_to_know: { enabled: true, variant: "modern" },
+    partners: { enabled: true, variant: "marquee" },
+    footer: { enabled: true, variant: "premium" },
+    floating_cta: { enabled: true, variant: "minimal-light" },
+  },
 }
 
 export const LANDING_TEMPLATE_PRESETS: LandingTemplatePresetOption[] = [
@@ -157,6 +169,17 @@ export const LANDING_TEMPLATE_PRESETS: LandingTemplatePresetOption[] = [
       fontFamily: "Lato",
       fontFamilyTitle: "Merriweather",
       radiusClass: "rounded-md",
+      surfaceClass: "bg-white",
+    },
+  },
+  {
+    key: "maritime-elite",
+    label: "Maritime Elite",
+    description: "Sleek, modern design with glassmorphism and smooth maritime-inspired transitions.",
+    tokens: {
+      fontFamily: "Plus Jakarta Sans",
+      fontFamilyTitle: "Urbanist",
+      radiusClass: "rounded-2xl",
       surfaceClass: "bg-white",
     },
   },

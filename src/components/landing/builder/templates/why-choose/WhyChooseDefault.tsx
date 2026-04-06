@@ -5,7 +5,7 @@ export default function WhyChooseDefault({ section, reasons, theme }: WhyChooseT
   if (items.length === 0) return null;
 
   return (
-    <section id="WhyChooseUs" className="px-6 py-16" style={{ backgroundColor: theme.surface }}>
+    <section id="WhyChooseUs" className="px-6 py-16" style={{ background: theme.surface }}>
       <div className="container mx-auto max-w-7xl">
         <div className="max-w-3xl">
           <h2 className="text-3xl font-bold" style={{ color: theme.text }}>
@@ -23,7 +23,7 @@ export default function WhyChooseDefault({ section, reasons, theme }: WhyChooseT
               className="rounded-[26px] border p-6"
               style={{
                 borderColor: `color-mix(in srgb, ${theme.primary} 14%, #e2e8f0)`,
-                backgroundColor: theme.surfaceAlt,
+                background: theme.surfaceAlt,
               }}
             >
               <div
