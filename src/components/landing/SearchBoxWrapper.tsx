@@ -224,7 +224,7 @@ function SearchBoxFormContent({
     const [returnDate, setReturnDate] = useStateForm<Date | undefined>(new Date());
     const [selectedOriginPort, setSelectedOriginPort] = useStateForm<IPort | undefined>();
     const [selectedDestinationPort, setSelectedDestinationPort] = useStateForm<IPort | undefined>();
-    const [destinationPorts, setDestinationPorts] = useStateForm<IPort[] | undefined>([]);
+    const [destinationPorts, setDestinationPorts] = useStateForm<IPort[] | undefined>(undefined);
     const [ports, setPorts] = useStateForm<IPort[] | undefined>([]);
     const [isFormValid, setIsFormValid] = useStateForm<boolean>(false);
     const [error, setError] = useStateForm<string | null>(null);
@@ -248,7 +248,7 @@ function SearchBoxFormContent({
             if (selectedOriginPort) {
                 try {
                     // Clear destinations while fetching
-                    setDestinationPorts([]);
+                    setDestinationPorts(undefined);
 
                     const destPorts = await getDestinationPortsByOrigin(selectedOriginPort.code);
 
@@ -258,21 +258,17 @@ function SearchBoxFormContent({
                     const availableDestPorts = ports?.filter(port => validDestCodes.has(port.code)) ?? [];
 
                     setDestinationPorts(availableDestPorts.sort((a, b) => a.name.localeCompare(b.name)));
-
-                    // Clear destination if it's no longer valid
-                    if (selectedDestinationPort && !validDestCodes.has(selectedDestinationPort.code)) {
-                        setSelectedDestinationPort(undefined);
-                    }
                 } catch (error) {
                     console.error("Failed to fetch destination ports:", error);
+                    setDestinationPorts([]);
                 }
             } else {
-                setDestinationPorts([]);
+                setDestinationPorts(undefined);
             }
         };
 
         fetchDestinationPorts();
-    }, [selectedOriginPort, ports, selectedDestinationPort]);
+    }, [selectedOriginPort, ports]);
 
     useEffect(() => {
         const isValid =
@@ -378,7 +374,7 @@ function SearchBoxFormContent({
                     onPortSelect={setSelectedDestinationPort}
                     ports={destinationPorts}
                     selectedPort={selectedDestinationPort}
-                    disabled={destinationPorts?.length === 0}
+                    disabled={!selectedOriginPort}
                 />
                 <div className="hidden lg:flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4 items-center justify-center h-auto md:h-[55px]">
                     <DatePickerFieldset
