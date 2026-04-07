@@ -21,11 +21,13 @@ const BirthDatePicker = ({
   setDate,
   validationErrors,
   allowMinors = false,
+  disabled = false,
 }: {
   date: Date | undefined;
   setDate: Dispatch<SetStateAction<Date | undefined>>;
   validationErrors: Record<string, string>;
   allowMinors?: boolean;
+  disabled?: boolean;
 }) => {
   const themeSettings = useThemeSettings();
   const primaryRgb = hexToRgb(themeSettings?.primary || "#8C1F21");
@@ -75,15 +77,17 @@ const BirthDatePicker = ({
   };
 
   return (
-    <Popover onOpenChange={(open) => { if (open) setShowMonthGrid(false); }}>
+    <Popover onOpenChange={(open) => { if (open && !disabled) setShowMonthGrid(false); }}>
       <PopoverTrigger asChild>
         <button
           type="button"
           aria-label="Select birthday"
+          disabled={disabled}
           className={cn(
             "flex px-3 py-2 rounded-md border border-input bg-background items-center justify-between w-full h-10 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)]",
             (!date || !isValid(date)) ? "text-muted-foreground" : "text-customText",
-            validationErrors.birthday ? "border-red-500" : ""
+            validationErrors.birthday ? "border-red-500" : "",
+            disabled && "opacity-50 cursor-not-allowed bg-slate-50"
           )}
           style={{ "--primary-color": primaryRgb } as React.CSSProperties}
         >

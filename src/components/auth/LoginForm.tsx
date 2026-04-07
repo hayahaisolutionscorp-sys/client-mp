@@ -18,7 +18,7 @@ export function LoginForm() {
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
 
-  const { clearSession, signInWithGoogle, signInWithFacebook } = useAuth();
+  const { clearSession, signInWithGoogle, signInWithFacebook, signInWithHayahai } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -67,7 +67,6 @@ export function LoginForm() {
       setLoading(false);
     }
   };
-
   const handleFacebookLogin = async () => {
     try {
       setLoading(true);
@@ -75,6 +74,22 @@ export function LoginForm() {
       router.push('/');
     } catch (error: any) {
       console.error('Facebook sign-in error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleHayahaiLogin = async () => {
+    try {
+      setLoading(true);
+      await signInWithHayahai();
+      router.push('/');
+    } catch (error: any) {
+      if (error?.message === 'Authentication cancelled') {
+        console.log('Hayahai sign-in cancelled');
+      } else {
+        console.error('Hayahai sign-in error:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -152,6 +167,17 @@ export function LoginForm() {
           <Image src="/assets/icons/facebook_logo.svg" alt="Facebook" width={20} height={20} className="mr-2" />
           Continue with Facebook
         </Button>
+        {process.env.NEXT_PUBLIC_IS_CLIENT === "true" && (
+          <Button
+            onClick={handleHayahaiLogin}
+            variant="outline"
+            disabled={loading}
+            className="w-full sm:col-span-2 border-[var(--theme-primary)] text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/10"
+          >
+            <Image src="/assets/icons/hayahai_logo.svg" alt="Ayahay" width={20} height={20} className="mr-2" />
+            Continue with Hayahai
+          </Button>
+        )}
       </div>
       <div className="text-center">
         <p className="text-sm text-muted-foreground">

@@ -266,6 +266,7 @@ export default function ProfilePage() {
                 onVerificationClick={() => setActiveTab("verification")}
                 fileInputRef={fileInputRef}
                 onImageChange={handleImageChange}
+                isHayahaiLinked={loggedInAccount?.providers?.some((p: any) => p.provider === 'hayahai')}
             />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">

@@ -26,7 +26,8 @@ interface PersonalDetailsFormProps {
 }
 
 export default function PersonalDetailsForm({ passenger, email, onUpdate }: PersonalDetailsFormProps) {
-    const { refreshProfile } = useAuth();
+    const { refreshProfile, loggedInAccount } = useAuth();
+    const isHayahaiLinked = loggedInAccount?.providers?.includes('hayahai');
     const [isSaving, setIsSaving] = useState(false);
     const ph = defaultCountries.find(c => parseCountry(c).iso2 === 'ph') || defaultCountries[0];
     const defaultCountry = parseCountry(ph);
@@ -225,6 +226,17 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                 </div>
             </CardHeader>
             <CardContent className="px-0">
+                {isHayahaiLinked && (
+                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold">Managed by Hayahai</span>
+                        </div>
+                        <p className="text-xs opacity-80">
+                            Some personal details are synchronized from your Hayahai account and cannot be edited here. 
+                            To update these, please visit the main Hayahai portal.
+                        </p>
+                    </div>
+                )}
                 {error && (
                     <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2">
                         <span className="text-sm font-medium">{error}</span>
@@ -237,6 +249,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             <Input
                                 value={formData.firstName || ''}
                                 onChange={(e) => handleInputChange('firstName', e.target.value)}
+                                disabled={isHayahaiLinked}
                                 required
                             />
                         </div>
@@ -246,6 +259,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                                 value={formData.middleName || ''}
                                 onChange={(e) => handleInputChange('middleName', e.target.value)}
                                 placeholder="Optional"
+                                disabled={isHayahaiLinked}
                             />
                         </div>
                         <div className="space-y-2">
@@ -253,6 +267,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             <Input
                                 value={formData.lastName || ''}
                                 onChange={(e) => handleInputChange('lastName', e.target.value)}
+                                disabled={isHayahaiLinked}
                                 required
                             />
                         </div>
@@ -262,6 +277,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                                 value={formData.suffixName || ''}
                                 onChange={(e) => handleInputChange('suffixName', e.target.value)}
                                 placeholder="Jr., Sr., etc. (Optional)"
+                                disabled={isHayahaiLinked}
                             />
                         </div>
                         
@@ -310,6 +326,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                             <Select
                                 value={formData.sex || ''}
                                 onValueChange={(value) => handleInputChange('sex', value)}
+                                disabled={isHayahaiLinked}
                                 required
                             >
                                 <SelectTrigger>
@@ -335,6 +352,7 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                                     }
                                 }}
                                 validationErrors={{}}
+                                disabled={isHayahaiLinked}
                             />
                         </div>
                         <div className="space-y-2">
