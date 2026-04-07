@@ -186,7 +186,15 @@ export default function ContactPageBuilder({
 
   return (
     <div className="mx-auto w-full max-w-[1400px] space-y-8 px-4 py-8 md:px-6 md:py-12">
-      {enabledSections.map((sectionConfig) => renderSection(sectionConfig))}
+      {enabledSections.map((sectionConfig) => {
+        const element = renderSection(sectionConfig);
+        if (!element) return null;
+        return (
+          <div key={sectionConfig.section_key} id={`section-${sectionConfig.section_key}`}>
+            {element}
+          </div>
+        );
+      })}
     </div>
   );
 }

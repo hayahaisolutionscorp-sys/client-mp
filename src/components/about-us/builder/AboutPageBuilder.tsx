@@ -98,6 +98,7 @@ export default function AboutPageBuilder({
         ) : null}
 
         {orderedSections.map((section) => {
+          const sectionElement = (() => {
           switch (section.section_key as AboutSectionKey) {
             case 'hero':
               if (section.variant === 'split') {
@@ -465,6 +466,14 @@ export default function AboutPageBuilder({
             default:
               return null;
           }
+          })();
+
+          if (!sectionElement) return null;
+          return (
+            <div key={section.id} id={`section-${section.section_key}`}>
+              {sectionElement}
+            </div>
+          );
         })}
 
         <CTASection

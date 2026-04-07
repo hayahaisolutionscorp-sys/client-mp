@@ -136,6 +136,7 @@ export default function LandingPageBuilder({
       ` }} />
 
       {layout.contentSections.map((section) => {
+        const sectionElement = (() => {
         switch (section.section_key) {
           case "header":
             // The real default homepage navbar is rendered inside Hero.
@@ -349,11 +350,19 @@ export default function LandingPageBuilder({
           default:
             return null;
         }
+        })();
+
+        if (!sectionElement) return null;
+        return (
+          <div key={section.id} id={`section-${section.section_key}`}>
+            {sectionElement}
+          </div>
+        );
       })}
     </div>
 
     {/* Footer Area: Footer variants include their own SubscribeBanner internally */}
-    <div id="Resources" className="w-full">
+    <div id="section-footer" className="w-full">
     {layout.footerSection ? (
         <>
           {layout.footerSection.variant === "centered" && <FooterCentered key={layout.footerSection.id} theme={theme} />}
