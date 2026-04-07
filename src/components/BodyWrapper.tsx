@@ -18,19 +18,7 @@ export default function BodyWrapper({ children }: { children: React.ReactNode })
   const fontStyle = themeSettings?.fontStyle?.trim();
 
   return (
-    <div
-      className={
-        fontStyle === "roboto" ? roboto.className :
-          fontStyle === "leagueSpartan" ? leagueSpartan.className :
-            fontStyle === "mountainsOfChristmas" ? mountainsOfChristmas.className :
-              fontStyle === "greatVibes" ? greatVibes.className :
-                fontStyle === "hennyPenny" ? hennyPenny.className :
-                  fontStyle === "rubikGemstones" ? rubikGemstones.className :
-                    fontStyle === "jost" ? jost.className :
-                      inter.className // Default to Inter
-      }
-    >
-
+    <div style={{ fontFamily: 'var(--font-body), sans-serif' }}>
       {children}
     </div>
   );

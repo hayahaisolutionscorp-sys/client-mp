@@ -1,7 +1,7 @@
-import FAQ from '@/components/faq/FAQ';
-import FAQHeroSection from '@/components/faq/FAQHeroSection';
+import FAQPageBuilder from '@/components/faq/builder/FAQPageBuilder';
 import { getPageMetadata } from '@/services/content/seo.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
+import { getFaqPage, getFaqs } from '@/services/content/faq.service';
 import { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -27,21 +27,20 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function FAQPage() {
+  const [theme, faqPage, faqs] = await Promise.all([
+    getThemeSettings(),
+    getFaqPage(),
+    getFaqs(),
+  ]);
 
-  const theme = await getThemeSettings();
-  const backgroundColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
+  const categories = Array.from(new Set(faqs.map((item) => item.category)));
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#EEF8FC]">
-      <main className="flex-grow pt-25 md:pt-10">
-        <FAQHeroSection backgroundColor={backgroundColor} />
-
-        <div className="container mx-auto px-4 py-4 md:py-6 max-w-4xl">
-          <FAQ
-            themeColor={backgroundColor}
-          />
-        </div>
-      </main>
-    </div>
+    <FAQPageBuilder
+      faqPageContent={faqPage.content}
+      faqs={faqs}
+      categories={categories}
+      themeSettings={theme ?? null}
+    />
   );
 }

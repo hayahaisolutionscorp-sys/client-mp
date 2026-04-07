@@ -14,6 +14,7 @@ export interface IContactInformation {
   type: string;
   value: string;
   label: string;
+  display_order?: number | null;
   is_active: boolean;
   created_at: string;
   updated_at: string | null;

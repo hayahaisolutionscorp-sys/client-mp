@@ -47,7 +47,7 @@ const PassengerDropdown = ({ value = DEFAULT_NUM_PASSENGERS, onChange }: Passeng
   }, []);
 
   return (
-    <div ref={dropdownRef} className="relative inline-block w-full h-[40px] text-left">
+    <div ref={dropdownRef} className="relative z-10 inline-block w-full h-[40px] overflow-visible text-left focus-within:z-[120]">
       {/* Button to toggle dropdown */}
       <button
         onClick={toggleDropdown}
@@ -74,7 +74,7 @@ const PassengerDropdown = ({ value = DEFAULT_NUM_PASSENGERS, onChange }: Passeng
 
       {/* Dropdown content */}
       {isOpen && (
-        <div className="absolute z-10 mt-2 p-4 w-full bg-white border rounded-md shadow-sm">
+        <div className="absolute left-0 top-full z-[140] mt-2 w-full rounded-md border bg-white p-4 shadow-sm">
           <div className="flex flex-col space-y-4">
             {/* Passenger */}
             <div className="flex items-center justify-between">

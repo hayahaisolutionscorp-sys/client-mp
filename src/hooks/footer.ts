@@ -13,8 +13,6 @@ export const useFooter = () => {
     if (cached) {
       try {
         setFooter(JSON.parse(cached));
-        setIsHydrated(true);
-        return;
       } catch (e) {
         console.error("Failed to parse cached footer:", e);
       }

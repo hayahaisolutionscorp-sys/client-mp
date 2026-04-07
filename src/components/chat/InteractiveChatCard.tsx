@@ -999,7 +999,6 @@ export default function InteractiveChatCard({
                                         </button>
                                     </div>
                                 )}
-                                </div>{/* end bubble */}
                                 </div>{/* end row wrapper */}
                             </motion.div>
                         ))}

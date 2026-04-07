@@ -1,17 +1,54 @@
+'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { getWhyChooseSection } from '@/services/content/features.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
+import type { IWhyChooseReason, IWhyChooseSection } from '@/services/content/features.service';
+import type { IThemeSettings, IBrandingConfig } from '@/models';
 
-export default async function Features({ reasons }: { reasons: import('@/services/content/features.service').IWhyChooseReason[] }) {
-  const [section, themeSettings, brandingConfig] = await Promise.all([
-    getWhyChooseSection(),
-    getThemeSettings(),
-    getBrandingConfig()
-  ]);
+interface FeaturesProps {
+  reasons: IWhyChooseReason[];
+  sectionOverride?: IWhyChooseSection | null;
+  themeSettingsOverride?: IThemeSettings | null;
+  brandingConfigOverride?: IBrandingConfig | null;
+}
 
-  if (!section || !reasons) return null;
+export default function Features({
+  reasons,
+  sectionOverride,
+  themeSettingsOverride,
+  brandingConfigOverride,
+}: FeaturesProps) {
+  const [section, setSection] = useState<IWhyChooseSection | null>(sectionOverride ?? null);
+  const [themeSettings, setThemeSettings] = useState<IThemeSettings | null>(themeSettingsOverride ?? null);
+  const [brandingConfig, setBrandingConfig] = useState<IBrandingConfig | null>(brandingConfigOverride ?? null);
+  const [loading, setLoading] = useState(!(sectionOverride && themeSettingsOverride && brandingConfigOverride));
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [sectionRes, themeRes, brandingRes] = await Promise.all([
+          sectionOverride ? Promise.resolve({ data: sectionOverride }) : getWhyChooseSection(),
+          themeSettingsOverride ? Promise.resolve({ data: themeSettingsOverride }) : getThemeSettings(),
+          brandingConfigOverride ? Promise.resolve({ data: brandingConfigOverride }) : getBrandingConfig()
+        ]);
+        
+        setSection((sectionRes as any).data || sectionRes);
+        setThemeSettings((themeRes as any).data || themeRes);
+        setBrandingConfig((brandingRes as any).data || brandingRes);
+      } catch (error) {
+        console.error("Failed to load features data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [sectionOverride, themeSettingsOverride, brandingConfigOverride]);
+
+  if (loading || !section || !reasons) return null;
 
   const title = section.title.includes('Ayahay!') ? (
     <>
@@ -71,4 +108,3 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
     </div>
   );
 }
-

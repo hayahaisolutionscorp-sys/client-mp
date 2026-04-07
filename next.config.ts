@@ -25,6 +25,9 @@ const withPWA = require('next-pwa')({
 });
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'react-icons', '@radix-ui/react-icons'],
+  },
   // For development purposes only
   images: {
     unoptimized: true,
@@ -50,7 +53,7 @@ const nextConfig: NextConfig = {
   // Add this for now para ma build ang project remove when good to go
   eslint: {
     ignoreDuringBuilds: true
-  }
+  },
 };
 
 export default withPWA(nextConfig);

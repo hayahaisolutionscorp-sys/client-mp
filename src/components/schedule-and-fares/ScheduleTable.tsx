@@ -5,9 +5,10 @@ import { Skeleton } from "@/components/ui/Skeleton";
 interface ScheduleTableProps {
   schedule: ScheduleItemType[];
   loading: boolean;
+  tableVariant?: "default" | "striped";
 }
 
-const ScheduleTable = ({ schedule, loading }: ScheduleTableProps) => {
+const ScheduleTable = ({ schedule, loading, tableVariant = "default" }: ScheduleTableProps) => {
   if (loading) {
     return (
       <div className="mt-6 rounded-md border overflow-hidden mx-2">
@@ -45,7 +46,11 @@ const ScheduleTable = ({ schedule, loading }: ScheduleTableProps) => {
   return (
     <div className="mt-6 rounded-md border overflow-hidden mx-2">
       {/* Header - Desktop */}
-      <div className="hidden sm:grid grid-cols-4 bg-slate-100 p-4 text-base font-medium text-slate-600">
+      <div
+        className={`hidden sm:grid grid-cols-4 p-4 text-base font-medium ${
+          tableVariant === "striped" ? "bg-slate-200 text-slate-700" : "bg-slate-100 text-slate-600"
+        }`}
+      >
         <div>Date & Time</div>
         <div>Route</div>
         <div>Ship</div>
@@ -55,7 +60,7 @@ const ScheduleTable = ({ schedule, loading }: ScheduleTableProps) => {
       <div className="divide-y">
         {schedule.length > 0 ? (
           schedule.map((item, index) => (
-            <ScheduleItem key={index} item={item} />
+            <ScheduleItem key={index} item={item} rowIndex={index} striped={tableVariant === "striped"} />
           ))
         ) : (
           <div className="p-8 text-center">

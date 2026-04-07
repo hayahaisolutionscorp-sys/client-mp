@@ -106,7 +106,7 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
               }}
             >
               <div
-                className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
+                className="relative w-full pt-[65%] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
                 role="button"
                 tabIndex={0}
                 onClick={() => setModalImage(image)}
@@ -123,7 +123,7 @@ const Carousel = ({ images }: { images: Promise<IThumbnail[]> }) => {
                   alt={`${image.label}`}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33.33vw"
-                  className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105 cursor-pointer"
+                  className="absolute top-0 left-0 w-full h-full object-contain bg-slate-50 transition-transform duration-300 hover:scale-105 cursor-pointer"
                   priority={index === currentIndex}
                 />
               </div>

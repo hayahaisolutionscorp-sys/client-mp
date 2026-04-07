@@ -1,15 +1,26 @@
 import { useState, useEffect } from "react";
 import { getBrandingConfig } from "@/services/ui/branding.service";
 import { IBrandingConfig } from "@/models/branding.model";
+import { useTheme } from "@/components/ThemeProvider";
 
 const BRANDING_CACHE_KEY = "branding_config";
 const BRANDING_CACHE_TS_KEY = "branding_config_ts";
 
 export const useBranding = () => {
-  const [branding, setBranding] = useState<IBrandingConfig | null>(null);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const { branding: themeBranding } = useTheme();
+  const [branding, setBranding] = useState<IBrandingConfig | null>(themeBranding);
 
   useEffect(() => {
+    if (themeBranding) {
+      setBranding(themeBranding);
+    }
+  }, [themeBranding]);
+
+  useEffect(() => {
+    if (themeBranding) {
+      return;
+    }
+
     // Try to get cached branding first for fast initial paint
     const cached = localStorage.getItem(BRANDING_CACHE_KEY);
     if (cached) {
@@ -19,8 +30,6 @@ export const useBranding = () => {
         console.error("Failed to parse cached branding:", e);
       }
     }
-
-    setIsHydrated(true);
 
     // Always fetch fresh branding so whitelabel updates are reflected
     getBrandingConfig()
@@ -34,5 +43,5 @@ export const useBranding = () => {
       .catch((error) => console.error("Error fetching branding settings:", error));
   }, []);
 
-  return branding;
+  return branding || themeBranding;
 };

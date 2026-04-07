@@ -16,9 +16,16 @@ interface ScheduleAndFaresProps {
   destPortId?: number;
   themeColor?: string;
   accentColor?: string;
+  datePickerVariant?: "default" | "minimal";
+  tableVariant?: "default" | "striped";
 }
 
-const ScheduleAndFares = ({ srcPortId, destPortId }: ScheduleAndFaresProps) => {
+const ScheduleAndFares = ({
+  srcPortId,
+  destPortId,
+  datePickerVariant = "default",
+  tableVariant = "default",
+}: ScheduleAndFaresProps) => {
   const theme = useThemeSettings();
   const themeColor = theme?.primaryColor || '#0060df';
   const accentColor = theme?.accent || '#23abff';
@@ -27,6 +34,7 @@ const ScheduleAndFares = ({ srcPortId, destPortId }: ScheduleAndFaresProps) => {
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pickerMinimal = datePickerVariant === "minimal";
 
   useEffect(() => {
     const fetchAllShips = async () => {
@@ -97,7 +105,10 @@ const ScheduleAndFares = ({ srcPortId, destPortId }: ScheduleAndFaresProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="px-2" style={{ '--primary-color': themeColor } as React.CSSProperties}>
+      <div
+        className={pickerMinimal ? "px-2 py-2 rounded-md border border-slate-200 bg-slate-50/70" : "px-2"}
+        style={{ '--primary-color': themeColor } as React.CSSProperties}
+      >
         <DateSelection onDateChange={setSelectedDate} accentColor={accentColor} />
       </div>
 
@@ -107,7 +118,9 @@ const ScheduleAndFares = ({ srcPortId, destPortId }: ScheduleAndFaresProps) => {
         </div>
       )}
 
-      <ScheduleTable schedule={schedule} loading={loading} />
+      <div className={tableVariant === "striped" ? "rounded-lg border border-slate-200 overflow-hidden" : ""}>
+        <ScheduleTable schedule={schedule} loading={loading} tableVariant={tableVariant} />
+      </div>
     </div>
   );
 };

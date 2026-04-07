@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { BiSolidShip } from "react-icons/bi";
 import { IoMdPin } from "react-icons/io";
 import { IoMdClose } from "react-icons/io";
@@ -25,24 +25,15 @@ const PortDropdownFieldset = ({
   disabled = false,
 }: DestinationPortDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [isDelayedEnabled, setIsDelayedEnabled] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredPorts, setFilteredPorts] = useState<IPort[]>([]);
+  const [filteredPorts, setFilteredPorts] = useState<IPort[]>(() =>
+    ports ? [...ports].filter((p) => p.name.trim() !== "").sort((a, b) => a.name.localeCompare(b.name)) : []
+  );
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const themeSettings = useThemeSettings();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsDelayedEnabled(true);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    setIsHydrated(true);
-
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
@@ -53,18 +44,17 @@ const PortDropdownFieldset = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const sortedPorts = useMemo(
+    () => (ports ? [...ports].filter((p) => p.name.trim() !== "").sort((a, b) => a.name.localeCompare(b.name)) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ports?.length]
+  );
   useEffect(() => {
-    if (ports) {
-      setFilteredPorts(
-        ports
-          .filter((port) => port.name.trim() !== "")
-          .sort((a, b) => a.name.localeCompare(b.name))
-      );
-    }
-  }, [ports]);
+    setFilteredPorts(sortedPorts);
+  }, [sortedPorts]);
 
   const toggleDropdown = () => {
-    if (!disabled && isDelayedEnabled) {
+    if (!disabled) {
       setIsOpen((prev) => !prev);
       clearSearch();
       if (!isOpen) {
@@ -74,7 +64,7 @@ const PortDropdownFieldset = ({
   };
 
   const handleSelection = (port: IPort) => {
-    if (!disabled && isDelayedEnabled) {
+    if (!disabled) {
       onPortSelect(port);
       setIsOpen(false);
     }
@@ -105,7 +95,7 @@ const PortDropdownFieldset = ({
 
   return (
     <fieldset
-      className="border rounded-md bg-white w-full h-[55px] focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2"
+      className="relative z-10 border rounded-md bg-white w-full h-[55px] overflow-visible focus-within:z-[140] focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2"
       style={
         {
           "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),
@@ -113,36 +103,26 @@ const PortDropdownFieldset = ({
       }
     >
       <legend className="font-natural text-xs text-customText">{legendText}</legend>
-      <div ref={dropdownRef} className="relative w-full h-full">
+      <div ref={dropdownRef} className="relative z-[140] w-full h-full overflow-visible">
         <button
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
-          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${disabled || !isDelayedEnabled ? "cursor-not-allowed opacity-60" : ""
+          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${disabled ? "cursor-not-allowed" : ""
             }`}
-          disabled={disabled || !isDelayedEnabled}
+          disabled={disabled}
         >
           <BiSolidShip
             className="w-5 h-5 mr-3"
             style={{ color: themeSettings?.accent || "#051036" }}
           />
           <span className="text-customText font-natural">
-            {!isHydrated
-              ? "Loading..."
-              : selectedPort
-                ? selectedPort.name
-                : disabled
-                  ? "Select origin first"
-                  : ports === undefined
-                    ? "Loading ports..."
-                    : ports.length === 0
-                      ? "No destinations available"
-                      : "Select Port"}
+            {selectedPort ? selectedPort.name : "Select Port"}
           </span>
         </button>
 
-        {isOpen && !disabled && isDelayedEnabled && (
-          <div className="absolute z-10 mt-2 w-full bg-white border rounded-md shadow-sm">
+        {isOpen && !disabled && (
+          <div className="absolute left-0 top-full z-[160] mt-2 w-full bg-white border rounded-md shadow-lg">
             <div className="p-2 relative">
               <input
                 ref={searchInputRef}

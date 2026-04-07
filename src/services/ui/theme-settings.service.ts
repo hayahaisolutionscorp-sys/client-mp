@@ -10,6 +10,8 @@ const DEFAULT_THEME: IThemeSettings = {
   accent: brandingData.colors.accent,
   primaryColor: brandingData.colors.primary,
   secondaryColor: brandingData.colors.secondary,
+  surface: (brandingData.colors as { surface?: string }).surface || '#FFFFFF',
+  surfaceAlt: (brandingData.colors as { surfaceAlt?: string }).surfaceAlt || '#EEF8FC',
   fontStyle: 'Inter'
 };
 
@@ -40,6 +42,8 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
         primary: response.data.colors.primary || response.data.colors.primaryColor || '',
         secondary: response.data.colors.secondary || response.data.colors.secondaryColor || '',
         accent: response.data.colors.accent,
+        surface: response.data.colors.surface || '#FFFFFF',
+        surfaceAlt: response.data.colors.surfaceAlt || '#EEF8FC',
         fontStyle: 'Inter'
       };
 

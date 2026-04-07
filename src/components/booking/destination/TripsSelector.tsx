@@ -9,7 +9,7 @@ import { FiLoader } from 'react-icons/fi';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import { cacheItem } from 'helpers/cache.helpers';
 import { Button } from '@/components/ui/Button';
-import { getAvailableTrips } from '@/services';
+import { getAvailableTrips } from '@/services/shipping-line/trip.service';
 import { SearchAvailableTrips } from '@/types/trip/trip-management';
 import { SelectedTrip } from '@/types/trip/selected-trip';
 import { PaginatedRequest } from '@/types/common/pagination';

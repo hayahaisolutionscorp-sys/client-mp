@@ -1,4 +1,5 @@
-import PrivacyPolicyContent from "@/components/privacy-policy/PrivacyPolicyContent";
+import dynamic from 'next/dynamic';
+const PrivacyPolicyContent = dynamic(() => import('@/components/privacy-policy/PrivacyPolicyContent'));
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
 

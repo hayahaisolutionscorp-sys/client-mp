@@ -1,53 +1,42 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { LuBell } from 'react-icons/lu';
 
-import { NAV_ITEMS } from 'constants/index';
-
-type NavItem = {
-  id: string;
-  name: string;
-  trigger: string;
-  redirect_url: string;
-};
 import UserDropdown from './UserDropdown';
 import { useBranding } from '@/hooks/branding';
 import { useHeaders } from '@/hooks/headers';
 import { useAuth } from '@/contexts/AuthContexts';
+import type { IBrandingConfig } from '@/models/branding.model';
+import type { HeaderNavigationConfig } from '@/lib/landing-nav';
+import { getFilteredLandingNavItems, scrollToLandingTarget } from '@/lib/landing-nav';
 
-const Navbar = () => {
+interface NavbarProps {
+  forceHomeStyle?: boolean;
+  initialBranding?: IBrandingConfig | null;
+  initialHeaderSection?: HeaderNavigationConfig | null;
+  showLandingNav?: boolean;
+}
+
+const Navbar = ({
+  forceHomeStyle = false,
+  initialBranding = null,
+  initialHeaderSection = null,
+  showLandingNav = false,
+}: NavbarProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const [activeNav, setActiveNav] = useState('Book');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
 
-  const branding = useBranding();
-  const headerSection = useHeaders();
+  const branding = useBranding() || initialBranding;
+  const headerSection = useHeaders(initialHeaderSection) || initialHeaderSection;
   const { currentUser, logout } = useAuth();
 
-
-  useEffect(() => {
-    const organizeHeaders = () => {
-      const itemsToRemove: string[] = [];
-
-      if (headerSection) {
-        if (!headerSection.showPromos) itemsToRemove.push('Promos');
-        if (!headerSection.showRoutes) itemsToRemove.push('Routes');
-        if (!headerSection.showResources) itemsToRemove.push('Resources');
-        if (!headerSection.showAboutUs) itemsToRemove.push('AboutUs');
-      }
-
-      const tempFilteredNavItems = NAV_ITEMS.filter((item) => !itemsToRemove.includes(item.id));
-      setFilteredNavItems(tempFilteredNavItems);
-    }
-
-    organizeHeaders();
-  }, [headerSection]);
+  const filteredNavItems = useMemo(() => getFilteredLandingNavItems(headerSection), [headerSection]);
 
   // Handle scroll lock when menu is open
   useEffect(() => {
@@ -62,31 +51,23 @@ const Navbar = () => {
   }, [isMenuOpen]);
 
   const scrollToElement = (id: string) => {
-    // Special case for Resources - scroll to bottom of the page
-    if (id === 'Resources') {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth'
-      });
-      setIsMenuOpen(false);
-      return;
-    }
-
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    setIsMenuOpen(false);
+    scrollToLandingTarget({
+      id,
+      pathname,
+      navigate: (href) => router.push(href),
+      onDone: () => setIsMenuOpen(false),
+    });
   };
 
   if (!branding) return null;
 
-  const isHome = pathname === '/';
+  const isHome = forceHomeStyle || pathname === '/';
+  const shouldRenderLandingNav = showLandingNav || isHome;
   const shouldBeTransparent = isHome && !isMenuOpen;
   const position = isHome ? 'absolute' : 'relative';
   const backgroundColor = shouldBeTransparent ? 'text-white bg-transparent' : 'text-black bg-white';
 
-  const logoSrc = isHome ? branding.logo.light : branding.logo.dark;
+  const logoSrc = isHome ? branding.logo?.light : branding.logo?.dark;
 
   return (
     <>
@@ -99,19 +80,23 @@ const Navbar = () => {
             {/* Logo */}
             <div className="flex-shrink-0 relative z-50">
               <Link href="/">
-                <Image
-                  alt="Company Logo"
-                  src={logoSrc}
-                  width={150}
-                  height={150}
-                  className="w-auto h-[40px] object-contain sm:h-[55px] transition-all duration-300"
-                />
+                {logoSrc ? (
+                  <Image
+                    alt="Company Logo"
+                    src={logoSrc}
+                    width={150}
+                    height={150}
+                    className="w-auto h-[40px] object-contain sm:h-[55px] transition-all duration-300"
+                  />
+                ) : (
+                  <span className="text-xl font-semibold">{branding.brand_name}</span>
+                )}
               </Link>
             </div>
 
-            {/* Desktop Navigation Links */}
+              {/* Desktop Navigation Links */}
             <div className={`hidden lg:flex flex-1 items-center justify-center space-x-6 lg:space-x-8 ${shouldBeTransparent ? 'text-white' : 'text-black'}`}>
-              {isHome &&
+              {shouldRenderLandingNav &&
                 filteredNavItems.map((item) =>
                   item.trigger.toLowerCase() === 'scroll' ? (
                     <button
@@ -156,7 +141,7 @@ const Navbar = () => {
             </div>
 
             {/* Mobile menu button */}
-            {isHome && (
+            {shouldRenderLandingNav && (
               <div className="lg:hidden relative z-50">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -184,7 +169,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile menu overlay */}
-        {isHome && (
+        {shouldRenderLandingNav && (
           <div
             className={`fixed inset-0 bg-white transition-opacity duration-300 lg:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
               }`}
@@ -275,7 +260,7 @@ const Navbar = () => {
       </nav>
 
       {/* Mobile backdrop */}
-      {isHome && (
+      {shouldRenderLandingNav && (
         <div
           className={`fixed inset-0 bg-black transition-opacity duration-300 lg:hidden ${isMenuOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
             }`}

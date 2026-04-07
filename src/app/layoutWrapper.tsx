@@ -1,34 +1,76 @@
 'use client';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
-import SubscribeBanner from '@/components/landing/SubscribeBanner';
-import ChatWidget from '@/components/chat/ChatWidget';
 import Footer from '@/components/Footer';
-import { SessionExpiredModal } from '@/components/auth/SessionExpiredModal';
+import BuilderLandingHeader from '@/components/landing/builder/BuilderLandingHeader';
+import FooterCentered from '@/components/landing/builder/templates/footer/FooterCentered';
+import FooterPremium from '@/components/landing/builder/templates/footer/FooterPremium';
+import { useLandingBuilder } from '@/hooks/landing-builder';
+import { useBranding } from '@/hooks/branding';
+import { createBuilderTheme } from '@/components/landing/builder/theme';
+import type { LandingBuilderContent } from '@/lib/landing-builder';
+import type { HeaderNavigationConfig } from '@/lib/landing-nav';
+
+const ChatWidget = dynamic(() => import('@/components/chat/ChatWidget'), { ssr: false });
+const SessionExpiredModal = dynamic(
+  () => import('@/components/auth/SessionExpiredModal').then(m => ({ default: m.SessionExpiredModal })),
+  { ssr: false }
+);
 
 export default function LayoutWrapper({
-  children
+  children,
+  initialLandingBuilderConfig,
+  initialHeaderSection,
 }: Readonly<{
   children: React.ReactNode;
+  initialLandingBuilderConfig: LandingBuilderContent | null;
+  initialHeaderSection: HeaderNavigationConfig | null;
 }>) {
   const pathname = usePathname();
-  const hideLayout = pathname === '/login' || pathname === '/register' || pathname.startsWith('/reset-password') || pathname.startsWith('/login/') || pathname.startsWith('/register/');
+  const [mounted, setMounted] = useState(false);
+  const landingBuilder = useLandingBuilder(initialLandingBuilderConfig);
+  const branding = useBranding();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isPreviewRoute = pathname.startsWith('/preview');
+  const hideLayout = isPreviewRoute || pathname === '/login' || pathname === '/register' || pathname.startsWith('/reset-password') || pathname.startsWith('/login/') || pathname.startsWith('/register/');
   const isProfilePage = pathname === '/profile';
+  const shouldRenderChrome = !hideLayout && pathname !== '/';
+  const headerVariant =
+    landingBuilder?.sections.find((section) => section.section_key === 'header')?.variant || 'default';
+  const footerVariant =
+    landingBuilder?.sections.find((section) => section.section_key === 'footer')?.variant || 'default';
+  const theme = createBuilderTheme((branding ?? {}) as any);
+  const mainOffsetClass = shouldRenderChrome && headerVariant === 'floating' ? 'pt-[120px]' : '';
 
   return (
     <>
-      {!hideLayout && pathname !== '/' && <Navbar />}
-      <main className="">{children}</main>
-      {!hideLayout && !isProfilePage && (
-        <div id="Resources" className="w-full lg:pt-56">
-          <div className="flex items-center justify-center w-full">
-            <SubscribeBanner />
-          </div>
-          <Footer />
-        </div>
-      )}
-      <SessionExpiredModal />
-      <ChatWidget tenantId={parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10)} />
+      {shouldRenderChrome && (headerVariant === 'centered' || headerVariant === 'floating') ? (
+        <BuilderLandingHeader
+          variant={headerVariant}
+          theme={theme}
+          headerSectionOverride={initialHeaderSection}
+        />
+      ) : null}
+      {shouldRenderChrome && !(headerVariant === 'centered' || headerVariant === 'floating') ? (
+        <Navbar showLandingNav initialHeaderSection={initialHeaderSection} />
+      ) : null}
+      <main className={mainOffsetClass}>{children}</main>
+      {shouldRenderChrome && !isProfilePage && footerVariant === 'centered' ? <FooterCentered theme={theme} /> : null}
+      {shouldRenderChrome && !isProfilePage && footerVariant === 'premium' ? <FooterPremium theme={theme} /> : null}
+      {shouldRenderChrome && !isProfilePage && footerVariant === 'default-no-banner' ? (
+        <Footer showSubscribeBanner={false} />
+      ) : null}
+      {shouldRenderChrome && !isProfilePage && !['centered', 'premium', 'default-no-banner'].includes(footerVariant) ? (
+        <Footer />
+      ) : null}
+      {mounted && <SessionExpiredModal />}
+      {mounted && !isPreviewRoute && <ChatWidget tenantId={parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10)} />}
     </>
   );
 }

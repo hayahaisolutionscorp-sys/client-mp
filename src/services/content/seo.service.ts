@@ -1,5 +1,5 @@
 import { SEO_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { IS_BUILD_TIME } from '../config';
 
 import seoData from '@/data/seo.json';
 
@@ -72,7 +72,7 @@ export async function getPageMetadata(pageKey: PageKey): Promise<SeoMetadata> {
     const resolvedKey = pageKeyMap[pageKey] || pageKey;
 
     try {
-        if (!IS_CLIENT) {
+        if (IS_BUILD_TIME) {
             const pageData = (seoData.pages as any)[resolvedKey];
             if (pageData) {
                 return buildMetadataFromConfig(pageData);

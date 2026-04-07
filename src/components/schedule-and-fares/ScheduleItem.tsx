@@ -10,14 +10,19 @@ export interface ScheduleItem {
 
 interface ScheduleItemProps {
   item: ScheduleItem;
+  rowIndex?: number;
+  striped?: boolean;
 }
 
 
-const ScheduleItem = ({ item }: ScheduleItemProps) => {
+const ScheduleItem = ({ item, rowIndex = 0, striped = false }: ScheduleItemProps) => {
   const themeSettings = useThemeSettings();
+  const stripedClass = striped && rowIndex % 2 === 1 ? "bg-slate-50/80" : "";
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-4 p-4 sm:p-6 items-start sm:items-center hover:bg-slate-50 transition-colors gap-4 sm:gap-3">
+    <div
+      className={`grid grid-cols-1 sm:grid-cols-4 p-4 sm:p-6 items-start sm:items-center hover:bg-slate-50 transition-colors gap-4 sm:gap-3 ${stripedClass}`}
+    >
       {/* Date & Time */}
       <div className="space-y-2">
         <div className="text-base sm:text-lg font-medium flex items-center justify-between sm:justify-start gap-2">

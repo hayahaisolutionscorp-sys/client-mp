@@ -1,17 +1,77 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Media from '@/components/landing/Media';
 import SearchBoxWrapper from '@/components/landing/SearchBoxWrapper';
-import { HERO_SECTION_IMAGES } from 'constants/storage';
-import { getHeroSections } from '@/services';
+import { getHeadersSections, getHeroSections, getPorts } from '@/services';
+import type { PreviewPageSection } from '@/lib/preview/landing-preview';
+import type { IPort } from '@/models';
+import type { IRoute } from '@/models/shipping-line/route.model';
+import type { HeaderNavigationConfig } from '@/lib/landing-nav';
 
-export default async function Hero() {
-  const heroSection = await getHeroSections();
+interface HeroProps {
+  heroSectionOverride?: PreviewPageSection | null;
+  forceHomeNavbar?: boolean;
+  showNavbar?: boolean;
+  showBookingSearch?: boolean;
+  headerSectionOverride?: HeaderNavigationConfig | null;
+  portsOverride?: IPort[] | null;
+  bookingRoutesOverride?: IRoute[] | null;
+  tripSearchEnabledOverride?: boolean;
+}
+
+export default function Hero({
+  heroSectionOverride,
+  forceHomeNavbar = false,
+  showNavbar = true,
+  showBookingSearch = true,
+  headerSectionOverride,
+  portsOverride,
+  bookingRoutesOverride,
+  tripSearchEnabledOverride = true,
+}: HeroProps = {}) {
+  const [heroSection, setHeroSection] = useState<PreviewPageSection | null>(heroSectionOverride ?? null);
+  const [headerSection, setHeaderSection] = useState<HeaderNavigationConfig | null>(
+    headerSectionOverride ?? null
+  );
+  const [ports, setPorts] = useState<IPort[]>(portsOverride ?? []);
+  const [loading, setLoading] = useState(!(heroSectionOverride && headerSectionOverride !== undefined && portsOverride !== undefined));
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [heroRes, headerRes, portsRes] = await Promise.all([
+          heroSectionOverride ? Promise.resolve(heroSectionOverride) : getHeroSections().then((res: any) => res?.data || res),
+          headerSectionOverride !== undefined
+            ? Promise.resolve(headerSectionOverride)
+            : getHeadersSections().catch(() => null).then((res: any) => res?.data || res),
+          portsOverride !== undefined
+            ? Promise.resolve(portsOverride ?? [])
+            : getPorts().catch(() => []).then((res: any) => res?.data || res),
+        ]);
+        
+        setHeroSection(heroRes as any);
+        setHeaderSection(headerRes as any);
+        setPorts(portsRes as any); 
+      } catch (error) {
+        console.error("Failed to load hero data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [heroSectionOverride, headerSectionOverride, portsOverride]);
+
+  if (loading) return <div className="h-[650px] bg-[#EEF8FC] animate-pulse rounded-[32px] m-4" />;
+
   let captionBackground;
 
   if (heroSection?.bg_type?.toLowerCase() == 'youtube') {
     captionBackground = (
       <Media
-        src={heroSection?.bg_url}
+        src={heroSection?.bg_url || ''}
         type="youtube"
         playing={true}
         loop={true}
@@ -41,10 +101,16 @@ export default async function Hero() {
       />
     );
   }
+
   return (
     <header id="Book" className="relative bg-[#EEF8FC]">
       <div className="relative w-auto h-[650px] mx-4 mt-4 rounded-[32px] overflow-hidden">
-        <Navbar />
+        {showNavbar ? (
+          <Navbar
+            forceHomeStyle={forceHomeNavbar}
+            initialHeaderSection={headerSection}
+          />
+        ) : null}
 
         {captionBackground ? (
           captionBackground
@@ -72,7 +138,13 @@ export default async function Hero() {
         </div>
       </div>
 
-      <SearchBoxWrapper />
+      {showBookingSearch ? (
+        <SearchBoxWrapper
+          initialPorts={ports}
+          initialRoutes={bookingRoutesOverride ?? []}
+          initialTripSearchEnabled={tripSearchEnabledOverride}
+        />
+      ) : null}
     </header>
   );
 }

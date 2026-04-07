@@ -24,7 +24,6 @@ export async function GET(request: NextRequest) {
     const config = data?.data?.config || data?.config || null;
     return NextResponse.json({ config });
   } catch (error) {
-    console.error('Failed to fetch agent config:', error);
     return NextResponse.json({ config: null }, { status: 200 });
   }
 }

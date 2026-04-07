@@ -5,4 +5,7 @@ export interface IThemeSettings {
   secondary: string;
   accent: string;
   fontStyle: string;
+  fontTitle?: string;
+  surface?: string;
+  surfaceAlt?: string;
 }
