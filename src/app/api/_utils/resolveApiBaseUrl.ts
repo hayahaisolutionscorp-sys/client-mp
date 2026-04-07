@@ -10,8 +10,16 @@ export const resolveApiBaseUrl = () => {
   return isClientMode ? clientApiBaseUrl : defaultApiUrl;
 };
 
-// Knowledge-base endpoints (chat, agent-config) always live on api-v2,
-// regardless of client mode.
+// Knowledge-base endpoints (chat, agent-config) route to the dedicated KB API
+// when NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL is explicitly set (e.g. local dev).
+// In production client-mode deployments without that override, fall back to
+// the client-api so the deployment remains self-contained.
 export const resolveKnowledgeBaseUrl = () => {
-  return trimTrailingSlash(process.env.NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL || 'http://localhost:3002');
+  if (process.env.NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL) {
+    return trimTrailingSlash(process.env.NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL);
+  }
+  if (isClientMode) {
+    return trimTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000');
+  }
+  return trimTrailingSlash('http://localhost:3002');
 };

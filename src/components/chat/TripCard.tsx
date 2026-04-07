@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Ship, Clock, Users, ArrowRight } from "lucide-react";
+import { Ship, Clock, Users, ArrowRight, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 
 export interface TripData {
@@ -24,6 +26,9 @@ interface TripCardProps {
 }
 
 export default function TripCard({ trip, onSelect }: TripCardProps) {
+    const [isLoading, setIsLoading] = useState(false);
+    const { info } = useToast();
+
     const formatTime = (time: string) => {
         try {
             const date = new Date(time);
@@ -46,7 +51,9 @@ export default function TripCard({ trip, onSelect }: TripCardProps) {
     };
 
     const handleClick = () => {
-        if (onSelect) {
+        if (onSelect && !isLoading) {
+            setIsLoading(true);
+            info("Loading trip details...", { title: "Please wait", duration: 8000 });
             onSelect(trip);
         }
     };
@@ -111,9 +118,15 @@ export default function TripCard({ trip, onSelect }: TripCardProps) {
 
                     <button
                         onClick={handleClick}
-                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-semibold rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-sm"
+                        disabled={isLoading}
+                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-semibold rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1.5"
                     >
-                        Choose Trip
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                                Loading...
+                            </>
+                        ) : "Choose Trip"}
                     </button>
                 </div>
             </div>
