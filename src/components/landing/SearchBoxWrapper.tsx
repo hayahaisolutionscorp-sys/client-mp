@@ -21,6 +21,8 @@ export default function SearchBoxWrapper() {
         ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
         : 1;
 
+    useEffect(() => { router.prefetch('/booking/destination'); }, [router]);
+
     useEffect(() => {
         (async () => {
             try {
@@ -56,17 +58,19 @@ export default function SearchBoxWrapper() {
     }, [tenantId]);
 
     const handleTripSelect = (trip: TripData) => {
-        const depDate = trip.departureTime
-            ? new Date(trip.departureTime).toISOString().split("T")[0]
-            : new Date().toISOString().split("T")[0];
+        // Use pre-computed local date from widget to avoid UTC day shift
+        const depDate = trip.departureDateLocal
+            || (trip.departureTime
+                ? new Date(trip.departureTime).toLocaleDateString("en-CA")
+                : new Date().toLocaleDateString("en-CA"));
 
         const originCode = portNameToCode.get(trip.srcPort.toLowerCase());
         const destCode = portNameToCode.get(trip.destPort.toLowerCase());
 
         const params = new URLSearchParams({
             departure_date: depDate,
-            passenger_count: "1",
-            vehicle_count: "0",
+            passenger_count: String(trip.passengerCount ?? 1),
+            vehicle_count: String(trip.vehicleCount ?? 0),
             sort: "departureDate",
             page: "1",
         });

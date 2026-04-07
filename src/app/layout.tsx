@@ -11,6 +11,7 @@ import { getDestinations } from '@/services/ui/destinations.service';
 import PwaInstallBanner from '@/components/pwa/PwaInstallBanner';
 import DevServiceWorkerReset from '@/components/pwa/DevServiceWorkerReset';
 import { ToasterProvider } from '@/components/ui/ToasterProvider';
+import NextTopLoader from 'nextjs-toploader';
 import { hexToHsl } from '@/lib/color-utils';
 import ThemeHydrator from '@/components/ThemeHydrator';
 import { IThemeSettings } from "@/models";
@@ -70,6 +71,7 @@ export default async function RootLayout({
           <AuthContextProvider>
             <ThemeHydrator theme={themeSettings} isFallback={isFallbackBranding} />
             <BodyWrapper> {/* Wrap everything inside BodyWrapper */}
+              <NextTopLoader color="#2563eb" height={3} showSpinner={false} />
               <ToasterProvider />
               <DevServiceWorkerReset />
               <PwaInstallBanner />
