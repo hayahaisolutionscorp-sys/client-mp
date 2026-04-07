@@ -1,4 +1,4 @@
-import { BOOKING_API } from 'constants/api';
+import { BOOKING_API, CORE_API_URL, IS_CLIENT } from 'constants/api';
 import { getAllShippingLines } from '../shipping-line/shipping-line.service';
 import { getVehicleType } from './vehicle-type.service';
 import { fetchItem } from 'helpers/cache.helpers';
@@ -7,9 +7,12 @@ import { IPrepareBookingResponse } from '@/models/booking/prepare-booking.model'
 import axios from '@/services/core/axios';
 // import { PaginatedRequest, PaginatedResponse } from 'http/pagination';
 
-export async function createBooking(payload: any): Promise<any> {
+export async function createBooking(payload: any, shippingLineId?: string): Promise<any> {
   try {
-    const { data } = await axios.post(BOOKING_API, payload);
+    const url = !IS_CLIENT && shippingLineId
+      ? `${BOOKING_API}?shipping_line_id=${shippingLineId}`
+      : BOOKING_API;
+    const { data } = await axios.post(url, payload);
     return data;
   } catch (e) {
     console.error('Error creating booking:', e);
@@ -27,9 +30,15 @@ export async function createTentativeBooking(booking: IBooking): Promise<IBookin
   }
 }
 
-export async function getBookingById(bookingId: string): Promise<{ booking: IBooking; raw: any }> {
+export async function getBookingById(bookingId: string, shippingLineId?: number): Promise<{ booking: IBooking; raw: any }> {
   try {
-    const { data } = await axios.get(`${BOOKING_API}/${bookingId}`);
+    if (!IS_CLIENT && !shippingLineId) {
+      throw new Error('tenant_id (shipping_line_id) is required to look up bookings in this context');
+    }
+    const url = shippingLineId
+      ? `${CORE_API_URL}/bookings/${bookingId}?shipping_line_id=${shippingLineId}`
+      : `${BOOKING_API}/${bookingId}`;
+    const { data } = await axios.get(url);
     // Support both {data: {...}} and direct object response shapes
     const raw = data?.data ?? data;
     if (!raw || !raw.id) {
@@ -139,6 +148,12 @@ export function mapBookingData(raw: any): IBooking {
 
 export async function getMyBookings(): Promise<{ results: IBooking[]; total: number }> {
   try {
+    if (!IS_CLIENT) {
+      const { data } = await axios.get(`${CORE_API_URL}/bookings/mine`);
+      const bookings: any[] = data?.data ?? [];
+      const results = bookings.map((b: any) => ({ ...mapBookingData(b), tenantId: b.tenant_id }));
+      return { results, total: data?.total ?? results.length };
+    }
     const { data } = await axios.get(`${BOOKING_API}/me`);
     const results = (data.data.results || []).map((b: any) => mapBookingData(b));
     return {
@@ -241,7 +256,8 @@ export async function getBookingTripVehicleById(
 export async function prepareBooking(
   tripIds: { departure: string[]; return?: string[] },
   commodityId?: string,
-  headers?: HeadersInit
+  headers?: HeadersInit,
+  shippingLineId?: string,
 ): Promise<IPrepareBookingResponse> {
   try {
     const queryParams = new URLSearchParams();
@@ -268,6 +284,9 @@ export async function prepareBooking(
     }
     if (commodityId) {
       queryParams.append('commodity_id', commodityId);
+    }
+    if (!IS_CLIENT && shippingLineId) {
+      queryParams.append('shipping_line_id', shippingLineId);
     }
 
     const queryString = queryParams.toString();
@@ -296,10 +315,14 @@ import { PricingResponse } from '@/types/booking/pricing';
 
 export async function calculatePricing(
   bookingState: any, // Using 'any' for now to match the TripSummary state structure, but ideally should be PricingRequest
-  headers?: HeadersInit
+  headers?: HeadersInit,
+  shippingLineId?: string,
 ): Promise<PricingResponse> {
   try {
-    const response = await fetch(`${BOOKING_API}/pricing/from-state`, {
+    const url = !IS_CLIENT && shippingLineId
+      ? `${BOOKING_API}/pricing/from-state?shipping_line_id=${shippingLineId}`
+      : `${BOOKING_API}/pricing/from-state`;
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

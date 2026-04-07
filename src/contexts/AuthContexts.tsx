@@ -18,6 +18,7 @@ interface AuthContextType {
     signIn: (email: string, password: string) => Promise<string>;
     signInWithGoogle: () => Promise<any | null>;
     signInWithFacebook: () => Promise<any | null>;
+    signInWithHayahai: () => Promise<any | null>;
     logout: () => Promise<void>;
     forgotPassword: (email: string) => Promise<boolean>;
     verifyResetCode: (email: string, code: string) => Promise<boolean>;
@@ -211,6 +212,21 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         }
     };
 
+    const signInWithHayahai = async () => {
+        try {
+            await AuthService.signInWithHayahai();
+            showNotification('success', `Welcome back to ${branding?.brand_name || 'Ayahay'}!`);
+            // Load profile in background — caller will redirect immediately
+            loadProfile(true);
+            return 'success';
+        } catch (error: any) {
+            console.error('Hayahai sign-in error:', error);
+            const msg = error.message || 'Hayahai sign-in failed';
+            showNotification('error', msg);
+            throw error;
+        }
+    };
+
     const forgotPassword = async (email: string): Promise<boolean> => {
         try {
             setLoading(true);
@@ -287,6 +303,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         logout,
         signInWithGoogle,
         signInWithFacebook,
+        signInWithHayahai,
         forgotPassword,
         verifyResetCode,
         confirmResetPassword,

@@ -36,8 +36,16 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
   const searchParams = useSearchParams();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [internalIsScroll, setInternalIsScroll] = useState(false);
 
-
+  useEffect(() => {
+    const handleScroll = () => {
+      setInternalIsScroll(window.scrollY > 80);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Utility to check if a date string is valid
   const isValidDate = (dateString: string | null) => {
@@ -148,7 +156,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
     setPassengerCount(parseInt(searchParams.get('passenger_count') || searchParams.get('passengerCount') || DEFAULT_NUM_PASSENGERS.toString(), 10));
     setVehicleCount(parseInt(searchParams.get('vehicle_count') || searchParams.get('vehicleCount') || DEFAULT_NUM_VEHICLES.toString(), 10));
     setBookingType(searchParams.get('bookingType') ? searchParams.get('bookingType') + ' Trip' : DEFAULT_BOOKING_TYPE);
-    
+
     // Header should reflect the active search date (base or specific filter)
     const depDateParam = searchParams.get('filterSpecificDepartureDate') || searchParams.get('departure_date') || searchParams.get('departureDate');
     if (isValidDate(depDateParam)) {
@@ -162,6 +170,8 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
       // Fallback to departure date for return if missing
       setReturnDate(new Date(depDateParam!));
     }
+
+    setIsLoading(false);
   }, [searchParams]);
 
   const handleOriginPortSelect = (port: IPort | undefined) => {
@@ -222,13 +232,18 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
 
     try {
       // Prepare search values
+      const toNoonISO = (d: Date) => {
+        const noon = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+        return noon.toISOString();
+      };
+
       const searchValues = {
         bookingType: bookingType?.replace('Trip', '').trim() ?? undefined,
         origin_code: selectedOriginPort?.code ?? undefined,
         destination_code: selectedDestinationPort?.code ?? undefined,
-        departure_date: departureDate ? departureDate.toISOString() : undefined,
+        departure_date: departureDate ? toNoonISO(departureDate) : undefined,
         returnDate:
-          bookingType?.toLowerCase() === 'round trip' ? (returnDate ? returnDate.toISOString() : undefined) : undefined,
+          bookingType?.toLowerCase() === 'round trip' ? (returnDate ? toNoonISO(returnDate) : undefined) : undefined,
         passenger_count: passengerCount !== undefined ? passengerCount.toString() : undefined,
         vehicle_count: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
         sort: 'departureDate',
@@ -240,7 +255,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
           .filter(([, value]) => value !== undefined)
           .map(([key, value]) => [key, value as string])
       );
-      
+
       queryParams.delete('filterSpecificDepartureDate');
       queryParams.delete('filterSpecificReturnDate');
 
@@ -254,7 +269,10 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
           if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
+          setIsLoading(false);
         }, 150);
+      } else {
+        setTimeout(() => setIsLoading(false), 500);
       }
     } catch (error) {
       console.error('Error occurred while searching:', error);
@@ -367,17 +385,16 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
     <div className="flex flex-row items-center justify-center gap-6 bg-white shadow-md sticky top-0 z-50 p-6">
       {/* Logo and Tagline */}
       <div className="flex flex-col items-center justify-center w-[280px]">
-        <div className={isScroll ? 'block' : 'hidden'}>
-          {/* <Image
+        <div className={(isScroll || internalIsScroll) ? 'block' : 'hidden'}>
+          <Image
             src={
-              branding?.logo?.dark || '/assets/images/ayahay_logo_blue.png'
+              branding?.logo?.light || branding?.logo?.dark || '/assets/images/ayahay_logo_blue.png'
             }
             alt={branding?.brand_name || 'Ayahay Logo'}
             height={500}
             width={800}
-            className={`w-auto object-contain h-[100px]`}
-          /> */}
-          <p className="mt-2 text-center">Kay Ang Pagsakay, Dapat AYAHAY!</p>
+            className={`w-auto object-contain h-[55px]`}
+          />
         </div>
       </div>
 

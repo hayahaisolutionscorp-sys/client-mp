@@ -42,6 +42,9 @@ interface VehicleInformationFormProps {
   onChange?: (vehicles: VehicleData[]) => void;
   cargoRequired?: boolean;
   initialVehicles?: VehicleData[];
+  shippingLineId?: string;
+  isCrossTenant?: boolean;
+  leg2ShippingLineId?: string;
 }
 
 const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHandle, VehicleInformationFormProps> = ({
@@ -51,13 +54,17 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
   passengerDetails = undefined,
   cargoRequired = false,
   initialVehicles,
-  onChange
+  onChange,
+  shippingLineId,
+  isCrossTenant = false,
+  leg2ShippingLineId
 }, ref) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const themeSettings = useThemeSettings();
 
   const [vehicleTypes, setVehicleTypes] = useState<VehicleTypes[]>([]);
+  const [leg2VehicleTypes, setLeg2VehicleTypes] = useState<VehicleTypes[]>([]);
   const [vehicles, setVehicles] = useState<VehicleData[]>(initialVehicles || []);
   const [combinedPassengerData, setCombinedPassengerData] = useState<PassengerData[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -169,7 +176,7 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
 
   useEffect(() => {
     // Fetch vehicle types from API
-    getVehicleTypes().then((vehicleTypesData) => {
+    getVehicleTypes(shippingLineId).then((vehicleTypesData) => {
       if (!vehicleTypesData) {
         console.warn('No vehicle types data received');
         setVehicleTypes([]);
@@ -192,7 +199,25 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
       console.error('Error fetching vehicle types:', error);
       setVehicleTypes([]);
     });
-  }, []);
+  }, [shippingLineId]);
+
+  // Fetch leg 2 vehicle types for cross-tenant
+  useEffect(() => {
+    if (!isCrossTenant || !leg2ShippingLineId) return;
+    getVehicleTypes(leg2ShippingLineId).then((data) => {
+      if (!data) { setLeg2VehicleTypes([]); return; }
+      const list = data
+        .map((vt: { id: number; name: string; description: string }) => ({
+          vehicleTypeId: vt.id,
+          vehicleTypeName: vt.name,
+          vehicleTypeDescription: vt.description,
+          vehicleFare: 0,
+          cargo_class: (vt as any).cargo_class
+        }))
+        .sort((a: VehicleTypes, b: VehicleTypes) => a.vehicleTypeName.localeCompare(b.vehicleTypeName));
+      setLeg2VehicleTypes(list);
+    }).catch(() => setLeg2VehicleTypes([]));
+  }, [isCrossTenant, leg2ShippingLineId]);
 
   useEffect(() => {
     if (passengerDetails) {
@@ -371,6 +396,47 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
                 <p className="text-sm text-red-500 mt-1">{errors[`${vehicle.id}-modelBody`]}</p>
               )}
             </div>
+
+            {/* Model Body (Leg 2) — cross-tenant only */}
+            {isCrossTenant && (
+              <div>
+                <label htmlFor={`leg2ModelBody-${vehicle.id}`} className="flex items-center gap-1 text-sm font-medium text-customText">
+                  Model Body (Leg 2)
+                  <span title="Different shipping lines may have different vehicle classifications. Select the vehicle type for the second leg.">
+                    <PiInfo className="w-4 h-4 text-gray-400 cursor-help" />
+                  </span>
+                </label>
+                <Select
+                  value={vehicle.leg2ModelBody || ''}
+                  onValueChange={(value) => {
+                    const selected = leg2VehicleTypes?.find((row) => row?.vehicleTypeName === value);
+                    const updatedVehicles = vehicles.map((v) =>
+                      v.id === vehicle.id
+                        ? {
+                          ...v,
+                          leg2ModelBody: value,
+                          leg2VehicleTypeId: selected?.vehicleTypeId || 0,
+                          leg2VehicleTypeDescription: selected?.vehicleTypeDescription || '',
+                          leg2CargoClass: selected?.cargo_class
+                        }
+                        : v
+                    );
+                    updateVehicles(updatedVehicles);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {leg2VehicleTypes?.map((row) => (
+                      <SelectItem key={row.vehicleTypeId} value={row?.vehicleTypeName}>
+                        {row?.vehicleTypeName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Driver Name */}
             <div>

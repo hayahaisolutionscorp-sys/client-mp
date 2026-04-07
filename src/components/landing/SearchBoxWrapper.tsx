@@ -45,6 +45,8 @@ export default function SearchBoxWrapper({
         ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
         : 1;
 
+    useEffect(() => { router.prefetch('/booking/destination'); }, [router]);
+
     useEffect(() => {
         (async () => {
             try {
@@ -62,17 +64,19 @@ export default function SearchBoxWrapper({
     }, [tenantId]);
 
     const handleTripSelect = (trip: TripData) => {
-        const depDate = trip.departureTime
-            ? new Date(trip.departureTime).toISOString().split("T")[0]
-            : new Date().toISOString().split("T")[0];
+        // Use pre-computed local date from widget to avoid UTC day shift
+        const depDate = trip.departureDateLocal
+            || (trip.departureTime
+                ? new Date(trip.departureTime).toLocaleDateString("en-CA")
+                : new Date().toLocaleDateString("en-CA"));
 
         const originCode = portNameToCode.get(trip.srcPort.toLowerCase());
         const destCode = portNameToCode.get(trip.destPort.toLowerCase());
 
         const params = new URLSearchParams({
             departure_date: depDate,
-            passenger_count: "1",
-            vehicle_count: "0",
+            passenger_count: String(trip.passengerCount ?? 1),
+            vehicle_count: String(trip.vehicleCount ?? 0),
             sort: "departureDate",
             page: "1",
         });
@@ -249,7 +253,6 @@ export function SearchBoxFormContent({
     useEffect(() => { portsRef.current = ports; }, [ports]);
     const [isFormValid, setIsFormValid] = useStateForm<boolean>(false);
     const [error, setError] = useStateForm<string | null>(null);
-    const [isLoading, setIsLoading] = useStateForm(false);
     const themeSettings = useThemeSettings();
     
     useEffect(() => {
@@ -304,9 +307,10 @@ export function SearchBoxFormContent({
                     }
                 } catch (error) {
                     console.error("Failed to fetch destination ports:", error);
+                    setDestinationPorts([]);
                 }
             } else {
-                setDestinationPorts([]);
+                setDestinationPorts(undefined);
             }
         };
 
@@ -322,7 +326,12 @@ export function SearchBoxFormContent({
             (bookingType.toLowerCase() !== "Round Trip".toLowerCase() || (bookingType.toLowerCase() === "Round Trip".toLowerCase() && returnDate));
 
         setIsFormValid(Boolean(isValid));
-    }, [bookingType, selectedOriginPort, selectedDestinationPort, departureDate, returnDate]);
+
+        // Prefetch destination page when form is valid
+        if (isValid) {
+            router.prefetch('/booking/destination');
+        }
+    }, [bookingType, selectedOriginPort, selectedDestinationPort, departureDate, returnDate, router]);
 
     const handleOriginPortSelect = (port: IPort | undefined) => {
         setSelectedOriginPort(port);
@@ -354,8 +363,6 @@ export function SearchBoxFormContent({
             return;
         }
 
-        setIsLoading(true);
-
         try {
             const searchValues = {
                 bookingType: bookingType?.replace("Trip", "").trim() ?? undefined,
@@ -378,7 +385,6 @@ export function SearchBoxFormContent({
             router.push(`/booking/destination?${queryParams}`);
         } catch (error) {
             console.error("Error occurred while searching:", error);
-            setIsLoading(false);
         }
     };
 
@@ -415,7 +421,7 @@ export function SearchBoxFormContent({
                     onPortSelect={setSelectedDestinationPort}
                     ports={destinationPorts}
                     selectedPort={selectedDestinationPort}
-                    disabled={destinationPorts?.length === 0}
+                    disabled={!selectedOriginPort}
                 />
                 <div className="hidden lg:flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 md:space-x-4 items-center justify-center h-auto md:h-[55px]">
                     <DatePickerFieldset
@@ -436,14 +442,11 @@ export function SearchBoxFormContent({
                     <Button
                         variant="default"
                         onClick={handleSearchClick}
-                        disabled={!isFormValid || isLoading}
+                        disabled={!isFormValid}
                         className={`${!isFormValid ? "bg-gray-400" : ""
                             } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
                         <BiSolidShip className="h-5 w-5 text-white" />
                         <span>Search Trip</span>
-                        {isLoading && (
-                            <FiLoader className="h-5 w-5 text-white animate-spin" />
-                        )}
                     </Button>
                 </div>
             </div>
@@ -468,14 +471,11 @@ export function SearchBoxFormContent({
                     <Button
                         variant="default"
                         onClick={handleSearchClick}
-                        disabled={!isFormValid || isLoading}
+                        disabled={!isFormValid}
                         className={`${!isFormValid ? "bg-gray-400" : ""
                             } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
                         <BiSolidShip className="h-5 w-5 text-white" />
                         <span>Search Trip</span>
-                        {isLoading && (
-                            <FiLoader className="h-5 w-5 text-white animate-spin" />
-                        )}
                     </Button>
                 </div>
             </div>

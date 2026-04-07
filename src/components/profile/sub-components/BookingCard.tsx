@@ -59,7 +59,7 @@ export const BookingCard: React.FC<BookingCardProps> = ({ booking, primaryColor 
     return (
         <Card
             className="group hover:shadow-md transition-all duration-300 cursor-pointer border-slate-200 overflow-hidden"
-            onClick={() => router.push(`/booking/confirmed/${booking.id}`)}
+            onClick={() => router.push(`/booking/confirmed/${booking.id}${booking.tenantId ? `?tenant_id=${booking.tenantId}` : ''}`)}
         >
             <CardContent className="p-0">
                 <div className="flex flex-col sm:flex-row">

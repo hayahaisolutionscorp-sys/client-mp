@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { FiLoader } from 'react-icons/fi';
 import Image from 'next/image';
 
@@ -19,7 +19,9 @@ import { PricingResponse } from '@/types/booking/pricing';
 
 export default function BookingDetails() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const bookingId = params?.id as string;
+  const tenantId = searchParams?.get('tenant_id') ? Number(searchParams.get('tenant_id')) : undefined;
   const themeSettings = useThemeSettings();
 
   const [booking, setBooking] = useState<IBooking | undefined>(undefined);
@@ -33,7 +35,7 @@ export default function BookingDetails() {
     const fetchBooking = async () => {
       if (!bookingId) return;
       try {
-        const { booking: fetchedBooking, raw } = await getBookingById(bookingId);
+        const { booking: fetchedBooking, raw } = await getBookingById(bookingId, tenantId);
         setBooking(fetchedBooking);
 
         // If the API returned payment_breakdown, build pricingData from it directly

@@ -5,16 +5,17 @@ import AuthContextProvider from "@/contexts/AuthContexts";
 import LayoutWrapper from "./layoutWrapper";
 import BodyWrapper from '@/components/BodyWrapper';
 import ThemeProvider from '@/components/ThemeProvider';
-import { getBrandingConfig } from '@/services/ui/branding.service';
+import { getHeadersSections } from '@/services/ui/header-section.service';
+import { getBrandingConfigWithSource } from '@/services/ui/branding.service';
 import { getDestinations } from '@/services/ui/destinations.service';
 import { getLandingBuilderContent } from '@/services/content/landing-builder.service';
 import PwaInstallBanner from '@/components/pwa/PwaInstallBanner';
 import DevServiceWorkerReset from '@/components/pwa/DevServiceWorkerReset';
 import { ToasterProvider } from '@/components/ui/ToasterProvider';
+import NextTopLoader from 'nextjs-toploader';
 import { getReadableTextColor, hexToHsl, toRgbCssValue } from '@/lib/color-utils';
 import ThemeHydrator from '@/components/ThemeHydrator';
 import { IThemeSettings } from "@/models";
-import { getHeadersSections } from '@/services/ui/header-section.service';
 
 
 export { generateMetadata };
@@ -31,12 +32,14 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [brandingConfig, destinations, landingBuilderConfig, initialHeaderSection] = await Promise.all([
-    getBrandingConfig(),
+  const [{ data: brandingConfig, source: brandingSource }, destinations, landingBuilderConfig, initialHeaderSection] = await Promise.all([
+    getBrandingConfigWithSource(),
     getDestinations(),
     getLandingBuilderContent(),
     getHeadersSections(),
   ]);
+
+  const isFallbackBranding = brandingSource === 'fallback';
 
   // Derive theme settings from branding config with fallback to local theme-settings.json
   const themeSettings: IThemeSettings = {
@@ -109,8 +112,9 @@ export default async function RootLayout({
       <body suppressHydrationWarning>
         <ThemeProvider initialTheme={themeSettings} initialBranding={brandingConfig} initialDestinations={destinations}>
           <AuthContextProvider>
-            <ThemeHydrator theme={themeSettings} />
+            <ThemeHydrator theme={themeSettings} isFallback={isFallbackBranding} />
             <BodyWrapper>
+              <NextTopLoader color="#2563eb" height={3} showSpinner={false} />
               <ToasterProvider />
               <DevServiceWorkerReset />
               <PwaInstallBanner />

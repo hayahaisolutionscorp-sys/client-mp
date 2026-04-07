@@ -118,6 +118,10 @@ export interface SearchAvailableTrips {
   filterDepartureDateTime?: string;
   origin_code?: string;
   destination_code?: string;
+  origin_province?: string;
+  origin_municipality?: string;
+  destination_province?: string;
+  destination_municipality?: string;
   commodity_id?: string;
 }
 

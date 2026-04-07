@@ -11,24 +11,28 @@ import { ConfirmationModal } from "@/components/ui/ConfirmationModal"
 import { AuthService } from "@/services/auth.service"
 
 export default function ConnectedAccounts() {
-    const { loggedInAccount, refreshProfile, signInWithGoogle, signInWithFacebook } = useAuth();
+    const { loggedInAccount, refreshProfile, signInWithGoogle, signInWithFacebook, signInWithHayahai } = useAuth();
     const providers = loggedInAccount?.providers || [];
-    const isGoogleConnected = providers.includes('google');
-    const isFacebookConnected = providers.includes('facebook');
+
+    const isGoogleConnected = providers.some((p: any) => p === 'google');
+    const isFacebookConnected = providers.some((p: any) => p === 'facebook');
+    const isHayahaiConnected = providers.some((p: any) => p === 'hayahai');
     
-    const [connectionLoading, setConnectionLoading] = useState({ google: false, facebook: false });
-    const [disconnectingProvider, setDisconnectingProvider] = useState<'google' | 'facebook' | null>(null);
+    const [connectionLoading, setConnectionLoading] = useState({ google: false, facebook: false, hayahai: false });
+    const [disconnectingProvider, setDisconnectingProvider] = useState<'google' | 'facebook' | 'hayahai' | null>(null);
     const [isConfirming, setIsConfirming] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleConnect = async (provider: 'google' | 'facebook') => {
+    const handleConnect = async (provider: 'google' | 'facebook' | 'hayahai') => {
         setConnectionLoading(prev => ({ ...prev, [provider]: true }));
         setError(null);
         try {
             if (provider === 'google') {
                 await signInWithGoogle();
-            } else {
+            } else if (provider === 'facebook') {
                 await signInWithFacebook();
+            } else {
+                await signInWithHayahai();
             }
             await refreshProfile();
         } catch (error: any) {
@@ -39,7 +43,7 @@ export default function ConnectedAccounts() {
         }
     };
 
-    const handleDisconnectRequest = (provider: 'google' | 'facebook') => {
+    const handleDisconnectRequest = (provider: 'google' | 'facebook' | 'hayahai') => {
         setDisconnectingProvider(provider);
         setIsConfirming(true);
         setError(null);
@@ -149,6 +153,43 @@ export default function ConnectedAccounts() {
                             </Button>
                         )}
                     </div>
+
+                    {process.env.NEXT_PUBLIC_IS_CLIENT === "true" && (
+                        <div className="flex items-center justify-between p-4 border rounded-lg bg-white">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 flex items-center justify-center border rounded-md overflow-hidden">
+                                    <Image src="/assets/icons/Ayahay_logo.svg" alt="Hayahai" width={24} height={24} />
+                                </div>
+                                <div>
+                                    <p className="font-medium">Hayahai</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {isHayahaiConnected ? "Connected" : "Not connected"}
+                                    </p>
+                                </div>
+                            </div>
+                            {isHayahaiConnected ? (
+                                <div className="flex flex-col items-end gap-1">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={true}
+                                        className="text-slate-400 border-slate-200 cursor-not-allowed opacity-70"
+                                    >
+                                        Disconnect
+                                    </Button>
+                                </div>
+                            ) : (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={connectionLoading.hayahai}
+                                    onClick={() => handleConnect('hayahai')}
+                                >
+                                    {connectionLoading.hayahai ? "Connecting..." : "Connect"}
+                                </Button>
+                            )}
+                        </div>
+                    )}
                 </div>
             </CardContent>
 

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContexts';
 
 import TripDetails from '@/components/booking/payment-confirmation/TripDetails';
@@ -24,12 +24,15 @@ interface Props {
   departureTripId?: string;
   returnTripId?: string;
   commodityId?: string;
+  shippingLineId?: string;
   initialDepartureTrips?: ITrip[];
   initialReturnTrips?: ITrip[];
   initialPrepareBookingData?: IPrepareBookingData;
 }
-export default function PaymentConfirmationDetails({ departureTripId, returnTripId, commodityId, initialDepartureTrips, initialReturnTrips, initialPrepareBookingData }: Props) {
+export default function PaymentConfirmationDetails({ departureTripId, returnTripId, commodityId, shippingLineId: shippingLineIdProp, initialDepartureTrips, initialReturnTrips, initialPrepareBookingData }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const shippingLineId = shippingLineIdProp ?? searchParams.get('shippingLineId') ?? undefined;
 
   const [departureTrips, setDepartureTrips] = useState<ITrip[] | undefined>(initialDepartureTrips);
   const [returnTrips, setReturnTrips] = useState<ITrip[] | undefined>(initialReturnTrips);
@@ -85,7 +88,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       const response = await prepareBooking({
         departure: departureTripId.split(','),
         return: returnTripId ? returnTripId.split(',') : [],
-      }, commodityId);
+      }, commodityId, undefined, shippingLineId);
 
       if (response.data) {
         setPrepareBookingData(response.data);
@@ -329,7 +332,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           });
         }
 
-        const pricing = await calculatePricing(state);
+        const pricing = await calculatePricing(state, undefined, shippingLineId);
         setPricingData(pricing.data);
 
       } catch (error) {
@@ -517,7 +520,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
     try {
       // Step 1: Create booking
       console.log('=== STEP 1: Creating booking ===');
-      const result = await createBooking(payload);
+      const result = await createBooking(payload, shippingLineId);
       const bookingId = result?.data || result?.id;
       
       if (!bookingId) {
@@ -530,7 +533,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
 
       // Step 2: Get booking payment ID
       console.log('=== STEP 2: Getting booking payment ID ===');
-      const bookingPaymentId = await getBookingPaymentId(bookingId);
+      const bookingPaymentId = await getBookingPaymentId(bookingId, shippingLineId);
       
       if (!bookingPaymentId) {
         console.error('Failed to get booking payment ID');
@@ -563,7 +566,9 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       console.log(`Providers — maya: ${isMayaEnabled}, paymongo: ${isPaymongoEnabled}, bothEnabled: ${bothEnabled}`);
 
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      const successUrl = `${baseUrl}/booking/payment-success?booking_id=${bookingId}`;
+      const successUrl = shippingLineId
+        ? `${baseUrl}/booking/payment-success?booking_id=${bookingId}&tenant_id=${shippingLineId}`
+        : `${baseUrl}/booking/payment-success?booking_id=${bookingId}`;
       const cancelUrl = `${baseUrl}/booking/payment-confirmation?departureTripId=${departureTripId || ''}&returnTripId=${returnTripId || ''}&commodityId=${commodityId || ''}`;
 
       let checkoutUrl: string | undefined;
@@ -599,7 +604,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           metadata: { bookingId, bookingPaymentId, source: 'marketplace' },
         };
         console.log('Maya request:', JSON.stringify(mayaRequest, null, 2));
-        const mayaResponse = await createMayaCheckout(mayaRequest);
+        const mayaResponse = await createMayaCheckout(mayaRequest, shippingLineId);
         if (!mayaResponse?.data?.checkoutUrl) {
           toastError('Failed to create Maya payment session. Please try again.', { title: 'Payment Error' });
           return false;
@@ -630,7 +635,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           metadata: { bookingId, bookingPaymentId, source: 'marketplace' },
         };
         console.log('PayMongo checkout request:', JSON.stringify(checkoutRequest, null, 2));
-        const checkoutResponse = await createPaymongoCheckout(checkoutRequest);
+        const checkoutResponse = await createPaymongoCheckout(checkoutRequest, shippingLineId);
         if (!checkoutResponse?.data?.checkoutUrl) {
           toastError('Failed to create PayMongo payment session. Please try again.', { title: 'Payment Error' });
           return false;
@@ -663,7 +668,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           metadata: { bookingId, bookingPaymentId, source: 'marketplace' },
         };
         console.log(`PayMongo checkout request (${effectiveMethod}):`, JSON.stringify(checkoutRequest, null, 2));
-        const checkoutResponse = await createPaymongoCheckout(checkoutRequest);
+        const checkoutResponse = await createPaymongoCheckout(checkoutRequest, shippingLineId);
         if (!checkoutResponse?.data?.checkoutUrl) {
           toastError('Failed to create PayMongo payment session. Please try again.', { title: 'Payment Error' });
           return false;
@@ -686,7 +691,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           },
         };
         console.log('PayMongo intent request:', JSON.stringify(intentRequest, null, 2));
-        const intentResponse = await initiatePaymongoPaymentIntent(intentRequest);
+        const intentResponse = await initiatePaymongoPaymentIntent(intentRequest, shippingLineId);
         if (!intentResponse?.data?.redirectUrl) {
           toastError('Failed to initiate PayMongo payment. Please try again.', { title: 'Payment Error' });
           return false;

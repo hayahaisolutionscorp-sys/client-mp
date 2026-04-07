@@ -1,12 +1,14 @@
 const trimTrailingSlash = (url: string) => url.replace(/\/+$/, '');
 
-const IS_CLIENT = process.env.NEXT_PUBLIC_IS_CLIENT === 'true';
+export const IS_CLIENT = process.env.NEXT_PUBLIC_IS_CLIENT === 'true';
 const CLIENT_API_BASE_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000');
-const CORE_API_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002');
+export const CORE_API_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002');
 
 const BASE_URL = IS_CLIENT ? CLIENT_API_BASE_URL : CORE_API_URL;
 
 export const EFFECTIVE_API_BASE_URL = BASE_URL;
+
+export const TENANT_PORTS_API = `${CORE_API_URL}/tenants/ports`;
 
 export const THEME_SETTINGS_API = `${BASE_URL}/gen_configs`;
 export const SEO_API = `${BASE_URL}/pages`;
@@ -60,8 +62,8 @@ export const PASSENGER_TYPES_API = `${BASE_URL}/passenger-types`;
 export const PAYMENT_API = `${BASE_URL}/pay`;
 export const PAYMONGO_API = `${BASE_URL}/payments/paymongo`;
 export const MAYA_API = `${BASE_URL}/payments/maya`;
-// Uses CORE_API_URL directly — provider config lives on ayahay-api-v2, not the client api
-export const PAYMENT_PROVIDERS_API = `${CORE_API_URL}/payments/providers`;
+// Uses BASE_URL directly - provider config now synced to client api via outbox
+export const PAYMENT_PROVIDERS_API = `${BASE_URL}/payments/providers`;
 export const PORTS_API = `${BASE_URL}/ports`;
 export const REPORTING_API = `${BASE_URL}/reporting`;
 export const SEARCH_API = `${BASE_URL}/search`;

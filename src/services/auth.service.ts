@@ -193,7 +193,63 @@ export const AuthService = {
     });
   },
 
-  disconnectSocialProvider: async (provider: 'google' | 'facebook') => {
+  signInWithHayahai: () => {
+    return new Promise((resolve, reject) => {
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+
+      // The marketplace API endpoint that initiates the Hayahai OAuth flow
+      const popup = window.open(
+        `${AUTH_API}/hayahai`,
+        'Hayahai Sign In',
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
+      );
+
+      const handleMessage = (event: MessageEvent) => {
+        const apiOrigin = new URL(AUTH_API).origin;
+
+        // Origin check for security
+        if (event.origin !== apiOrigin) {
+          if (!apiOrigin.includes(event.origin) && !event.origin.includes(apiOrigin)) {
+            return;
+          }
+        }
+
+        if (event.data && (event.data.type === 'oauth-success' || event.data.type === 'oauth-error')) {
+          window.removeEventListener('message', handleMessage);
+          popup?.close();
+
+          if (event.data.type === 'oauth-success') {
+            resolve(event.data);
+          } else {
+            reject(new Error(event.data.error || 'Hayahai OAuth failed'));
+          }
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      if (!popup) {
+        window.removeEventListener('message', handleMessage);
+        reject(new Error('Popup blocked. Please allow popups for this site.'));
+        return;
+      }
+
+      const checkClosed = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkClosed);
+          setTimeout(() => {
+            window.removeEventListener('message', handleMessage);
+            reject(new Error('Authentication cancelled'));
+          }, 500);
+        }
+      }, 1000);
+    });
+  },
+
+  disconnectSocialProvider: async (provider: 'google' | 'facebook' | 'hayahai') => {
     const response = await axios.delete(`${AUTH_API}/disconnect/${provider}`);
     return response.data;
   }

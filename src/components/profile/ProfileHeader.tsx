@@ -29,6 +29,7 @@ interface ProfileHeaderProps {
     onVerificationClick: () => void;
     fileInputRef: React.RefObject<HTMLInputElement>;
     onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    isHayahaiLinked?: boolean;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -44,7 +45,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     onCopyClick,
     onVerificationClick,
     fileInputRef,
-    onImageChange
+    onImageChange,
+    isHayahaiLinked
 }) => {
     const [imageError, setImageError] = useState(false);
 
@@ -124,6 +126,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                                     <Button variant="ghost" size="icon" className="h-4 w-4" onClick={onCopyClick}>
                                         {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                                     </Button>
+                                    {isHayahaiLinked && (
+                                        <Badge variant="outline" className="ml-2 bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] border-[var(--theme-primary)]/20 gap-1 px-2 py-0 h-5">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-primary)] animate-pulse" />
+                                            Hayahai Account
+                                        </Badge>
+                                    )}
                                 </div>
                             </div>
                             <Button 

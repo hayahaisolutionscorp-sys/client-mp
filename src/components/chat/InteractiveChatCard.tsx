@@ -75,27 +75,23 @@ const isRealPort = (name: string) =>
 
 type PortInfo = { code: string; name: string; id: number };
 
-const getUniqueOriginPorts = (routes: RouteData[]): PortInfo[] => {
-    const map = new Map<string, PortInfo>();
-    for (const r of routes) {
-        if (!map.has(r.src_port_code) && isRealPort(r.src_port_name)) {
-            map.set(r.src_port_code, { code: r.src_port_code, name: r.src_port_name, id: r.src_port_id });
-        }
-    }
-    // Filter out origins that have no valid destinations (prevents dead-end selections)
-    return Array.from(map.values())
-        .filter((origin) => getDestinationsForOrigin(routes, origin.code).length > 0)
-        .sort((a, b) => a.name.localeCompare(b.name));
-};
+const ROUTE_PREVIEW_COUNT = 6;
 
-const getDestinationsForOrigin = (routes: RouteData[], originCode: string): PortInfo[] => {
-    const map = new Map<string, PortInfo>();
-    for (const r of routes) {
-        if (r.src_port_code === originCode && !map.has(r.dest_port_code) && isRealPort(r.dest_port_name)) {
-            map.set(r.dest_port_code, { code: r.dest_port_code, name: r.dest_port_name, id: r.dest_port_id });
-        }
+type AvailableRoute = { src: PortInfo; dest: PortInfo };
+
+const buildRouteOptions = (availableRoutes: AvailableRoute[], showAll: boolean): QuickReplyOption[] => {
+    const displayed = showAll ? availableRoutes : availableRoutes.slice(0, ROUTE_PREVIEW_COUNT);
+    const options: QuickReplyOption[] = displayed.map((r) => ({
+        label: `📍 ${r.src.name} → ${r.dest.name}`,
+        value: `route:${r.src.code}:${r.src.name}:${r.src.id}:${r.dest.code}:${r.dest.name}:${r.dest.id}`,
+    }));
+    if (!showAll && availableRoutes.length > ROUTE_PREVIEW_COUNT) {
+        options.push({
+            label: `🔽 See more (${availableRoutes.length - ROUTE_PREVIEW_COUNT} more routes)`,
+            value: "show_more_routes",
+        });
     }
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return options;
 };
 
 const findRouteByPorts = (routes: RouteData[], originCode: string, destCode: string): RouteData | undefined =>
@@ -135,6 +131,8 @@ export default function InteractiveChatCard({
     agentConfig,
 }: Props) {
     const router = useRouter();
+    // Prefetch booking page so it's ready when user clicks Choose Trip
+    useEffect(() => { router.prefetch('/booking/destination'); }, [router]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -145,19 +143,9 @@ export default function InteractiveChatCard({
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const pendingRouteRef = useRef<RouteData | null>(null);
-    const [step, setStep] = useState<"origin" | "destination" | "passengers" | "vehicles" | "date" | "complete">("origin");
+    const [step, setStep] = useState<"route" | "passengers" | "vehicles" | "date" | "complete">("route");
+    const [availableRoutes, setAvailableRoutes] = useState<AvailableRoute[]>([]);
     const initAttempted = useRef(false);
-    const noTripOriginsRef = useRef<Set<string>>(new Set());
-
-    // Build filtered origin options, excluding known dead origins
-    const buildOriginOptions = (): QuickReplyOption[] => {
-        return getUniqueOriginPorts(routes)
-            .filter((p) => !noTripOriginsRef.current.has(p.code))
-            .map((p) => ({
-                label: `📍 ${p.name}`,
-                value: `origin:${p.code}:${p.name}:${p.id}`,
-            }));
-    };
 
     const displayName = agentConfig?.displayName || "AyahAI";
     // Use only the greeting portion of the welcome message (strip trailing questions)
@@ -166,18 +154,32 @@ export default function InteractiveChatCard({
     const configWelcomeMsg = rawWelcome.split("\n").filter((line) => !line.trim().endsWith("?")).join("\n").trim()
         || rawWelcome.split("\n")[0];
 
-    // Fetch routes on mount
+    // Fetch routes then immediately show route selection (no async pre-filtering)
     useEffect(() => {
         const fetchRoutes = async () => {
             try {
                 const response = await fetch("/api/routes?tenantId=1");
-                if (response.ok) {
-                    const responseData = await response.json();
-                    const routesArray = responseData.data || responseData;
-                    if (Array.isArray(routesArray)) {
-                        setRoutes(routesArray);
+                if (!response.ok) return;
+                const responseData = await response.json();
+                const routesArray: RouteData[] = responseData.data || responseData;
+                if (!Array.isArray(routesArray)) return;
+                setRoutes(routesArray);
+
+                // Build unique real (src, dest) pairs sorted alphabetically
+                const seen = new Set<string>();
+                const pairs: AvailableRoute[] = [];
+                for (const r of routesArray) {
+                    const key = `${r.src_port_code}:${r.dest_port_code}`;
+                    if (!seen.has(key) && isRealPort(r.src_port_name) && isRealPort(r.dest_port_name)) {
+                        seen.add(key);
+                        pairs.push({
+                            src: { code: r.src_port_code, name: r.src_port_name, id: r.src_port_id },
+                            dest: { code: r.dest_port_code, name: r.dest_port_name, id: r.dest_port_id },
+                        });
                     }
                 }
+                pairs.sort((a, b) => a.src.name.localeCompare(b.src.name) || a.dest.name.localeCompare(b.dest.name));
+                setAvailableRoutes(pairs);
             } catch (error) {
                 console.error("Failed to fetch routes:", error);
             }
@@ -185,19 +187,20 @@ export default function InteractiveChatCard({
         fetchRoutes();
     }, []);
 
-    // Show origin selection once routes are loaded
+    // Show route selection as soon as routes are loaded
     useEffect(() => {
-        if (routes.length === 0 || messages.length > 0 || initAttempted.current) return;
+        if (availableRoutes.length === 0 || messages.length > 0 || initAttempted.current) return;
         initAttempted.current = true;
 
+        const options = buildRouteOptions(availableRoutes, false);
         setMessages([{
             id: crypto.randomUUID(),
             role: "assistant",
-            content: `${configWelcomeMsg}\n\nWhere are you traveling from?`,
-            interactive: { type: "quick_reply", data: { options: buildOriginOptions() } },
+            content: `${configWelcomeMsg}\n\nWhere would you like to go?`,
+            interactive: { type: "quick_reply", data: { options } },
             timestamp: new Date(),
         }]);
-    }, [routes, messages.length, configWelcomeMsg]);
+    }, [availableRoutes, messages.length, configWelcomeMsg]);
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -277,10 +280,18 @@ export default function InteractiveChatCard({
                 const tripsArray = tripResults.data || [];
                 
                 const trips: TripData[] = tripsArray.map((t: any) => {
-                    // Extract ship name from segments array (API structure)
                     const firstSegment = t.segments?.[0];
                     const shipName = firstSegment?.ship_name || t.ship_name || "Unknown";
-                    
+                    // Price: base_fare (adult ECO) from first segment
+                    const price = firstSegment?.base_fare
+                        ?? firstSegment?.passenger_rates?.find((r: any) => r.passenger_type_code === "ADULT")?.amount
+                        ?? 0;
+                    // Seats: bottleneck remaining across all segments
+                    const availableSeats = (t.segments ?? [firstSegment]).reduce((min: number, s: any) => {
+                        const cabinCaps: Record<string, { remaining: number }> = s?.cabin_capacities ?? {};
+                        const total = Object.values(cabinCaps).reduce((sum, c) => sum + (c.remaining ?? 0), 0);
+                        return total > 0 ? Math.min(min, total) : min;
+                    }, Infinity);
                     return {
                         id: t.id?.toString() || crypto.randomUUID(),
                         shippingLine: shipName,
@@ -290,8 +301,8 @@ export default function InteractiveChatCard({
                         departureTime: t.total_departure_time || t.scheduled_departure,
                         arrivalTime: t.total_arrival_time || t.scheduled_arrival || "",
                         duration: t.total_duration_minutes ? `${Math.floor(t.total_duration_minutes / 60)}h ${t.total_duration_minutes % 60}m` : "",
-                        price: firstSegment?.fare || t.fare || 0,
-                        availableSeats: firstSegment?.available_capacity || t.available_capacity || 0,
+                        price,
+                        availableSeats: isFinite(availableSeats) ? availableSeats : 0,
                     };
                 });
                 
@@ -324,7 +335,7 @@ export default function InteractiveChatCard({
 
                     try {
                         const datesResponse = await fetch(
-                            `/api/trips/available-dates?origin_code=${route.src_port_code}&destination_code=${route.dest_port_code}&limit=5`
+                            `/api/trips/available-dates?origin_code=${route.src_port_code}&destination_code=${route.dest_port_code}&limit=5&vehicle_count=${context.vehicleCount ?? 0}`
                         );
                         if (datesResponse.ok) {
                             const datesData = await datesResponse.json();
@@ -394,16 +405,138 @@ export default function InteractiveChatCard({
         }
     };
 
-    // Handle trip selection - navigate to booking page
+    // Handle trip selection - navigate to booking destination with search context
     const handleTripSelect = (trip: TripData) => {
-        router.push(`/trips/${trip.id}`);
+        const route = context.selectedRoute;
+        const depDate = context.departureDate
+            || (trip.departureTime
+                ? new Date(trip.departureTime).toLocaleDateString("en-CA")
+                : new Date().toLocaleDateString("en-CA"));
+
+        const params = new URLSearchParams({
+            departure_date: depDate,
+            passenger_count: String(context.passengerCount || 1),
+            vehicle_count: String(context.vehicleCount || 0),
+            sort: "departureDate",
+            page: "1",
+        });
+        if (route?.src_port_code) params.set("origin_code", route.src_port_code);
+        if (route?.dest_port_code) params.set("destination_code", route.dest_port_code);
+
+        router.push(`/booking/destination?${params.toString()}`);
     };
+
+    // Fuzzy-match a user-typed port name against available routes
+    const findPort = useCallback((query: string) => {
+        const q = query.toLowerCase().trim();
+        // exact substring match first
+        let match = availableRoutes.flatMap(r => [r.src, r.dest])
+            .find(p => p.name.toLowerCase().includes(q) || q.includes(p.name.toLowerCase()));
+        if (match) return match;
+        // word-overlap fallback (e.g. "talisay" matches "Talisay, Cebu")
+        const words = q.split(/\s+/);
+        match = availableRoutes.flatMap(r => [r.src, r.dest])
+            .find(p => words.some(w => w.length >= 4 && p.name.toLowerCase().includes(w)));
+        return match ?? null;
+    }, [availableRoutes]);
+
+    // Detect "from X to Y [at/on DATE]" intent — extracts ports and optional date string
+    const detectRouteQuery = useCallback((text: string): { src: string; dest: string; dateHint?: string } | null => {
+        const t = text.toLowerCase();
+        // Strip trailing date phrases so they don't bleed into dest name
+        const stripped = t.replace(/\s+(?:at|on)\s+[\w,.\s]+\d{4}.*$/, "").trim();
+        const fromTo = stripped.match(/from\s+(.+?)\s+to\s+(.+?)(?:\?|$)/);
+        if (fromTo) {
+            // Try to extract a date from the original text (e.g. "Apr. 11, 2026" or "2026-04-11")
+            const dateMatch = text.match(/(\d{4}-\d{2}-\d{2})|([A-Za-z]{3,9}\.?\s+\d{1,2},?\s+\d{4})/);
+            return { src: fromTo[1].trim(), dest: fromTo[2].trim(), dateHint: dateMatch?.[0] };
+        }
+        const xTo = stripped.match(/(?:^|\s)(.+?)\s+to\s+(.+?)(?:\?|$)/);
+        if (xTo) {
+            const dateMatch = text.match(/(\d{4}-\d{2}-\d{2})|([A-Za-z]{3,9}\.?\s+\d{1,2},?\s+\d{4})/);
+            return { src: xTo[1].trim(), dest: xTo[2].trim(), dateHint: dateMatch?.[0] };
+        }
+        return null;
+    }, []);
 
     // Always send typed input to AI with quickchat context
     // AI responses always include a "Start over" button so users can re-enter the guided flow
     const handleSendMessage = useCallback(
         async (text: string) => {
             if (!text.trim()) return;
+
+            // --- Route intent intercept ---
+            const routeQuery = detectRouteQuery(text);
+            if (routeQuery && availableRoutes.length > 0) {
+                const srcPort = findPort(routeQuery.src);
+                const destPort = findPort(routeQuery.dest);
+                if (srcPort && destPort && srcPort.code !== destPort.code) {
+                    const matchedRoute = availableRoutes.find(
+                        r => r.src.code === srcPort.code && r.dest.code === destPort.code
+                    );
+                    if (matchedRoute) {
+                        const userMessage: Message = { id: crypto.randomUUID(), role: "user", content: text, timestamp: new Date() };
+                        setMessages(prev => [...prev, userMessage]);
+                        setInput("");
+                        const routeObj = findRouteByPorts(routes, srcPort.code, destPort.code) ?? null;
+                        pendingRouteRef.current = routeObj;
+                        // Parse date hint if provided ("Apr. 11, 2026" → "2026-04-11")
+                        let parsedDate: string | null = null;
+                        if (routeQuery.dateHint) {
+                            const MONTHS: Record<string, number> = {
+                                jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+                                jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+                            };
+                            const hint = routeQuery.dateHint;
+                            // ISO: "2026-04-11"
+                            const iso = hint.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                            if (iso) {
+                                parsedDate = hint;
+                            } else {
+                                // "Apr. 11, 2026" / "Apr 11, 2026" / "April 11, 2026"
+                                const m = hint.match(/([A-Za-z]{3,9})\.?\s+(\d{1,2}),?\s+(\d{4})/);
+                                if (m) {
+                                    const mo = MONTHS[m[1].toLowerCase().slice(0, 3)];
+                                    if (mo !== undefined) {
+                                        const day = parseInt(m[2], 10);
+                                        const year = parseInt(m[3], 10);
+                                        parsedDate = `${year}-${String(mo + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                                    }
+                                }
+                            }
+                        }
+                        setContext(prev => ({
+                            ...prev,
+                            originPort: srcPort,
+                            destinationPort: destPort,
+                            selectedRoute: routeObj ?? undefined,
+                            ...(parsedDate ? { departureDate: parsedDate } : {}),
+                            passengerCount: prev.passengerCount || 1,
+                            vehicleCount: prev.vehicleCount ?? 0,
+                        }));
+                        if (parsedDate) {
+                            // Date known — search immediately with default 1 pax / 0 vehicles
+                            setStep("complete");
+                            await searchTrips(parsedDate, context.passengerCount || 1, context.vehicleCount ?? 0);
+                        } else {
+                            // No date — ask passengers first
+                            const passengerOptions: QuickReplyOption[] = [1,2,3,4,5,6,7,8,9,10].map(n => ({
+                                label: `👤 ${n} passenger${n > 1 ? "s" : ""}`,
+                                value: `passengers:${n}`,
+                            }));
+                            setMessages(prev => [...prev, {
+                                id: crypto.randomUUID(), role: "assistant",
+                                content: `**${srcPort.name} → ${destPort.name}** 🛳️\n\nHow many passengers will be traveling?`,
+                                interactive: { type: "quick_reply", data: { options: passengerOptions } },
+                                timestamp: new Date(),
+                            }]);
+                            setStep("passengers");
+                        }
+                        return;
+                    }
+                }
+            }
+            // --- end intercept ---
 
             // Clear previous interactive options so old buttons disappear
             setMessages((prev) => prev.map((m) => m.interactive ? { ...m, interactive: undefined } : m));
@@ -471,7 +604,7 @@ export default function InteractiveChatCard({
                 setIsLoading(false);
             }
         },
-        [context, messages]
+        [context, messages, availableRoutes, routes, findPort, detectRouteQuery, searchTrips]
     );
 
     // Handle form submit — intercept typed input for passengers/vehicles steps
@@ -518,105 +651,63 @@ export default function InteractiveChatCard({
         if (value === "start over" || value.toLowerCase().includes("start over")) {
             setContext({});
             setMessages([]);
-            setStep("origin");
+            setStep("route");
             pendingRouteRef.current = null;
             initAttempted.current = false;
+            return;
+        }
+
+        // --- Show more routes (expand without clearing) ---
+        if (value === "show_more_routes") {
+            const allOptions = buildRouteOptions(availableRoutes, true);
+            setMessages((prev) => {
+                const updated = [...prev];
+                for (let i = updated.length - 1; i >= 0; i--) {
+                    if (updated[i].role === "assistant" && updated[i].interactive) {
+                        updated[i] = { ...updated[i], interactive: { type: "quick_reply", data: { options: allOptions } } };
+                        break;
+                    }
+                }
+                return updated;
+            });
             return;
         }
 
         // Clear previous interactive options so old buttons disappear
         clearPreviousOptions();
 
-        // --- Choose another origin (excludes known dead origins) ---
-        if (value === "choose_origin") {
-            const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: "Choose another port", timestamp: new Date() };
+        // --- Choose another route ---
+        if (value === "choose_origin" || value === "choose_route") {
+            const options = buildRouteOptions(availableRoutes, false);
+            const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: "Choose another route", timestamp: new Date() };
             const assistantMsg: Message = {
                 id: crypto.randomUUID(),
                 role: "assistant",
-                content: "Where are you traveling from?",
-                interactive: { type: "quick_reply", data: { options: buildOriginOptions() } },
+                content: "Where would you like to go?",
+                interactive: { type: "quick_reply", data: { options } },
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, userMsg, assistantMsg]);
             return;
         }
 
-        // --- Origin selected → check which destinations have trips ---
-        if (value.startsWith("origin:")) {
-            const [, code, name, idStr] = value.split(":");
-            const id = parseInt(idStr, 10);
-            setContext((prev) => ({ ...prev, originPort: { code, name, id } }));
+        // --- Route selected (combined origin + destination) → ask passengers ---
+        if (value.startsWith("route:")) {
+            const parts = value.split(":");
+            const srcCode = parts[1];
+            const srcName = parts[2];
+            const srcId = parseInt(parts[3], 10);
+            const destCode = parts[4];
+            const destName = parts[5];
+            const destId = parseInt(parts[6], 10);
 
-            const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: `From ${name}`, timestamp: new Date() };
-            setMessages((prev) => [...prev, userMsg]);
-            setIsSearchingTrips(true);
-
-            // Check which destinations actually have upcoming trip schedules
-            const destinations = getDestinationsForOrigin(routes, code);
-            const availableDestinations: PortInfo[] = [];
-            await Promise.all(
-                destinations.map(async (dest) => {
-                    try {
-                        const res = await fetch(
-                            `/api/trips/available-dates?origin_code=${code}&destination_code=${dest.code}&limit=1`
-                        );
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (data.data && data.data.length > 0) {
-                                availableDestinations.push(dest);
-                            }
-                        }
-                    } catch { /* skip destinations that fail */ }
-                })
-            );
-            setIsSearchingTrips(false);
-
-            if (availableDestinations.length > 0) {
-                // Sort alphabetically
-                availableDestinations.sort((a, b) => a.name.localeCompare(b.name));
-                const destOptions: QuickReplyOption[] = availableDestinations.map((p) => ({
-                    label: `🏝️ ${p.name}`,
-                    value: `dest:${p.code}:${p.name}:${p.id}`,
-                }));
-
-                const assistantMsg: Message = {
-                    id: crypto.randomUUID(),
-                    role: "assistant",
-                    content: `Great! Traveling from **${name}** 📍\n\nWhere would you like to go?`,
-                    interactive: { type: "quick_reply", data: { options: destOptions } },
-                    timestamp: new Date(),
-                };
-                setMessages((prev) => [...prev, assistantMsg]);
-            } else {
-                // Mark this origin as having no trips so it's excluded from future lists
-                noTripOriginsRef.current.add(code);
-                const assistantMsg: Message = {
-                    id: crypto.randomUUID(),
-                    role: "assistant",
-                    content: `Sorry, there are no upcoming trips from **${name}** at this time. Would you like to try another port?`,
-                    interactive: {
-                        type: "quick_reply",
-                        data: { options: [{ label: "📍 Choose another port", value: "choose_origin" }] },
-                    },
-                    timestamp: new Date(),
-                };
-                setMessages((prev) => [...prev, assistantMsg]);
-            }
-            setStep("destination");
-            return;
-        }
-
-        // --- Destination selected → ask passengers ---
-        if (value.startsWith("dest:")) {
-            const [, code, name, idStr] = value.split(":");
-            const id = parseInt(idStr, 10);
-            const originCode = context.originPort?.code || "";
-            const route = findRouteByPorts(routes, originCode, code);
+            const route = findRouteByPorts(routes, srcCode, destCode);
             if (route) {
                 pendingRouteRef.current = route;
                 setContext((prev) => ({
                     ...prev,
-                    destinationPort: { code, name, id },
+                    originPort: { code: srcCode, name: srcName, id: srcId },
+                    destinationPort: { code: destCode, name: destName, id: destId },
                     selectedRoute: route,
                 }));
             }
@@ -626,11 +717,11 @@ export default function InteractiveChatCard({
                 value: `passengers:${n}`,
             }));
 
-            const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: `To ${name}`, timestamp: new Date() };
+            const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: `${srcName} → ${destName}`, timestamp: new Date() };
             const assistantMsg: Message = {
                 id: crypto.randomUUID(),
                 role: "assistant",
-                content: `${context.originPort?.name} → **${name}** 🛳️\n\nHow many passengers will be traveling?\nOr type a number below for larger groups.`,
+                content: `**${srcName} → ${destName}** 🛳️\n\nHow many passengers will be traveling?\nOr type a number below for larger groups.`,
                 interactive: { type: "quick_reply", data: { options: passengerOptions } },
                 timestamp: new Date(),
             };
@@ -691,7 +782,7 @@ export default function InteractiveChatCard({
                 setIsSearchingTrips(true);
                 try {
                     const datesResponse = await fetch(
-                        `/api/trips/available-dates?origin_code=${route.src_port_code}&destination_code=${route.dest_port_code}&limit=7`
+                        `/api/trips/available-dates?origin_code=${route.src_port_code}&destination_code=${route.dest_port_code}&limit=7&vehicle_count=${vCount}`
                     );
                     let dateOptions: QuickReplyOption[] = [];
                     if (datesResponse.ok) {
@@ -837,6 +928,17 @@ export default function InteractiveChatCard({
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.2 }}
                             >
+                                {/* Message row wrapper — avatar + bubble */}
+                                <div className={cn(
+                                    "flex items-start gap-2",
+                                    message.role === "user" ? "flex-row-reverse" : "flex-row"
+                                )}>
+                                {/* Bot avatar */}
+                                {message.role === "assistant" && (
+                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center mt-0.5">
+                                        <Bot className="h-3.5 w-3.5 text-blue-600" />
+                                    </div>
+                                )}
                                 {/* Message Bubble */}
                                 <div
                                     className={cn(
@@ -847,8 +949,7 @@ export default function InteractiveChatCard({
                                     )}
                                 >
                                     {message.role === "assistant" && (
-                                        <div className="flex items-center gap-1 text-[10px] text-blue-500 font-medium">
-                                            <Bot className="h-3 w-3" />
+                                        <div className="text-[10px] text-blue-500 font-medium">
                                             {displayName}
                                         </div>
                                     )}
@@ -898,6 +999,7 @@ export default function InteractiveChatCard({
                                         </button>
                                     </div>
                                 )}
+                                </div>{/* end row wrapper */}
                             </motion.div>
                         ))}
                     </AnimatePresence>
@@ -907,10 +1009,15 @@ export default function InteractiveChatCard({
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="flex w-max items-center gap-1.5 rounded-xl rounded-bl-none bg-white px-3 py-2 text-xs text-gray-500 shadow-sm border border-gray-100"
+                            className="flex items-start gap-2"
                         >
-                            <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
-                            <span>{isSearchingTrips ? "Searching trips..." : `${displayName} is thinking...`}</span>
+                            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center mt-0.5">
+                                <Bot className="h-3.5 w-3.5 text-blue-600" />
+                            </div>
+                            <div className="flex w-max items-center gap-1.5 rounded-xl rounded-bl-none bg-white px-3 py-2 text-xs text-gray-500 shadow-sm border border-gray-100">
+                                <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
+                                <span>{isSearchingTrips ? "Searching trips..." : `${displayName} is thinking...`}</span>
+                            </div>
                         </motion.div>
                     )}
                 </div>

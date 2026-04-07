@@ -1,5 +1,6 @@
 export interface SelectedSegment {
   segmentId: number | string;
+  shippingLineId?: number;
   cabinId: number;
   cabinTypeId: number;
   cabinType: string;
@@ -9,6 +10,7 @@ export interface SelectedSegment {
 
 export interface SelectedTrip {
   tripId: number | string;
+  shippingLineId?: number;
   totalFare: number;
   segmentSelections: SelectedSegment[];
 

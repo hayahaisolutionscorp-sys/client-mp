@@ -45,6 +45,10 @@ export interface ITripSummary {
     status: string;
     origin: string;
     destination: string;
+    origin_municipality?: string;
+    origin_province?: string;
+    destination_municipality?: string;
+    destination_province?: string;
     route_code: string;
     ship: {
         id: number;

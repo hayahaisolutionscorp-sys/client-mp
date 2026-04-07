@@ -1,17 +1,30 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { getThemeSettings } from "@/services/ui/theme-settings.service";
 import { IThemeSettings } from "@/models";
+import { IS_CLIENT } from "@/services/config";
+import brandingData from "@/data/branding.json";
 
 const BRANDING_CACHE_KEY = "branding_config";
 
 export const useThemeSettings = () => {
   const { themeSettings, setThemeSettings } = useTheme();
 
+  const defaultTheme = useMemo(() => {
+    return {
+      primaryColor: brandingData.colors.primary,
+      secondaryColor: brandingData.colors.secondary,
+      primary: brandingData.colors.primary,
+      secondary: brandingData.colors.secondary,
+      accent: brandingData.colors.accent,
+      fontStyle: 'Inter'
+    } as IThemeSettings;
+  }, []);
+
   useEffect(() => {
-    if (themeSettings) {
+    if (!IS_CLIENT) {
       return;
     }
 
@@ -61,7 +74,7 @@ export const useThemeSettings = () => {
         }
       })
       .catch((error) => console.error("Error fetching theme settings:", error));
-  }, [themeSettings, setThemeSettings]);
+  }, [setThemeSettings]);
 
-  return themeSettings;
+  return themeSettings || (!IS_CLIENT ? defaultTheme : null);
 };

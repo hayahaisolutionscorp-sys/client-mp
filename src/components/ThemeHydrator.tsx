@@ -6,11 +6,11 @@ import { IThemeSettings } from "@/models";
 
 const BRANDING_CACHE_KEY = "branding_config";
 
-export default function ThemeHydrator({ theme }: { theme: IThemeSettings }) {
+export default function ThemeHydrator({ theme, isFallback }: { theme: IThemeSettings, isFallback?: boolean }) {
     const pathname = usePathname();
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
+        if (typeof window === "undefined" || isFallback) return;
         if (pathname.startsWith("/preview")) return;
 
         // Seed the cache with the server-fetched theme

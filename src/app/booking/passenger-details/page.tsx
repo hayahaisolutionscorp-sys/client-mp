@@ -11,11 +11,14 @@ interface PageProps {
     returnTripId?: string;
     returnCabinName?: string;
     returnCabinId?: string;
+    shippingLineId?: string;
     passengerCount?: string;
     vehicleCount?: string;
     commodityId?: string;
   }>;
 }
+
+const UUID_REGEX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
 
 export default async function PassengerDetails(props: PageProps) {
   const searchParams = await props.searchParams;
@@ -32,6 +35,21 @@ export default async function PassengerDetails(props: PageProps) {
   const departureTripId = cleanTripId(searchParams.departureTripId);
   const returnTripId = cleanTripId(searchParams.returnTripId);
 
+  // Detect cross-tenant connecting trips from pipe-separated shippingLineId
+  const shippingLineId = searchParams.shippingLineId;
+  const shippingLineIds = shippingLineId?.split('|') ?? [];
+  const isCrossTenant = shippingLineIds.length > 1 && shippingLineIds[0] !== shippingLineIds[1];
+
+  // For cross-tenant, split the compound trip ID into individual leg UUIDs
+  let legTripIds: string[] | undefined;
+  let legReturnTripIds: string[] | undefined;
+  if (isCrossTenant && departureTripId) {
+    legTripIds = departureTripId.match(UUID_REGEX) ?? undefined;
+  }
+  if (isCrossTenant && returnTripId) {
+    legReturnTripIds = returnTripId.match(UUID_REGEX) ?? undefined;
+  }
+
   return (
     <div className="grid grid-cols-1 gap-4 bg-gray-50 px-3 pt-3 md:grid-cols-2 lg:grid-cols-[2fr_1fr] lg:px-10">
       <Suspense fallback={<div className="col-span-full"><LoadingScreen fullScreen={false} /></div>}>
@@ -42,7 +60,12 @@ export default async function PassengerDetails(props: PageProps) {
           departureCabinId={searchParams.departureCabinId}
           returnCabinName={searchParams.returnCabinName}
           returnCabinId={searchParams.returnCabinId}
+          shippingLineId={shippingLineId}
           commodityId={searchParams.commodityId}
+          isCrossTenant={isCrossTenant}
+          legTripIds={legTripIds}
+          shippingLineIds={isCrossTenant ? shippingLineIds : undefined}
+          legReturnTripIds={legReturnTripIds}
         />
       </Suspense>
     </div>

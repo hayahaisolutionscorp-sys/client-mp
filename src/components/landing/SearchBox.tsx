@@ -21,6 +21,7 @@ import {
   DEFAULT_NUM_PASSENGERS,
 } from "constants/default";
 import { getPorts, getDestinationPortsByOrigin } from "@/services";
+import { IS_CLIENT } from 'constants/api';
 
 const SearchBox: React.FC = () => {
   const router = useRouter();
@@ -136,17 +137,34 @@ const SearchBox: React.FC = () => {
 
       // Prepare search values, ensuring number fields are converted to strings
       // Prepare search values, ensuring number fields are converted to strings
-      const searchValues = {
+      const toNoonISO = (d: Date) => {
+        const noon = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+        return noon.toISOString();
+      };
+
+      const searchValues: any = {
         bookingType: bookingType?.replace("Trip", "").trim() ?? undefined,
-        origin_code: selectedOriginPort?.code ?? undefined,
-        destination_code: selectedDestinationPort?.code ?? undefined,
-        departure_date: departureDate ? departureDate.toISOString() : undefined,
-        returnDate: bookingType?.toLowerCase() === "round trip" ? (returnDate ? returnDate.toISOString() : undefined) : undefined,
+        departure_date: departureDate ? toNoonISO(departureDate) : undefined,
+        returnDate: bookingType?.toLowerCase() === "round trip" ? (returnDate ? toNoonISO(returnDate) : undefined) : undefined,
         passenger_count: passengerCount !== undefined ? passengerCount.toString() : undefined,
         vehicle_count: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
         sort: "departureDate",
         page: "1",
       };
+
+      if (!IS_CLIENT) {
+        if (selectedOriginPort?.province) searchValues.origin_province = selectedOriginPort.province;
+        if (selectedOriginPort?.municipality) searchValues.origin_municipality = selectedOriginPort.municipality;
+        if (selectedDestinationPort?.province) searchValues.destination_province = selectedDestinationPort.province;
+        if (selectedDestinationPort?.municipality) searchValues.destination_municipality = selectedDestinationPort.municipality;
+
+        // Keep codes as fallback/reference for TripsSelector bridging back
+        if (selectedOriginPort?.code) searchValues.origin_code = selectedOriginPort.code;
+        if (selectedDestinationPort?.code) searchValues.destination_code = selectedDestinationPort.code;
+      } else {
+        searchValues.origin_code = selectedOriginPort?.code ?? undefined;
+        searchValues.destination_code = selectedDestinationPort?.code ?? undefined;
+      }
 
       // Filter out undefined values to avoid passing empty params
       const queryParams = new URLSearchParams(

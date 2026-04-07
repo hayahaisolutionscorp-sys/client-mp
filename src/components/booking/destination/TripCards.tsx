@@ -95,6 +95,8 @@ export default function TripCards({
       newSelections = [];
     }
 
+    const trip = trips.find(t => t.id === tripId);
+
     // Check if this segment is already selected with the same cabin
     const existingSegmentIndex = newSelections.findIndex(s => s.segmentId === segmentId);
     if (existingSegmentIndex >= 0) {
@@ -103,14 +105,16 @@ export default function TripCards({
         newSelections.splice(existingSegmentIndex, 1);
       } else {
         // Changing cabin for this segment
+        const segShippingLineId = trip?.segments?.find(s => s.id === segmentId)?.shippingLineId;
         newSelections[existingSegmentIndex] = {
-          segmentId, cabinId, cabinTypeId, cabinType, cabinFare, departureDateIso
+          segmentId, shippingLineId: segShippingLineId, cabinId, cabinTypeId, cabinType, cabinFare, departureDateIso
         };
       }
     } else {
       // New segment selection
+      const segShippingLineId = trip?.segments?.find(s => s.id === segmentId)?.shippingLineId;
       newSelections.push({
-        segmentId, cabinId, cabinTypeId, cabinType, cabinFare, departureDateIso
+        segmentId, shippingLineId: segShippingLineId, cabinId, cabinTypeId, cabinType, cabinFare, departureDateIso
       });
     }
 
@@ -131,6 +135,7 @@ export default function TripCards({
 
     const newSelectedTrip: SelectedTrip = {
       tripId,
+      shippingLineId: trip?.shippingLineId,
       totalFare,
       segmentSelections: newSelections,
 
@@ -382,7 +387,7 @@ export default function TripCards({
                     <p className="text-lg font-bold text-gray-900">
                       {toPhilippinesTime(trip.departureDateIso, TIME_DEFAULT_FORMAT)}
                     </p>
-                    <p className="text-sm text-gray-600">{trip.srcPort?.name}</p>
+                    <p className="text-sm text-gray-600">{trip.srcPort?.name || trip.srcPortName}</p>
                   </div>
 
                   {/* Journey Line */}
@@ -399,7 +404,7 @@ export default function TripCards({
                     <p className="text-lg font-bold text-gray-900">
                       {toPhilippinesTime(trip.arrivalTimeDateIso, TIME_DEFAULT_FORMAT)}
                     </p>
-                    <p className="text-sm text-gray-600">{trip.destPort?.name}</p>
+                    <p className="text-sm text-gray-600">{trip.destPort?.name || trip.destPortName}</p>
                   </div>
                 </div>
 

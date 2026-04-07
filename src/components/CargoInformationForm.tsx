@@ -27,15 +27,22 @@ export interface CargoInformationFormHandle {
 interface CargoInformationFormProps {
     onChange?: (cargos: CargoData[]) => void;
     initialCargos?: CargoData[];
+    shippingLineId?: string;
+    isCrossTenant?: boolean;
+    leg2ShippingLineId?: string;
 }
 
 const CargoInformationForm: ForwardRefRenderFunction<CargoInformationFormHandle, CargoInformationFormProps> = ({
     onChange,
-    initialCargos
+    initialCargos,
+    shippingLineId,
+    isCrossTenant = false,
+    leg2ShippingLineId
 }, ref) => {
     const themeSettings = useThemeSettings();
 
     const [commodityTypes, setCommodityTypes] = useState<CommodityTypes[]>([]);
+    const [leg2CommodityTypes, setLeg2CommodityTypes] = useState<CommodityTypes[]>([]);
     const [cargos, setCargos] = useState<CargoData[]>(initialCargos || []);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -114,7 +121,7 @@ const CargoInformationForm: ForwardRefRenderFunction<CargoInformationFormHandle,
 
     useEffect(() => {
         // Fetch commodity types from API
-        getCommodities().then((commoditiesData) => {
+        getCommodities(shippingLineId).then((commoditiesData) => {
             if (!commoditiesData) {
                 console.warn('No commodities data received');
                 setCommodityTypes([]);
@@ -137,7 +144,25 @@ const CargoInformationForm: ForwardRefRenderFunction<CargoInformationFormHandle,
             console.error('Error fetching commodities:', error);
             setCommodityTypes([]);
         });
-    }, []);
+    }, [shippingLineId]);
+
+    // Fetch leg 2 commodity types for cross-tenant
+    useEffect(() => {
+        if (!isCrossTenant || !leg2ShippingLineId) return;
+        getCommodities(leg2ShippingLineId).then((data) => {
+            if (!data) { setLeg2CommodityTypes([]); return; }
+            const list = data
+                .map((commodity) => ({
+                    commodityId: commodity.id,
+                    commodityName: commodity.name,
+                    commodityDescription: commodity.description,
+                    cbmRate: commodity.cbm_rate,
+                    cargo_class: commodity.cargo_class || ''
+                }))
+                .sort((a, b) => a.commodityName.localeCompare(b.commodityName));
+            setLeg2CommodityTypes(list);
+        }).catch(() => setLeg2CommodityTypes([]));
+    }, [isCrossTenant, leg2ShippingLineId]);
 
     if (cargos.length === 0) {
         return null;
@@ -211,6 +236,48 @@ const CargoInformationForm: ForwardRefRenderFunction<CargoInformationFormHandle,
                                 <p className="text-sm text-red-500 mt-1">{errors[`${cargo.id}-commodityName`]}</p>
                             )}
                         </div>
+
+                        {/* Commodity Type (Leg 2) — cross-tenant only */}
+                        {isCrossTenant && (
+                            <div>
+                                <label htmlFor={`leg2CommodityType-${cargo.id}`} className="flex items-center gap-1 text-sm font-medium text-customText">
+                                    Commodity Type (Leg 2)
+                                    <span title="Different shipping lines may have different commodity classifications. Select the commodity type for the second leg.">
+                                        <PiInfo className="w-4 h-4 text-gray-400 cursor-help" />
+                                    </span>
+                                </label>
+                                <Select
+                                    value={cargo.leg2CommodityName || ''}
+                                    onValueChange={(value) => {
+                                        const selected = leg2CommodityTypes?.find((row) => row?.commodityName === value);
+                                        const updatedCargos = cargos.map((c) =>
+                                            c.id === cargo.id
+                                                ? {
+                                                    ...c,
+                                                    leg2CommodityName: value,
+                                                    leg2CommodityId: selected?.commodityId || 0,
+                                                    leg2CommodityDescription: selected?.commodityDescription || '',
+                                                    leg2CbmRate: selected?.cbmRate || '0',
+                                                    leg2CargoClass: selected?.cargo_class
+                                                }
+                                                : c
+                                        );
+                                        updateCargos(updatedCargos);
+                                    }}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select commodity type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {leg2CommodityTypes?.map((row) => (
+                                            <SelectItem key={row.commodityId} value={row?.commodityName}>
+                                                {row?.commodityName} - {row?.commodityDescription}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
 
                         {/* Quantity */}
                         <div>

@@ -1,8 +1,9 @@
 import { IPort } from '@/models';
-import { PORTS_API, SHIPPING_LINE_API } from 'constants/api';
+import { PORTS_API, SHIPPING_LINE_API, TENANT_PORTS_API } from 'constants/api';
 import { cacheItem, fetchItem } from 'helpers/cache.helpers';
 import axios from '@/services/core/axios';
 import type { IRoute } from '@/models/shipping-line/route.model';
+import { IS_CLIENT } from 'constants/api';
 
 import portsData from '@/data/ports.json';
 
@@ -44,13 +45,38 @@ export async function getAllPorts(): Promise<IPort[]> {
 
 export async function getPorts(): Promise<IPort[] | undefined> {
   try {
-    const res = await fetch(PORTS_API, {
-      next: { tags: ['ports'], revalidate: 3600 }
-    });
+    if (!IS_CLIENT) {
+      // API V2 Server Mode - Fetch distinct provinces/municipalities
+      const res = await fetch(TENANT_PORTS_API, {
+        next: { tags: ['ports'], revalidate: 3600 }
+      });
+      if (res.ok) {
+        const { data } = await res.json();
+        // Map { province, municipality } to IPort
+        return data.map((item: any, index: number) => {
+          const name = item.municipality && item.province
+            ? `${item.municipality}, ${item.province}`
+            : (item.municipality || item.province);
+          const code = `${item.province}|${item.municipality}`;
+          return {
+            id: index + 1, // Synthetic ID for dropdown
+            name,
+            code,
+            province: item.province,
+            municipality: item.municipality
+          } as IPort;
+        });
+      }
+    } else {
+      // Client API Mode
+      const res = await fetch(PORTS_API, {
+        next: { tags: ['ports'], revalidate: 3600 }
+      });
 
-    if (res.ok) {
-      const { data } = await res.json();
-      return data;
+      if (res.ok) {
+        const { data } = await res.json();
+        return data;
+      }
     }
   } catch (error) {
     console.error('Failed to fetch ports:', error);

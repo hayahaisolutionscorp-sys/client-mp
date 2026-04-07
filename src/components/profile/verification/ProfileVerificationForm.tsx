@@ -2,6 +2,8 @@
 
 import type React from "react"
 import { useState } from "react"
+import { defaultCountries, parseCountry } from "react-international-phone";
+import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
@@ -42,29 +44,24 @@ interface ProfileVerificationFormProps {
     initialData?: IVerification;
 }
 
+import CountrySelector from "@/components/ui/CountrySelector"
+
 const idTypes = ["Philippine National ID (PhilID)","Postal ID","Driver's License","SSS UMID Card","PRC ID","Voter's ID", "PhilHealth ID","Senior Citizen ID","PWD ID","GSIS", "Passport", "Others"]
-const countryCodes = [
-    { code: "PH", name: "Philippines" },
-    { code: "US", name: "United States" },
-    { code: "GB", name: "United Kingdom" },
-    { code: "CA", name: "Canada" },
-    { code: "AU", name: "Australia" },
-    { code: "JP", name: "Japan" },
-    { code: "KR", name: "South Korea" },
-    { code: "CN", name: "China" },
-]
 
 export default function ProfileVerification({ onCancel, onSubmit, dependentId, dependentName, initialData }: ProfileVerificationFormProps) {
-    const { loggedInAccount } = useAuth();
+    const { loggedInAccount, branding } = useAuth();
     const themeSettings = useThemeSettings();
     const primaryColor = themeSettings?.primary || '#2563eb';
+    const isHayahaiLinked = loggedInAccount?.providers?.includes('hayahai');
+    const isSelfVerification = !dependentId;
+    const isGlobalManaged = isHayahaiLinked && isSelfVerification;
     
     const [currentStep, setCurrentStep] = useState(1)
     const [formData, setFormData] = useState<VerificationFormData>({
         governmentId: initialData?.id_type?.toLowerCase() || "",
         customIdType: initialData?.id_type && !idTypes.some(t => t.toLowerCase() === initialData.id_type.toLowerCase()) ? initialData.id_type : "",
         idNumber: initialData?.id_number || "",
-        documentCountry: initialData?.document_country || "PH",
+        documentCountry: initialData?.document_country || "Philippines",
         expiryDate: initialData?.expiry_date ? new Date(initialData.expiry_date).toISOString().split('T')[0] : "",
         idFront: null,
         idBack: null,
@@ -199,7 +196,51 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
 
     return (
         <div className="bg-transparent relative">
-            {/* Form Header - Sticky */}
+            {isGlobalManaged ? (
+                /* Global Management Screen for Linked Users */
+                <div className="p-10 flex flex-col items-center text-center">
+                    <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+                        <User className="h-10 w-10 text-blue-600" />
+                    </div>
+                    
+                    <h3 className="text-2xl font-bold text-slate-900 mb-2">Profile Managed by Hayahai</h3>
+                    <p className="text-slate-600 max-w-sm mb-6 leading-relaxed">
+                        Your identity verification is managed globally through your Hayahai account. 
+                        Please complete your verification on the main Hayahai portal to ensure your status is synced across all marketplaces.
+                    </p>
+
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-8 w-full max-w-sm">
+                        <div className="flex items-center gap-3 mb-3 text-left">
+                            <div className="w-2 h-2 rounded-full bg-blue-500" />
+                            <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Sync Benefits</p>
+                        </div>
+                        <ul className="text-xs text-slate-500 text-left space-y-2 list-disc list-inside">
+                            <li>Verified status shared across all partners</li>
+                            <li>Secure global document management</li>
+                            <li>Faster boarding on all shipping lines</li>
+                        </ul>
+                    </div>
+
+                    <div className="flex flex-col gap-3 w-full max-w-xs">
+                        <Button
+                            className="w-full hover:brightness-90 h-11"
+                            style={{ backgroundColor: primaryColor }}
+                            onClick={() => window.open('https://ayahay.com/profile/verification', '_blank')}
+                        >
+                            Go to Hayahai Main Portal
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            className="w-full h-11 text-slate-500"
+                            onClick={onCancel}
+                        >
+                            Back to Profile
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <>
+                {/* Form Header - Sticky */}
             <div className="border-b sticky top-0 bg-white z-20">
                 <div className="p-6 flex pb-2 justify-between items-center">
                     <div>
@@ -305,21 +346,10 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">Document Issuing Country</label>
-                            <Select
+                            <CountrySelector
                                 value={formData.documentCountry}
-                                onValueChange={(value) => setFormData({ ...formData, documentCountry: value })}
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select Country" />
-                                </SelectTrigger>
-                                <SelectContent side="bottom" align="start">
-                                    {countryCodes.map((country) => (
-                                        <SelectItem key={country.code} value={country.code}>
-                                            {country.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                onChange={(value) => setFormData({ ...formData, documentCountry: value })}
+                            />
                         </div>
                     </div>
 
@@ -533,7 +563,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                                     <div className="space-y-1">
                                         <p className="text-xs font-medium text-slate-500 uppercase tracking-tight">Issuing Country</p>
                                         <p className="text-sm font-semibold text-slate-900">
-                                            {countryCodes.find(c => c.code === formData.documentCountry)?.name || formData.documentCountry}
+                                            {defaultCountries.map(c => parseCountry(c)).find(pc => pc.iso2.toUpperCase() === formData.documentCountry)?.name || formData.documentCountry}
                                         </p>
                                     </div>
                                     <div className="space-y-1">
@@ -641,6 +671,8 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                         Back to Profile
                     </Button>
                 </div>
+            )}
+                </>
             )}
         </div>
     )
