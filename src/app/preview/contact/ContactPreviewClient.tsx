@@ -2,7 +2,7 @@ import type { ContactPreviewPayload } from "@/lib/preview/contact-preview";
 import { PreviewPageShell } from "@/lib/preview/PreviewPageShell";
 
 interface ContactPreviewClientProps {
-  initialPayload: ContactPreviewPayload;
+  initialPayload: ContactPreviewPayload | null;
 }
 
 export default function ContactPreviewClient({ initialPayload }: ContactPreviewClientProps) {

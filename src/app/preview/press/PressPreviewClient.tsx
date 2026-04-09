@@ -2,7 +2,7 @@ import type { PressPreviewPayload } from "@/lib/preview/press-preview";
 import { PreviewPageShell } from "@/lib/preview/PreviewPageShell";
 
 interface PressPreviewClientProps {
-  initialPayload: PressPreviewPayload;
+  initialPayload: PressPreviewPayload | null;
 }
 
 export default function PressPreviewClient({ initialPayload }: PressPreviewClientProps) {

@@ -14,14 +14,6 @@ export default async function LandingPreviewPage({ searchParams }: LandingPrevie
   const initialPayload = draftId ? getLandingDraft(draftId) : null;
   const initialLandingData = await getLandingPageData();
 
-  if (!initialPayload) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500">
-        Preview draft not found.
-      </div>
-    );
-  }
-
   return (
     <LandingPreviewClient 
       initialPayload={initialPayload} 

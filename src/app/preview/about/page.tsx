@@ -12,13 +12,5 @@ export default async function AboutPreviewPage({ searchParams }: AboutPreviewPag
   const draftId = params.draftId;
   const initialPayload = draftId ? getAboutDraft(draftId) : null;
 
-  if (!initialPayload) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500">
-        Preview draft not found.
-      </div>
-    );
-  }
-
   return <AboutPreviewClient initialPayload={initialPayload} />;
 }

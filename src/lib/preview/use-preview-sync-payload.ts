@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-export function usePreviewSyncPayload<T>(initialPayload: T, messageType: string) {
-  const [payload, setPayload] = useState<T>(initialPayload);
+export function usePreviewSyncPayload<T>(initialPayload: T | null, messageType: string): T | null {
+  const [payload, setPayload] = useState<T | null>(initialPayload);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {

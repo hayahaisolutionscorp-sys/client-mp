@@ -2,7 +2,7 @@ import type { FaqPreviewPayload } from "@/lib/preview/faq-preview";
 import { PreviewPageShell } from "@/lib/preview/PreviewPageShell";
 
 interface FaqPreviewClientProps {
-  initialPayload: FaqPreviewPayload;
+  initialPayload: FaqPreviewPayload | null;
 }
 
 export default function FaqPreviewClient({ initialPayload }: FaqPreviewClientProps) {

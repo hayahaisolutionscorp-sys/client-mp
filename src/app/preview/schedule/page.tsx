@@ -12,13 +12,5 @@ export default async function SchedulePreviewPage({ searchParams }: SchedulePrev
   const draftId = params.draftId;
   const initialPayload = draftId ? getScheduleDraft(draftId) : null;
 
-  if (!initialPayload) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500">
-        Preview draft not found.
-      </div>
-    );
-  }
-
   return <SchedulePreviewClient initialPayload={initialPayload} />;
 }
