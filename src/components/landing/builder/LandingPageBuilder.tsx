@@ -409,7 +409,6 @@ export default function LandingPageBuilder({
             }
             break;
         }
-
         if (!content) return null;
 
         const animationStyle = sectionAnimations[section.section_key];
@@ -432,7 +431,7 @@ export default function LandingPageBuilder({
     </div>
 
     {/* Footer Area: Footer variants include their own SubscribeBanner internally */}
-    <div id="Resources" className="w-full">
+    <div id="section-footer" className="w-full">
     {layout.footerSection ? (
         <>
           {layout.footerSection.variant === "centered" && <FooterCentered key={layout.footerSection.id} theme={theme} />}

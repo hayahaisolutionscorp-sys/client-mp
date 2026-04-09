@@ -10,6 +10,7 @@ import type { LandingPreviewPayload } from "@/lib/preview/landing-preview";
 import type { LandingPageData } from "@/services/content/landing-page.service";
 import { buildPreviewBranding } from "@/lib/preview/theme";
 import { usePreviewSyncPayload } from "@/lib/preview/use-preview-sync-payload";
+import { usePreviewScrollToSection } from "@/lib/preview/use-preview-scroll-to-section";
 import type { IThemeSettings } from "@/models";
 
 interface LandingPreviewClientProps {
@@ -23,6 +24,7 @@ export default function LandingPreviewClient({
 }: LandingPreviewClientProps) {
   const { setBranding, setThemeSettings } = useTheme();
   const payload = usePreviewSyncPayload(initialPayload, "AYAHAY_LANDING_PREVIEW_SYNC");
+  usePreviewScrollToSection();
   const [config, setConfig] = useState<LandingBuilderContent>(
     normalizeLandingBuilderContent(initialPayload.builderConfig)
   );

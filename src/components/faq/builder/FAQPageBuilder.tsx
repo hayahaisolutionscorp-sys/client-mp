@@ -266,7 +266,9 @@ export default function FAQPageBuilder({
         <div className="space-y-8">
           {enabledSections.map((sectionConfig) => {
             if (sectionConfig.section_key === 'hero') {
-              return renderSection(sectionConfig);
+              const element = renderSection(sectionConfig);
+              if (!element) return null;
+              return <div key={sectionConfig.section_key} id={`section-${sectionConfig.section_key}`}>{element}</div>;
             }
             return null;
           })}
@@ -275,7 +277,9 @@ export default function FAQPageBuilder({
         <div className="container mx-auto px-4 py-6 max-w-4xl">
           {enabledSections.map((sectionConfig) => {
             if (sectionConfig.section_key === 'faq_list') {
-              return renderSection(sectionConfig);
+              const element = renderSection(sectionConfig);
+              if (!element) return null;
+              return <div key={sectionConfig.section_key} id={`section-${sectionConfig.section_key}`}>{element}</div>;
             }
             return null;
           })}

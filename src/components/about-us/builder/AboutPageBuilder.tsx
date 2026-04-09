@@ -587,7 +587,6 @@ export default function AboutPageBuilder({
               sectionContent = null;
               break;
           }
-
           if (!sectionContent) return null;
 
           return (
