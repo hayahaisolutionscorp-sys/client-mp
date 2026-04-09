@@ -6,17 +6,22 @@ import Image from "next/image"
 import { EyeIcon, EyeOffIcon, Check } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
 import { PasswordStrengthTracker } from "@/components/auth/PasswordStrengthTracker";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
+import { buildReturnUrlParam, resolvePostAuthPath, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
 
 const REGISTER_STEP_KEY = 'register-step';
 const REGISTER_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 export function RegisterPasswordForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
+  const safeReturnUrl = sanitizeReturnUrl(returnUrl);
+  const returnUrlParam = buildReturnUrlParam(safeReturnUrl);
   const branding = useBranding();
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
@@ -35,20 +40,20 @@ export function RegisterPasswordForm() {
   // Guard: requires step 1 + email data
   useEffect(() => {
     const raw = sessionStorage.getItem(REGISTER_STEP_KEY);
-    if (!raw) { router.replace('/register'); return; }
+    if (!raw) { router.replace(withReturnUrl('/register', safeReturnUrl)); return; }
     try {
       const parsed = JSON.parse(raw);
       if (!parsed.firstName || !parsed.email || Date.now() - parsed.ts > REGISTER_TTL_MS) {
         sessionStorage.removeItem(REGISTER_STEP_KEY);
-        router.replace('/register');
+        router.replace(withReturnUrl('/register', safeReturnUrl));
         return;
       }
       setStepData(parsed);
     } catch {
       sessionStorage.removeItem(REGISTER_STEP_KEY);
-      router.replace('/register');
+      router.replace(withReturnUrl('/register', safeReturnUrl));
     }
-  }, [router]);
+  }, [router, safeReturnUrl]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +90,7 @@ export function RegisterPasswordForm() {
       };
       await register(stepData.email, password, fullForm);
       sessionStorage.removeItem(REGISTER_STEP_KEY);
-      router.push('/');
+      router.push(resolvePostAuthPath(safeReturnUrl));
     } catch (error: any) {
       console.error(error);
       const msg = error.message || "An unexpected error occurred. Please try again.";
@@ -180,7 +185,7 @@ export function RegisterPasswordForm() {
 
         <div className="flex space-x-4">
           <Button type="button" variant="outline" className="w-full" 
-            onClick={() => { setIsNavigating(true); router.push('/register/email'); }}
+            onClick={() => { setIsNavigating(true); router.push(`/register/email${returnUrlParam}`); }}
             disabled={isNavigating || loading}>
             Back
           </Button>
@@ -194,7 +199,7 @@ export function RegisterPasswordForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="hover:underline" style={{ color: primaryColor }}>Sign in</Link>
+          <Link href={`/login${returnUrlParam}`} className="hover:underline" style={{ color: primaryColor }}>Sign in</Link>
         </p>
       </div>
     </div>

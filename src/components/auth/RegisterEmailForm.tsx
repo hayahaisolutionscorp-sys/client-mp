@@ -6,16 +6,21 @@ import Image from "next/image"
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useBranding } from "@/hooks/branding";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { AuthService } from "@/services/auth.service";
+import { buildReturnUrlParam, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
 
 const REGISTER_STEP_KEY = 'register-step';
 const REGISTER_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 export function RegisterEmailForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
+  const safeReturnUrl = sanitizeReturnUrl(returnUrl);
+  const returnUrlParam = buildReturnUrlParam(safeReturnUrl);
   const branding = useBranding();
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
@@ -30,21 +35,21 @@ export function RegisterEmailForm() {
   // Guard: requires valid step 1 session data
   useEffect(() => {
     const raw = sessionStorage.getItem(REGISTER_STEP_KEY);
-    if (!raw) { router.replace('/register'); return; }
+    if (!raw) { router.replace(withReturnUrl('/register', safeReturnUrl)); return; }
     try {
       const parsed = JSON.parse(raw);
       if (!parsed.firstName || Date.now() - parsed.ts > REGISTER_TTL_MS) {
         sessionStorage.removeItem(REGISTER_STEP_KEY);
-        router.replace('/register');
+        router.replace(withReturnUrl('/register', safeReturnUrl));
         return;
       }
       setStepData(parsed);
       if (parsed.email) setEmail(parsed.email);
     } catch {
       sessionStorage.removeItem(REGISTER_STEP_KEY);
-      router.replace('/register');
+      router.replace(withReturnUrl('/register', safeReturnUrl));
     }
-  }, [router]);
+  }, [router, safeReturnUrl]);
 
   const checkEmailAvailability = useCallback(async (emailToCheck: string) => {
     try {
@@ -91,7 +96,8 @@ export function RegisterEmailForm() {
     setIsNavigating(true);
     const updated = { ...stepData, email, ts: Date.now() };
     sessionStorage.setItem(REGISTER_STEP_KEY, JSON.stringify(updated));
-    router.push('/register/password');
+    const passwordUrl = withReturnUrl('/register/password', safeReturnUrl);
+    router.push(passwordUrl);
   };
 
   if (!stepData) return null;
@@ -154,7 +160,7 @@ export function RegisterEmailForm() {
         </div>
         <div className="flex space-x-4">
           <Button type="button" variant="outline" className="w-full" 
-            onClick={() => { setIsNavigating(true); router.push('/register'); }} 
+            onClick={() => { setIsNavigating(true); router.push(`/register${returnUrlParam}`); }} 
             disabled={emailValidation.checking || isNavigating}>
             Back
           </Button>
@@ -168,7 +174,7 @@ export function RegisterEmailForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/login" className="hover:underline" style={{ color: primaryColor }}>Sign in</Link>
+          <Link href={`/login${returnUrlParam}`} className="hover:underline" style={{ color: primaryColor }}>Sign in</Link>
         </p>
       </div>
     </div>

@@ -39,6 +39,7 @@ export interface IBookingTripPassenger {
   preferredCabinId?: number;
   preferredCabin?: ICabin;
 
+  seatCellId?: string | null;
   meal?: string;
   totalPrice?: number;
   priceWithoutMarkup?: number;

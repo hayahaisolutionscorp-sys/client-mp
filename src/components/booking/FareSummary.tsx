@@ -4,6 +4,11 @@ import { useState, useEffect, useMemo, type FC } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { FiChevronDown, FiChevronUp, FiLoader } from 'react-icons/fi';
+import { AlertTriangle, Armchair, CheckCircle2 } from 'lucide-react';
+import { SeatPickerDialog } from '@/components/booking/seat-selection/SeatPickerDialog';
+import type { SeatPickerDialogTrip, SeatPickerDialogPassenger } from '@/components/booking/seat-selection/SeatPickerDialog';
+import type { AssignmentsMap } from '@/components/booking/seat-selection/seat-picker.types';
+import type { SeatLabelsMap } from '@/components/booking/seat-selection/SeatPicker';
 import { FaCheckCircle } from 'react-icons/fa';
 import { v4 as uuidv4 } from 'uuid';
 import { cacheItem } from 'helpers/cache.helpers';
@@ -19,6 +24,7 @@ import { ContactData } from '@/types/booking/contact-data';
 import { PaymentInitiationRequest, PaymentInitiationResponse } from '@/types/payment/payment';
 import { ITrip, IBooking } from '@/models';
 import { startPaymentForBooking } from '@/services';
+import { useAuth } from '@/contexts/AuthContexts';
 import { PricingResponse } from '@/types/booking/pricing';
 
 interface PassengerDetails {
@@ -53,6 +59,8 @@ interface FareSummaryProps {
   cargoDetails?: CargoData[];
   commodityId?: string;
   shippingLineId?: string;
+  departureCabinId?: string;
+  returnCabinId?: string;
   isLoading?: boolean;
   onPay?: () => Promise<boolean | void>;
   enabledProviders?: string[];
@@ -83,6 +91,8 @@ const FareSummary: FC<FareSummaryProps> = ({
   cargoDetails,
   commodityId,
   shippingLineId,
+  departureCabinId,
+  returnCabinId,
   isLoading = false,
   onPay,
   enabledProviders = [],
@@ -108,10 +118,20 @@ const FareSummary: FC<FareSummaryProps> = ({
   const [isChargesDepExpanded, setIsChargesDepExpanded] = useState(false);
   const [isChargesRetExpanded, setIsChargesRetExpanded] = useState(false);
 
+  const [showSeatLoginModal, setShowSeatLoginModal] = useState(false);
+  const [seatDialogOpen, setSeatDialogOpen] = useState(false);
+  const [selectedSeatAssignments, setSelectedSeatAssignments] = useState<AssignmentsMap>({});
+  const [selectedSeatLabels, setSelectedSeatLabels] = useState<SeatLabelsMap>({});
+
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const departureCabinNameParam = searchParams.get('departureCabinName');
+  const returnCabinNameParam = searchParams.get('returnCabinName');
+  const passengerCountParam = searchParams.get('passengerCount');
+  const vehicleCountParam = searchParams.get('vehicleCount');
   const router = useRouter();
   const themeSettings = useThemeSettings();
+  const { loggedInAccount } = useAuth();
 
   const returnCabinName = searchParams.get('returnCabinName');
 
@@ -152,6 +172,60 @@ const FareSummary: FC<FareSummaryProps> = ({
 
     setIsFormValid(mainPassengerValid && companionsValid && contactValid && vehiclesValid && cargosValid);
   }, [passengerDetails, contactDetails, vehicleDepartureDetails, cargoDetails]);
+
+  const buildPassengerDetailsUrl = () => {
+    const p = new URLSearchParams();
+    const dTripIds = departureTrips?.map(t => t.id).join(',') || '';
+    const rTripIds = returnTrips?.map(t => t.id).join(',') || '';
+    const computedPassengerCount = passengerDetails
+      ? 1 + (passengerDetails.companions?.length ?? 0)
+      : undefined;
+    const computedVehicleCount = vehicleDepartureDetails?.length ?? undefined;
+
+    const addParam = (key: string, value?: string | number | null) => {
+      if (value !== undefined && value !== null && String(value).length > 0) {
+        p.append(key, String(value));
+      }
+    };
+
+    addParam('departureTripId', dTripIds || undefined);
+    addParam('returnTripId', rTripIds || undefined);
+    addParam('commodityId', commodityId);
+    addParam('shippingLineId', shippingLineId);
+    addParam('departureCabinId', departureCabinId);
+    addParam('returnCabinId', returnCabinId);
+    addParam('departureCabinName', departureCabinNameParam);
+    addParam('returnCabinName', returnCabinNameParam);
+    addParam('passengerCount', passengerCountParam ?? computedPassengerCount);
+    addParam('vehicleCount', vehicleCountParam ?? computedVehicleCount);
+
+    return `/booking/passenger-details?${p.toString()}`;
+  };
+
+  const cacheForAuthReturn = () => {
+    cacheItem('booking-json', {
+      passengerDetails,
+      contactDetails,
+      vehicleDepartureDetails,
+      vehicleReturnDetails,
+      cargoDetails,
+      bookingState,
+      prepareBookingData,
+      pricingData,
+    }, 900);
+  };
+
+  const handleLoginRedirect = () => {
+    cacheForAuthReturn();
+    setShowSeatLoginModal(false);
+    router.push(`/login?returnUrl=${encodeURIComponent(buildPassengerDetailsUrl())}`);
+  };
+
+  const handleRegisterRedirect = () => {
+    cacheForAuthReturn();
+    setShowSeatLoginModal(false);
+    router.push(`/register?returnUrl=${encodeURIComponent(buildPassengerDetailsUrl())}`);
+  };
 
   const handleProceedToPayment = () => {
     setIsNavigatingToPayment(true);
@@ -202,19 +276,27 @@ const FareSummary: FC<FareSummaryProps> = ({
         prepareBookingData,
         pricingData,
       };
-      cacheItem('booking-json', bookingJson, 60);
+      cacheItem('booking-json', bookingJson, 900);
 
       const queryParams = new URLSearchParams();
       if (departureTripIds) queryParams.append('departureTripId', departureTripIds);
       if (returnTripIds) queryParams.append('returnTripId', returnTripIds);
       if (commodityId) queryParams.append('commodityId', commodityId);
       if (shippingLineId) queryParams.append('shippingLineId', shippingLineId);
+      if (departureCabinId) queryParams.append('departureCabinId', departureCabinId);
+      if (returnCabinId) queryParams.append('returnCabinId', returnCabinId);
+
+      // Cache seat assignments if the user picked seats via the dialog
+      if (Object.keys(selectedSeatAssignments).length > 0) {
+        cacheItem('seat-assignments', selectedSeatAssignments, 900);
+        cacheItem('seat-assignment-labels', selectedSeatLabels, 900);
+      }
 
       router.push(`/booking/payment-confirmation?${queryParams.toString()}`);
     }
   };
 
-  const handlePayment = async () => {
+const handlePayment = async () => {
     setIsProcessing(true);
     try {
       if (onPay) {
@@ -892,6 +974,19 @@ const FareSummary: FC<FareSummaryProps> = ({
           </>
         )}
 
+        {(() => {
+          const hasSeatmap = departureTrips?.some(t => t.seatSelection) || returnTrips?.some(t => t.seatSelection);
+          return hasSeatmap && Object.keys(selectedSeatAssignments).length > 0 ? (
+            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>
+                Selected seats may have added markup charges.
+                Final amount is reflected after seat assignment.
+              </span>
+            </div>
+          ) : null;
+        })()}
+
         <hr className="border-t-2 border-dashed border-gray-300" />
 
         <div className="flex justify-between items-center font-bold text-lg">
@@ -915,6 +1010,119 @@ const FareSummary: FC<FareSummaryProps> = ({
       {/* Buttons */}
       {pathname.includes('/booking/passenger-details') && (
         <>
+          {(() => {
+            const hasSeatmap = departureTrips?.some(t => t.seatSelection) || returnTrips?.some(t => t.seatSelection);
+            if (!hasSeatmap) return null;
+
+            // Build passengers list for dialog from current form state
+            const dialogPassengers: SeatPickerDialogPassenger[] = passengerDetails
+              ? [passengerDetails.passenger, ...(passengerDetails.companions ?? [])].map((p, i) => ({
+                  key: `p-${i}`,
+                  firstName: p.firstname ?? '',
+                  lastName: p.lastname ?? '',
+                  discountType: p.discountType ?? 'Adult',
+                }))
+              : [];
+
+            // Build trips list for dialog
+            const dialogTrips: SeatPickerDialogTrip[] = [];
+            const departureTripId = departureTrips?.[0]?.id ?? '';
+            const returnTripId = returnTrips?.[0]?.id ?? '';
+            if (departureTripId && departureCabinId) {
+              dialogTrips.push({ tripId: String(departureTripId), label: 'Departure', cabinId: Number(departureCabinId) });
+            }
+            if (returnTripId && returnCabinId) {
+              dialogTrips.push({ tripId: String(returnTripId), label: 'Return', cabinId: Number(returnCabinId) });
+            }
+
+            // First selected seat label for display (primary passenger, departure trip)
+            const firstLabel = selectedSeatLabels['p-0']?.[departureTripId];
+            const hasSeatSelected = Object.keys(selectedSeatAssignments).length > 0 && Object.values(selectedSeatAssignments).some(tm => Object.keys(tm).length > 0);
+
+            return (
+              <>
+                {/* Choose seat section */}
+                <div className="py-2">
+                  <p className="text-sm font-medium text-zinc-800 mb-0.5">Choose your seat</p>
+                  <p className="text-xs text-zinc-400 mb-2">Pick your preferred seat or we'll assign one for you</p>
+
+                  {hasSeatSelected && (
+                    <div className="flex items-center gap-1.5 mb-2 text-emerald-600">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                      <span className="text-xs font-medium">
+                        {firstLabel ? `Seat selected: ${firstLabel}` : 'Seats selected'}
+                      </span>
+                    </div>
+                  )}
+
+                  {!hasSeatSelected && (
+                    <p className="text-xs text-zinc-400 mb-2 italic">Seat will be auto assigned</p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!loggedInAccount) {
+                        setShowSeatLoginModal(true);
+                      } else if (dialogTrips.length > 0 && dialogPassengers.length > 0) {
+                        setSeatDialogOpen(true);
+                      }
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 text-[12px] font-medium text-zinc-700 border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
+                  >
+                    <Armchair className="h-3.5 w-3.5" />
+                    {hasSeatSelected ? 'Change seat' : 'Choose seat'}
+                  </button>
+                </div>
+
+                {/* Seat picker dialog */}
+                {dialogTrips.length > 0 && (
+                  <SeatPickerDialog
+                    open={seatDialogOpen}
+                    onClose={() => setSeatDialogOpen(false)}
+                    trips={dialogTrips}
+                    passengers={dialogPassengers}
+                    initialAssignments={selectedSeatAssignments}
+                    onConfirm={(assignments, labels) => {
+                      setSelectedSeatAssignments(assignments);
+                      setSelectedSeatLabels(labels);
+                      setSeatDialogOpen(false);
+                    }}
+                    onSkip={() => {
+                      setSelectedSeatAssignments({});
+                      setSelectedSeatLabels({});
+                      setSeatDialogOpen(false);
+                    }}
+                  />
+                )}
+
+                {/* Guest auth modal */}
+                <Dialog open={showSeatLoginModal} onOpenChange={setShowSeatLoginModal}>
+                  <DialogContent className="max-w-sm">
+                    <DialogTitle>Choose your seat</DialogTitle>
+                    <p className="text-sm text-zinc-600 mt-2">
+                      Seat selection is available for registered users. Log in to pick your preferred seat and avoid random assignment.
+                    </p>
+                    <div className="mt-4 flex flex-col gap-2">
+                      <Button variant="default" className="w-full" onClick={handleLoginRedirect}>
+                        Log In
+                      </Button>
+                      <Button variant="outline" className="w-full" onClick={handleRegisterRedirect}>
+                        Create Account
+                      </Button>
+                      <button
+                        type="button"
+                        className="text-xs text-zinc-400 hover:text-zinc-600 mt-1 text-center"
+                        onClick={() => setShowSeatLoginModal(false)}
+                      >
+                        Continue without seat selection
+                      </button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
+            );
+          })()}
           <Button
             variant="default"
             className="mt-6 w-full bg-customBlue text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-500 flex items-center justify-center gap-2"
@@ -975,6 +1183,7 @@ const FareSummary: FC<FareSummaryProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 };

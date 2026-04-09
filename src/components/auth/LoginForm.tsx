@@ -5,10 +5,11 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
+import { buildReturnUrlParam, resolvePostAuthPath, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
 
 const STEP_KEY = 'login-step';
 
@@ -18,6 +19,10 @@ interface LoginFormProps {
 
 export function LoginForm({ mode = "default" }: LoginFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
+  const safeReturnUrl = sanitizeReturnUrl(returnUrl);
+  const returnUrlParam = buildReturnUrlParam(safeReturnUrl);
   const branding = useBranding();
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
@@ -53,14 +58,15 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
     if (!email || !emailValidation.isValid) return;
     setIsNavigating(true);
     sessionStorage.setItem(STEP_KEY, JSON.stringify({ email, ts: Date.now() }));
-    router.push('/login/verify');
+    const verifyUrl = withReturnUrl('/login/verify', safeReturnUrl);
+    router.push(verifyUrl);
   };
 
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
       await signInWithGoogle();
-      router.push('/');
+      router.push(resolvePostAuthPath(safeReturnUrl));
     } catch (error: any) {
       if (error?.code === 'auth/popup-closed-by-user') {
         console.log('Google sign-in cancelled');
@@ -75,7 +81,7 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
     try {
       setLoading(true);
       await signInWithFacebook();
-      router.push('/');
+      router.push(resolvePostAuthPath(safeReturnUrl));
     } catch (error: any) {
       console.error('Facebook sign-in error:', error);
     } finally {
@@ -191,8 +197,8 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link 
-            href="/register" 
-            onMouseEnter={() => router.prefetch('/register')}
+            href={`/register${returnUrlParam}`} 
+            onMouseEnter={() => router.prefetch(`/register${returnUrlParam}`)}
             className="hover:underline" 
             style={{ color: primaryColor }}
           >

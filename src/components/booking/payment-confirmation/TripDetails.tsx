@@ -7,13 +7,16 @@ import { IBooking } from '@/models';
 
 interface TripDetailsProps {
   booking?: IBooking;
+  /** seat-assignment-labels cache: passengerKey → tripId → cell_id */
+  seatLabels?: Record<string, Record<string, string>>;
 }
 
-export default function TripDetails({ booking }: TripDetailsProps) {
+export default function TripDetails({ booking, seatLabels }: TripDetailsProps) {
   const themeSettings = useThemeSettings();
 
   const renderPassengers = (tripIndex: number) => {
     const passengers = booking?.bookingTrips?.[tripIndex]?.bookingTripPassengers;
+    const tripId = (booking?.bookingTrips?.[tripIndex] as any)?.tripId as string | undefined;
     if (!passengers || passengers.length === 0) return null;
 
     return (
@@ -23,21 +26,37 @@ export default function TripDetails({ booking }: TripDetailsProps) {
           <h3 className="text-sm font-semibold text-gray-700">Passengers</h3>
         </div>
         <div className="pl-7 space-y-3">
-          {passengers.map((passenger, index) => (
-            <div key={index} className="text-customText">
-              <p className="text-sm font-medium">
-                {passenger.passenger?.firstName} {passenger.passenger?.lastName}
-              </p>
-              <p className="text-xs text-gray-500">
-                {passenger?.discountType || 'Regular'} | {passenger.passenger?.sex} |{' '}
-                {passenger.passenger?.nationality}
-              </p>
-            </div>
-          ))}
+          {passengers.map((passenger, index) => {
+            const seatCellId = (tripId ? seatLabels?.[`p-${index}`]?.[tripId] : undefined)
+              ?? (passenger as any).seatCellId
+              ?? null;
+            return (
+              <div key={index} className="text-customText">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-sm font-medium">
+                    {passenger.passenger?.firstName} {passenger.passenger?.lastName}
+                  </p>
+                  {seatCellId && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 font-mono border border-violet-200">
+                      {seatCellId}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500">
+                  {passenger?.discountType || 'Regular'} | {passenger.passenger?.sex} |{' '}
+                  {passenger.passenger?.nationality}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
   };
+
+  // TODO: surface SEAT_MARKUP from booking.bookingPaymentItems when available
+  // Filter for items where charge_code === 'SEAT_MARKUP' and display as a labeled line item
+  // in the passenger section or a separate "Seat Charges" section below passengers.
 
   const renderVehicles = (tripIndex: number) => {
     const vehicles = booking?.bookingTrips?.[tripIndex]?.bookingTripVehicles;

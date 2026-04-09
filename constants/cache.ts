@@ -25,6 +25,8 @@ export const publicCacheKeys = <const>[
   'saved-bookings',
   'booking-json',
   'booking-response',
+  'seat-assignments',
+  'seat-assignment-labels',
   'query-params',
   'header-sections',
   'destinations',

@@ -359,6 +359,8 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
           cargoDetails={cargoDetails}
           commodityId={commodityId}
           shippingLineId={shippingLineId}
+          departureCabinId={departureCabinId}
+          returnCabinId={returnCabinId}
           isLoading={isPricingLoading}
         />
       </div>

@@ -6,11 +6,12 @@ import Image from "next/image";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPassword";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
+import { buildReturnUrlParam, resolvePostAuthPath, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
 
 const STEP_KEY = "login-step";
 const TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -21,6 +22,10 @@ interface LoginVerifyFormProps {
 
 export function LoginVerifyForm({ mode = "default" }: LoginVerifyFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
+  const safeReturnUrl = sanitizeReturnUrl(returnUrl);
+  const returnUrlParam = buildReturnUrlParam(safeReturnUrl);
   const branding = useBranding();
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || "oklch(34.38% 0.118 262.34)";
@@ -50,22 +55,22 @@ export function LoginVerifyForm({ mode = "default" }: LoginVerifyFormProps) {
   useEffect(() => {
     const raw = sessionStorage.getItem(STEP_KEY);
     if (!raw) {
-      router.replace("/login");
+      router.replace(withReturnUrl('/login', safeReturnUrl));
       return;
     }
     try {
       const { email: storedEmail, ts } = JSON.parse(raw);
       if (!storedEmail || Date.now() - ts > TTL_MS) {
         sessionStorage.removeItem(STEP_KEY);
-        router.replace("/login");
+        router.replace(withReturnUrl('/login', safeReturnUrl));
         return;
       }
       setEmail(storedEmail);
     } catch {
       sessionStorage.removeItem(STEP_KEY);
-      router.replace("/login");
+      router.replace(withReturnUrl('/login', safeReturnUrl));
     }
-  }, [router]);
+  }, [router, safeReturnUrl]);
 
   useEffect(() => {
     if (cooldownTime <= 0) return;
@@ -96,7 +101,7 @@ export function LoginVerifyForm({ mode = "default" }: LoginVerifyFormProps) {
     try {
       await signIn(email, password);
       sessionStorage.removeItem(STEP_KEY);
-      router.push("/");
+      router.push(resolvePostAuthPath(safeReturnUrl));
     } catch (err: any) {
       console.error("Login error:", err);
       const retryAfter = err.response?.data?.retryAfter;
@@ -213,7 +218,7 @@ export function LoginVerifyForm({ mode = "default" }: LoginVerifyFormProps) {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="hover:underline" style={{ color: primaryColor }}>
+          <Link href={`/register${returnUrlParam}`} className="hover:underline" style={{ color: primaryColor }}>
             Register now
           </Link>
         </p>

@@ -59,6 +59,12 @@ export default function PassengerList({ booking }: PassengerListProps) {
                     {passenger?.cabin?.cabinType?.name}
                   </div>
                 )}
+                {/* Seat Badge */}
+                {(passenger as any)?.seatCellId && (
+                  <div className="flex items-center px-2 py-1 text-xs font-medium font-mono bg-violet-100 text-violet-700 border border-violet-200 rounded-full">
+                    {(passenger as any).seatCellId}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -101,6 +107,12 @@ export default function PassengerList({ booking }: PassengerListProps) {
                     >
                       <TbPointFilled className="mr-1" />
                       {passenger?.cabin?.cabinType?.name}
+                    </div>
+                  )}
+                  {/* Seat Badge */}
+                  {(passenger as any)?.seatCellId && (
+                    <div className="flex items-center px-2 py-1 text-xs font-medium font-mono bg-violet-100 text-violet-700 border border-violet-200 rounded-full">
+                      {(passenger as any).seatCellId}
                     </div>
                   )}
                 </div>

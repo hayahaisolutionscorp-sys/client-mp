@@ -14,6 +14,7 @@ import DevServiceWorkerReset from '@/components/pwa/DevServiceWorkerReset';
 import { ToasterProvider } from '@/components/ui/ToasterProvider';
 import NextTopLoader from 'nextjs-toploader';
 import { getReadableTextColor, hexToHsl, toRgbCssValue } from '@/lib/color-utils';
+import NextTopLoader from 'nextjs-toploader';
 import ThemeHydrator from '@/components/ThemeHydrator';
 import { IThemeSettings } from "@/models";
 

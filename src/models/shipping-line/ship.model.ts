@@ -14,4 +14,5 @@ export interface IShip {
   cabins?: ICabin[];
   voyages?: IVoyage[];
   dryDocks?: IDryDock[];
+  has_seatmap?: boolean;
 }
