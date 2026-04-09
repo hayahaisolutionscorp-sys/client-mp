@@ -142,12 +142,12 @@ const Navbar = ({
               <UserDropdown shouldBeTransparent={shouldBeTransparent} />
             </div>
 
-            {/* Mobile menu button */}
-            {shouldRenderLandingNav && (
-              <div className="lg:hidden relative z-50 flex items-center gap-4">
-                <div className="lg:hidden flex items-center">
-                   <UserDropdown shouldBeTransparent={shouldBeTransparent} />
-                </div>
+            {/* Mobile section - UserDropdown always visible; hamburger only for landing nav */}
+            <div className="lg:hidden relative z-50 flex items-center gap-4">
+              <div className="flex items-center">
+                <UserDropdown shouldBeTransparent={shouldBeTransparent} />
+              </div>
+              {shouldRenderLandingNav && (
                 <div
                   role="button"
                   tabIndex={0}
@@ -172,8 +172,8 @@ const Navbar = ({
                     />
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 

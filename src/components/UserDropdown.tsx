@@ -108,7 +108,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
 
         {/* Dropdown Menu (Only logic for logged in or mobile logged out) */}
         <div
-          className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 transition-all duration-200 ${isDropdownOpen ? 'transform opacity-100 scale-100' : 'transform opacity-0 scale-95 pointer-events-none'
+          className={`absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 transition-all duration-200 ${isDropdownOpen ? 'transform opacity-100 scale-100' : 'transform opacity-0 scale-95 pointer-events-none'
             }`}
         >
           {currentUser ? (
