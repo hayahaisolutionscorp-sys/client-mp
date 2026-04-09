@@ -57,7 +57,7 @@ function AboutTextSection({
   if (!title && !description) {
     return null;
   }
-
+//test
   return (
     <section
       className="rounded-[28px] border border-slate-200 p-8 shadow-sm md:p-10"
