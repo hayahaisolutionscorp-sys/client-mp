@@ -50,6 +50,7 @@ const PassengerDropdown = ({ value = DEFAULT_NUM_PASSENGERS, onChange }: Passeng
     <div ref={dropdownRef} className="relative z-10 inline-block w-full h-[40px] overflow-visible text-left focus-within:z-[120]">
       {/* Button to toggle dropdown */}
       <button
+        data-template-ignore="true"
         onClick={toggleDropdown}
         aria-haspopup="true"
         aria-expanded={isOpen}
@@ -84,6 +85,7 @@ const PassengerDropdown = ({ value = DEFAULT_NUM_PASSENGERS, onChange }: Passeng
               </div>
               <div className="flex items-center space-x-4">
                 <button
+                  data-template-ignore="true"
                   onClick={decrement}
                   className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={value <= 1} // Disable minus button when value is 1
@@ -92,6 +94,7 @@ const PassengerDropdown = ({ value = DEFAULT_NUM_PASSENGERS, onChange }: Passeng
                 </button>
                 <span aria-live="polite">{value}</span>
                 <button
+                  data-template-ignore="true"
                   onClick={increment}
                   className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

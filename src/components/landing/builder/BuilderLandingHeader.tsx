@@ -89,6 +89,7 @@ export default function BuilderLandingHeader({
                 <button
                   key={item.id}
                   type="button"
+                  data-template-ignore="true"
                   onClick={() => handleScroll(item.id)}
                   className="text-sm font-medium transition-colors"
                   style={{ color: `${theme.text}BF` }}
@@ -104,6 +105,7 @@ export default function BuilderLandingHeader({
           </div>
           <button
             type="button"
+            data-template-ignore="true"
             className="rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em]"
             style={{
               borderColor: `${theme.primary}33`,
@@ -158,6 +160,7 @@ export default function BuilderLandingHeader({
                 <button
                   key={item.id}
                   type="button"
+                  data-template-ignore="true"
                   onClick={() => handleScroll(item.id)}
                   className="font-medium transition-all hover:border-b-2 border-transparent"
                   style={{ "--hover-color": theme.primary } as any}
@@ -187,6 +190,7 @@ export default function BuilderLandingHeader({
             </div>
             <button
               className="relative z-50 inline-flex items-center justify-center p-2 lg:hidden"
+              data-template-ignore="true"
               aria-label="Toggle menu"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
@@ -214,6 +218,7 @@ export default function BuilderLandingHeader({
         {/* Close button */}
         <button
           className="absolute right-4 top-4 z-50 p-2"
+          data-template-ignore="true"
           aria-label="Close menu"
           onClick={() => setIsMenuOpen(false)}
         >
@@ -229,6 +234,7 @@ export default function BuilderLandingHeader({
                 <button
                   key={item.id}
                   type="button"
+                  data-template-ignore="true"
                   onClick={() => handleScroll(item.id)}
                   className="block w-full py-4 text-left text-lg font-medium transition-colors hover:opacity-80"
                   style={{ color: theme.text }}

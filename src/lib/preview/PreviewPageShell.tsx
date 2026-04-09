@@ -14,6 +14,7 @@ import type { IPress } from "@/models";
 import type { IPressPage, IPressSection } from "@/services/content/press.service";
 import { buildPreviewThemeSettings } from "./theme";
 import { usePreviewSyncPayload } from "./use-preview-sync-payload";
+import { usePreviewScrollToSection } from "./use-preview-scroll-to-section";
 import type { PreviewGeneralConfig } from "./landing-preview";
 import type { AboutPreviewPayload } from "./about-preview";
 import type { ContactPreviewPayload } from "./contact-preview";
@@ -38,6 +39,7 @@ export function PreviewPageShell<TPayload extends { config?: PreviewGeneralConfi
   baseBranding = null,
 }: PreviewPageShellProps<TPayload>) {
   const payload = usePreviewSyncPayload(initialPayload, messageType);
+  usePreviewScrollToSection();
   const theme = buildPreviewThemeSettings(payload.config ?? null, baseBranding);
 
   if (pageKey === "about") {
@@ -76,6 +78,7 @@ export function PreviewPageShell<TPayload extends { config?: PreviewGeneralConfi
         faqs={faqs}
         categories={categories}
         themeSettings={theme.themeSettings}
+        branding={theme.branding as any}
       />
     );
   }

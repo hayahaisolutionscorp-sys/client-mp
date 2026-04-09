@@ -49,6 +49,7 @@ const DatePickerFieldset = ({
         <Popover>
           <PopoverTrigger asChild>
             <button
+              data-template-ignore="true"
               className={cn(
                 "flex w-full h-full px-4 py-2 items-center justify-start text-left font-normal text-customText",
                 !isClient || !date ? "text-muted-foreground" : ""

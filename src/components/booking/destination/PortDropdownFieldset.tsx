@@ -112,6 +112,7 @@ const PortDropdownFieldset = ({
       <legend className="font-natural text-xs text-customText">{legendText}</legend>
       <div ref={dropdownRef} className="relative z-[140] w-full h-full overflow-visible">
         <button
+          data-template-ignore="true"
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="listbox"

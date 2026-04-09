@@ -99,19 +99,21 @@ const Navbar = ({
               {shouldRenderLandingNav &&
                 filteredNavItems.map((item) =>
                   item.trigger.toLowerCase() === 'scroll' ? (
-                    <button
+                    <a
                       key={item.id}
-                      onClick={() => {
+                      href={`#${item.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
                         setActiveNav(item.id);
                         scrollToElement(item.id);
                       }}
-                      className={`text-sm lg:text-md font-medium transition-all duration-300 ${activeNav === item.id
+                      className={`text-sm lg:text-md font-medium transition-all duration-300 cursor-pointer ${activeNav === item.id
                         ? 'border-b-2 border-current'
                         : 'hover:border-b-2 border-transparent hover:border-current'
                         }`}
                     >
                       {item.name}
-                    </button>
+                    </a>
                   ) : (
                     <Link
                       key={item.id}
@@ -131,9 +133,9 @@ const Navbar = ({
             <div className={`hidden lg:flex items-center space-x-4 lg:space-x-6 ${shouldBeTransparent ? 'text-white' : 'text-customText'}`}>
               {isHome && currentUser && (
                 <>
-                  <button className="hover:opacity-80 transition-opacity">
+                  <div role="button" tabIndex={0} className="hover:opacity-80 transition-opacity cursor-pointer">
                     <LuBell className="w-5 h-5" />
-                  </button>
+                  </div>
                 </>
               )}
 
@@ -142,10 +144,17 @@ const Navbar = ({
 
             {/* Mobile menu button */}
             {shouldRenderLandingNav && (
-              <div className="lg:hidden relative z-50">
-                <button
+              <div className="lg:hidden relative z-50 flex items-center gap-4">
+                <div className="lg:hidden flex items-center">
+                   <UserDropdown shouldBeTransparent={shouldBeTransparent} />
+                </div>
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="inline-flex items-center justify-center p-2 mt-4 rounded-md focus:outline-none"
+                  onKeyDown={(e) => e.key === 'Enter' && setIsMenuOpen(!isMenuOpen)}
+                  className="inline-flex items-center justify-center p-2 rounded-md focus:outline-none cursor-pointer"
+                  style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
                   aria-label="Toggle menu"
                 >
                   <div className="relative w-6 h-6">
@@ -162,7 +171,7 @@ const Navbar = ({
                         }`}
                     />
                   </div>
-                </button>
+                </div>
               </div>
             )}
           </div>
@@ -179,17 +188,19 @@ const Navbar = ({
               <div className="space-y-1">
                 {filteredNavItems.map((item) =>
                   item.trigger.toLowerCase() === 'scroll' ? (
-                    <button
+                    <a
                       key={item.id}
-                      onClick={() => {
+                      href={`#${item.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
                         setActiveNav(item.id);
                         scrollToElement(item.id);
                       }}
-                      className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                      className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 cursor-pointer ${isMenuOpen ? 'opacity-100' : 'opacity-0'
                         } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
                     >
                       {item.name}
-                    </button>
+                    </a>
                   ) : (
                     <Link
                       key={item.id}
@@ -219,16 +230,19 @@ const Navbar = ({
                       >
                         Profile
                       </Link>
-                      <button
+                      <div
+                        role="button"
+                        tabIndex={0}
                         onClick={() => {
                           logout();
                           setIsMenuOpen(false);
                         }}
-                        className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                        onKeyDown={(e) => e.key === 'Enter' && logout()}
+                        className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 cursor-pointer ${isMenuOpen ? 'opacity-100' : 'opacity-0'
                           } text-red-600 hover:bg-red-50`}
                       >
                         Log Out
-                      </button>
+                      </div>
                     </>
                   ) : (
                     <>

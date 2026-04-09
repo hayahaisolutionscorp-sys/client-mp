@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback } from 'react';
 import { IAccount, RegisterForm } from '@/models';
 import { AuthService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
@@ -48,14 +48,21 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     const router = useRouter();
     const branding = useBranding();
     const theme = useThemeSettings();
-    const cachedAccount = fetchItem<IAccount>('logged-in-account') || null;
+
+    // Read cached account only once on mount to avoid creating new object references
+    // that would trigger the loadProfile useEffect on every render.
+    const [cachedAccount] = useState<IAccount | null>(
+        () => fetchItem<IAccount>('logged-in-account') || null
+    );
 
     // In-memory auth state — never written to localStorage or any storage.
     // The HTTP-only JWT cookie is sent automatically on every request.
     // Login state is determined solely by whether GET /auth/me succeeds.
     const [currentUser, setCurrentUser] = useState<any | null>(null);
-    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(cachedAccount);
-    const [loading, setLoading] = useState(Boolean(cachedAccount));
+    // Start with null to match server (no localStorage on server) and avoid hydration mismatch.
+    // loadProfile will populate this after mount if the user has a valid session.
+    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const [notification, setNotification] = useState<{
         type: 'success' | 'error' | null;
@@ -78,7 +85,10 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             setLoading(true);
             const result = await AuthService.getProfile();
             if (!result) {
-                clearSession();
+                // No valid session — clear in-memory state but keep localStorage cache
+                // so the next refresh still attempts loadProfile instead of showing login.
+                setCurrentUser(null);
+                setLoggedInAccount(null);
                 return null;
             }
 
@@ -87,7 +97,8 @@ export default function AuthContextProvider({ children }: { children: React.Reac
 
             if (!user || typeof user !== 'object' || Object.keys(user).length === 0) {
                 console.warn('Profile fetch returned invalid user data', result);
-                clearSession();
+                setCurrentUser(null);
+                setLoggedInAccount(null);
                 return null;
             }
 
@@ -132,7 +143,17 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         }
     }, [clearSession]);
 
+    // Immediately set loading before paint if we have a cached account,
+    // so UserDropdown shows a skeleton instead of flashing "Login/Create Account".
+    useLayoutEffect(() => {
+        if (cachedAccount) {
+            setLoading(true);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     // Initial load — checks the HTTP-only cookie implicitly via /auth/me
+    // cachedAccount is stable (from useState initializer), so this runs only once.
     useEffect(() => {
         if (!cachedAccount) {
             setLoading(false);
@@ -140,7 +161,8 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         }
 
         loadProfile();
-    }, [cachedAccount, loadProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const register = async (email: string, password: string, values: RegisterForm) => {
         try {

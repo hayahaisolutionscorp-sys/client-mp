@@ -52,6 +52,7 @@ const VehicleDropdown: React.FC<VehicleDropdownProps> = ({ value = DEFAULT_NUM_V
     <div ref={dropdownRef} className="relative z-10 inline-block w-full h-[40px] overflow-visible text-left focus-within:z-[120]">
       {/* Button to toggle dropdown */}
       <button
+        data-template-ignore="true"
         onClick={toggleDropdown}
         className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50"
         style={
@@ -82,6 +83,7 @@ const VehicleDropdown: React.FC<VehicleDropdownProps> = ({ value = DEFAULT_NUM_V
               </div>
               <div className="flex items-center space-x-4">
                 <button
+                  data-template-ignore="true"
                   onClick={decrement}
                   className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={value == 0} // Disable minus button when value is 0
@@ -90,6 +92,7 @@ const VehicleDropdown: React.FC<VehicleDropdownProps> = ({ value = DEFAULT_NUM_V
                 </button>
                 <span>{value}</span>
                 <button
+                  data-template-ignore="true"
                   onClick={increment}
                   className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

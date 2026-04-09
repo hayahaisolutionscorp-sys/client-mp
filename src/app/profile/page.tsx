@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useCallback, useEffect, useRef, useLayoutEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton"
@@ -65,6 +65,12 @@ export default function ProfilePage() {
     const [isUploading, setIsUploading] = useState(false);
     const [showCropper, setShowCropper] = useState(false);
     const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+
+    // Track whether auth state has been resolved (not just the initial false/null defaults)
+    const [authReady, setAuthReady] = useState(false);
+    useLayoutEffect(() => {
+        setAuthReady(true);
+    }, []);
 
     const fetchProfileData = useCallback(async () => {
         if (!loggedInAccount) return;
@@ -135,7 +141,7 @@ export default function ProfilePage() {
     }, [loggedInAccount]);
 
     useEffect(() => {
-        if (loading) return;
+        if (!authReady || loading) return;
 
         if (loggedInAccount === null) {
             router.replace('/login');
@@ -147,7 +153,7 @@ export default function ProfilePage() {
         } else {
             setIsProfileLoading(false);
         }
-    }, [loggedInAccount, loading, fetchProfileData, router]);
+    }, [authReady, loggedInAccount, loading, fetchProfileData, router]);
 
     // Persist active tab to sessionStorage whenever it changes
     useEffect(() => {
@@ -280,6 +286,7 @@ export default function ProfilePage() {
                         <TabsTrigger
                             key={tab}
                             value={tab}
+                            data-template-ignore="true"
                             style={activeTab === tab ? { borderColor: primaryColor } : {}}
                             className="rounded-none border-b-2 border-transparent data-[state=active]:bg-transparent px-8 py-3 whitespace-nowrap capitalize"
                         >

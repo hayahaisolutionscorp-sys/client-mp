@@ -1,8 +1,11 @@
 'use client';
 
-import type { IFaq, IThemeSettings } from '@/models';
+import { useState, useEffect } from 'react';
+import type { IFaq, IThemeSettings, IBrandingConfig } from '@/models';
 import { getReadableTextColor } from '@/lib/color-utils';
 import { normalizeFaqBuilderContent, type FaqBuilderSectionConfig } from '@/lib/faq-builder';
+import { cn } from '@/lib/utils';
+import { AnimatedSection } from '@/components/whitelabel/AnimatedSection';
 
 // Hero variants
 import HeroDefault from './templates/hero/HeroDefault';
@@ -23,6 +26,7 @@ interface FAQPageBuilderProps {
   faqs: IFaq[];
   categories: string[];
   themeSettings: IThemeSettings | null;
+  branding: IBrandingConfig | null;
 }
 
 export default function FAQPageBuilder({
@@ -30,7 +34,122 @@ export default function FAQPageBuilder({
   faqs,
   categories,
   themeSettings,
+  branding,
 }: FAQPageBuilderProps) {
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'scroll-to-section') {
+        const sectionId = event.data?.sectionId;
+        const element = document.getElementById(`section-${sectionId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setActiveSectionId(sectionId);
+          setTimeout(() => setActiveSectionId(null), 2000);
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const sectionAnimationsRaw = branding?.colors?.sectionAnimations;
+  let sectionAnimations: Record<string, string> = {};
+  if (sectionAnimationsRaw) {
+    if (typeof sectionAnimationsRaw === 'string') {
+      try { sectionAnimations = JSON.parse(sectionAnimationsRaw); } catch (e) {}
+    } else if (typeof sectionAnimationsRaw === 'object') {
+      sectionAnimations = sectionAnimationsRaw as Record<string, string>;
+    }
+  }
+
+  const getAnimationCSSForSection = (sectionId: string, animation: string) => {
+    if (!animation || animation === "none") return "";
+    const scope = `.anim-section-${sectionId}`;
+    switch (animation) {
+      case "smooth-up":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            opacity: 0;
+            animation: textSmoothUp-${sectionId} 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.2s;
+          }
+          @keyframes textSmoothUp-${sectionId} {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(1); }
+          }
+        `;
+      case "staggered":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            opacity: 0;
+            filter: blur(10px);
+            animation: textStaggered-${sectionId} 1s ease-out forwards;
+            animation-delay: 0.3s;
+          }
+          @keyframes textStaggered-${sectionId} {
+            0% { opacity: 0; filter: blur(10px); transform: scale(0.98); }
+            100% { opacity: 1; filter: blur(0px); transform: scale(1); }
+          }
+        `;
+      case "typewriter":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            clip-path: inset(0 100% 0 0);
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            clip-path: inset(0 100% 0 0);
+            animation: textTypewriterReveal-${sectionId} 3s steps(60, end) forwards;
+            animation-delay: 0.2s;
+          }
+          @keyframes textTypewriterReveal-${sectionId} {
+            from { clip-path: inset(0 100% 0 0); }
+            to { clip-path: inset(0 0 0 0); }
+          }
+        `;
+      case "floating":
+        return `
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            animation: textFloat-${sectionId} 3s ease-in-out infinite;
+          }
+          @keyframes textFloat-${sectionId} {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+          }
+        `;
+      case "zoom-in":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            opacity: 0;
+            animation: textZoom-${sectionId} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes textZoom-${sectionId} {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+          }
+        `;
+      default: return "";
+    }
+  };
+
+  const fullAnimationCSS = Object.entries(sectionAnimations)
+    .filter(([id]) => id.startsWith('faq_'))
+    .map(([id, anim]) => getAnimationCSSForSection(id, anim))
+    .join("\n");
   const primaryColor = themeSettings?.primaryColor || themeSettings?.primary || '#0052CC';
   const secondaryColor = themeSettings?.secondaryColor || themeSettings?.secondary || '#00A3E0';
   const surfaceColor = themeSettings?.surface || '#FFFFFF';
@@ -51,140 +170,105 @@ export default function FAQPageBuilder({
   const renderSection = (sectionConfig: FaqBuilderSectionConfig) => {
     const { section_key, variant } = sectionConfig;
 
+    let sectionContent = null;
     switch (section_key) {
       case 'hero':
         switch (variant) {
           case 'minimal':
-            return (
-              <HeroMinimal
-                key="hero"
-                title={heroTitle}
-                description={heroDescription}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-              />
+            sectionContent = (
+              <HeroMinimal key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
+            break;
           case 'centered':
-            return (
-              <HeroCentered
-                key="hero"
-                title={heroTitle}
-                description={heroDescription}
-                primaryColor={primaryColor}
-                textOnPrimary={textOnPrimary}
-              />
+            sectionContent = (
+              <HeroCentered key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textOnPrimary={textOnPrimary} />
             );
+            break;
           case 'gradient':
-            return (
-              <HeroGradient
-                key="hero"
-                title={heroTitle}
-                description={heroDescription}
-                primaryColor={primaryColor}
-                secondaryColor={secondaryColor}
-                textOnPrimary={textOnPrimary}
-              />
+            sectionContent = (
+              <HeroGradient key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} secondaryColor={secondaryColor} textOnPrimary={textOnPrimary} />
             );
+            break;
           case 'compact':
-            return (
-              <HeroCompact
-                key="hero"
-                title={heroTitle}
-                description={heroDescription}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-              />
+            sectionContent = (
+              <HeroCompact key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
+            break;
           case 'default':
           default:
-            return (
-              <HeroDefault
-                key="hero"
-                title={heroTitle}
-                description={heroDescription}
-                primaryColor={primaryColor}
-                textOnPrimary={textOnPrimary}
-              />
+            sectionContent = (
+              <HeroDefault key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textOnPrimary={textOnPrimary} />
             );
+            break;
         }
+        break;
 
       case 'faq_list':
         switch (variant) {
           case 'accordion':
-            return (
-              <FAQListAccordion
-                key="faq_list"
-                faqs={faqs}
-                categories={categories}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-              />
+            sectionContent = (
+              <FAQListAccordion key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
+            break;
           case 'cards':
-            return (
-              <FAQListCards
-                key="faq_list"
-                faqs={faqs}
-                categories={categories}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-              />
+            sectionContent = (
+              <FAQListCards key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
             );
+            break;
           case 'compact':
-            return (
-              <FAQListCompact
-                key="faq_list"
-                faqs={faqs}
-                categories={categories}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-              />
+            sectionContent = (
+              <FAQListCompact key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
             );
+            break;
           case 'minimal':
-            return (
-              <FAQListMinimal
-                key="faq_list"
-                faqs={faqs}
-                categories={categories}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-              />
+            sectionContent = (
+              <FAQListMinimal key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
             );
+            break;
           case 'default':
           default:
-            return (
-              <FAQListDefault
-                key="faq_list"
-                faqs={faqs}
-                categories={categories}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-              />
+            sectionContent = (
+              <FAQListDefault key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
             );
+            break;
         }
+        break;
 
       default:
-        return null;
+        sectionContent = null;
     }
+
+    if (!sectionContent) return null;
+
+    const faqSectionId = section_key === 'hero' ? 'faq_hero' : 'faq_list';
+    const animationStyle = sectionAnimations[faqSectionId];
+    const animationClass = animationStyle && animationStyle !== "none" ? `anim-section-${faqSectionId}` : "";
+    const isFocused = activeSectionId === faqSectionId;
+
+    return (
+      <AnimatedSection 
+        key={section_key} 
+        id={`section-${faqSectionId}`}
+        className={cn(
+          animationClass,
+          isFocused && "ring-4 ring-primary ring-offset-4 ring-opacity-50 transition-all duration-500 rounded-lg relative z-50"
+        )}
+      >
+        {sectionContent}
+      </AnimatedSection>
+    );
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#EEF8FC]">
+      <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
       <main className="flex-grow pt-25 md:pt-10">
         <div className="space-y-8">
           {enabledSections.map((sectionConfig) => {
             if (sectionConfig.section_key === 'hero') {
-              return renderSection(sectionConfig);
+              const element = renderSection(sectionConfig);
+              if (!element) return null;
+              return <div key={sectionConfig.section_key} id={`section-${sectionConfig.section_key}`}>{element}</div>;
             }
             return null;
           })}
@@ -193,7 +277,9 @@ export default function FAQPageBuilder({
         <div className="container mx-auto px-4 py-6 max-w-4xl">
           {enabledSections.map((sectionConfig) => {
             if (sectionConfig.section_key === 'faq_list') {
-              return renderSection(sectionConfig);
+              const element = renderSection(sectionConfig);
+              if (!element) return null;
+              return <div key={sectionConfig.section_key} id={`section-${sectionConfig.section_key}`}>{element}</div>;
             }
             return null;
           })}

@@ -32,18 +32,7 @@ export function LoginVerifyForm({ mode = "default" }: LoginVerifyFormProps) {
 
   const { signIn } = useAuth();
 
-  const [email, setEmail] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    const raw = sessionStorage.getItem(STEP_KEY);
-    if (!raw) return null;
-    try {
-      const { email: storedEmail, ts } = JSON.parse(raw);
-      if (!storedEmail || Date.now() - ts > TTL_MS) return null;
-      return storedEmail;
-    } catch {
-      return null;
-    }
-  });
+  const [email, setEmail] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);

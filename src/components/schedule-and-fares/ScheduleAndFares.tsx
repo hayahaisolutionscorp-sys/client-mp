@@ -16,8 +16,8 @@ interface ScheduleAndFaresProps {
   destPortId?: number;
   themeColor?: string;
   accentColor?: string;
-  datePickerVariant?: "default" | "minimal";
-  tableVariant?: "default" | "striped";
+  datePickerVariant?: "default" | "minimal" | "simple" | "outlined";
+  tableVariant?: "default" | "striped" | "comfortable" | "high-contrast";
 }
 
 const ScheduleAndFares = ({
@@ -34,7 +34,8 @@ const ScheduleAndFares = ({
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const pickerMinimal = datePickerVariant === "minimal";
+  const pickerMinimal = datePickerVariant === "minimal" || datePickerVariant === "simple";
+  const pickerOutlined = datePickerVariant === "outlined";
 
   useEffect(() => {
     const fetchAllShips = async () => {
@@ -106,7 +107,13 @@ const ScheduleAndFares = ({
   return (
     <div className="space-y-6">
       <div
-        className={pickerMinimal ? "px-2 py-2 rounded-md border border-slate-200 bg-slate-50/70" : "px-2"}
+        className={
+          pickerOutlined
+            ? "px-3 py-3 rounded-lg border-2 border-slate-300 bg-white shadow-sm"
+            : pickerMinimal
+              ? "px-2 py-2 rounded-md border border-slate-200 bg-slate-50/70"
+              : "px-2"
+        }
         style={{ '--primary-color': themeColor } as React.CSSProperties}
       >
         <DateSelection onDateChange={setSelectedDate} accentColor={accentColor} />

@@ -9,7 +9,7 @@ import dynamic from "next/dynamic";
 interface ScheduleAndFaresClientPageProps {
   heroVariant: string;
   datePickerVariant: string;
-  fareTableVariant: "default" | "striped";
+  fareTableVariant: "default" | "striped" | "comfortable" | "high-contrast";
 }
 
 const ScheduleAndFares = dynamic(() => import("@/components/schedule-and-fares/ScheduleAndFares"), {
@@ -23,22 +23,23 @@ export function ScheduleAndFaresClientPage({
 }: ScheduleAndFaresClientPageProps) {
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || "#0060df";
-  const heroCompact = heroVariant === "compact";
-  const pickerMinimal = datePickerVariant === "minimal";
+  const heroCompact = heroVariant === "compact" || heroVariant === "modern-clean";
+  const heroReadable = heroVariant === "readable";
+  const pickerMinimal = datePickerVariant === "minimal" || datePickerVariant === "simple";
 
   return (
     <div
       className={`container max-w-[1500px] mx-auto px-4 sm:px-6 ${heroCompact ? "py-3 sm:py-6" : "py-4 sm:py-8"}`}
       style={{ "--primary-color": primaryColor } as CSSProperties}
     >
-      <Card className={`w-full max-w-none ${heroCompact ? "border-slate-200" : ""}`}>
+      <Card className={`w-full max-w-none ${heroCompact ? "border-slate-200" : ""} ${heroReadable ? "border-slate-300 shadow-sm" : ""}`}>
         <CardContent className={pickerMinimal ? "p-4 sm:p-6" : "p-5 sm:p-8"}>
           <div
             className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${pickerMinimal ? "mb-4" : "mb-6"}`}
           >
             <h2
               className={`font-semibold flex items-center gap-2 px-2 ${
-                heroCompact ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"
+                heroReadable ? "text-2xl sm:text-3xl" : heroCompact ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"
               }`}
             >
               <CalendarIcon className="w-6 h-6" style={{ color: primaryColor }} />
@@ -46,7 +47,10 @@ export function ScheduleAndFaresClientPage({
             </h2>
           </div>
 
-          <ScheduleAndFares datePickerVariant={datePickerVariant as "default" | "minimal"} tableVariant={fareTableVariant} />
+          <ScheduleAndFares
+            datePickerVariant={datePickerVariant as "default" | "minimal" | "simple" | "outlined"}
+            tableVariant={fareTableVariant}
+          />
         </CardContent>
         <CardFooter className="bg-slate-50 py-4 sm:py-5 px-6 sm:px-8 text-sm sm:text-base text-muted-foreground border-t">
           Schedule and fares for the selected date. Prices may vary based on availability.
