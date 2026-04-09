@@ -45,6 +45,8 @@ interface VehicleInformationFormProps {
   shippingLineId?: string;
   isCrossTenant?: boolean;
   leg2ShippingLineId?: string;
+  vehicleClasses?: { code: string; display: string; vehicleTypeId?: number | null }[];
+  leg2VehicleClasses?: { code: string; display: string; vehicleTypeId?: number | null }[];
 }
 
 const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHandle, VehicleInformationFormProps> = ({
@@ -57,7 +59,9 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
   onChange,
   shippingLineId,
   isCrossTenant = false,
-  leg2ShippingLineId
+  leg2ShippingLineId,
+  vehicleClasses,
+  leg2VehicleClasses
 }, ref) => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -175,49 +179,60 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
   };
 
   useEffect(() => {
-    // Fetch vehicle types from API
-    getVehicleTypes(shippingLineId).then((vehicleTypesData) => {
-      if (!vehicleTypesData) {
-        console.warn('No vehicle types data received');
-        setVehicleTypes([]);
-        return;
-      }
-
-      // Map vehicle types from API
-      const vehicleTypesList = vehicleTypesData
-        .map((vt: { id: number; name: string; description: string }) => ({
-          vehicleTypeId: vt.id,
-          vehicleTypeName: vt.name,
-          vehicleTypeDescription: vt.description,
-          vehicleFare: 0, // Fare not provided by vehicle types endpoint
-          cargo_class: (vt as any).cargo_class // Map cargo_class from API
-        }))
-        .sort((a: VehicleTypes, b: VehicleTypes) => a.vehicleTypeName.localeCompare(b.vehicleTypeName));
-
-      setVehicleTypes(vehicleTypesList);
-    }).catch((error) => {
-      console.error('Error fetching vehicle types:', error);
-      setVehicleTypes([]);
-    });
-  }, [shippingLineId]);
+    if (vehicleClasses?.length) {
+      setVehicleTypes(vehicleClasses
+        .filter(vc => vc.vehicleTypeId != null)
+        .map(vc => ({
+          vehicleTypeId: vc.vehicleTypeId!,
+          vehicleTypeName: vc.display,
+          vehicleTypeDescription: '',
+          vehicleFare: 0,
+          cargo_class: undefined,
+        })));
+    } else {
+      getVehicleTypes(shippingLineId).then((vehicleTypesData) => {
+        if (!vehicleTypesData) { setVehicleTypes([]); return; }
+        setVehicleTypes(vehicleTypesData
+          .map((vt: { id: number; name: string; description: string }) => ({
+            vehicleTypeId: vt.id,
+            vehicleTypeName: vt.name,
+            vehicleTypeDescription: vt.description,
+            vehicleFare: 0,
+            cargo_class: (vt as any).cargo_class
+          }))
+          .sort((a: VehicleTypes, b: VehicleTypes) => a.vehicleTypeName.localeCompare(b.vehicleTypeName)));
+      }).catch(() => setVehicleTypes([]));
+    }
+  }, [vehicleClasses, shippingLineId]);
 
   // Fetch leg 2 vehicle types for cross-tenant
   useEffect(() => {
-    if (!isCrossTenant || !leg2ShippingLineId) return;
-    getVehicleTypes(leg2ShippingLineId).then((data) => {
-      if (!data) { setLeg2VehicleTypes([]); return; }
-      const list = data
-        .map((vt: { id: number; name: string; description: string }) => ({
-          vehicleTypeId: vt.id,
-          vehicleTypeName: vt.name,
-          vehicleTypeDescription: vt.description,
+    if (!isCrossTenant) return;
+    if (leg2VehicleClasses?.length) {
+      setLeg2VehicleTypes(leg2VehicleClasses
+        .filter(vc => vc.vehicleTypeId != null)
+        .map(vc => ({
+          vehicleTypeId: vc.vehicleTypeId!,
+          vehicleTypeName: vc.display,
+          vehicleTypeDescription: '',
           vehicleFare: 0,
-          cargo_class: (vt as any).cargo_class
-        }))
-        .sort((a: VehicleTypes, b: VehicleTypes) => a.vehicleTypeName.localeCompare(b.vehicleTypeName));
-      setLeg2VehicleTypes(list);
-    }).catch(() => setLeg2VehicleTypes([]));
-  }, [isCrossTenant, leg2ShippingLineId]);
+          cargo_class: undefined,
+        })));
+    } else if (leg2ShippingLineId) {
+      getVehicleTypes(leg2ShippingLineId).then((data) => {
+        if (!data) { setLeg2VehicleTypes([]); return; }
+        setLeg2VehicleTypes(data
+          .map((vt: { id: number; name: string; description: string }) => ({
+            vehicleTypeId: vt.id,
+            vehicleTypeName: vt.name,
+            vehicleTypeDescription: vt.description,
+            vehicleFare: 0,
+            cargo_class: (vt as any).cargo_class
+          }))
+          .sort((a: VehicleTypes, b: VehicleTypes) => a.vehicleTypeName.localeCompare(b.vehicleTypeName)));
+      }).catch(() => setLeg2VehicleTypes([]));
+    }
+  }, [isCrossTenant, leg2VehicleClasses, leg2ShippingLineId]);
 
   useEffect(() => {
     if (passengerDetails) {

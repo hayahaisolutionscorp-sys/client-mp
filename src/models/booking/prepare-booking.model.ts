@@ -8,6 +8,12 @@ export interface IPrepareBookingData {
     routePreference: IRoutePreference;
     departure: ITripSummary[];
     return: ITripSummary[];
+    passengerTypes: string[];
+    vehicleClasses: { code: string; display: string; vehicleTypeId?: number | null }[];
+    cargoClasses: { code: string; display: string }[];
+    accommodationCodes: string[];
+    bookingUiSettings?: Record<string, any>;
+    snapshot_mismatch: boolean;
 }
 
 export interface IRoutePreference {
