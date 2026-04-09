@@ -7,8 +7,6 @@ export interface ILoginPage {
   page_type: string;
   title: string;
   content: LoginBuilderContent | null;
-  seo_config: Record<string, unknown> | null;
-  header_config: Record<string, unknown> | null;
   show_in_footer: boolean;
   slug: string;
   created_at: string | null;
@@ -20,8 +18,6 @@ const FALLBACK_LOGIN_PAGE: ILoginPage = {
   page_type: "login",
   title: "Sign In",
   content: DEFAULT_LOGIN_BUILDER_CONTENT,
-  seo_config: null,
-  header_config: null,
   show_in_footer: false,
   slug: "login",
   created_at: null,

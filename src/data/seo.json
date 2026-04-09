@@ -314,32 +314,6 @@
             "twitter_title": "Ferry Route | Hayahai",
             "twitter_description": "Details about this ferry route.",
             "twitter_image": "https://hayahai.com/images/og-default.jpg"
-        },
-        "login": {
-            "title": "Sign In - Hayahai Online Booking",
-            "description": "Sign in to your Hayahai account to manage your bookings, view travel history, and access exclusive deals.",
-            "keywords": [
-                "Hayahai sign in",
-                "Hayahai login",
-                "ferry booking login",
-                "Hayahai account"
-            ],
-            "robots": [
-                "noindex",
-                "follow"
-            ],
-            "locale": "en_US",
-            "canonical_url": "https://hayahai.com/login",
-            "og_url": "https://hayahai.com/login",
-            "og_type": "website",
-            "og_title": "Sign In - Hayahai",
-            "og_description": "Sign in to your Hayahai account to manage your bookings and travel history.",
-            "og_image": "https://hayahai.com/images/og-default.jpg",
-            "og_site_name": "Hayahai",
-            "twitter_card": "summary",
-            "twitter_title": "Sign In - Hayahai",
-            "twitter_description": "Sign in to your Hayahai account to manage your bookings and travel history.",
-            "twitter_image": "https://hayahai.com/images/twitter-default.jpg"
         }
     }
 }
