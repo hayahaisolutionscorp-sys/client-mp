@@ -3,6 +3,11 @@ import { ArrowLeft } from "lucide-react"
 import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function RegisterPage() {
   return (

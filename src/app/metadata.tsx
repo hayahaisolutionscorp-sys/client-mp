@@ -6,7 +6,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = await getGlobalMetadata();
   const branding = await getBrandingConfig();
   const brandName = branding?.brand_name || 'HayahAI';
-  const title = typeof seo.title === 'string' ? { default: seo.title, template: `%s | ${seo.title}` } : seo.title;
+  const title = typeof seo.title === 'string' ? { default: seo.title, template: `%s | ${brandName}` } : seo.title;
   const description = seo.description || 'HayahAI Marketplace';
 
   return {

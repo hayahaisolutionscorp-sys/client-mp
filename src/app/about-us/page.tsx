@@ -1,7 +1,8 @@
+import React from 'react';
 import { Metadata } from 'next';
-
 import AboutPageBuilder from '@/components/about-us/builder/AboutPageBuilder';
 import { AboutPageContent } from '@/components/about-us/AboutPageContent';
+import OrganizationSchema from '@/components/seo/OrganizationSchema';
 import { getAboutPage, getAboutUsSection, getCoreValues } from '@/services/content/about-us.service';
 import { getPageMetadata } from '@/services/content/seo.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
@@ -51,24 +52,30 @@ export default async function AboutPage() {
   // If there's builder configuration, use the new builder
   if (aboutPage?.content && typeof aboutPage.content === 'object' && 'sections' in aboutPage.content) {
     return (
-      <AboutPageBuilder
+      <>
+        <OrganizationSchema />
+        <AboutPageBuilder
+          aboutPage={aboutPage}
+          sections={sections}
+          coreValues={coreValues}
+          themeSettings={themeSettings ?? null}
+          branding={branding ?? null}
+        />
+      </>
+    );
+  }
+
+  // Fallback to old rendering
+  return (
+    <>
+      <OrganizationSchema />
+      <AboutPageContent
         aboutPage={aboutPage}
         sections={sections}
         coreValues={coreValues}
         themeSettings={themeSettings ?? null}
         branding={branding ?? null}
       />
-    );
-  }
-
-  // Fallback to old rendering
-  return (
-    <AboutPageContent
-      aboutPage={aboutPage}
-      sections={sections}
-      coreValues={coreValues}
-      themeSettings={themeSettings ?? null}
-      branding={branding ?? null}
-    />
+    </>
   );
 }

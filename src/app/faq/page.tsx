@@ -1,4 +1,5 @@
 import FAQPageBuilder from '@/components/faq/builder/FAQPageBuilder';
+import FAQSchema from '@/components/seo/FAQSchema';
 import { getPageMetadata } from '@/services/content/seo.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
 import { getFaqPage, getFaqs } from '@/services/content/faq.service';
@@ -38,12 +39,15 @@ export default async function FAQPage() {
   const categories = Array.from(new Set(faqs.map((item) => item.category)));
 
   return (
-    <FAQPageBuilder
-      faqPageContent={faqPage.content}
-      faqs={faqs}
-      categories={categories}
-      themeSettings={theme ?? null}
-      branding={branding ?? null}
-    />
+    <>
+      <FAQSchema />
+      <FAQPageBuilder
+        faqPageContent={faqPage.content}
+        faqs={faqs}
+        categories={categories}
+        themeSettings={theme ?? null}
+        branding={branding ?? null}
+      />
+    </>
   );
 }
