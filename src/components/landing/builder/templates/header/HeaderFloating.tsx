@@ -67,6 +67,7 @@ export default function HeaderFloating({
                 <button
                   key={item.id}
                   type="button"
+                  data-template-ignore="true"
                   onClick={() => handleScroll(item.id)}
                   className="text-sm font-medium transition-all hover:border-b-2 border-transparent"
                   onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.primary)}
@@ -95,6 +96,7 @@ export default function HeaderFloating({
             </div>
             <button
               className="relative z-50 inline-flex items-center justify-center p-2 lg:hidden"
+              data-template-ignore="true"
               aria-label="Toggle menu"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
@@ -122,6 +124,7 @@ export default function HeaderFloating({
         {/* Close button */}
         <button
           className="absolute right-4 top-4 z-50 p-2"
+          data-template-ignore="true"
           aria-label="Close menu"
           onClick={() => setIsMenuOpen(false)}
         >
@@ -137,6 +140,7 @@ export default function HeaderFloating({
                 <button
                   key={item.id}
                   type="button"
+                  data-template-ignore="true"
                   onClick={() => handleScroll(item.id)}
                   className="block w-full text-center text-lg font-medium transition-colors hover:opacity-80"
                   style={{ color: theme.text }}

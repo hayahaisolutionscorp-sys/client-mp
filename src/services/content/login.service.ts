@@ -36,7 +36,8 @@ export async function getLoginPage(): Promise<ILoginPage> {
   try {
     const res = await fetch(`${SEO_API}/login`, { cache: "no-store" });
     if (!res.ok) {
-      throw new Error("Failed to fetch login page");
+      console.error("Failed to fetch login page:", res.status, res.statusText);
+      return FALLBACK_LOGIN_PAGE;
     }
     const { data } = await res.json();
     return data;

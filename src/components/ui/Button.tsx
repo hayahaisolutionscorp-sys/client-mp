@@ -144,6 +144,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       onClick?.(event);
     };
 
+    // Variants that should NOT receive the global template background/color overrides
+    const isTemplateIgnored = variant === "outline" || variant === "ghost" || variant === "link" || variant === "destructive" || variant === "secondary";
+
     return (
       <Comp
         className={cn(
@@ -162,6 +165,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         style={style}
         disabled={disabled}
         onClick={handleClick}
+        {...(isTemplateIgnored ? { "data-template-ignore": "true" } : {})}
         {...props}
       >
         {children}

@@ -28,6 +28,11 @@ export const useThemeSettings = () => {
       return;
     }
 
+    // Skip if ThemeProvider already supplied theme settings (from server-side fetch)
+    if (themeSettings) {
+      return;
+    }
+
     const cached = localStorage.getItem(BRANDING_CACHE_KEY);
     if (cached) {
       try {
@@ -74,7 +79,7 @@ export const useThemeSettings = () => {
         }
       })
       .catch((error) => console.error("Error fetching theme settings:", error));
-  }, [setThemeSettings]);
+  }, [setThemeSettings, themeSettings]);
 
   return themeSettings || (!IS_CLIENT ? defaultTheme : null);
 };

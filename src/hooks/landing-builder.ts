@@ -25,13 +25,19 @@ const getCachedLandingBuilderConfig = (): LandingBuilderContent | null => {
 };
 
 export const useLandingBuilder = (initialConfig: LandingBuilderContent | null = null) => {
-  const [config, setConfig] = useState<LandingBuilderContent | null>(
-    () => initialConfig ?? getCachedLandingBuilderConfig()
-  );
+  // Only use initialConfig for the initial state to avoid hydration mismatch.
+  // localStorage is read in the useEffect below (client-only).
+  const [config, setConfig] = useState<LandingBuilderContent | null>(initialConfig);
 
   useEffect(() => {
     if (initialConfig) {
       setConfig(initialConfig);
+    } else {
+      // Restore from cache on client mount (not in useState to avoid hydration mismatch)
+      const cached = getCachedLandingBuilderConfig();
+      if (cached) {
+        setConfig(cached);
+      }
     }
 
     getLandingBuilderContent()

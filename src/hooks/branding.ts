@@ -31,17 +31,19 @@ export const useBranding = () => {
       }
     }
 
-    // Always fetch fresh branding so whitelabel updates are reflected
-    getBrandingConfig()
-      .then((data) => {
-        if (data) {
-          setBranding(data);
-          localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(data));
-          localStorage.setItem(BRANDING_CACHE_TS_KEY, String(Date.now()));
-        }
-      })
-      .catch((error) => console.error("Error fetching branding settings:", error));
-  }, []);
+    // Only fetch if we have no branding at all (not even cached)
+    if (!cached) {
+      getBrandingConfig()
+        .then((data) => {
+          if (data) {
+            setBranding(data);
+            localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(data));
+            localStorage.setItem(BRANDING_CACHE_TS_KEY, String(Date.now()));
+          }
+        })
+        .catch((error) => console.error("Error fetching branding settings:", error));
+    }
+  }, [themeBranding]);
 
   return branding || themeBranding;
 };

@@ -14,6 +14,11 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const themeSettings = useThemeSettings();
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // Add useEffect for clicking outside dropdown
   useEffect(() => {
@@ -27,15 +32,11 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (pathname !== '/' && !pathname.startsWith('/preview')) {
-    return null;
-  }
-
   return (
     <>
       {/* User Dropdown Menu */}
       <div className="relative" ref={dropdownRef}>
-        {loading ? (
+        {!hasMounted || loading ? (
           <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse border border-gray-100" />
         ) : loggedInAccount?.passenger?.profilePictureUrl ? (
           <div

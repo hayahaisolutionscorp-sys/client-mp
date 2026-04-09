@@ -48,6 +48,7 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
   return (
     <div ref={dropdownRef} className="relative z-10 inline-block w-full h-[40px] overflow-visible text-left focus-within:z-[120]">
       <button
+        data-template-ignore="true"
         onClick={toggleDropdown}
         className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50"
         style={
