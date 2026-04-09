@@ -40,6 +40,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
   const [prepareBookingData, setPrepareBookingData] = useState<IPrepareBookingData | undefined>(initialPrepareBookingData);
   const [pricingData, setPricingData] = useState<PricingResponse['data'] | undefined>(undefined);
   const [isPricingLoading, setIsPricingLoading] = useState(false);
+  const [seatLabels, setSeatLabels] = useState<Record<string, Record<string, string>>>({});
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [enabledProviders, setEnabledProviders] = useState<string[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<PaymentPickerMethod | null>(null);
@@ -51,6 +52,11 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
 
   useEffect(() => {
     window.scrollTo(0, 0); // Scrolls to the top of the page on component load
+  }, []);
+
+  useEffect(() => {
+    const labels = fetchItem<Record<string, Record<string, string>>>('seat-assignment-labels');
+    if (labels) setSeatLabels(labels);
   }, []);
 
   // Load enabled payment providers on mount so picker renders before user tries to pay
@@ -383,7 +389,9 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
     }
 
     const allRawPassengers = [passengerDetails.passenger, ...passengerDetails.companions];
-    const passengers = allRawPassengers.map((p: any) => {
+    const seatAssignments = fetchItem<Record<string, Record<string, string>>>('seat-assignments') || {};
+    const passengers = allRawPassengers.map((p: any, pIndex: number) => {
+      const passengerKey = `p-${pIndex}`;
       const tripAssignments: any[] = [];
 
       const addAssignments = (tripDataArray: any[]) => {
@@ -413,11 +421,14 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
 
           if (!cabinId && tripData?.ship?.cabins?.length === 1) cabinId = tripData.ship.cabins[0].id;
 
+          const seatId = seatAssignments[passengerKey]?.[tripId] || undefined;
+
           tripAssignments.push({
             tripId,
             cabinId,
             cabin_type_name: cabinName,
             discountType: p.discountType || 'Adult',
+            ...(seatId ? { seatId } : {}),
           });
         });
       };
@@ -753,7 +764,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
               />
             )}
             {/* Booking details — Passengers, Vehicles, Cargo */}
-            <TripDetails booking={booking} />
+            <TripDetails booking={booking} seatLabels={seatLabels} />
           </div>
         </div>
 

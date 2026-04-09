@@ -7,7 +7,7 @@ import Image from "next/image"
 import { UserIcon } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from "@/contexts/AuthContexts";
 import {
   Select,
@@ -24,11 +24,16 @@ import { defaultCountries, parseCountry } from "react-international-phone";
 import NationalitySelector from "@/components/ui/NationalitySelector";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
+import { buildReturnUrlParam, resolvePostAuthPath, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
 
 const REGISTER_STEP_KEY = 'register-step';
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl');
+  const safeReturnUrl = sanitizeReturnUrl(returnUrl);
+  const returnUrlParam = buildReturnUrlParam(safeReturnUrl);
   const branding = useBranding();
   const theme = useThemeSettings();
   const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
@@ -140,14 +145,15 @@ export function RegisterForm() {
 
     setLoading(true);
     sessionStorage.setItem(REGISTER_STEP_KEY, JSON.stringify({ ...formData, ts: Date.now() }));
-    router.push('/register/email');
+    const emailUrl = withReturnUrl('/register/email', safeReturnUrl);
+    router.push(emailUrl);
   };
 
   const handleGoogleRegister = async () => {
     try {
       setLoading(true);
       await signInWithGoogle();
-      router.push('/');
+      router.push(resolvePostAuthPath(safeReturnUrl));
     } catch (error: any) {
       if (error?.code === 'auth/popup-closed-by-user') {
         console.log('Google sign-in cancelled');
@@ -163,7 +169,7 @@ export function RegisterForm() {
     try {
       setLoading(true);
       await signInWithFacebook();
-      router.push('/');
+      router.push(resolvePostAuthPath(safeReturnUrl));
     } catch (error: any) {
       console.error('Facebook sign-in error:', error);
     } finally {
@@ -347,8 +353,8 @@ export function RegisterForm() {
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
           <Link 
-            href="/login" 
-            onMouseEnter={() => router.prefetch('/login')}
+            href={`/login${returnUrlParam}`} 
+            onMouseEnter={() => router.prefetch(`/login${returnUrlParam}`)}
             className="hover:underline" 
             style={{ color: primaryColor }}
           >

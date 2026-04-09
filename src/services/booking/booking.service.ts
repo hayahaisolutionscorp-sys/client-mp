@@ -74,6 +74,7 @@ export function mapBookingData(raw: any): IBooking {
       discountType: p.discount_type,
       price: p.price,
       cabin: { name: p.cabin || p.accommodation },
+      seatCellId: p.seatCellId ?? null,
       passenger: {
         firstName: p.first_name,
         lastName: p.last_name,

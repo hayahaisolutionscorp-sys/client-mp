@@ -55,6 +55,7 @@ export interface ITripSummary {
         name: string;
         vehicle_capacities: IVehicleCapacity;
         cabins: ICabinSummary[];
+        has_seatmap?: boolean;
     };
 }
 

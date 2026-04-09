@@ -247,7 +247,7 @@ export function SearchBoxFormContent({
     const [selectedDestinationPort, setSelectedDestinationPort] = useStateForm<IPort | undefined>();
     const selectedDestinationPortRef = useRef(selectedDestinationPort);
     useEffect(() => { selectedDestinationPortRef.current = selectedDestinationPort; }, [selectedDestinationPort]);
-    const [destinationPorts, setDestinationPorts] = useStateForm<IPort[] | undefined>([]);
+    const [destinationPorts, setDestinationPorts] = useStateForm<IPort[] | undefined>(undefined);
     const [ports, setPorts] = useStateForm<IPort[] | undefined>(initialPorts);
     const portsRef = useRef(ports);
     useEffect(() => { portsRef.current = ports; }, [ports]);
@@ -280,6 +280,8 @@ export function SearchBoxFormContent({
         const fetchDestinationPorts = async () => {
             if (selectedOriginPort) {
                 try {
+                    setDestinationPorts(undefined);
+
                     let validDestCodes: Set<string>;
 
                     if (initialRoutes.length > 0) {
@@ -296,7 +298,7 @@ export function SearchBoxFormContent({
                         validDestCodes = new Set(destPorts.map(p => p.code));
                     }
 
-                    const availableDestPorts = portsRef.current?.filter(port => validDestCodes.has(port.code)) ?? [];
+                    const availableDestPorts = portsRef.current?.filter((port) => validDestCodes.has(port.code)) ?? [];
 
                     setDestinationPorts(availableDestPorts.sort((a, b) => a.name.localeCompare(b.name)));
 
@@ -315,7 +317,7 @@ export function SearchBoxFormContent({
         };
 
         fetchDestinationPorts();
-    }, [initialRoutes, selectedOriginPort]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [initialRoutes, selectedOriginPort, ports]);
 
     useEffect(() => {
         const isValid =

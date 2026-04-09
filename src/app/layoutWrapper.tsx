@@ -38,7 +38,14 @@ export default function LayoutWrapper({
   }, []);
 
   const isPreviewRoute = pathname.startsWith('/preview');
-  const hideLayout = isPreviewRoute || pathname === '/login' || pathname === '/register' || pathname.startsWith('/reset-password') || pathname.startsWith('/login/') || pathname.startsWith('/register/');
+  const hideLayout =
+    isPreviewRoute ||
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/login/') ||
+    pathname.startsWith('/register/') ||
+    pathname === '/booking/seat-selection';
   const isProfilePage = pathname === '/profile';
   const shouldRenderChrome = !hideLayout && pathname !== '/';
   const headerVariant =

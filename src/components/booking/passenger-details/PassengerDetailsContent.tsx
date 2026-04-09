@@ -212,7 +212,7 @@ function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId: number = 0)
     status: summary.status as any,
     arrivalTimeDateIso: summary.scheduled_arrival,
     departureDateIso: summary.scheduled_departure,
-    seatSelection: false,
+    seatSelection: summary.ship?.has_seatmap ?? false,
     availableVehicleCapacity,
     remainingVehicleCapacity: vehicleCapacities?.remaining,
     vehicleCapacity,

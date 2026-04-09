@@ -26,12 +26,19 @@ const PortDropdownFieldset = ({
 }: DestinationPortDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isHydrated, setIsHydrated] = useState(false);
   const [filteredPorts, setFilteredPorts] = useState<IPort[]>(() =>
     ports ? [...ports].filter((p) => p.name.trim() !== "").sort((a, b) => a.name.localeCompare(b.name)) : []
   );
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const themeSettings = useThemeSettings();
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const isDelayedEnabled = isHydrated;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -109,16 +116,26 @@ const PortDropdownFieldset = ({
           onClick={toggleDropdown}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
-          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${disabled ? "cursor-not-allowed" : ""
+          className={`flex text-sm items-center justify-start w-full h-full px-4 py-2 bg-white rounded-md shadow-sm ${disabled || !isDelayedEnabled ? "cursor-not-allowed opacity-60" : ""
             }`}
-          disabled={disabled}
+          disabled={disabled || !isDelayedEnabled}
         >
           <BiSolidShip
             className="w-5 h-5 mr-3"
             style={{ color: themeSettings?.accent || "#051036" }}
           />
           <span className="text-customText font-natural">
-            {selectedPort ? selectedPort.name : "Select Port"}
+            {!isHydrated
+              ? "Loading..."
+              : selectedPort
+                ? selectedPort.name
+                : disabled
+                  ? "Select origin first"
+                  : ports === undefined
+                    ? "Loading ports..."
+                    : ports.length === 0
+                      ? "No destinations available"
+                      : "Select Port"}
           </span>
         </button>
 
