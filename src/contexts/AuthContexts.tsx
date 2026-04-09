@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
 import { IAccount, RegisterForm } from '@/models';
 import { AuthService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
@@ -80,7 +80,11 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
     }, []);
 
+    const loadingRef = useRef(false);
+
     const loadProfile = useCallback(async (_force: boolean = false) => {
+        if (loadingRef.current) return;
+        loadingRef.current = true;
         try {
             setLoading(true);
             const result = await AuthService.getProfile();
@@ -139,6 +143,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             }
             return null;
         } finally {
+            loadingRef.current = false;
             setLoading(false);
         }
     }, [clearSession]);
@@ -315,7 +320,14 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         }
     };
 
-    const value: AuthContextType = {
+    // branding and theme are stored in refs so they can be accessed by consumers
+    // without causing re-renders of all auth consumers when theme/branding changes.
+    const brandingRef = useRef(branding);
+    brandingRef.current = branding;
+    const themeRef = useRef(theme);
+    themeRef.current = theme;
+
+    const value: AuthContextType = useMemo(() => ({
         currentUser,
         loggedInAccount,
         hasPrivilegedAccess: loggedInAccount?.role === 'SuperAdmin' || loggedInAccount?.role === 'ShippingLineAdmin' || loggedInAccount?.role === 'TravelAgencyAdmin' || loggedInAccount?.role === 'ClientAdmin',
@@ -331,11 +343,11 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         confirmResetPassword,
         sendEmailVerification,
         notification,
-        branding,
-        theme,
+        get branding() { return brandingRef.current; },
+        get theme() { return themeRef.current; },
         refreshProfile: loadProfile,
         clearSession
-    };
+    }), [currentUser, loggedInAccount, loading, notification, loadProfile, clearSession]);
 
     return (
         <AuthContext.Provider value={value}>

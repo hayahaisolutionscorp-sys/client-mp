@@ -2,7 +2,7 @@ import type { AboutPreviewPayload } from "@/lib/preview/about-preview";
 import { PreviewPageShell } from "@/lib/preview/PreviewPageShell";
 
 interface AboutPreviewClientProps {
-  initialPayload: AboutPreviewPayload;
+  initialPayload: AboutPreviewPayload | null;
 }
 
 export default function AboutPreviewClient({ initialPayload }: AboutPreviewClientProps) {

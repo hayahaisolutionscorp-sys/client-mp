@@ -10,11 +10,19 @@ import type { IThemeSettings, IBrandingConfig } from "@/models";
 import { buildPreviewThemeSettings } from "@/lib/preview/theme";
 
 interface SchedulePreviewClientProps {
-  initialPayload: SchedulePreviewPayload;
+  initialPayload: SchedulePreviewPayload | null;
 }
-
 export default function SchedulePreviewClient({ initialPayload }: SchedulePreviewClientProps) {
   const payload = usePreviewSyncPayload(initialPayload, "AYAHAY_SCHEDULE_PREVIEW_SYNC");
+
+  if (!payload) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500 text-sm">
+        Loading preview...
+      </div>
+    );
+  }
+
   const theme = buildPreviewThemeSettings(payload.config ?? null, null as IBrandingConfig | null);
 
   const variants = useMemo(() => {

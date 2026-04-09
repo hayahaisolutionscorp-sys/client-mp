@@ -16,31 +16,31 @@ interface DateSelectionProps {
 const DateSelection: FC<DateSelectionProps> = ({ onDateChange, accentColor = '#23abff' }) => {
 
   const [windowStart, setWindowStart] = useState(0);
-  const [uniqueDates, setUniqueDates] = useState<{ date: string; day: string }[]>([]);
+  const [uniqueDates, setUniqueDates] = useState<{ date: string; day: string; iso: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [windowSize, setWindowSize] = useState(6);
 
   const fetchDates = useCallback(async () => {
     const baseDate = new Date();
-    const datesArray: { date: string; day: string }[] = [];
+    const datesArray: { date: string; day: string; iso: string }[] = [];
 
     for (let i = windowStart; i < windowStart + windowSize; i++) {
       const newDate = new Date(baseDate);
       newDate.setDate(baseDate.getDate() + i);
 
-      const formattedDate = toPhilippinesTime(newDate.toISOString(), DATE_PRIMARY_DEFAULT_FORMAT);
-      const day = toPhilippinesTime(newDate.toISOString(), DAY_DEFAULT_FORMAT);
+      const isoString = newDate.toISOString();
+      const formattedDate = toPhilippinesTime(isoString, DATE_PRIMARY_DEFAULT_FORMAT);
+      const day = toPhilippinesTime(isoString, DAY_DEFAULT_FORMAT);
 
-      datesArray.push({ date: formattedDate, day });
+      datesArray.push({ date: formattedDate, day, iso: isoString });
     }
 
     setUniqueDates(datesArray);
 
     // Set selectedDate to the first available date as ISO string
     if (datesArray.length > 0) {
-      const isoDate = new Date(datesArray[0].date).toISOString();
-      setSelectedDate(isoDate);
+      setSelectedDate(datesArray[0].iso);
     } else {
       setSelectedDate(new Date().toISOString());
     }
@@ -87,9 +87,8 @@ const DateSelection: FC<DateSelectionProps> = ({ onDateChange, accentColor = '#2
     setWindowStart(windowStart + windowSize);
   };
 
-  const handleDateClick = (date: string) => {
-    const clickedDateISO = new Date(date).toISOString();
-    setSelectedDate(clickedDateISO);
+  const handleDateClick = (iso: string) => {
+    setSelectedDate(iso);
   };
 
   return (
@@ -105,14 +104,13 @@ const DateSelection: FC<DateSelectionProps> = ({ onDateChange, accentColor = '#2
       ) : (
         <div className="flex items-center justify-between w-full overflow-x-hidden no-scrollbar hide-scrollbar">
           {uniqueDates.map((item, index) => {
-            const itemDateISO = new Date(item.date).toISOString();
-            const isSelected = itemDateISO === selectedDate;
+            const isSelected = item.iso === selectedDate;
 
             return (
               <Fragment key={index}>
                 <Button
                   variant={null}
-                  onClick={() => handleDateClick(item.date)}
+                  onClick={() => handleDateClick(item.iso)}
                   className={`flex flex-col items-center justify-center w-full h-full ${isSelected ? "border-b-4 border-[var(--border-color)]" : ""}`}
                   style={{ "--border-color": accentColor } as React.CSSProperties}
                 >
