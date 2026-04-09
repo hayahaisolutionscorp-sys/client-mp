@@ -36,6 +36,16 @@ export const SCHEDULE_VARIANTS: Record<ScheduleSectionKey, ScheduleBuilderVarian
       label: "Compact",
       description: "Reduced vertical spacing in the schedule hero.",
     },
+    {
+      value: "modern-clean",
+      label: "Modern Clean",
+      description: "Cleaner hero spacing with contemporary emphasis.",
+    },
+    {
+      value: "readable",
+      label: "Readable",
+      description: "Larger and clearer heading hierarchy.",
+    },
   ],
   date_picker: [
     {
@@ -48,6 +58,16 @@ export const SCHEDULE_VARIANTS: Record<ScheduleSectionKey, ScheduleBuilderVarian
       label: "Minimal",
       description: "Cleaner date picker spacing and framing.",
     },
+    {
+      value: "simple",
+      label: "Simple",
+      description: "Flat and minimal framing for straightforward scanning.",
+    },
+    {
+      value: "outlined",
+      label: "Outlined",
+      description: "Crisp bordered picker for clearer separation.",
+    },
   ],
   fare_table: [
     {
@@ -59,6 +79,16 @@ export const SCHEDULE_VARIANTS: Record<ScheduleSectionKey, ScheduleBuilderVarian
       value: "striped",
       label: "Striped",
       description: "Alternating row backgrounds for readability.",
+    },
+    {
+      value: "comfortable",
+      label: "Comfortable",
+      description: "More spacing and calmer row rhythm.",
+    },
+    {
+      value: "high-contrast",
+      label: "High Contrast",
+      description: "Stronger contrast for quick legibility.",
     },
   ],
 };

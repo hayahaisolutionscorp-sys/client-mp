@@ -5,10 +5,14 @@ import { Skeleton } from "@/components/ui/Skeleton";
 interface ScheduleTableProps {
   schedule: ScheduleItemType[];
   loading: boolean;
-  tableVariant?: "default" | "striped";
+  tableVariant?: "default" | "striped" | "comfortable" | "high-contrast";
 }
 
 const ScheduleTable = ({ schedule, loading, tableVariant = "default" }: ScheduleTableProps) => {
+  const isStriped = tableVariant === "striped";
+  const isComfortable = tableVariant === "comfortable";
+  const isHighContrast = tableVariant === "high-contrast";
+
   if (loading) {
     return (
       <div className="mt-6 rounded-md border overflow-hidden mx-2">
@@ -44,11 +48,21 @@ const ScheduleTable = ({ schedule, loading, tableVariant = "default" }: Schedule
   }
 
   return (
-    <div className="mt-6 rounded-md border overflow-hidden mx-2">
+    <div
+      className={`mt-6 rounded-md border overflow-hidden mx-2 ${
+        isHighContrast ? "border-slate-400 shadow-sm" : ""
+      }`}
+    >
       {/* Header - Desktop */}
       <div
-        className={`hidden sm:grid grid-cols-4 p-4 text-base font-medium ${
-          tableVariant === "striped" ? "bg-slate-200 text-slate-700" : "bg-slate-100 text-slate-600"
+        className={`hidden sm:grid grid-cols-4 text-base font-medium ${
+          isComfortable ? "p-5" : "p-4"
+        } ${
+          isHighContrast
+            ? "bg-slate-800 text-white"
+            : isStriped
+              ? "bg-slate-200 text-slate-700"
+              : "bg-slate-100 text-slate-600"
         }`}
       >
         <div>Date & Time</div>
@@ -60,7 +74,13 @@ const ScheduleTable = ({ schedule, loading, tableVariant = "default" }: Schedule
       <div className="divide-y">
         {schedule.length > 0 ? (
           schedule.map((item, index) => (
-            <ScheduleItem key={index} item={item} rowIndex={index} striped={tableVariant === "striped"} />
+            <ScheduleItem
+              key={index}
+              item={item}
+              rowIndex={index}
+              striped={isStriped}
+              rowVariant={tableVariant}
+            />
           ))
         ) : (
           <div className="p-8 text-center">

@@ -30,7 +30,7 @@ export default function SchedulePreviewClient({ initialPayload }: SchedulePrevie
       fareTableVariant:
         fareTableSection?.enabled === false
           ? ("default" as const)
-          : ((fareTableSection?.variant as "default" | "striped") || "default"),
+          : ((fareTableSection?.variant as "default" | "striped" | "comfortable" | "high-contrast") || "default"),
     };
   }, [payload.page?.content]);
 

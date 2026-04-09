@@ -25,11 +25,11 @@ export const ABOUT_SECTION_LABELS: Record<AboutSectionKey, string> = {
 };
 
 export const ABOUT_VARIANTS: Record<AboutSectionKey, string[]> = {
-  hero: ["default", "split", "minimal", "overlay", "cards", "centered"],
-  welcome: ["default", "spotlight", "highlight", "quote", "side-accent"],
-  our_story: ["default", "timeline", "milestone", "narrative", "journey"],
-  our_expertise: ["default", "checklist", "grid", "showcase", "badges"],
-  core_values: ["default", "pillars", "icon-grid", "timeline", "accordion", "compact"],
+  hero: ["default", "split", "minimal", "overlay", "cards", "centered", "panorama"],
+  welcome: ["default", "spotlight", "highlight", "quote", "side-accent", "glass"],
+  our_story: ["default", "timeline", "milestone", "narrative", "journey", "chronicle"],
+  our_expertise: ["default", "checklist", "grid", "showcase", "badges", "feature-cards"],
+  core_values: ["default", "pillars", "icon-grid", "timeline", "accordion", "compact", "showcase"],
 };
 
 const ABOUT_SECTION_DEFINITIONS = ABOUT_SECTION_KEYS.map((sectionKey) => ({

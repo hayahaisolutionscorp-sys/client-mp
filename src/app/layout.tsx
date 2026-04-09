@@ -77,7 +77,7 @@ export default async function RootLayout({
   const fontScale = fontScaleMap[themeSettings.fontStyle] || '100%';
 
   return (
-    <html lang="en" style={{ fontSize: fontScale }}>
+    <html lang="en" style={{ fontSize: fontScale }} suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{
           __html: `

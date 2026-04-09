@@ -33,6 +33,7 @@ export function buildPreviewBranding(
       baseBranding?.fontFamily ??
       "Jost",
     colors: {
+      ...incomingColors,
       primaryColor: incomingColors.primaryColor ?? incomingColors.primary ?? "#004C70",
       secondaryColor: incomingColors.secondaryColor ?? incomingColors.secondary ?? "#7ACCFA",
       primary: incomingColors.primary ?? incomingColors.primaryColor ?? "#004C70",

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import Hero from "@/components/landing/Hero";
 import Footer from "@/components/Footer";
 import SubscribeBanner from "@/components/landing/SubscribeBanner";
@@ -38,9 +39,12 @@ import PartnersDefault from "./templates/partners/PartnersDefault";
 import FooterCentered from "./templates/footer/FooterCentered";
 import FooterPremium from "./templates/footer/FooterPremium";
 import dynamic from 'next/dynamic';
+import { motion } from 'framer-motion';
+import { cn } from "@/lib/utils";
 
 const ChatWidget = dynamic(() => import('@/components/chat/ChatWidget'), { ssr: false });
 import { createBuilderTheme } from "./theme";
+import { AnimatedSection } from "@/components/whitelabel/AnimatedSection";
 import type { LandingBuilderContent } from "@/lib/landing-builder";
 import {
   getLandingBuilderLayoutState,
@@ -61,6 +65,24 @@ export default function LandingPageBuilder({
   previewPayload,
   landingData,
 }: LandingPageBuilderProps) {
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'scroll-to-section') {
+        const sectionId = event.data?.sectionId;
+        const element = document.getElementById(`section-${sectionId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Optional: briefly highlight or pulse the section
+          setActiveSectionId(sectionId);
+          setTimeout(() => setActiveSectionId(null), 2000);
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
   const builder = normalizeLandingBuilderContent(config);
   const layout = getLandingBuilderLayoutState(builder);
   const templatePreset = layout.templatePreset;
@@ -118,6 +140,111 @@ export default function LandingPageBuilder({
     templatePreset?.tokens.radiusClass ||
     "rounded-2xl";
 
+  const sectionAnimationsRaw = landingBranding?.colors?.sectionAnimations;
+  let sectionAnimations: Record<string, string> = {};
+  
+  if (sectionAnimationsRaw) {
+    if (typeof sectionAnimationsRaw === 'string') {
+      try {
+        sectionAnimations = JSON.parse(sectionAnimationsRaw);
+      } catch (e) {
+        console.error("Error parsing sectionAnimations:", e);
+      }
+    } else if (typeof sectionAnimationsRaw === 'object') {
+      sectionAnimations = sectionAnimationsRaw as Record<string, string>;
+    }
+  }
+
+  const getAnimationCSSForSection = (sectionId: string, animation: string) => {
+    if (!animation || animation === "none") return "";
+    
+    // Use a unique class for each section's animation
+    const scope = `.anim-section-${sectionId}`;
+    
+    switch (animation) {
+      case "smooth-up":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3, ${scope}:not(.in-view) .brand-title {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3, ${scope}.in-view .brand-title {
+            opacity: 0;
+            animation: textSmoothUp-${sectionId} 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.2s;
+          }
+          @keyframes textSmoothUp-${sectionId} {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `;
+      case "staggered":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3, ${scope}:not(.in-view) .brand-title {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3, ${scope}.in-view .brand-title {
+            opacity: 0;
+            filter: blur(10px);
+            animation: textStaggered-${sectionId} 1s ease-out forwards;
+            animation-delay: 0.3s;
+          }
+          @keyframes textStaggered-${sectionId} {
+            0% { opacity: 0; filter: blur(10px); transform: scale(0.98); }
+            100% { opacity: 1; filter: blur(0px); transform: scale(1); }
+          }
+        `;
+      case "typewriter":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3, ${scope}:not(.in-view) .brand-title {
+            clip-path: inset(0 100% 0 0);
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3, ${scope}.in-view .brand-title {
+            clip-path: inset(0 100% 0 0);
+            animation: textTypewriterReveal-${sectionId} 3s steps(60, end) forwards;
+            animation-delay: 0.2s;
+          }
+          @keyframes textTypewriterReveal-${sectionId} {
+            from { clip-path: inset(0 100% 0 0); }
+            to { clip-path: inset(0 0 0 0); }
+          }
+        `;
+      case "floating":
+        return `
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3, ${scope}.in-view .brand-title {
+            animation: textFloat-${sectionId} 3s ease-in-out infinite;
+          }
+          @keyframes textFloat-${sectionId} {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+          }
+        `;
+      case "zoom-in":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3, ${scope}:not(.in-view) .brand-title {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3, ${scope}.in-view .brand-title {
+            opacity: 0;
+            animation: textZoom-${sectionId} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes textZoom-${sectionId} {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+          }
+        `;
+      default:
+        return "";
+    }
+  };
+
+  const fullAnimationCSS = Object.entries(sectionAnimations)
+    .map(([id, anim]) => getAnimationCSSForSection(id, anim))
+    .join("\n");
+
   return (
     <>
     <div
@@ -133,31 +260,27 @@ export default function LandingPageBuilder({
         h1, h2, h3, h4, h5, h6, .brand-title {
           font-family: var(--font-title), var(--font-body) !important;
         }
+        ${fullAnimationCSS}
       ` }} />
 
       {layout.contentSections.map((section) => {
+        let content = null;
         switch (section.section_key) {
           case "header":
-            // The real default homepage navbar is rendered inside Hero.
-            // For non-default variants, always render the standalone header
-            // even when the hero section is present.
-            if (section.variant === "default") {
-              return null;
+            if (section.variant !== "default") {
+              content = (
+                <BuilderLandingHeader 
+                  variant={section.variant} 
+                  theme={theme} 
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
+                />
+              );
             }
-
-            return (
-              <BuilderLandingHeader 
-                key={section.id} 
-                variant={section.variant} 
-                theme={theme} 
-                headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
-              />
-            );
+            break;
           case "hero":
             if (section.variant === "minimal") {
-              return (
+              content = (
                 <HeroMinimal
-                  key={section.id}
                   heroSectionOverride={heroSection}
                   forceHomeNavbar={Boolean(previewPayload)}
                   showNavbar={layout.showNavbarInHero}
@@ -168,11 +291,9 @@ export default function LandingPageBuilder({
                   tripSearchEnabledOverride={true}
                 />
               );
-            }
-            if (section.variant === "cards") {
-              return (
+            } else if (section.variant === "cards") {
+              content = (
                 <HeroCards
-                  key={section.id}
                   variant={section.variant}
                   heroSectionOverride={heroSection}
                   forceHomeNavbar={Boolean(previewPayload)}
@@ -184,22 +305,31 @@ export default function LandingPageBuilder({
                   tripSearchEnabledOverride={true}
                 />
               );
-            }
-            if (section.variant === "professional-editorial") {
-              return (
+            } else if (section.variant === "professional-editorial") {
+              content = (
                 <HeroProfessional
-                  key={section.id}
                   heroSectionOverride={heroSection}
                   forceHomeNavbar={Boolean(previewPayload)}
                   showNavbar={layout.showNavbarInHero}
                   headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
                 />
               );
-            }
-            if (section.variant === "split") {
-              return (
+            } else if (section.variant === "split") {
+              content = (
                 <HeroSplit
-                  key={section.id}
+                  heroSectionOverride={heroSection}
+                  forceHomeNavbar={Boolean(previewPayload)}
+                  showNavbar={layout.showNavbarInHero}
+                  showBookingSearch={layout.showBookingInHero}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
+                  portsOverride={landingData?.ports ?? null}
+                  bookingRoutesOverride={landingData?.bookingRoutes ?? null}
+                  tripSearchEnabledOverride={true}
+                />
+              );
+            } else {
+              content = (
+                <Hero
                   heroSectionOverride={heroSection}
                   forceHomeNavbar={Boolean(previewPayload)}
                   showNavbar={layout.showNavbarInHero}
@@ -211,144 +341,93 @@ export default function LandingPageBuilder({
                 />
               );
             }
-            return (
-              <Hero
-                key={section.id}
-                heroSectionOverride={heroSection}
-                forceHomeNavbar={Boolean(previewPayload)}
-                showNavbar={layout.showNavbarInHero}
-                showBookingSearch={layout.showBookingInHero}
-                headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
-                portsOverride={landingData?.ports ?? null}
-                bookingRoutesOverride={landingData?.bookingRoutes ?? null}
-                tripSearchEnabledOverride={true}
-              />
-            );
+            break;
           case "booking":
             if (section.variant === "banner") {
-              return (
-                <BookingBanner
-                  key={section.id}
-                  theme={theme}
-                  ports={landingData?.ports ?? []}
-                  routes={landingData?.bookingRoutes ?? []}
-                />
-              );
+              content = <BookingBanner theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "card") {
+              content = <BookingCard theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "overlay") {
+              content = <BookingOverlay theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "compact-dark") {
+              content = <BookingPremiumDark theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "professional-card") {
+              content = <BookingProfessional theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             }
-            if (section.variant === "card") {
-              return (
-                <BookingCard
-                  key={section.id}
-                  theme={theme}
-                  ports={landingData?.ports ?? []}
-                  routes={landingData?.bookingRoutes ?? []}
-                />
-              );
-            }
-            if (section.variant === "overlay") {
-              return (
-                <BookingOverlay
-                  key={section.id}
-                  theme={theme}
-                  ports={landingData?.ports ?? []}
-                  routes={landingData?.bookingRoutes ?? []}
-                />
-              );
-            }
-            if (section.variant === "compact-dark") {
-              return (
-                <BookingPremiumDark
-                  key={section.id}
-                  theme={theme}
-                  ports={landingData?.ports ?? []}
-                  routes={landingData?.bookingRoutes ?? []}
-                />
-              );
-            }
-            if (section.variant === "professional-card") {
-              return (
-                <BookingProfessional
-                  key={section.id}
-                  theme={theme}
-                  ports={landingData?.ports ?? []}
-                  routes={landingData?.bookingRoutes ?? []}
-                />
-              );
-            }
-            // default booking search is rendered inside Hero
-            return null;
+            break;
           case "promotions":
             if (section.variant === "grid" || section.variant === "professional-banner") {
-              return <PromotionsGrid key={section.id} promos={(promotions as any) ?? []} theme={theme} />;
+              content = <PromotionsGrid promos={(promotions as any) ?? []} theme={theme} />;
+            } else if (section.variant === "banner") {
+              content = <PromotionsBanner promos={(promotions as any) ?? []} theme={theme} />;
+            } else {
+              content = <Promos promosOverride={promotions as any} />;
             }
-            if (section.variant === "banner") {
-              return <PromotionsBanner key={section.id} promos={(promotions as any) ?? []} theme={theme} />;
-            }
-            return <Promos key={section.id} promosOverride={promotions as any} />;
+            break;
           case "routes":
             if (section.variant === "carousel") {
-              return <RoutesCarousel key={section.id} routes={(routes as any) ?? []} theme={theme} />;
+              content = <RoutesCarousel routes={(routes as any) ?? []} theme={theme} />;
+            } else if (section.variant === "cards" || section.variant === "professional-wall") {
+              content = <RoutesModernGrid routes={(routes as any) ?? []} theme={theme} />;
+            } else if (section.variant === "list") {
+              content = <RoutesMinimalList routes={(routes as any) ?? []} theme={theme} />;
+            } else {
+              content = <PopularRoutes routesOverride={routes as any} />;
             }
-            if (section.variant === "cards" || section.variant === "professional-wall") {
-              return <RoutesModernGrid key={section.id} routes={(routes as any) ?? []} theme={theme} />;
-            }
-            if (section.variant === "list") {
-              return <RoutesMinimalList key={section.id} routes={(routes as any) ?? []} theme={theme} />;
-            }
-            return <PopularRoutes key={section.id} routesOverride={routes as any} />;
+            break;
           case "why_choose":
             if (section.variant === "steps" || section.variant === "professional-stack") {
-              return <WhyChooseSteps key={section.id} section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+              content = <WhyChooseSteps section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            } else if (section.variant === "grid") {
+              content = <WhyChooseGrid section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            } else if (section.variant === "minimal") {
+              content = <WhyChooseMinimal section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            } else {
+              content = <WhyChooseDefault section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             }
-            if (section.variant === "grid") {
-              return <WhyChooseGrid key={section.id} section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
-            }
-            if (section.variant === "minimal") {
-              return <WhyChooseMinimal key={section.id} section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
-            }
-            return (
-              <WhyChooseDefault
-                key={section.id}
-                section={whyChooseSection as any}
-                reasons={(whyChooseReasons as any) ?? []}
-                theme={theme}
-              />
-            );
+            break;
           case "get_to_know":
             if (section.variant === "timeline" && getToKnowMain && getToKnowMission && getToKnowVision) {
-              return <GetToKnowTimeline key={section.id} main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+              content = <GetToKnowTimeline main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+            } else if ((section.variant === "modern" || section.variant === "professional-panel") && getToKnowMain && getToKnowMission && getToKnowVision) {
+              content = <GetToKnowModern main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+            } else if (section.variant === "center" && getToKnowMain && getToKnowMission && getToKnowVision) {
+              content = <GetToKnowCenter main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+            } else {
+              content = <GetToKnowDefault main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             }
-            if ((section.variant === "modern" || section.variant === "professional-panel") && getToKnowMain && getToKnowMission && getToKnowVision) {
-                return <GetToKnowModern key={section.id} main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
-            }
-            if (section.variant === "center" && getToKnowMain && getToKnowMission && getToKnowVision) {
-                return <GetToKnowCenter key={section.id} main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
-            }
-            return (
-              <GetToKnowDefault
-                key={section.id}
-                main={getToKnowMain as any}
-                mission={getToKnowMission as any}
-                vision={getToKnowVision as any}
-                theme={theme}
-              />
-            );
+            break;
           case "partners":
             if (section.variant === "strip" || section.variant === "professional-rail") {
-              return <PartnersStrip key={section.id} partners={(partners as any) ?? []} theme={theme} />;
+              content = <PartnersStrip partners={(partners as any) ?? []} theme={theme} />;
+            } else if (section.variant === "marquee") {
+              content = <PartnersMarquee partners={(partners as any) ?? []} theme={theme} />;
+            } else if (section.variant === "grid-premium") {
+              content = <PartnersGridPremium partners={(partners as any) ?? []} theme={theme} />;
+            } else {
+              content = <PartnersDefault partners={(partners as any) ?? []} theme={theme} />;
             }
-            if (section.variant === "marquee") {
-                return <PartnersMarquee key={section.id} partners={(partners as any) ?? []} theme={theme} />;
-            }
-            if (section.variant === "grid-premium") {
-                return <PartnersGridPremium key={section.id} partners={(partners as any) ?? []} theme={theme} />;
-            }
-            return (
-                <PartnersDefault key={section.id} partners={(partners as any) ?? []} theme={theme} />
-            );
-          default:
-            return null;
+            break;
         }
+
+        if (!content) return null;
+
+        const animationStyle = sectionAnimations[section.section_key];
+        const animationClass = animationStyle && animationStyle !== "none" ? `anim-section-${section.section_key}` : "";
+        const isFocused = activeSectionId === section.section_key;
+
+        return (
+          <AnimatedSection 
+            key={section.id} 
+            id={`section-${section.section_key}`} 
+            className={cn(
+               animationClass,
+               isFocused && "ring-4 ring-primary ring-offset-4 ring-opacity-50 transition-all duration-500 rounded-lg relative z-50"
+            )}
+          >
+            {content}
+          </AnimatedSection>
+        );
       })}
     </div>
 

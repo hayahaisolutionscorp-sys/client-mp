@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -12,6 +13,7 @@ import { LoginVerifyForm } from "@/components/auth/LoginVerifyForm";
 import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import type { ILoginPage } from "@/services/content/login.service";
 import { cn } from "@/lib/utils";
+import { AnimatedSection } from "@/components/whitelabel/AnimatedSection";
 
 interface LoginPageBuilderProps {
   loginPage: ILoginPage | null;
@@ -26,6 +28,120 @@ export function LoginPageBuilder({
   themeSettings,
   branding,
 }: LoginPageBuilderProps) {
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'scroll-to-section') {
+        const sectionId = event.data?.sectionId;
+        const element = document.getElementById(`section-${sectionId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setActiveSectionId(sectionId);
+          setTimeout(() => setActiveSectionId(null), 2000);
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const sectionAnimationsRaw = branding?.colors?.sectionAnimations;
+  let sectionAnimations: Record<string, string> = {};
+  if (sectionAnimationsRaw) {
+    if (typeof sectionAnimationsRaw === 'string') {
+      try { sectionAnimations = JSON.parse(sectionAnimationsRaw); } catch (e) {}
+    } else if (typeof sectionAnimationsRaw === 'object') {
+      sectionAnimations = sectionAnimationsRaw as Record<string, string>;
+    }
+  }
+
+  const getAnimationCSSForSection = (sectionId: string, animation: string) => {
+    if (!animation || animation === "none") return "";
+    const scope = `.anim-section-${sectionId}`;
+    switch (animation) {
+      case "smooth-up":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            opacity: 0;
+            animation: textSmoothUp-${sectionId} 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.2s;
+          }
+          @keyframes textSmoothUp-${sectionId} {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(1); }
+          }
+        `;
+      case "staggered":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            opacity: 0;
+            filter: blur(10px);
+            animation: textStaggered-${sectionId} 1s ease-out forwards;
+            animation-delay: 0.3s;
+          }
+          @keyframes textStaggered-${sectionId} {
+            0% { opacity: 0; filter: blur(10px); transform: scale(0.98); }
+            100% { opacity: 1; filter: blur(0px); transform: scale(1); }
+          }
+        `;
+      case "typewriter":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            clip-path: inset(0 100% 0 0);
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            clip-path: inset(0 100% 0 0);
+            animation: textTypewriterReveal-${sectionId} 3s steps(60, end) forwards;
+            animation-delay: 0.2s;
+          }
+          @keyframes textTypewriterReveal-${sectionId} {
+            from { clip-path: inset(0 100% 0 0); }
+            to { clip-path: inset(0 0 0 0); }
+          }
+        `;
+      case "floating":
+        return `
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            animation: textFloat-${sectionId} 3s ease-in-out infinite;
+          }
+          @keyframes textFloat-${sectionId} {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+          }
+        `;
+      case "zoom-in":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            opacity: 0;
+            animation: textZoom-${sectionId} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes textZoom-${sectionId} {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+          }
+        `;
+      default: return "";
+    }
+  };
+
+  const fullAnimationCSS = Object.entries(sectionAnimations)
+    .filter(([id]) => id.startsWith('login_'))
+    .map(([id, anim]) => getAnimationCSSForSection(id, anim))
+    .join("\n");
   const builderConfig = normalizeLoginBuilderContent(loginPage?.content);
   const theme = createBuilderTheme((branding ?? {}) as IBrandingConfig);
   const primaryColor = themeSettings?.primaryColor || themeSettings?.primary || theme.primary;
@@ -63,8 +179,10 @@ export function LoginPageBuilder({
   const heroTitle =
     step === "verify"
       ? "Enter your password"
-      : loginPage?.title ||
-        (heroVariant === "split"
+        : loginPage?.title ||
+        (heroVariant === "readable"
+          ? "Welcome back to your account"
+          : heroVariant === "split"
           ? "Welcome back"
           : heroVariant === "minimal"
             ? "Sign in"
@@ -72,15 +190,24 @@ export function LoginPageBuilder({
   const heroDescription =
     step === "verify"
       ? "Complete your sign in to access your account."
-      : heroVariant === "minimal"
+      : heroVariant === "readable"
+        ? "Sign in with larger, clearer content to continue your account journey."
+        : heroVariant === "minimal"
         ? "Use your email to continue."
         : heroVariant === "split"
           ? "A cleaner sign-in flow built around fast account access."
           : "Continue using your email address or social login.";
-  const footerCopy =
-    footerSection?.variant === "minimal"
+  const footerCopy = footerSection?.variant === "inline"
+    ? "By continuing, you agree to Terms and Privacy Policy."
+    : footerSection?.variant === "minimal" || footerSection?.variant === "compact"
       ? "By signing in, you agree to our Terms and Privacy Policy."
       : "By signing in, you agree to our Terms of Use and Privacy Policy.";
+
+  const sidebarToneVariant = sidebarVariant === "minimal"
+    ? "image"
+    : sidebarVariant === "clean"
+      ? "gradient"
+      : sidebarVariant;
 
   const formMode = layout.formMode;
   const renderForm = () => {
@@ -92,19 +219,29 @@ export function LoginPageBuilder({
 
   const renderSidebar = (embedded = false) => {
     if (!hasSidebar) return null;
-    if (embedded) return <AuthSidebar variant={sidebarVariant as any} embedded tone={layoutVariant === "split-left" ? "editorial" : "brand"} />;
-    return <AuthSidebar variant={sidebarVariant as any} tone={layoutVariant === "split-left" ? "editorial" : "brand"} />;
+    if (embedded) return <AuthSidebar variant={sidebarToneVariant as any} embedded tone={layoutVariant === "split-left" ? "editorial" : "brand"} />;
+    return <AuthSidebar variant={sidebarToneVariant as any} tone={layoutVariant === "split-left" ? "editorial" : "brand"} />;
   };
 
+  const loginHeroAnim = sectionAnimations["login_hero"];
+  const loginFormAnim = sectionAnimations["login_form"];
+
   const heroCopy = (
-    <div className="space-y-3">
+    <AnimatedSection 
+      id="section-login_hero"
+      className={cn(
+        "space-y-3",
+        loginHeroAnim && loginHeroAnim !== "none" && `anim-section-login_hero`,
+        activeSectionId === "login_hero" && "ring-4 ring-primary ring-offset-4 ring-opacity-50 transition-all rounded-lg relative z-50 bg-white/10 p-2"
+      )}
+    >
       <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: primaryColor }}>
         {step === "verify" ? "Secure Access" : "Welcome Back"}
       </p>
       <h1
         className={cn(
           "font-bold",
-          heroVariant === "minimal" ? "text-2xl md:text-3xl" : "text-3xl md:text-4xl",
+          heroVariant === "minimal" ? "text-2xl md:text-3xl" : heroVariant === "readable" ? "text-4xl md:text-5xl" : "text-3xl md:text-4xl",
           heroVariant === "split" && "max-w-md"
         )}
         style={{ color: heroTextColor }}
@@ -121,7 +258,7 @@ export function LoginPageBuilder({
       >
         {heroDescription}
       </p>
-    </div>
+    </AnimatedSection>
   );
 
   if (isBrandImmersive) {
@@ -135,6 +272,7 @@ export function LoginPageBuilder({
           ["--font-title" as string]: theme.fontFamilyTitle,
         }}
       >
+        <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
         <div
           className="pointer-events-none absolute inset-0 opacity-90"
           style={{
@@ -167,7 +305,14 @@ export function LoginPageBuilder({
                 {brandName}
               </div>
 
-              <div className="space-y-5">
+              <AnimatedSection 
+                id="section-login_hero"
+                className={cn(
+                  "space-y-5",
+                  loginHeroAnim && loginHeroAnim !== "none" && `anim-section-login_hero`,
+                  activeSectionId === "login_hero" && "ring-4 ring-primary ring-offset-4 ring-opacity-50 transition-all rounded-lg relative z-50 bg-white/10 p-2"
+                )}
+              >
                 <h1
                   className="max-w-2xl text-4xl font-black leading-[0.92] md:text-6xl lg:text-7xl"
                   style={{ ...heroFontStyle, color: textOnSurface }}
@@ -177,7 +322,7 @@ export function LoginPageBuilder({
                 <p className="max-w-xl text-sm leading-7 md:text-base" style={{ color: textOnSurfaceAlt }}>
                   {heroDescription}
                 </p>
-              </div>
+              </AnimatedSection>
 
               {brandTagline ? (
                 <p className="max-w-xl text-sm leading-7 md:text-base" style={{ color: textOnSurfaceAlt }}>
@@ -232,18 +377,23 @@ export function LoginPageBuilder({
                     </div>
                   ) : null}
 
-                  <div
+                  <AnimatedSection
+                    id="section-login_form"
                     className={cn(
-                      "border bg-white/85",
+                      "border bg-white/85 transition-all duration-500",
                       formVariant === "compact" ? "p-4" : "p-5 md:p-6",
                       formVariant === "rounded" && "p-6",
+                      formVariant === "simple" && "rounded-2xl p-4 md:p-5 border-slate-200 shadow-none",
+                      formVariant === "spacious" && "p-7 md:p-8",
                       formVariant === "elevated" && "shadow-lg",
-                      brandRadiusClass
+                      brandRadiusClass,
+                      loginFormAnim && loginFormAnim !== "none" && `anim-section-login_form`,
+                      activeSectionId === "login_form" && "ring-4 ring-primary ring-offset-4 ring-opacity-50 relative z-50"
                     )}
                     style={{ borderColor: "rgba(148, 163, 184, 0.18)" }}
                   >
                     {renderForm()}
-                  </div>
+                  </AnimatedSection>
 
                   {footerSection?.enabled !== false ? (
                     <p className="text-center text-xs md:text-sm" style={{ color: textOnSurfaceAlt }}>
@@ -270,6 +420,7 @@ export function LoginPageBuilder({
           ["--font-title" as string]: theme.fontFamilyTitle,
         }}
       >
+        <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
         <div
           className="pointer-events-none absolute inset-0 opacity-90"
           style={{
@@ -322,7 +473,14 @@ export function LoginPageBuilder({
               ) : null}
 
               <div className="grid gap-8 px-5 py-6 md:px-8 md:py-10">
-                <div className="space-y-3 text-center">
+                <AnimatedSection 
+                  id="section-login_hero"
+                  className={cn(
+                    "space-y-3 text-center",
+                    loginHeroAnim && loginHeroAnim !== "none" && `anim-section-login_hero`,
+                    activeSectionId === "login_hero" && "ring-4 ring-primary ring-offset-4 ring-opacity-50 transition-all rounded-lg relative z-50 bg-white/10 p-2"
+                  )}
+                >
                   <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: primaryColor }}>
                     {step === "verify" ? "Secure access" : "Welcome back"}
                   </p>
@@ -337,17 +495,22 @@ export function LoginPageBuilder({
                       {brandTagline}
                     </p>
                   ) : null}
-                </div>
+                </AnimatedSection>
 
                 <div className="mx-auto w-full max-w-xl">
-                  <div
+                  <AnimatedSection
+                    id="section-login_form"
                     className={cn(
-                      "border border-slate-200 bg-white p-5 shadow-sm md:p-7",
-                      brandRadiusClass
+                      "border border-slate-200 bg-white p-5 shadow-sm md:p-7 transition-all duration-500",
+                      formVariant === "simple" && "rounded-2xl p-4 md:p-5 shadow-none",
+                      formVariant === "spacious" && "p-8 md:p-9",
+                      brandRadiusClass,
+                      loginFormAnim && loginFormAnim !== "none" && `anim-section-login_form`,
+                      activeSectionId === "login_form" && "ring-4 ring-primary ring-offset-4 ring-opacity-50 relative z-50"
                     )}
                   >
                     {renderForm()}
-                  </div>
+                  </AnimatedSection>
                 </div>
 
                 {footerSection?.enabled !== false ? (
@@ -405,15 +568,21 @@ export function LoginPageBuilder({
               color: isLeftLayout ? "#f8fafc" : textOnSurface,
             }}
           >
+            <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
             {heroSection?.enabled !== false ? heroCopy : null}
 
-            <div
+            <AnimatedSection
+              id="section-login_form"
               className={cn(
-                "border",
+                "border transition-all duration-500",
                 formVariant === "compact" ? "rounded-[20px] p-4 md:p-5" : "rounded-[28px] p-5 md:p-6",
                 formVariant === "rounded" && "rounded-[32px]",
+                formVariant === "simple" && "rounded-[20px] p-4 md:p-5",
+                formVariant === "spacious" && "rounded-[32px] p-7 md:p-8",
                 formVariant === "elevated" && "shadow-lg",
-                isLeftLayout && "bg-white/8 backdrop-blur-xl"
+                isLeftLayout && "bg-white/8 backdrop-blur-xl",
+                loginFormAnim && loginFormAnim !== "none" && `anim-section-login_form`,
+                activeSectionId === "login_form" && "ring-4 ring-primary ring-offset-4 ring-opacity-50 relative z-50"
               )}
               style={{
                 color: isLeftLayout ? "rgba(255,255,255,0.78)" : textOnSurfaceAlt,
@@ -421,13 +590,17 @@ export function LoginPageBuilder({
               }}
             >
               {renderForm()}
-            </div>
+            </AnimatedSection>
 
             {footerSection?.enabled !== false ? (
               <p
                 className={cn(
                   "text-center",
-                  footerSection?.variant === "minimal" ? "text-[11px] md:text-xs" : "text-xs md:text-sm",
+                  footerSection?.variant === "minimal" || footerSection?.variant === "compact"
+                    ? "text-[11px] md:text-xs"
+                    : footerSection?.variant === "inline"
+                      ? "text-[11px] md:text-[11px]"
+                      : "text-xs md:text-sm",
                   isLeftLayout && "text-white/70"
                 )}
                 style={{ color: isLeftLayout ? "rgba(255,255,255,0.7)" : textOnSurfaceAlt }}

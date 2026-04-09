@@ -97,10 +97,10 @@ export const LOGIN_PAGE_LAYOUTS: Record<LoginPageVariant, LoginPageLayoutConfig>
 };
 
 export const LOGIN_VARIANTS: Record<LoginSectionKey, string[]> = {
-  hero: ["default", "minimal", "split", "editorial"],
-  form: ["default", "rounded", "compact", "elevated"],
-  sidebar: ["default", "image", "testimonial", "gradient"],
-  footer: ["default", "minimal"],
+  hero: ["default", "minimal", "split", "editorial", "modern", "readable"],
+  form: ["default", "rounded", "compact", "elevated", "simple", "spacious"],
+  sidebar: ["default", "image", "testimonial", "gradient", "minimal", "clean"],
+  footer: ["default", "minimal", "compact", "inline"],
 };
 
 const LOGIN_SECTION_DEFINITIONS = LOGIN_SECTION_KEYS.map((sectionKey) => ({

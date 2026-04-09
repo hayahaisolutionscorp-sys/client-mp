@@ -1,9 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import type { IContactInformation, IThemeSettings, IBrandingConfig } from '@/models';
 import type { IContactPage, IContactSection } from '@/services/content/contact-us.service';
 import { getReadableTextColor } from '@/lib/color-utils';
 import { normalizeContactBuilderContent, type ContactBuilderSectionConfig } from '@/lib/contact-builder';
+import { cn } from '@/lib/utils';
+import { AnimatedSection } from '@/components/whitelabel/AnimatedSection';
 
 // Hero variants
 import HeroDefault from './templates/hero/HeroDefault';
@@ -51,141 +54,220 @@ export default function ContactPageBuilder({
     .filter((s) => s.enabled)
     .sort((a, b) => a.display_order - b.display_order);
 
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'scroll-to-section') {
+        const sectionId = event.data?.sectionId;
+        const element = document.getElementById(`section-${sectionId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setActiveSectionId(sectionId);
+          setTimeout(() => setActiveSectionId(null), 2000);
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const sectionAnimationsRaw = branding?.colors?.sectionAnimations;
+  let sectionAnimations: Record<string, string> = {};
+  if (sectionAnimationsRaw) {
+    if (typeof sectionAnimationsRaw === 'string') {
+      try { sectionAnimations = JSON.parse(sectionAnimationsRaw); } catch (e) {}
+    } else if (typeof sectionAnimationsRaw === 'object') {
+      sectionAnimations = sectionAnimationsRaw as Record<string, string>;
+    }
+  }
+
+  const getAnimationCSSForSection = (sectionId: string, animation: string) => {
+    if (!animation || animation === "none") return "";
+    const scope = `.anim-section-${sectionId}`;
+    
+    switch (animation) {
+      case "smooth-up":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            opacity: 0;
+            animation: textSmoothUp-${sectionId} 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.2s;
+          }
+          @keyframes textSmoothUp-${sectionId} {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(1); }
+          }
+        `;
+      case "staggered":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            opacity: 0;
+            filter: blur(10px);
+            animation: textStaggered-${sectionId} 1s ease-out forwards;
+            animation-delay: 0.3s;
+          }
+          @keyframes textStaggered-${sectionId} {
+            0% { opacity: 0; filter: blur(10px); transform: scale(0.98); }
+            100% { opacity: 1; filter: blur(0px); transform: scale(1); }
+          }
+        `;
+      case "typewriter":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            clip-path: inset(0 100% 0 0);
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            clip-path: inset(0 100% 0 0);
+            animation: textTypewriterReveal-${sectionId} 3s steps(60, end) forwards;
+            animation-delay: 0.2s;
+          }
+          @keyframes textTypewriterReveal-${sectionId} {
+            from { clip-path: inset(0 100% 0 0); }
+            to { clip-path: inset(0 0 0 0); }
+          }
+        `;
+      case "floating":
+        return `
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            animation: textFloat-${sectionId} 3s ease-in-out infinite;
+          }
+          @keyframes textFloat-${sectionId} {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+          }
+        `;
+      case "zoom-in":
+        return `
+          ${scope}:not(.in-view) h1, ${scope}:not(.in-view) h2, ${scope}:not(.in-view) h3 {
+            opacity: 0;
+            animation: none;
+          }
+          ${scope}.in-view h1, ${scope}.in-view h2, ${scope}.in-view h3 {
+            opacity: 0;
+            animation: textZoom-${sectionId} 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          }
+          @keyframes textZoom-${sectionId} {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+          }
+        `;
+      default: return "";
+    }
+  };
+
+  const fullAnimationCSS = Object.entries(sectionAnimations)
+    .filter(([id]) => id.startsWith('contact_'))
+    .map(([id, anim]) => getAnimationCSSForSection(id, anim))
+    .join("\n");
+
   const heroSection = sections.find((s) => s.type === 'hero') || sections[0];
 
   const renderSection = (sectionConfig: ContactBuilderSectionConfig) => {
     const { section_key, variant } = sectionConfig;
 
+    let sectionContent = null;
     switch (section_key) {
       case 'hero':
         switch (variant) {
           case 'minimal':
-            return (
-              <HeroMinimal
-                key="hero"
-                hero={heroSection}
-                contactPageTitle={contactPage.title}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-              />
+            sectionContent = (
+              <HeroMinimal key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
+            break;
           case 'centered':
-            return (
-              <HeroCentered
-                key="hero"
-                hero={heroSection}
-                contactPageTitle={contactPage.title}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-              />
+            sectionContent = (
+              <HeroCentered key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
+            break;
           case 'gradient':
-            return (
-              <HeroGradient
-                key="hero"
-                hero={heroSection}
-                contactPageTitle={contactPage.title}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                textOnPrimary={textOnPrimary}
-              />
+            sectionContent = (
+              <HeroGradient key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} textOnPrimary={textOnPrimary} />
             );
+            break;
           case 'split':
-            return (
-              <HeroSplit
-                key="hero"
-                hero={heroSection}
-                contactPageTitle={contactPage.title}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-              />
+            sectionContent = (
+              <HeroSplit key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
+            break;
           case 'default':
           default:
-            return (
-              <HeroDefault
-                key="hero"
-                hero={heroSection}
-                contactPageTitle={contactPage.title}
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-              />
+            sectionContent = (
+              <HeroDefault key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
             );
+            break;
         }
+        break;
 
       case 'contact_form':
         switch (variant) {
           case 'side-by-side':
-            return (
-              <ContactFormSideBySide
-                key="contact_form"
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-                surfaceAltColor={surfaceAltColor}
-                textOnSurfaceAlt={textOnSurfaceAlt}
-              />
+            sectionContent = (
+              <ContactFormSideBySide key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} surfaceAltColor={surfaceAltColor} textOnSurfaceAlt={textOnSurfaceAlt} />
             );
+            break;
           case 'minimal':
-            return (
-              <ContactFormMinimal
-                key="contact_form"
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-              />
+            sectionContent = (
+              <ContactFormMinimal key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
+            break;
           case 'floating':
-            return (
-              <ContactFormFloating
-                key="contact_form"
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-              />
+            sectionContent = (
+              <ContactFormFloating key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
+            break;
           case 'premium':
-            return (
-              <ContactFormPremium
-                key="contact_form"
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-                textOnPrimary={textOnPrimary}
-              />
+            sectionContent = (
+              <ContactFormPremium key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} textOnPrimary={textOnPrimary} />
             );
+            break;
           case 'default':
           default:
-            return (
-              <ContactFormDefault
-                key="contact_form"
-                primaryColor={primaryColor}
-                textColor={textOnSurface}
-                mutedColor={mutedOnSurface}
-                surfaceColor={surfaceColor}
-              />
+            sectionContent = (
+              <ContactFormDefault key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
+            break;
         }
+        break;
 
       default:
-        return null;
+        sectionContent = null;
+        break;
     }
+
+    if (!sectionContent) return null;
+
+    const contactSectionId = `contact_${section_key}`;
+    const animationStyle = sectionAnimations[contactSectionId];
+    const animationClass = animationStyle && animationStyle !== "none" ? `anim-section-${contactSectionId}` : "";
+    const isFocused = activeSectionId === contactSectionId;
+
+    return (
+      <AnimatedSection 
+        key={section_key} 
+        id={`section-${contactSectionId}`}
+        className={cn(
+          animationClass,
+          isFocused && "ring-4 ring-primary ring-offset-4 ring-opacity-50 transition-all duration-500 rounded-lg relative z-50"
+        )}
+      >
+        {sectionContent}
+      </AnimatedSection>
+    );
   };
 
   return (
     <div className="mx-auto w-full max-w-[1400px] space-y-8 px-4 py-8 md:px-6 md:py-12">
+      <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
       {enabledSections.map((sectionConfig) => renderSection(sectionConfig))}
     </div>
   );

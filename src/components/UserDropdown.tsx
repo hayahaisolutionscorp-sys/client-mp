@@ -38,9 +38,13 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
         {loading ? (
           <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse border border-gray-100" />
         ) : loggedInAccount?.passenger?.profilePictureUrl ? (
-          <button
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center space-x-2 focus:outline-none relative w-8 h-8 rounded-full overflow-hidden border border-gray-200"
+            onKeyDown={(e) => e.key === 'Enter' && setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center space-x-2 focus:outline-none relative w-8 h-8 rounded-full overflow-hidden border border-gray-200 cursor-pointer"
+            style={{ background: 'transparent', boxShadow: 'none' }}
           >
             <Image
               src={loggedInAccount.passenger.profilePictureUrl}
@@ -48,37 +52,46 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
               fill
               className="object-cover"
             />
-          </button>
+          </div>
         ) : currentUser ? (
-          <button
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm transition-all duration-200 focus:outline-none ${shouldBeTransparent ? 'bg-white/20 text-white backdrop-blur-sm border border-white/40 hover:bg-white/30' : 'text-white'
+            onKeyDown={(e) => e.key === 'Enter' && setIsDropdownOpen(!isDropdownOpen)}
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm transition-all duration-200 focus:outline-none cursor-pointer border-none ${shouldBeTransparent ? 'bg-white/20 text-white backdrop-blur-sm border border-white/40 hover:bg-white/30' : 'text-white'
               }`}
             style={{
-              backgroundColor: !shouldBeTransparent && themeSettings?.primaryColor ? themeSettings.primaryColor : undefined
+              backgroundColor: !shouldBeTransparent && themeSettings?.primaryColor ? themeSettings.primaryColor : undefined,
+              boxShadow: 'none'
             }}
           >
             {(loggedInAccount?.passenger?.firstName?.charAt(0) || currentUser.email?.charAt(0) || '?').toUpperCase()}
-          </button>
+          </div>
         ) : (
           <>
             {/* Desktop: Login Button */}
             <Link
               href="/login"
               onMouseEnter={() => router.prefetch('/login')}
-              className={`hidden lg:flex items-center justify-center px-6 py-2 text-white font-bold rounded-lg transition-all shadow-md whitespace-nowrap`}
-              style={{
-                backgroundColor: themeSettings?.primary
-              }}
+              className={`hidden lg:flex items-center justify-center px-6 py-2 font-bold rounded-lg transition-all whitespace-nowrap border ${
+                shouldBeTransparent
+                  ? 'border-white/50 bg-transparent text-white hover:bg-white/10'
+                  : 'border-slate-300 bg-transparent text-slate-800 hover:bg-slate-50'
+              }`}
             >
               Login/Create Account
             </Link>
 
             {/* Mobile: Menu Icon */}
             <div className="lg:hidden relative">
-              <button
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-2 focus:outline-none"
+                onKeyDown={(e) => e.key === 'Enter' && setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center space-x-2 focus:outline-none cursor-pointer"
+                style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
               >
                 <Image
                   src="/assets/icons/circle-user-round.svg"
@@ -87,7 +100,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
                   height={32}
                   className={`w-8 h-8 transition-all duration-200 ${shouldBeTransparent ? 'brightness-0 invert' : 'brightness-0'}`}
                 />
-              </button>
+              </div>
             </div>
           </>
         )}
@@ -111,15 +124,19 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
                 Profile
               </Link>
               <div className="border-t border-gray-100">
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => {
                     logout();
                     setIsDropdownOpen(false);
                   }}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+                  onKeyDown={(e) => e.key === 'Enter' && logout()}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 cursor-pointer"
+                  style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
                 >
                   Log Out
-                </button>
+                </div>
               </div>
             </>
           ) : (

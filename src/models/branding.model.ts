@@ -7,6 +7,8 @@ export interface IBrandingColors {
     surface?: string;
     surfaceAlt?: string;
     cornerRadiusClass?: string;
+    sectionAnimation?: string;
+    [key: string]: any;
 }
 
 export interface IBrandingLogo {

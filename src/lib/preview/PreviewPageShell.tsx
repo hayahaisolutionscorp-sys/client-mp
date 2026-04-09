@@ -76,6 +76,7 @@ export function PreviewPageShell<TPayload extends { config?: PreviewGeneralConfi
         faqs={faqs}
         categories={categories}
         themeSettings={theme.themeSettings}
+        branding={theme.branding as any}
       />
     );
   }
