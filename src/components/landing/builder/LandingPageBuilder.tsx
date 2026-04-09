@@ -409,7 +409,6 @@ export default function LandingPageBuilder({
             }
             break;
         }
-
         if (!content) return null;
 
         const animationStyle = sectionAnimations[section.section_key];
