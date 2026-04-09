@@ -12,16 +12,28 @@
             "id": "/",
             "icons": [
                 {
-                    "src": "/Hayahai_Logo_192x192.png",
+                    "src": "/icon-192x192.png",
                     "sizes": "192x192",
                     "type": "image/png",
                     "purpose": "any"
                 },
                 {
-                    "src": "/Hayahai_Logo_512x512.png",
+                    "src": "/icon-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png",
+                    "purpose": "maskable"
+                },
+                {
+                    "src": "/icon-512x512.png",
                     "sizes": "512x512",
                     "type": "image/png",
                     "purpose": "any"
+                },
+                {
+                    "src": "/icon-512x512.png",
+                    "sizes": "512x512",
+                    "type": "image/png",
+                    "purpose": "maskable"
                 }
             ],
             "screenshots": [
@@ -40,8 +52,8 @@
             ]
         },
         "openGraph": {
-            "title": "Hayahai Online Booking",
-            "description": "Hasul nga proseso? Kalas ug oras? Walay kasiguradohan makakuha ug ticket? Book now at Hayahai.com.",
+            "title": "Hayahai – Book Ferry Tickets Online Philippines",
+            "description": "Book ferry tickets fast and easy with Hayahai. Secure online booking for inter-island travel in the Philippines.",
             "siteName": "Hayahai",
             "images": [
                 {
@@ -56,89 +68,94 @@
     },
     "pages": {
         "home": {
-            "title": "Hayahai Online Booking - Book Your Ship Journey Today",
+            "title": "Hayahai – Book Ferry Tickets Online Philippines",
             "description": "Book your ship tickets online with Hayahai. Fast, secure, and convenient ferry booking for all your travel needs in the Philippines.",
             "keywords": [
                 "Hayahai booking",
                 "Hayahai online booking",
                 "ship booking",
                 "ferry booking philippines",
-                "online ship tickets"
+                "online ship tickets",
+                "book ship tickets Philippines",
+                "inter-island travel Philippines",
+                "ro-ro booking",
+                "ferry schedule Philippines"
             ],
             "robots": [
                 "index",
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://Hayahai.com",
-            "og_url": "https://Hayahai.com",
+            "canonical_url": "https://hayahai.com/",
+            "og_url": "https://hayahai.com/",
             "og_type": "website",
-            "og_title": "Hayahai Online Booking",
-            "og_description": "Book your ship tickets online with Hayahai. Fast, secure, and convenient.",
-            "og_image": "https://Hayahai.com/images/og-home.jpg",
+            "og_title": "Hayahai – Book Ferry Tickets Online Philippines",
+            "og_description": "Book ferry tickets fast and easy with Hayahai. Secure online booking for inter-island travel in the Philippines.",
+            "og_image": "https://hayahai.com/images/og-home.jpg",
             "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "Hayahai Online Booking",
-            "twitter_description": "Book your ship tickets online with Hayahai. Fast, secure, and convenient.",
-            "twitter_image": "https://Hayahai.com/images/twitter-home.jpg"
+            "twitter_title": "Hayahai – Book Ferry Tickets Online Philippines",
+            "twitter_description": "Book ferry tickets fast and easy with Hayahai. Secure online booking for inter-island travel in the Philippines.",
+            "twitter_image": "https://hayahai.com/images/og-home.jpg"
         },
         "about-us": {
-            "title": "About Us - Hayahai Online Booking",
+            "title": "About Us | Hayahai",
             "description": "Discover Hayahai's story, mission, and vision. Learn how we're revolutionizing ship booking and making travel easier for Filipinos.",
             "keywords": [
                 "about Hayahai",
                 "Hayahai company",
                 "ship booking company",
                 "Hayahai mission",
-                "ferry booking service"
+                "ferry booking service Philippines"
             ],
             "robots": [
                 "index",
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://Hayahai.com/about-us",
-            "og_url": "https://Hayahai.com/about-us",
+            "canonical_url": "https://hayahai.com/about-us",
+            "og_url": "https://hayahai.com/about-us",
             "og_type": "website",
-            "og_title": "About Us - Hayahai",
+            "og_title": "About Us | Hayahai",
             "og_description": "Discover Hayahai's story and mission to revolutionize ship booking in the Philippines.",
-            "og_image": "https://Hayahai.com/images/og-about.jpg",
+            "og_image": "https://hayahai.com/images/og-about.jpg",
             "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "About Us - Hayahai",
+            "twitter_title": "About Us | Hayahai",
             "twitter_description": "Discover Hayahai's story and mission to revolutionize ship booking.",
-            "twitter_image": "https://Hayahai.com/images/twitter-about.jpg"
+            "twitter_image": "https://hayahai.com/images/og-about.jpg"
         },
         "faqs": {
-            "title": "FAQs - Hayahai Online Booking Help & Support",
+            "title": "FAQs | Hayahai Ship Booking Help",
             "description": "Get answers to frequently asked questions about Hayahai ship booking. Learn about payments, cancellations, refunds, and booking procedures.",
             "keywords": [
                 "Hayahai faq",
                 "booking help",
                 "ship booking questions",
                 "Hayahai support",
-                "how to book",
-                "cancellation policy"
+                "how to book ferry Philippines",
+                "cancellation policy",
+                "ferry refund policy"
             ],
             "robots": [
                 "index",
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://Hayahai.com/faqs",
-            "og_url": "https://Hayahai.com/faqs",
+            "canonical_url": "https://hayahai.com/faq",
+            "og_url": "https://hayahai.com/faq",
             "og_type": "website",
-            "og_title": "Frequently Asked Questions - Hayahai",
+            "og_title": "FAQs | Hayahai Ship Booking Help",
             "og_description": "Get answers to common questions about Hayahai ship booking services.",
-            "og_image": "https://Hayahai.com/images/og-faq.jpg",
+            "og_image": "https://hayahai.com/images/og-faq.jpg",
             "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "FAQs - Hayahai",
+            "twitter_title": "FAQs | Hayahai Ship Booking Help",
             "twitter_description": "Get answers to common questions about Hayahai ship booking services.",
-            "twitter_image": "https://Hayahai.com/images/twitter-faq.jpg"
+            "twitter_image": "https://hayahai.com/images/og-faq.jpg"
         },
         "press-releases": {
-            "title": "Press Releases - Hayahai Online Booking",
+            "title": "Press Releases | Hayahai",
             "description": "Read the latest press releases and news from Hayahai. Stay informed about our updates, partnerships, and announcements.",
             "keywords": [
                 "Hayahai press",
@@ -152,20 +169,20 @@
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://Hayahai.com/press-releases",
-            "og_url": "https://Hayahai.com/press-releases",
+            "canonical_url": "https://hayahai.com/press",
+            "og_url": "https://hayahai.com/press",
             "og_type": "website",
-            "og_title": "Press Releases - Hayahai",
+            "og_title": "Press Releases | Hayahai",
             "og_description": "Read the latest press releases and news from Hayahai.",
-            "og_image": "https://Hayahai.com/images/og-press.jpg",
+            "og_image": "https://hayahai.com/images/og-press.jpg",
             "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "Press Releases - Hayahai",
+            "twitter_title": "Press Releases | Hayahai",
             "twitter_description": "Read the latest press releases and news from Hayahai.",
-            "twitter_image": "https://Hayahai.com/images/twitter-press.jpg"
+            "twitter_image": "https://hayahai.com/images/og-press.jpg"
         },
         "privacy-policy": {
-            "title": "Privacy Policy - Hayahai Online Booking",
+            "title": "Privacy Policy | Hayahai",
             "description": "Learn how Hayahai protects your privacy and handles your personal data. Read our comprehensive privacy policy for online booking services.",
             "keywords": [
                 "Hayahai privacy policy",
@@ -179,97 +196,99 @@
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://Hayahai.com/privacy-policy",
-            "og_url": "https://Hayahai.com/privacy-policy",
+            "canonical_url": "https://hayahai.com/privacy-policy",
+            "og_url": "https://hayahai.com/privacy-policy",
             "og_type": "website",
-            "og_title": "Privacy Policy - Hayahai",
+            "og_title": "Privacy Policy | Hayahai",
             "og_description": "Learn how Hayahai protects your privacy and handles your personal data.",
-            "og_image": "https://Hayahai.com/images/og-default.jpg",
+            "og_image": "https://hayahai.com/images/og-default.jpg",
             "og_site_name": "Hayahai",
             "twitter_card": "summary",
-            "twitter_title": "Privacy Policy - Hayahai",
+            "twitter_title": "Privacy Policy | Hayahai",
             "twitter_description": "Learn how Hayahai protects your privacy and handles your personal data.",
-            "twitter_image": "https://Hayahai.com/images/twitter-default.jpg"
+            "twitter_image": "https://hayahai.com/images/og-default.jpg"
         },
         "contact-us": {
-            "title": "Contact Us - Hayahai Online Booking",
+            "title": "Contact Us | Hayahai",
             "description": "Contact Hayahai for support, inquiries, or to get in touch with our team.",
             "keywords": [
                 "Hayahai contact",
                 "contact us",
                 "Hayahai support",
                 "Hayahai help",
-                "Hayahai assistance"
+                "Hayahai customer service Philippines"
             ],
             "robots": [
                 "index",
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://Hayahai.com/contact-us",
-            "og_url": "https://Hayahai.com/contact-us",
+            "canonical_url": "https://hayahai.com/contact-us",
+            "og_url": "https://hayahai.com/contact-us",
             "og_type": "website",
-            "og_title": "Contact Us - Hayahai",
+            "og_title": "Contact Us | Hayahai",
             "og_description": "Contact Hayahai for support, inquiries, or to get in touch with our team.",
-            "og_image": "https://Hayahai.com/images/og-contact.jpg",
+            "og_image": "https://hayahai.com/images/og-contact.jpg",
             "og_site_name": "Hayahai",
             "twitter_card": "summary_large_image",
-            "twitter_title": "Contact Us - Hayahai",
+            "twitter_title": "Contact Us | Hayahai",
             "twitter_description": "Contact Hayahai for support, inquiries, or to get in touch with our team.",
-            "twitter_image": "https://Hayahai.com/images/twitter-contact.jpg"
+            "twitter_image": "https://hayahai.com/images/og-contact.jpg"
         },
         "terms-and-conditions": {
-            "title": "Terms and Conditions - Hayahai Online Booking",
+            "title": "Terms and Conditions | Hayahai",
             "description": "Read Hayahai's terms and conditions for booking services. Understand your rights and responsibilities when using our platform.",
             "keywords": [
                 "Hayahai terms",
                 "terms and conditions",
                 "booking terms",
                 "Hayahai policies",
-                "ship booking terms"
+                "ship booking terms Philippines"
             ],
             "robots": [
                 "index",
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://Hayahai.com/terms-and-conditions",
-            "og_url": "https://Hayahai.com/terms-and-conditions",
+            "canonical_url": "https://hayahai.com/terms",
+            "og_url": "https://hayahai.com/terms",
             "og_type": "website",
-            "og_title": "Terms and Conditions - Hayahai",
+            "og_title": "Terms and Conditions | Hayahai",
             "og_description": "Read Hayahai's terms and conditions for booking services.",
-            "og_image": "https://Hayahai.com/images/og-default.jpg",
+            "og_image": "https://hayahai.com/images/og-default.jpg",
             "og_site_name": "Hayahai",
             "twitter_card": "summary",
-            "twitter_title": "Terms and Conditions - Hayahai",
+            "twitter_title": "Terms and Conditions | Hayahai",
             "twitter_description": "Read Hayahai's terms and conditions for booking services.",
-            "twitter_image": "https://Hayahai.com/images/twitter-default.jpg"
+            "twitter_image": "https://hayahai.com/images/og-default.jpg"
         },
         "find-trips": {
-            "title": "Find Ferry Trips | Hayahai",
-            "description": "Check ferry schedules and fares. Find the best trips for your travel dates.",
+            "title": "Schedule & Fares | Hayahai",
+            "description": "Check ferry schedules and fares. Find the best trips for your travel dates across Philippine inter-island routes.",
             "keywords": [
-                "ferry schedules",
+                "ferry schedules Philippines",
                 "boat fares",
                 "trip booking",
-                "Hayahai schedule"
+                "Hayahai schedule",
+                "inter-island ferry schedule",
+                "ship fares Philippines"
             ],
             "robots": [
                 "index",
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://Hayahai.com/schedule-and-fares",
-            "og_url": "https://Hayahai.com/schedule-and-fares",
+            "canonical_url": "https://hayahai.com/schedule-and-fares",
+            "og_url": "https://hayahai.com/schedule-and-fares",
             "og_type": "website",
-            "og_title": "Find Ferry Trips | Hayahai",
+            "og_title": "Schedule & Fares | Hayahai",
             "og_description": "Check ferry schedules and fares. Find the best trips for your travel dates.",
-            "og_image": "https://Hayahai.com/images/og-default.jpg",
+            "og_image": "https://hayahai.com/images/og-default.jpg",
             "og_site_name": "Hayahai",
             "twitter_card": "summary",
-            "twitter_title": "Find Ferry Trips | Hayahai",
+            "twitter_title": "Schedule & Fares | Hayahai",
             "twitter_description": "Check ferry schedules and fares. Find the best trips for your travel dates.",
-            "twitter_image": "https://Hayahai.com/images/twitter-default.jpg"
+            "twitter_image": "https://hayahai.com/images/og-default.jpg"
         },
         "route": {
             "title": "Ferry Route | Hayahai",
@@ -284,17 +303,17 @@
                 "follow"
             ],
             "locale": "en_US",
-            "canonical_url": "https://Hayahai.com",
-            "og_url": "https://Hayahai.com",
+            "canonical_url": "https://hayahai.com",
+            "og_url": "https://hayahai.com",
             "og_type": "website",
             "og_title": "Ferry Route | Hayahai",
             "og_description": "Details about this ferry route.",
-            "og_image": "https://Hayahai.com/images/og-default.jpg",
+            "og_image": "https://hayahai.com/images/og-default.jpg",
             "og_site_name": "Hayahai",
             "twitter_card": "summary",
             "twitter_title": "Ferry Route | Hayahai",
             "twitter_description": "Details about this ferry route.",
-            "twitter_image": "https://Hayahai.com/images/twitter-default.jpg"
+            "twitter_image": "https://hayahai.com/images/og-default.jpg"
         }
     }
 }

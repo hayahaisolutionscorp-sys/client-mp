@@ -118,7 +118,10 @@ const Footer = ({ showSubscribeBanner = true }: FooterProps) => {
             <h3 className="font-semibold mb-5">Customer Care</h3>
             {phoneNumbers.map((phone, idx) => (
               <p key={`phone-${phone.id || idx}`} className="mb-5 text-sm sm:text-base opacity-80 whitespace-nowrap">
-                {phone.label}: {phone.value}
+                {phone.label}:{' '}
+                <a href={`tel:${phone.value.replace(/\s/g, '')}`} className="hover:underline">
+                  {phone.value}
+                </a>
               </p>
             ))}
 
@@ -134,7 +137,7 @@ const Footer = ({ showSubscribeBanner = true }: FooterProps) => {
         {/* Bottom Section */}
         <div className="mt-8 pt-6 border-t border-white opacity-80 flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm">
           <p className="mb-4 sm:mb-0 text-center sm:text-left">
-            © 2025 {branding?.brand_name}. All rights reserved.
+            © {new Date().getFullYear()} {branding?.brand_name}. All rights reserved.
           </p>
           <div className="flex space-x-4">
             {socialLinks.twitter && (

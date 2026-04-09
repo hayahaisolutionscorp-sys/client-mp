@@ -29,6 +29,8 @@ interface TipTapRendererProps {
     className?: string;
     isEditable?: boolean;
     onChange?: (content: any) => void;
+    /** When true, H1 nodes in content are rendered as H2 to avoid multiple H1s on a page */
+    downgradeH1?: boolean;
 }
 
 const MenuBar = ({ editor }: { editor: any }) => {
@@ -184,6 +186,27 @@ function extractTextFromNode(node: any): string {
     return '';
 }
 
+// Downgrade H1 nodes to H2 so they don't conflict with the page's own H1
+function downgradeH1Nodes(content: any): any {
+    if (!content || typeof content !== 'object') return content;
+
+    if (content.type === 'heading' && content.attrs?.level === 1) {
+        return {
+            ...content,
+            attrs: { ...content.attrs, level: 2 },
+        };
+    }
+
+    if (content.content && Array.isArray(content.content)) {
+        return {
+            ...content,
+            content: content.content.map(downgradeH1Nodes),
+        };
+    }
+
+    return content;
+}
+
 // Helper function to add IDs to heading nodes in TipTap content
 function addIdsToHeadings(content: any): any {
     if (!content || typeof content !== 'object') return content;
@@ -229,7 +252,7 @@ const HeadingWithId = Heading.extend({
     },
 });
 
-export default function TipTapRenderer({ content, className = '', isEditable = false, onChange }: TipTapRendererProps) {
+export default function TipTapRenderer({ content, className = '', isEditable = false, onChange, downgradeH1 = false }: TipTapRendererProps) {
     const parsedContent = useMemo(() => {
         let parsed;
         // If content is already an object, use it directly
@@ -252,9 +275,13 @@ export default function TipTapRenderer({ content, className = '', isEditable = f
                 };
             }
         }
+        // Downgrade H1 nodes when the page already has its own H1
+        if (downgradeH1) {
+            parsed = downgradeH1Nodes(parsed);
+        }
         // Add IDs to all headings
         return addIdsToHeadings(parsed);
-    }, [content]);
+    }, [content, downgradeH1]);
 
     const editor = useEditor({
         extensions: [

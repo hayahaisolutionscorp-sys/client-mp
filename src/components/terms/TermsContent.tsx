@@ -34,7 +34,7 @@ export default function TermsContent() {
         <main className="flex-1 px-8">
           <h1 className="mb-8 text-3xl font-bold">Terms and Conditions - {brandingConfig?.brand_name}</h1>
           {content && (
-            <TipTapRenderer content={content} />
+            <TipTapRenderer content={content} downgradeH1 />
           )}
         </main>
       </div>

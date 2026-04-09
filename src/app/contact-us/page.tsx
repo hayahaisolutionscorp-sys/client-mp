@@ -1,5 +1,6 @@
 import { ContactPageContent } from '@/components/contact-us/ContactPageContent';
 import ContactPageBuilder from '@/components/contact-us/builder/ContactPageBuilder';
+import OrganizationSchema from '@/components/seo/OrganizationSchema';
 import { getContactPage, getContactSections, getContactUs } from '@/services/content/contact-us.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
@@ -40,24 +41,30 @@ export default async function ContactUs() {
   // If there's builder configuration, use the new builder
   if (contactPage?.content && typeof contactPage.content === 'object' && 'sections' in contactPage.content) {
     return (
-      <ContactPageBuilder
-        contactPage={contactPage}
-        sections={contactSections}
-        contactInfo={contactInfo}
-        themeSettings={themeSettings ?? null}
-        branding={branding ?? null}
-      />
+      <>
+        <OrganizationSchema />
+        <ContactPageBuilder
+          contactPage={contactPage}
+          sections={contactSections}
+          contactInfo={contactInfo}
+          themeSettings={themeSettings ?? null}
+          branding={branding ?? null}
+        />
+      </>
     );
   }
 
   // Fallback to old rendering
   return (
-    <ContactPageContent
-      contactPage={contactPage}
-      sections={contactSections}
-      contacts={contactInfo}
-      themeSettings={themeSettings ?? null}
-      branding={branding ?? null}
-    />
+    <>
+      <OrganizationSchema />
+      <ContactPageContent
+        contactPage={contactPage}
+        sections={contactSections}
+        contacts={contactInfo}
+        themeSettings={themeSettings ?? null}
+        branding={branding ?? null}
+      />
+    </>
   );
 }

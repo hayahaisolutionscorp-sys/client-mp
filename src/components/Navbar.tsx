@@ -94,7 +94,7 @@ const Navbar = ({
               </Link>
             </div>
 
-              {/* Desktop Navigation Links */}
+            {/* Desktop Navigation Links */}
             <div className={`hidden lg:flex flex-1 items-center justify-center space-x-6 lg:space-x-8 ${shouldBeTransparent ? 'text-white' : 'text-black'}`}>
               {shouldRenderLandingNav &&
                 filteredNavItems.map((item) =>
