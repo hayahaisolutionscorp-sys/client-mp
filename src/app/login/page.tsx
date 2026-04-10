@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { getBrandingConfig } from "@/services/ui/branding.service";
 import { getThemeSettings } from "@/services/ui/theme-settings.service";
 import { getLoginPage } from "@/services/content/login.service";
@@ -16,11 +17,13 @@ export default async function LoginPage() {
   ]);
 
   return (
-    <LoginPageBuilder
-      loginPage={loginPage}
-      step="email"
-      themeSettings={themeSettings ?? null}
-      branding={branding ?? null}
-    />
+    <Suspense>
+      <LoginPageBuilder
+        loginPage={loginPage}
+        step="email"
+        themeSettings={themeSettings ?? null}
+        branding={branding ?? null}
+      />
+    </Suspense>
   );
 }

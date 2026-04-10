@@ -2,7 +2,7 @@
 
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { Jost, Roboto, League_Spartan, Mountains_of_Christmas, Great_Vibes, Henny_Penny, Rubik_Gemstones, Inter } from "next/font/google";
 
 // Define fonts and explicitly set the weight where required
@@ -15,9 +15,7 @@ const greatVibes = Great_Vibes({ subsets: ["latin"], weight: "400", variable: "-
 const hennyPenny = Henny_Penny({ subsets: ["latin"], weight: "400", variable: "--font-henny-penny" });
 const rubikGemstones = Rubik_Gemstones({ subsets: ["latin"], weight: "400", variable: "--font-rubik-gemstones" });
 
-export default function BodyWrapper({ children }: { children: React.ReactNode }) {
-  const themeSettings = useThemeSettings();
-  const fontStyle = themeSettings?.fontStyle?.trim();
+function ScrollHandler() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -78,8 +76,18 @@ export default function BodyWrapper({ children }: { children: React.ReactNode })
     }
   }, [searchParams]);
 
+  return null;
+}
+
+export default function BodyWrapper({ children }: { children: React.ReactNode }) {
+  const themeSettings = useThemeSettings();
+  const fontStyle = themeSettings?.fontStyle?.trim();
+
   return (
     <div style={{ fontFamily: 'var(--font-body), sans-serif' }}>
+      <Suspense>
+        <ScrollHandler />
+      </Suspense>
       {children}
     </div>
   );

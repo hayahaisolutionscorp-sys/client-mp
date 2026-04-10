@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getBrandingConfig } from "@/services/ui/branding.service";
 import { getThemeSettings } from "@/services/ui/theme-settings.service";
 import { getLoginPage } from "@/services/content/login.service";
@@ -11,11 +12,13 @@ export default async function LoginVerifyPage() {
   ]);
 
   return (
-    <LoginPageBuilder
-      loginPage={loginPage}
-      step="verify"
-      themeSettings={themeSettings ?? null}
-      branding={branding ?? null}
-    />
+    <Suspense>
+      <LoginPageBuilder
+        loginPage={loginPage}
+        step="verify"
+        themeSettings={themeSettings ?? null}
+        branding={branding ?? null}
+      />
+    </Suspense>
   );
 }

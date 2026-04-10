@@ -9,8 +9,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = typeof seo.title === 'string' ? { default: seo.title, template: `%s | ${brandName}` } : seo.title;
   const description = seo.description || 'HayahAI Marketplace';
 
+  const siteUrl = (branding?.domain_name ? `https://${branding.domain_name}` : '') || process.env.NEXT_PUBLIC_SITE_URL || '';
   return {
-    ...(process.env.NODE_ENV === 'production' ? { metadataBase: new URL('https://www.hayahai.com') } : {}),
+    ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
 
     title: {
       default: (title as any).default || 'HayahAI',
