@@ -88,12 +88,14 @@ instance.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // Avoid infinite loops and don't try to refresh if already on login/register
+      // Avoid infinite loops: never retry /auth/me or /auth/refresh themselves,
+      // and don't attempt refresh on login/register pages.
       if (
         typeof window !== 'undefined' &&
         window.location.pathname !== '/login' &&
         window.location.pathname !== '/register' &&
-        !originalRequest.url?.includes('/auth/refresh')
+        !originalRequest.url?.includes('/auth/refresh') &&
+        !originalRequest.url?.includes('/auth/me')
       ) {
         originalRequest._retry = true;
 

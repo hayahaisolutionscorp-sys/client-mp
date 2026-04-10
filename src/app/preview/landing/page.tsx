@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import LandingPreviewClient from "./LandingPreviewClient";
 import { getLandingDraft } from "@/lib/preview/landing-draft-store";
 import { getLandingPageData } from "@/services/content/landing-page.service";
@@ -15,9 +16,11 @@ export default async function LandingPreviewPage({ searchParams }: LandingPrevie
   const initialLandingData = await getLandingPageData();
 
   return (
-    <LandingPreviewClient 
-      initialPayload={initialPayload} 
-      initialLandingData={initialLandingData} 
-    />
+    <Suspense>
+      <LandingPreviewClient 
+        initialPayload={initialPayload} 
+        initialLandingData={initialLandingData} 
+      />
+    </Suspense>
   );
 }
