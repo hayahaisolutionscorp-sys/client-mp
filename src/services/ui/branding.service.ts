@@ -47,13 +47,12 @@ export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<B
 
     try {
         const requestInit: RequestInit = {
-            cache: 'no-store',
             ...init,
         };
 
         const res = await fetch(`${BRANDING_API}`, {
             ...requestInit,
-            // next: { tags: ['branding'], revalidate: 3600 }
+            next: { tags: ['branding'], revalidate: 3600 }
         });
 
         if (res.ok) {
