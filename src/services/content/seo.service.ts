@@ -15,6 +15,27 @@ export interface SeoMetadata {
     manifest?: any;
 }
 
+const DEVELOPMENT_ROBOTS = {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+        index: false,
+        follow: false,
+        noimageindex: true,
+        'max-image-preview': 'none',
+        'max-snippet': 0,
+    },
+};
+
+export function getRobotsMetadata(robots?: SeoMetadata['robots']) {
+    if (process.env.NODE_ENV === 'development') {
+        return DEVELOPMENT_ROBOTS;
+    }
+
+    return robots;
+}
+
 type PageKey =
     | 'home'
     | 'find-trips'
@@ -41,7 +62,7 @@ function buildMetadataFromConfig(config: any): SeoMetadata {
         title: config.title,
         description: config.description,
         keywords: config.keywords,
-        robots: config.robots,
+        robots: getRobotsMetadata(config.robots),
         alternates: {
             canonical: config.canonical_url,
         },
@@ -103,5 +124,6 @@ export async function getPageMetadata(pageKey: PageKey): Promise<SeoMetadata> {
     return {
         title: pageData?.title || 'Ayahay',
         description: pageData?.description || 'Ayahay Marketplace',
+        robots: getRobotsMetadata(pageData?.robots),
     } as SeoMetadata;
 }

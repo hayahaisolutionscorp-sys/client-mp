@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getGlobalMetadata } from '@/services/content/seo.service';
+import { getGlobalMetadata, getRobotsMetadata } from '@/services/content/seo.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: 'HayahAI Team',
     publisher: brandName,
 
-    robots: seo.robots || {
+    robots: getRobotsMetadata(seo.robots) || {
       index: true,
       follow: true,
       googleBot: {
