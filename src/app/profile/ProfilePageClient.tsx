@@ -72,16 +72,23 @@ export default function ProfilePageClient() {
         setAuthReady(true);
     }, []);
 
-    const fetchProfileData = useCallback(async () => {
+    const fetchProfileData = useCallback(async (force = false) => {
         if (!loggedInAccount) return;
 
         try {
             const [profileResult, dependentsData] = await Promise.all([
-                AuthService.getProfile(),
+                AuthService.getProfile(force),
                 getDependents(loggedInAccount.id)
             ]);
 
-            const profileData = profileResult.data;
+            const profileData = profileResult?.data ?? profileResult;
+            if (!profileData) {
+                setPassenger(null);
+                setAccount(null);
+                setDependents([]);
+                setVerificationStatus('unverified');
+                return;
+            }
 
             // Deep sanitize helper to ensure only strings reach renderable fields
             const s = (val: any) => typeof val === 'string' ? val : (val ? String(val) : '');
@@ -149,7 +156,7 @@ export default function ProfilePageClient() {
         }
 
         if (loggedInAccount?.role === 'Passenger') {
-            fetchProfileData();
+            void fetchProfileData();
         } else {
             setIsProfileLoading(false);
         }
@@ -189,11 +196,11 @@ export default function ProfilePageClient() {
         setVerificationStatus(status);
     };
 
-    const handleVerificationFormSubmit = (formData: any) => {
+    const handleVerificationFormSubmit = (_formData: any) => {
         // Don't close modal immediately - let the form show success state
         // setShowVerificationForm(false);
         // setDependentToVerify(null);
-        fetchProfileData();
+        void fetchProfileData(true);
 
         // Close modal after a delay to show success message
         setTimeout(() => {
@@ -238,7 +245,7 @@ export default function ProfilePageClient() {
 
             await updatePassenger({ profilePictureUrl: upload.url });
             setImagePreview(upload.url);
-            fetchProfileData();
+            await fetchProfileData(true);
         } catch (error: any) {
             console.error("Updating profile picture failed:", error.message);
         } finally {
@@ -346,7 +353,7 @@ export default function ProfilePageClient() {
                         accountId={loggedInAccount.id}
                         verificationDetails={account?.verificationDetails}
                         onStatusChange={handleVerificationStatusChange}
-                        onRefresh={fetchProfileData}
+                        onRefresh={() => fetchProfileData(true)}
                     />
                 </TabsContent>
 

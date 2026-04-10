@@ -13,6 +13,7 @@ import PwaInstallBanner from '@/components/pwa/PwaInstallBanner';
 import DevServiceWorkerReset from '@/components/pwa/DevServiceWorkerReset';
 import { ToasterProvider } from '@/components/ui/ToasterProvider';
 import NextTopLoader from 'nextjs-toploader';
+import { Suspense } from 'react';
 import { getReadableTextColor, hexToHsl, toRgbCssValue } from '@/lib/color-utils';
 import ThemeHydrator from '@/components/ThemeHydrator';
 import { IThemeSettings } from "@/models";
@@ -113,18 +114,20 @@ export default async function RootLayout({
         <ThemeProvider initialTheme={themeSettings} initialBranding={brandingConfig} initialDestinations={destinations}>
           <AuthContextProvider>
             <ThemeHydrator theme={themeSettings} isFallback={isFallbackBranding} />
-            <BodyWrapper>
-              <NextTopLoader color="#2563eb" height={3} showSpinner={false} />
-              <ToasterProvider />
-              <DevServiceWorkerReset />
-              <PwaInstallBanner />
-              <LayoutWrapper
-                initialLandingBuilderConfig={landingBuilderConfig}
-                initialHeaderSection={initialHeaderSection ?? null}
-              >
-                {children}
-              </LayoutWrapper>
-            </BodyWrapper>
+            <Suspense fallback={null}>
+              <BodyWrapper>
+                <NextTopLoader color="#2563eb" height={3} showSpinner={false} />
+                <ToasterProvider />
+                <DevServiceWorkerReset />
+                <PwaInstallBanner />
+                <LayoutWrapper
+                  initialLandingBuilderConfig={landingBuilderConfig}
+                  initialHeaderSection={initialHeaderSection ?? null}
+                >
+                  {children}
+                </LayoutWrapper>
+              </BodyWrapper>
+            </Suspense>
           </AuthContextProvider>
         </ThemeProvider>
       </body>

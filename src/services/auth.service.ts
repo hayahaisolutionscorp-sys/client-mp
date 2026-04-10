@@ -2,6 +2,18 @@ import axios from '@/services/core/axios';
 import { AUTH_API } from 'constants/api';
 import { RegisterForm, LoginForm } from '@/models';
 
+const PROFILE_CACHE_TTL_MS = 3_000;
+let inflightProfileRequest: Promise<any | null> | null = null;
+let lastProfileSnapshot: { value: any | null; timestamp: number } | null = null;
+
+const cacheProfileSnapshot = (value: any | null) => {
+  lastProfileSnapshot = {
+    value,
+    timestamp: Date.now(),
+  };
+  return value;
+};
+
 export const AuthService = {
   register: async (data: RegisterForm) => {
     const response = await axios.post(`${AUTH_API}/register`, data);
@@ -22,18 +34,41 @@ export const AuthService = {
     return response.data;
   },
 
-  getProfile: async () => {
-    try {
-      const response = await axios.get(`${AUTH_API}/me`);
-      return response.data;
-    } catch (error: any) {
-      // Silently handle 401 (no session) and 403 (session exists but no role yet)
-      // as both mean the user is effectively not usable in the current state.
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        return null;
-      }
-      throw error;
+  clearProfileCache: () => {
+    inflightProfileRequest = null;
+    lastProfileSnapshot = null;
+  },
+
+  getProfile: async (force = false) => {
+    if (inflightProfileRequest) {
+      return inflightProfileRequest;
     }
+
+    if (
+      !force &&
+      lastProfileSnapshot &&
+      Date.now() - lastProfileSnapshot.timestamp < PROFILE_CACHE_TTL_MS
+    ) {
+      return lastProfileSnapshot.value;
+    }
+
+    inflightProfileRequest = (async () => {
+      try {
+        const response = await axios.get(`${AUTH_API}/me`);
+        return cacheProfileSnapshot(response.data);
+      } catch (error: any) {
+        // Silently handle 401 (no session) and 403 (session exists but no role yet)
+        // as both mean the user is effectively not usable in the current state.
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          return cacheProfileSnapshot(null);
+        }
+        throw error;
+      } finally {
+        inflightProfileRequest = null;
+      }
+    })();
+
+    return inflightProfileRequest;
   },
 
   updateProfile: async (data: any) => {

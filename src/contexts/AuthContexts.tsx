@@ -77,6 +77,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     };
 
     const clearSession = useCallback(() => {
+        AuthService.clearProfileCache();
         setCurrentUser(null);
         setLoggedInAccount(null);
         accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
@@ -89,7 +90,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         loadingRef.current = true;
         try {
             setLoading(true);
-            const result = await AuthService.getProfile();
+            const result = await AuthService.getProfile(_force);
             if (!result) {
                 // No valid session — clear in-memory state but keep localStorage cache
                 // so the next refresh still attempts loadProfile instead of showing login.

@@ -10,7 +10,9 @@ const TripsSelector = dynamic(() => import('@/components/booking/destination/Tri
 export default function Destination() {
   return (
     <TripsProvider>
-      <SearchHeader />
+      <Suspense fallback={null}>
+        <SearchHeader />
+      </Suspense>
       <div className="flex flex-col bg-gray-50 px-3 pt-2 pb-8 lg:flex-row lg:px-10">
         {/* Sidebar - Hidden on mobile */}
         <div className="hidden lg:block lg:w-[300px] pt-[140px]">

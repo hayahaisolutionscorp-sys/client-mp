@@ -2,12 +2,6 @@ import { Metadata } from 'next';
 import { getPageMetadata } from '@/services/content/seo.service';
 import ScheduleAndFaresClient from './ScheduleAndFaresClient';
 
-import dynamic from 'next/dynamic';
-import { Card, CardContent, CardFooter } from '@/components/ui/Card';
-import { CalendarIcon } from 'lucide-react';
-
-const ScheduleAndFares = dynamic(() => import('@/components/schedule-and-fares/ScheduleAndFares'), { ssr: false });
-
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('schedule-and-fares');
 

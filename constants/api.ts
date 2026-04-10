@@ -1,8 +1,8 @@
-const trimTrailingSlash = (url: string) => url.replace(/\/+$/, '');
+const trimTrailingSlash = (url?: string | null) => (url ?? '').replace(/\/+$/, '');
 
 export const IS_CLIENT = process.env.NEXT_PUBLIC_IS_CLIENT === 'true';
-const CLIENT_API_BASE_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL!);
-export const CORE_API_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL!);
+const CLIENT_API_BASE_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000');
+export const CORE_API_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002');
 
 const BASE_URL = IS_CLIENT ? CLIENT_API_BASE_URL : CORE_API_URL;
 
