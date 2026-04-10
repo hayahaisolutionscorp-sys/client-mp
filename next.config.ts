@@ -12,7 +12,7 @@ const withPWA = require('next-pwa')({
     // The client API backend (auth/me, bookings, etc.) must NEVER be served from
     // cache – stale auth responses were causing an infinite auth/me loop in prod.
     {
-      urlPattern: /^https:\/\/client\.hayahai\.com\/.*/,
+      urlPattern: new RegExp(`^${(process.env.NEXT_PUBLIC_API_URL || 'https://client.hayahai.com').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*`),
       handler: 'NetworkOnly',
     },
     // Also exclude Next.js internal API routes from caching
