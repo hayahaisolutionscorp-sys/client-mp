@@ -1,4 +1,4 @@
-const trimTrailingSlash = (url: string) => url.replace(/\/+$/, '');
+const trimTrailingSlash = (url?: string | null) => (url ?? '').replace(/\/+$/, '');
 
 export const isClientMode = process.env.NEXT_PUBLIC_IS_CLIENT === 'true';
 

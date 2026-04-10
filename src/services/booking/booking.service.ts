@@ -345,58 +345,74 @@ export async function calculatePricing(
 }
 
 /**
- * Derives the pricing state required for calculatePricing from a raw booking response.
+ * Derives a `CalculatePricingRequest` payload from a raw booking response.
  */
 export function derivePricingStateFromBooking(rawBookingData: any) {
   const trips = rawBookingData.trips;
   const departureLegs = trips?.departure || (Array.isArray(trips) ? trips : []);
   const returnLegs = trips?.return || [];
-  const allLegs = [...departureLegs, ...returnLegs];
+  const allLegs = [...departureLegs, ...returnLegs].filter((leg) => leg?.id);
 
   if (allLegs.length === 0) return null;
 
-  // 1. Map routes to cabins
-  // The API expects a 'route' object where keys are "ORIG-DEST" and value is the cabin type name string
-  const route: Record<string, string> = {};
-  allLegs.forEach(leg => {
-    const key = `${leg.origin}-${leg.destination}`;
-    const p = leg.passengers?.[0];
-    if (p) {
-      route[key] = p.cabin_type_name || p.cabinTypeName || p.cabin || p.accommodation;
-    }
-  });
+  const tripIds = allLegs.map((leg) => String(leg.id));
+  const routeCode =
+    departureLegs[0]?.route_code ||
+    departureLegs[0]?.routeCode ||
+    allLegs[0]?.route_code ||
+    allLegs[0]?.routeCode ||
+    '';
 
-  // 2. Passengers
-  // Standardize on the first leg's passengers and ensure discount types are uppercase
-  const passenger = (departureLegs[0]?.passengers || []).map((p: any) =>
-    (p.discount_type || p.discountType || 'ADULT').toUpperCase()
-  );
+  const passengers = (departureLegs[0]?.passengers || []).map((passenger: any, index: number) => ({
+    index,
+    passengerType: passenger.passenger_type || passenger.passengerType || passenger.discount_type || passenger.discountType || 'ADULT',
+    tripAssignments: allLegs.map((leg: any) => ({
+      tripId: String(leg.id),
+      cabinId:
+        passenger.cabin_id ||
+        passenger.cabinId ||
+        passenger.cabin_type_id ||
+        passenger.cabinTypeId ||
+        null,
+      discountType: String(
+        passenger.discount_type ||
+        passenger.discountType ||
+        passenger.passenger_type ||
+        passenger.passengerType ||
+        'ADULT'
+      ).toUpperCase(),
+    })),
+  }));
 
-  // 3. Vehicles
-  const vehicle: Record<string, any> = {};
-  (departureLegs[0]?.vehicles || []).forEach((v: any, i: number) => {
-    vehicle[`vehicle_${i + 1}`] = {
-      vehicleTypeId: v.vehicle_type_id || v.vehicleTypeId || v.vehicleTypeId,
-      plateNumber: v.plate_no || v.plateNumber || v.plate_number,
-      cargo_class: v.cargo_class || v.type || v.vehicle_type || (v.vehicle?.vehicleType?.name)
-    };
-  });
+  const rollingCargo = (departureLegs[0]?.vehicles || [])
+    .map((vehicle: any, index: number) => ({
+      index,
+      cargoType: 'rolling' as const,
+      cargoClassCode: String(
+        vehicle.vehicle_type_id ||
+        vehicle.vehicleTypeId ||
+        vehicle.type_id ||
+        vehicle.vehicle?.vehicleType?.id ||
+        vehicle.vehicle?.vehicle_type_id ||
+        ''
+      ),
+      tripAssignments: allLegs.map((leg: any) => ({ tripId: String(leg.id) })),
+    }))
+    .filter((cargo: { cargoClassCode: string }) => Boolean(cargo.cargoClassCode));
 
-  // 4. Cargos
-  const cargo: Record<string, any> = {};
-  const cargoList = departureLegs[0]?.cargos || departureLegs[0]?.cargo || [];
-  cargoList.forEach((c: any, i: number) => {
-    cargo[`cargo_${i + 1}`] = {
-      commodityId: c.commodity_id || c.commodityId,
-      quantity: c.quantity || 1,
-      cargo_class: c.cargo_class || c.commodity_name || 'Cargo'
-    };
-  });
+  const looseCargoSource = departureLegs[0]?.cargos || departureLegs[0]?.cargo || [];
+  const looseCargo = looseCargoSource.map((cargo: any, index: number) => ({
+    index: rollingCargo.length + index,
+    cargoType: 'loose' as const,
+    cargoClassCode: cargo.cargo_class || cargo.cargoClass || cargo.commodity_name || cargo.commodityName || undefined,
+    quantity: Number(cargo.quantity || 1),
+    tripAssignments: allLegs.map((leg: any) => ({ tripId: String(leg.id) })),
+  }));
 
   return {
-    route,
-    passenger,
-    vehicle,
-    cargo
+    routeCode,
+    tripIds,
+    passengers,
+    cargos: [...rollingCargo, ...looseCargo],
   };
 }

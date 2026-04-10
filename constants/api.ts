@@ -1,4 +1,4 @@
-const trimTrailingSlash = (url: string) => url.replace(/\/+$/, '');
+const trimTrailingSlash = (url?: string | null) => (url ?? '').replace(/\/+$/, '');
 
 export const IS_CLIENT = process.env.NEXT_PUBLIC_IS_CLIENT === 'true';
 const CLIENT_API_BASE_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000');
