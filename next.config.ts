@@ -9,15 +9,41 @@ const withPWA = require('next-pwa')({
   skipWaiting: true, // skip waiting for service worker activation
   runtimeCaching: [
     // ─── NEVER cache API/auth calls ─────────────────────────────────────────────
-    // The client API backend (auth/me, bookings, etc.) must NEVER be served from
-    // cache – stale auth responses were causing an infinite auth/me loop in prod.
+    // Auth and API calls must NEVER be served from cache.
+    // Path-based pattern ensures auth requests are excluded regardless of origin,
+    // which avoids issues when build-time env vars don't match the production domain.
     {
-      urlPattern: new RegExp(`^${(process.env.NEXT_PUBLIC_API_URL || 'https://client.hayahai.com').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*`),
+      urlPattern: /\/auth\//,
       handler: 'NetworkOnly',
     },
+    // Also exclude by origin when the env vars are available at build time
+    ...(process.env.NEXT_PUBLIC_API_URL
+      ? [{
+          urlPattern: new RegExp(`^${process.env.NEXT_PUBLIC_API_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*`),
+          handler: 'NetworkOnly' as const,
+        }]
+      : []),
+    ...(process.env.NEXT_PUBLIC_API_BASE_URL
+      ? [{
+          urlPattern: new RegExp(`^${process.env.NEXT_PUBLIC_API_BASE_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*`),
+          handler: 'NetworkOnly' as const,
+        }]
+      : []),
     // Also exclude Next.js internal API routes from caching
     {
       urlPattern: /\/api\//,
+      handler: 'NetworkOnly',
+    },
+    // ─── NEVER cache large media files ──────────────────────────────────────────
+    // Video files are too large for the Cache API and cause
+    // ERR_CACHE_OPERATION_NOT_SUPPORTED when the service worker tries to store them.
+    {
+      urlPattern: /\.(?:mp4|webm|ogg|avi|mov)(?:\?.*)?$/i,
+      handler: 'NetworkOnly',
+    },
+    // S3 asset bucket — images are fine to cache but videos above will match first
+    {
+      urlPattern: /^https:\/\/ayahay-assets\.s3\.ap-southeast-2\.amazonaws\.com\/.*/,
       handler: 'NetworkOnly',
     },
     // ─── Static assets / pages: NetworkFirst ────────────────────────────────────
