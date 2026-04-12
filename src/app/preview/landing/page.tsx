@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import LandingPreviewClient from "./LandingPreviewClient";
 import { getLandingDraft } from "@/lib/preview/landing-draft-store";
 import { getLandingPageData } from "@/services/content/landing-page.service";
@@ -14,18 +15,12 @@ export default async function LandingPreviewPage({ searchParams }: LandingPrevie
   const initialPayload = draftId ? getLandingDraft(draftId) : null;
   const initialLandingData = await getLandingPageData();
 
-  if (!initialPayload) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500">
-        Preview draft not found.
-      </div>
-    );
-  }
-
   return (
-    <LandingPreviewClient 
-      initialPayload={initialPayload} 
-      initialLandingData={initialLandingData} 
-    />
+    <Suspense>
+      <LandingPreviewClient 
+        initialPayload={initialPayload} 
+        initialLandingData={initialLandingData} 
+      />
+    </Suspense>
   );
 }

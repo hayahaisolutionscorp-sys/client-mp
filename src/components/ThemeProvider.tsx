@@ -174,8 +174,14 @@ export default function ThemeProvider({ children, initialTheme, initialBranding,
     }
   }, [initialDestinations]);
 
+  const contextValue = useMemo(() => ({
+    themeSettings, setThemeSettings,
+    branding, setBranding,
+    destinations, setDestinations,
+  }), [themeSettings, branding, destinations]);
+
   return (
-    <ThemeContext.Provider value={{ themeSettings, setThemeSettings, branding, setBranding, destinations, setDestinations }}>
+    <ThemeContext.Provider value={contextValue}>
       <div data-button-template-scope data-button-template={buttonTemplate}>
         <style dangerouslySetInnerHTML={{ __html: templateButtonCss }} />
         {children}

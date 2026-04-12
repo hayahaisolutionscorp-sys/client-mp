@@ -14,10 +14,9 @@ import { usePreviewScrollToSection } from "@/lib/preview/use-preview-scroll-to-s
 import type { IThemeSettings } from "@/models";
 
 interface LandingPreviewClientProps {
-  initialPayload: LandingPreviewPayload;
+  initialPayload: LandingPreviewPayload | null;
   initialLandingData: LandingPageData | null;
 }
-
 export default function LandingPreviewClient({
   initialPayload,
   initialLandingData,
@@ -26,15 +25,16 @@ export default function LandingPreviewClient({
   const payload = usePreviewSyncPayload(initialPayload, "AYAHAY_LANDING_PREVIEW_SYNC");
   usePreviewScrollToSection();
   const [config, setConfig] = useState<LandingBuilderContent>(
-    normalizeLandingBuilderContent(initialPayload.builderConfig)
+    normalizeLandingBuilderContent(initialPayload?.builderConfig)
   );
 
   useEffect(() => {
+    if (!payload) return;
     setConfig(normalizeLandingBuilderContent(payload.builderConfig));
-  }, [payload.builderConfig]);
+  }, [payload?.builderConfig]);
 
   useEffect(() => {
-    const previewConfig = payload.config;
+    const previewConfig = payload?.config;
     if (!previewConfig) return;
 
     const mergedBranding = buildPreviewBranding(previewConfig, initialLandingData?.brandingConfig);
@@ -78,7 +78,15 @@ export default function LandingPreviewClient({
     root.style.setProperty("--text-on-surface-alt", textOnSurfaceAlt);
     root.style.setProperty("--muted-on-surface", mutedOnSurface);
     root.style.setProperty("--text-default-rgb", toRgbCssValue(textOnSurface));
-  }, [initialLandingData?.brandingConfig, payload.config, setBranding, setThemeSettings]);
+  }, [initialLandingData?.brandingConfig, payload?.config, setBranding, setThemeSettings]);
+
+  if (!payload) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500 text-sm">
+        Loading preview...
+      </div>
+    );
+  }
 
   return <LandingPageBuilder config={config} previewPayload={payload} landingData={initialLandingData} />;
 }

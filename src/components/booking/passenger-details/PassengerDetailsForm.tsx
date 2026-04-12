@@ -22,7 +22,8 @@ import type { DISCOUNT_TYPE } from 'constants/enum';
 import { getDefaultDOB } from 'helpers/date.helpers';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import { hexToRgb } from 'helpers/theme.helpers';
-import { getRateTableRowsByRateTableId, getActivePassengerTypes, PassengerType } from '@/services';
+import { getRateTableRowsByRateTableId } from '@/services';
+import type { PassengerType } from '@/services/booking/passenger.service';
 import { PassengerData } from '@/types/booking/passenger-data';
 import { IRateTableRow, IDependent } from '@/models';
 import { differenceInYears, format } from 'date-fns';
@@ -47,11 +48,12 @@ interface PassengerDetailsFormProps {
   vehicleCount?: number;
   passengerDetails?: PassengerDetails | undefined;
   shippingLineId?: string;
+  passengerTypeCodes?: string[];
   onChange?: (data: { passenger: PassengerData; companions: PassengerData[] }) => void;
   onAddVehicle?: () => void;
 }
 
-const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () => void }, PassengerDetailsFormProps> = ({ rateTableId, vehicleCount = 0, passengerDetails, shippingLineId, onChange, onAddVehicle }, ref) => {
+const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () => void }, PassengerDetailsFormProps> = ({ rateTableId, vehicleCount = 0, passengerDetails, shippingLineId, passengerTypeCodes, onChange, onAddVehicle }, ref) => {
   const generateUniqueNumber = (): number => {
     return (Date.now() + Math.floor(Math.random() * 1000)) * -1;
   };
@@ -97,8 +99,20 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
   }, [formData, onChange]);
 
   useEffect(() => {
-    getActivePassengerTypes(shippingLineId).then(setPassengerTypes);
-  }, [shippingLineId]);
+    if (passengerTypeCodes?.length) {
+      setPassengerTypes(passengerTypeCodes.map(name => ({
+        id: 0,
+        code: name.toUpperCase(),
+        name,
+        description: '',
+        age_min: null,
+        age_max: null,
+        requires_id: false,
+        sort_order: 0,
+        is_active: true,
+      })));
+    }
+  }, [passengerTypeCodes]);
 
   useEffect(() => {
     if (loggedInAccount?.id) {

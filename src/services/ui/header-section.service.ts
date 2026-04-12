@@ -11,8 +11,7 @@ export async function getHeadersSections(): Promise<IHeaderSection | undefined> 
     }
 
     const res = await fetch(HEADER_SECTION_API, {
-      cache: 'no-store',
-      // next: { tags: ['header-sections'], revalidate: 3600 }
+      next: { tags: ['header-sections'], revalidate: 3600 }
     });
 
     if (res.ok) {

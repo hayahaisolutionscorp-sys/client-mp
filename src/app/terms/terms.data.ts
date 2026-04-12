@@ -94,6 +94,7 @@ export const terms: Terms[] = [
     content: `Change requests (e.g., rescheduling) are subject to the policies of the respective shipping line and may incur additional fees.
       Cancellations and refund requests must be made in accordance with the shipping line's policies.
       Refund processing times may vary depending on the payment method used.
+      For payments made via debit or credit card, any fees, charges, or differences arising from international transaction refunds, including but not limited to bank fees, foreign exchange fluctuations, and processing charges, shall be borne solely by the customer.
       Cancellation of trips is subject to change without prior notice.`
   },
   {

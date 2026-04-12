@@ -75,6 +75,7 @@ const ScheduleAndFares = ({
           )})`,
           route: `${trip.srcPort?.name ?? trip.srcPortName ?? 'Unknown'} → ${trip.destPort?.name ?? trip.destPortName ?? 'Unknown'}`,
           ship: `${getShipDetailsById(trip.shipId)?.name ?? trip.shipName ?? 'Unknown'}`,
+          logoUrl: trip.lightLogoUrl,
           fare:
             Array.isArray(trip.availableCabins) && trip.availableCabins.length
               ? trip.availableCabins

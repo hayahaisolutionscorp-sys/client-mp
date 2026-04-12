@@ -442,6 +442,13 @@
                     },
                     {
                         "type": "text",
+                        "text": "For payments made via debit or credit card, any fees, charges, or differences arising from international transaction refunds, including but not limited to bank fees, foreign exchange fluctuations, and processing charges, shall be borne solely by the customer."
+                    },
+                    {
+                        "type": "hardBreak"
+                    },
+                    {
+                        "type": "text",
                         "text": "Cancellation of trips is subject to change without prior notice."
                     }
                 ]

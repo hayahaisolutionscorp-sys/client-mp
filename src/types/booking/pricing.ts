@@ -1,3 +1,20 @@
+export interface CalculatePricingRequest {
+    routeCode: string;
+    tripIds: string[];
+    passengers: {
+        index: number;
+        passengerType: string;
+        tripAssignments: { tripId: string; cabinId?: number | null; discountType?: string }[];
+    }[];
+    cargos?: {
+        index: number;
+        cargoType: 'rolling' | 'loose';
+        cargoClassCode?: string;
+        quantity?: number;
+        tripAssignments: { tripId: string }[];
+    }[];
+}
+
 export interface PricingRequest {
     route: {
         [key: string]: string; // e.g., "POB-DMG": "Deluxe"

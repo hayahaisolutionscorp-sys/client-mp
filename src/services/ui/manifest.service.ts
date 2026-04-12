@@ -37,12 +37,12 @@ export const ManifestService = {
         const dynamicThemeColor = brandingConfig?.colors?.primaryColor || brandingConfig?.colors?.primary;
         const dynamicFavicon = brandingConfig?.favicon_url?.trim();
 
-        const dynamicIcons: ManifestIcon[] = dynamicFavicon
+        const dynamicIcons: ManifestIcon[] = dynamicFavicon && !dynamicFavicon.endsWith('.ico')
             ? [
                 {
                     src: dynamicFavicon,
                     sizes: 'any',
-                    type: dynamicFavicon.endsWith('.ico') ? 'image/x-icon' : 'image/png',
+                    type: 'image/png',
                     purpose: 'any'
                 }
             ]

@@ -39,6 +39,7 @@ export function getRobotsMetadata(robots?: SeoMetadata['robots']) {
 type PageKey =
     | 'home'
     | 'find-trips'
+    | 'schedule-and-fares'
     | 'faqs'
     | 'faq'
     | 'press-releases'
@@ -50,11 +51,12 @@ type PageKey =
     | 'privacy-policy'
     | 'route';
 
-// Map legacy page keys to new slugs used in seo.json
+// Map page route keys to slugs used in seo.json / API
 const pageKeyMap: Record<string, string> = {
     faq: 'faqs',
     press: 'press-releases',
     terms: 'terms-and-conditions',
+    'schedule-and-fares': 'find-trips',
 };
 
 function buildMetadataFromConfig(config: any): SeoMetadata {

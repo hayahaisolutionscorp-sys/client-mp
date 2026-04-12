@@ -315,29 +315,59 @@ export async function prepareBooking(
 import { PricingResponse } from '@/types/booking/pricing';
 
 export async function calculatePricing(
-  bookingState: any, // Using 'any' for now to match the TripSummary state structure, but ideally should be PricingRequest
+  pricingData: import('@/types/booking/pricing').CalculatePricingRequest,
   headers?: HeadersInit,
   shippingLineId?: string,
 ): Promise<PricingResponse> {
   try {
     const url = !IS_CLIENT && shippingLineId
-      ? `${BOOKING_API}/pricing/from-state?shipping_line_id=${shippingLineId}`
-      : `${BOOKING_API}/pricing/from-state`;
+      ? `${BOOKING_API}/pricing?shipping_line_id=${shippingLineId}`
+      : `${BOOKING_API}/pricing`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...headers,
       },
-      body: JSON.stringify(bookingState),
+      body: JSON.stringify(pricingData),
     });
 
     if (!response.ok) {
-      // Handle non-200 responses gracefully if needed, or let it throw
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    // Normalize flat response into PricingResponse shape expected by FareSummary
+    const json = await response.json();
+    const flat = json.data;
+    if (!flat) return json;
+
+    const tripIds: string[] = pricingData.tripIds;
+    const tripMap = new Map<string, { passengerPrices: any[]; cargoPrices: any[] }>();
+    for (const id of tripIds) tripMap.set(id, { passengerPrices: [], cargoPrices: [] });
+
+    (flat.passengerPrices ?? []).forEach((p: any) => { tripMap.get(p.tripId)?.passengerPrices.push(p); });
+    (flat.cargoPrices ?? []).forEach((c: any) => { tripMap.get(c.tripId)?.cargoPrices.push(c); });
+
+    const trips = [...tripMap.entries()].map(([tripId, data], i) => {
+      const pSub = data.passengerPrices.reduce((s: number, p: any) => s + (p.baseFare ?? 0), 0);
+      const cSub = data.cargoPrices.reduce((s: number, c: any) => s + (c.baseFare ?? 0), 0);
+      const charges = i === 0 ? (flat.charges ?? []) : [];
+      const chargesTotal = i === 0 ? (flat.chargesTotal ?? 0) : 0;
+      return {
+        tripId,
+        routeCode: data.passengerPrices[0]?.routeCode ?? data.cargoPrices[0]?.routeCode ?? '',
+        passengerPrices: data.passengerPrices,
+        cargoPrices: data.cargoPrices,
+        baseFare: { passengers: pSub, cargo: cSub, total: pSub + cSub },
+        charges,
+        chargesTotal,
+        taxesTotal: i === 0 ? (flat.taxesTotal ?? 0) : 0,
+        subtotal: pSub + cSub + chargesTotal,
+        grandTotal: pSub + cSub + chargesTotal,
+      };
+    });
+
+    return { message: json.message ?? 'Pricing calculated successfully', data: { trips, grandTotal: flat.grandTotal ?? 0 } };
   } catch (e) {
     console.error('Error calculating pricing:', e);
     throw e;

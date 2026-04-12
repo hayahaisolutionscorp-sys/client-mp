@@ -26,7 +26,7 @@ import type { IBrandingConfig } from "@/models";
 export type PreviewPageKey = "about" | "contact" | "faq" | "press" | "login";
 
 interface PreviewPageShellProps<TPayload extends { config?: PreviewGeneralConfig | null }> {
-  initialPayload: TPayload;
+  initialPayload: TPayload | null;
   messageType: string;
   pageKey: PreviewPageKey;
   baseBranding?: IBrandingConfig | null;
@@ -40,6 +40,15 @@ export function PreviewPageShell<TPayload extends { config?: PreviewGeneralConfi
 }: PreviewPageShellProps<TPayload>) {
   const payload = usePreviewSyncPayload(initialPayload, messageType);
   usePreviewScrollToSection();
+
+  if (!payload) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500 text-sm">
+        Loading preview...
+      </div>
+    );
+  }
+
   const theme = buildPreviewThemeSettings(payload.config ?? null, baseBranding);
 
   if (pageKey === "about") {

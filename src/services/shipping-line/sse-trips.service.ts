@@ -181,6 +181,16 @@ function mapSSEToITrip(rawTrips: any[]): ITrip[] {
 
                     if (adultFare === undefined || adultFare === null) return null;
 
+                    const segCabinCapacities = actualSegment.cabin_capacities || seg.cabin_capacities || t.cabin_capacities || {};
+                    const segRemainingPassengers = actualSegment.remaining_capacities?.passengers || seg.remaining_capacities?.passengers || t.remaining_capacities?.passengers || {};
+                    const cabinCapInfo = segCabinCapacities[c.name] || segCabinCapacities[c.cabin_type_name] || {};
+
+                    const sseAvailableCap = typeof cabinCapInfo === 'number' 
+                        ? cabinCapInfo 
+                        : (cabinCapInfo.remaining ?? segRemainingPassengers[c.name] ?? segRemainingPassengers[c.cabin_type_name] ?? c.remaining_capacity ?? c.max_passenger_capacity);
+                    
+                    const sseTotalCap = cabinCapInfo.max ?? c.capacity ?? c.max_passenger_capacity;
+
                     return {
                         tripId: isConnecting ? `connecting-${t.id}` : seg.id,
                         cabinId: c.id,
@@ -199,8 +209,8 @@ function mapSSEToITrip(rawTrips: any[]): ITrip[] {
                             cabin_type_name: c.cabin_type_name,
                             cabin_type_description: c.cabin_type_description
                         },
-                        availablePassengerCapacity: c.max_passenger_capacity,
-                        passengerCapacity: c.max_passenger_capacity,
+                        availablePassengerCapacity: sseAvailableCap,
+                        passengerCapacity: sseTotalCap,
                         adultFare: adultFare
                     };
                 })

@@ -2,6 +2,7 @@ import Hero from '@/components/landing/Hero';
 import LandingPageBuilder from '@/components/landing/builder/LandingPageBuilder';
 import Footer from '@/components/Footer';
 import dynamic from 'next/dynamic';
+import WebSiteSchema from '@/components/seo/WebSiteSchema';
 
 const Promos = dynamic(() => import('@/components/landing/Promos'), { ssr: true });
 const PopularRoutes = dynamic(() => import('@/components/landing/PopularRoutes'), { ssr: true });
@@ -42,11 +43,17 @@ export default async function Home() {
   ]);
 
   if (builderConfig) {
-    return <LandingPageBuilder config={builderConfig} landingData={landingData} />;
+    return (
+      <>
+        <WebSiteSchema />
+        <LandingPageBuilder config={builderConfig} landingData={landingData} />
+      </>
+    );
   }
 
   return (
     <>
+      <WebSiteSchema />
       <div className="bg-[#EEF8FC]">
         <Hero
           heroSectionOverride={landingData.heroSection}

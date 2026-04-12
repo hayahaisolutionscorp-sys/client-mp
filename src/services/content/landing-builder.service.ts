@@ -12,7 +12,7 @@ export async function getLandingBuilderContent(): Promise<LandingBuilderContent 
 
   try {
     const response = await fetch(`${SEO_API}/home`, {
-      cache: "no-store",
+      next: { tags: ['landing-builder'], revalidate: 3600 },
     });
 
     if (!response.ok) {

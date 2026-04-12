@@ -1,13 +1,12 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
 import { IAccount, RegisterForm } from '@/models';
 import { AuthService } from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import { cacheItem, fetchItem, invalidateItem } from 'helpers/cache.helpers';
 import { accountRelatedCacheKeys } from 'constants/cache';
-import { useBranding } from "@/hooks/branding";
-import { useThemeSettings } from "@/hooks/theme-settings";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface AuthContextType {
     currentUser: any | null;
@@ -46,8 +45,11 @@ export const useAuth = () => {
 
 export default function AuthContextProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
-    const branding = useBranding();
-    const theme = useThemeSettings();
+    // Read branding/theme directly from ThemeProvider to avoid the extra local-state
+    // layer that useBranding()/useThemeSettings() maintain.  Those hooks each call
+    // setBranding/setThemeSettings on every navigation which caused AuthContextProvider
+    // to re-render twice per navigation for no benefit (auth state never changes).
+    const { branding: themeBranding, themeSettings } = useTheme();
 
     // Read cached account only once on mount to avoid creating new object references
     // that would trigger the loadProfile useEffect on every render.
@@ -81,7 +83,11 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
     }, []);
 
+    const loadingRef = useRef(false);
+
     const loadProfile = useCallback(async (_force: boolean = false) => {
+        if (loadingRef.current) return;
+        loadingRef.current = true;
         try {
             setLoading(true);
             const result = await AuthService.getProfile(_force);
@@ -140,6 +146,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             }
             return null;
         } finally {
+            loadingRef.current = false;
             setLoading(false);
         }
     }, [clearSession]);
@@ -177,7 +184,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
 
             await AuthService.register(payload as any);
 
-            showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}! Registration successful!`);
+            showNotification('success', `Welcome to ${themeBranding?.brand_name || 'Ayahay'}! Registration successful!`);
 
             // Load profile in background — caller will redirect immediately
             loadProfile();
@@ -193,7 +200,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     const signIn = async (email: string, password: string): Promise<any> => {
         try {
             await AuthService.login({ email, password });
-            showNotification('success', `Welcome back to ${branding?.brand_name || 'Ayahay'}!`);
+            showNotification('success', `Welcome back to ${themeBranding?.brand_name || 'Ayahay'}!`);
             // Load profile in background — caller will redirect immediately
             loadProfile();
             return 'success';
@@ -208,7 +215,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     const signInWithGoogle = async () => {
         try {
             await AuthService.signInWithGoogle();
-            showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}!`);
+            showNotification('success', `Welcome to ${themeBranding?.brand_name || 'Ayahay'}!`);
             // Load profile in background — caller will redirect immediately
             loadProfile(true);
             return 'success';
@@ -223,7 +230,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     const signInWithFacebook = async () => {
         try {
             await AuthService.signInWithFacebook();
-            showNotification('success', `Welcome to ${branding?.brand_name || 'Ayahay'}!`);
+            showNotification('success', `Welcome to ${themeBranding?.brand_name || 'Ayahay'}!`);
             // Load profile in background — caller will redirect immediately
             loadProfile(true);
             return 'success';
@@ -238,7 +245,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     const signInWithHayahai = async () => {
         try {
             await AuthService.signInWithHayahai();
-            showNotification('success', `Welcome back to ${branding?.brand_name || 'Ayahay'}!`);
+            showNotification('success', `Welcome back to ${themeBranding?.brand_name || 'Ayahay'}!`);
             // Load profile in background — caller will redirect immediately
             loadProfile(true);
             return 'success';
@@ -316,7 +323,14 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         }
     };
 
-    const value: AuthContextType = {
+    // branding and theme are stored in refs so they can be accessed by consumers
+    // without causing re-renders of all auth consumers when theme/branding changes.
+    const brandingRef = useRef(themeBranding);
+    brandingRef.current = themeBranding;
+    const themeRef = useRef(themeSettings);
+    themeRef.current = themeSettings;
+
+    const value: AuthContextType = useMemo(() => ({
         currentUser,
         loggedInAccount,
         hasPrivilegedAccess: loggedInAccount?.role === 'SuperAdmin' || loggedInAccount?.role === 'ShippingLineAdmin' || loggedInAccount?.role === 'TravelAgencyAdmin' || loggedInAccount?.role === 'ClientAdmin',
@@ -332,11 +346,11 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         confirmResetPassword,
         sendEmailVerification,
         notification,
-        branding,
-        theme,
+        get branding() { return brandingRef.current; },
+        get theme() { return themeRef.current; },
         refreshProfile: loadProfile,
         clearSession
-    };
+    }), [currentUser, loggedInAccount, loading, notification, loadProfile, clearSession]);
 
     return (
         <AuthContext.Provider value={value}>
@@ -345,7 +359,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
                 <div
                     className="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-opacity duration-300 text-white"
                     style={{
-                        backgroundColor: notification.type === 'success' ? (theme?.primary || '#22c55e') : '#ef4444'
+                        backgroundColor: notification.type === 'success' ? (themeSettings?.primary || '#22c55e') : '#ef4444'
                     }}
                 >
                     {notification?.message}

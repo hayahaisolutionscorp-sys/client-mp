@@ -2,7 +2,7 @@ import type { LoginPreviewPayload } from "@/lib/preview/login-preview";
 import { PreviewPageShell } from "@/lib/preview/PreviewPageShell";
 
 interface LoginPreviewClientProps {
-  initialPayload: LoginPreviewPayload;
+  initialPayload: LoginPreviewPayload | null;
 }
 
 export default function LoginPreviewClient({ initialPayload }: LoginPreviewClientProps) {
