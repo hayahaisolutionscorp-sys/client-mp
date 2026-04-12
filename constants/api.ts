@@ -1,10 +1,31 @@
 const trimTrailingSlash = (url?: string | null) => (url ?? '').replace(/\/+$/, '');
 
-export const IS_CLIENT = process.env.NEXT_PUBLIC_IS_CLIENT === 'true';
+const clientModeFlag = process.env.NEXT_PUBLIC_IS_CLIENT;
+export const IS_CLIENT = clientModeFlag === 'true';
 const CLIENT_API_BASE_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000');
 export const CORE_API_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002');
 
-const BASE_URL = IS_CLIENT ? CLIENT_API_BASE_URL : CORE_API_URL;
+// If NEXT_PUBLIC_IS_CLIENT is omitted but a client API base URL is provided,
+// default to client mode to avoid silently falling back to core API endpoints.
+const hasClientApiBase = Boolean(process.env.NEXT_PUBLIC_API_BASE_URL);
+const BASE_URL = IS_CLIENT || (!clientModeFlag && hasClientApiBase) ? CLIENT_API_BASE_URL : CORE_API_URL;
+
+const WHITELABEL_DEBUG = process.env.NEXT_PUBLIC_WHITELABEL_DEBUG === 'true';
+const logScope = globalThis as typeof globalThis & {
+  __WHITELABEL_API_CONFIG_LOGGED__?: boolean;
+};
+
+if (WHITELABEL_DEBUG && !logScope.__WHITELABEL_API_CONFIG_LOGGED__) {
+  logScope.__WHITELABEL_API_CONFIG_LOGGED__ = true;
+  console.info('[WhitelabelAPI] endpoint resolution', {
+    isClientMode: IS_CLIENT,
+    clientModeFlag,
+    hasClientApiBase,
+    clientApiBaseUrl: CLIENT_API_BASE_URL,
+    coreApiUrl: CORE_API_URL,
+    effectiveBaseUrl: BASE_URL
+  });
+}
 
 export const EFFECTIVE_API_BASE_URL = BASE_URL;
 
