@@ -18,7 +18,7 @@ const DEFAULT_THEME: IThemeSettings = {
 };
 
 export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
-  if (IS_BUILD_TIME || !IS_CLIENT) {
+  if (!IS_CLIENT) {
     return DEFAULT_THEME;
   }
 

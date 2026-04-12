@@ -38,7 +38,7 @@ const withBrandingCacheBuster = (config: IBrandingConfig): IBrandingConfig => {
 };
 
 export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<BrandingConfigResult> => {
-  if (IS_BUILD_TIME || !IS_CLIENT) {
+  if (!IS_CLIENT) {
     return {
       data: brandingData as unknown as IBrandingConfig,
       source: 'fallback'

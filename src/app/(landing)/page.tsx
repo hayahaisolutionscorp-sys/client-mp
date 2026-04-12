@@ -1,18 +1,20 @@
 import Hero from '@/components/landing/Hero';
 import LandingPageBuilder from '@/components/landing/builder/LandingPageBuilder';
 import Footer from '@/components/Footer';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 import WebSiteSchema from '@/components/seo/WebSiteSchema';
 
-const Promos = dynamic(() => import('@/components/landing/Promos'), { ssr: true });
-const PopularRoutes = dynamic(() => import('@/components/landing/PopularRoutes'), { ssr: true });
-const WhyChooseUs = dynamic(() => import('@/components/landing/WhyChooseUs'), { ssr: true });
+const Promos = nextDynamic(() => import('@/components/landing/Promos'), { ssr: true });
+const PopularRoutes = nextDynamic(() => import('@/components/landing/PopularRoutes'), { ssr: true });
+const WhyChooseUs = nextDynamic(() => import('@/components/landing/WhyChooseUs'), { ssr: true });
 
 
 import { getPageMetadata } from '@/services/content/seo.service';
 import { getLandingBuilderContent } from '@/services/content/landing-builder.service';
 import { getLandingPageData } from '@/services/content/landing-page.service';
 import { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('home');
