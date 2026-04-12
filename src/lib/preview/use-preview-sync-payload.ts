@@ -18,6 +18,14 @@ export function usePreviewSyncPayload<T>(initialPayload: T | null, messageType: 
     };
 
     window.addEventListener("message", handleMessage);
+
+    // Signal to the parent frame that this preview page is ready to receive
+    // the payload. This handles the race condition where the parent fires
+    // postMessage on iframe onLoad before React has hydrated.
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: `${messageType}:READY` }, "*");
+    }
+
     return () => window.removeEventListener("message", handleMessage);
   }, [messageType]);
 
