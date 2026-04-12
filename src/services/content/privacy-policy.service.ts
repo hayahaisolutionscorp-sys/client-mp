@@ -21,7 +21,7 @@ export async function getPrivacyPolicy(): Promise<IPrivacyPolicyTipTap | undefin
     }
 
     const res = await fetch(`${PRIVACY_POLICY_API}`, {
-      // next: { tags: ['privacy-policy'], revalidate: 3600 }
+      next: { tags: ['privacy-policy'], revalidate: 3600 }
     });
 
     if (res.ok) {

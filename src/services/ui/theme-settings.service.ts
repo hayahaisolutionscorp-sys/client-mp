@@ -4,6 +4,8 @@ import { THEME_SETTINGS_API } from 'constants/api';
 import brandingData from '@/data/branding.json';
 import { IS_BROWSER, IS_BUILD_TIME, IS_CLIENT } from '../config';
 
+const WHITELABEL_DEBUG = process.env.NEXT_PUBLIC_WHITELABEL_DEBUG === 'true';
+
 const DEFAULT_THEME: IThemeSettings = {
   primary: brandingData.colors.primary,
   secondary: brandingData.colors.secondary,
@@ -20,19 +22,25 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
     return DEFAULT_THEME;
   }
 
+  let cachedTheme: IThemeSettings | undefined;
   if (IS_BROWSER) {
     try {
-      const cached = localStorage.getItem("theme_settings");
+      const cached = localStorage.getItem('theme_settings');
       if (cached) {
-        return JSON.parse(cached);
+        cachedTheme = JSON.parse(cached) as IThemeSettings;
       }
     } catch (e) {
-      console.error("Failed to parse cached theme settings", e);
+      if (WHITELABEL_DEBUG) {
+        console.warn('[WhitelabelAPI] failed to parse cached theme settings', e);
+      }
     }
   }
 
   try {
-    const res = await fetch(THEME_SETTINGS_API);
+    const res = await fetch(
+      THEME_SETTINGS_API,
+      IS_BROWSER ? { cache: 'no-store' } : { next: { tags: ['branding'], revalidate: 3600 } }
+    );
 
     if (res.ok) {
       const response: IBrandingResponse = await res.json();
@@ -48,15 +56,17 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
       };
 
       if (IS_BROWSER) {
-        localStorage.setItem("theme_settings", JSON.stringify(theme));
+        localStorage.setItem('theme_settings', JSON.stringify(theme));
       }
 
       return theme;
     }
 
-    return DEFAULT_THEME;
+    return cachedTheme ?? DEFAULT_THEME;
   } catch (e) {
-    console.error('Error fetching theme settings:', e);
-    return DEFAULT_THEME;
+    if (typeof window === 'undefined' || WHITELABEL_DEBUG) {
+      console.error('[WhitelabelAPI] Error fetching theme settings:', e);
+    }
+    return cachedTheme ?? DEFAULT_THEME;
   }
 }

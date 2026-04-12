@@ -28,7 +28,7 @@ const FALLBACK_FAQ_PAGE: IFaqPage = {
   show_in_footer: false,
   slug: 'faq',
   created_at: null,
-  updated_at: null,
+  updated_at: null
 };
 
 export async function getFaqPage(): Promise<IFaqPage> {
@@ -39,16 +39,18 @@ export async function getFaqPage(): Promise<IFaqPage> {
 export async function getFaqs(): Promise<IFaq[]> {
   try {
     if (!IS_CLIENT) {
-      return (faqsData as unknown as IFaq[]).filter(f => f.is_active).sort((a, b) => a.display_order - b.display_order);
+      return (faqsData as unknown as IFaq[])
+        .filter((f) => f.is_active)
+        .sort((a, b) => a.display_order - b.display_order);
     }
 
     const res = await fetch(FAQS_API, {
-      // next: { tags: ['faqs'], revalidate: 3600 }
+      next: { tags: ['faqs'], revalidate: 3600 }
     });
 
     if (res.ok) {
       const { data } = await res.json();
-      return (data as IFaq[]).filter(f => f.is_active).sort((a, b) => a.display_order - b.display_order);
+      return (data as IFaq[]).filter((f) => f.is_active).sort((a, b) => a.display_order - b.display_order);
     }
 
     return [];
