@@ -16,12 +16,12 @@ const cacheProfileSnapshot = (value: any | null) => {
 
 export const AuthService = {
   register: async (data: RegisterForm) => {
-    const response = await axios.post(`${AUTH_API}/register`, data);
+    const response = await axios.post('/api/auth/register', data);
     return response.data;
   },
 
   login: async (data: LoginForm) => {
-    const response = await axios.post(`${AUTH_API}/login`, data);
+    const response = await axios.post('/api/auth/login', data);
     return response.data;
   },
 
@@ -30,7 +30,7 @@ export const AuthService = {
   },
 
   logout: async () => {
-    const response = await axios.post(`${AUTH_API}/logout`);
+    const response = await axios.post('/api/auth/logout');
     return response.data;
   },
 
@@ -102,7 +102,7 @@ export const AuthService = {
   },
 
   refreshToken: async () => {
-    const response = await axios.post(`${AUTH_API}/refresh`);
+    const response = await axios.post('/api/auth/refresh');
     return response.data;
   },
 

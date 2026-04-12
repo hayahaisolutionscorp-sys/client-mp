@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { fetchItem } from 'helpers/cache.helpers';
-import { EFFECTIVE_API_BASE_URL } from 'constants/api';
 
 const instance = axios.create({
   withCredentials: true
@@ -12,6 +11,30 @@ const instance = axios.create({
 // Track if we're currently refreshing to avoid duplicate refresh calls
 let isRefreshing = false;
 let refreshPromise: Promise<any> | null = null;
+const pendingRequests: Array<{
+  resolve: () => void;
+  reject: (error: unknown) => void;
+}> = [];
+
+function resolvePendingRequests() {
+  while (pendingRequests.length > 0) {
+    const subscriber = pendingRequests.shift();
+    subscriber?.resolve();
+  }
+}
+
+function rejectPendingRequests(error: unknown) {
+  while (pendingRequests.length > 0) {
+    const subscriber = pendingRequests.shift();
+    subscriber?.reject(error);
+  }
+}
+
+function waitForRefresh(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    pendingRequests.push({ resolve, reject });
+  });
+}
 
 /**
  * Shared function to handle token refresh.
@@ -25,7 +48,8 @@ const handleTokenRefresh = async () => {
   isRefreshing = true;
   refreshPromise = (async () => {
     try {
-      const response = await axios.post(`${EFFECTIVE_API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
+      const response = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+      resolvePendingRequests();
       return response.data;
     } catch (error: any) {
       // If refresh fails (especially 401), the refresh token is invalid.
@@ -38,6 +62,17 @@ const handleTokenRefresh = async () => {
       eraseCookie('user');
       eraseCookie('access_token');
       eraseCookie('refresh_token');
+      eraseCookie('auth_meta');
+
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include',
+          cache: 'no-store',
+        });
+      } catch {
+        // Ignore logout transport errors and continue local cleanup.
+      }
 
       // Clear all account-related cache items
       accountRelatedCacheKeys.forEach((key) => invalidateItem(key as any));
@@ -49,6 +84,8 @@ const handleTokenRefresh = async () => {
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('session-expired'));
       }
+
+      rejectPendingRequests(error);
       throw error;
     } finally {
       isRefreshing = false;
@@ -94,14 +131,17 @@ instance.interceptors.response.use(
         typeof window !== 'undefined' &&
         window.location.pathname !== '/login' &&
         window.location.pathname !== '/register' &&
-        !originalRequest.url?.includes('/auth/refresh') &&
+        !originalRequest.url?.includes('/api/auth/refresh') &&
         !originalRequest.url?.includes('/auth/me')
       ) {
         originalRequest._retry = true;
 
         try {
-          // Attempt to refresh the token using the shared logic
-          await handleTokenRefresh();
+          if (!isRefreshing) {
+            await handleTokenRefresh();
+          } else {
+            await waitForRefresh();
+          }
 
           return instance(originalRequest);
         } catch (refreshError: any) {

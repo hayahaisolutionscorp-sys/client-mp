@@ -72,12 +72,13 @@ const CountryCodeSelector = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          data-template-ignore="true"
           variant={null}
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "h-10 w-[110px] justify-between rounded-md border border-input bg-background px-3 py-2 font-normal text-customText text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+            "h-10 w-[110px] justify-between !rounded-md border border-input bg-transparent px-3 py-2 font-normal text-base text-black shadow-none ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
             className
           )}
           style={
@@ -89,20 +90,20 @@ const CountryCodeSelector = ({
           <span className="truncate">
             {selectedCountry ? `+${selectedCountry.dialCode}` : "+63"}
           </span>
-          <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-100" style={{ color: `rgba(${primaryColorRgb}, 1)` }} />
+          <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-100 text-black" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search country or code..." />
-          <CommandList className="max-h-60 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <PopoverContent className="w-[300px] border border-gray-200 bg-white p-0 text-black shadow-none" align="start">
+        <Command className="bg-white text-black shadow-none">
+          <CommandInput className="text-black placeholder:text-gray-500" placeholder="Search country or code..." />
+          <CommandList className="max-h-60 bg-white text-black [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <CommandEmpty>No country found.</CommandEmpty>
             <CommandGroup>
               {countries.map((country) => (
                 <CommandItem
                   key={country.iso2}
                   value={`${country.name} ${country.dialCode} ${country.iso2}`}
-                  className="data-[selected='true']:bg-[rgba(var(--primary-color),0.12)] data-[selected='true']:text-inherit aria-selected:bg-[rgba(var(--primary-color),0.12)]"
+                  className="bg-white text-black transition-colors hover:bg-[rgba(var(--primary-color),0.08)] data-[selected='true']:bg-[rgba(var(--primary-color),0.08)] data-[selected='true']:text-black data-[selected='true']:font-medium aria-selected:bg-[rgba(var(--primary-color),0.08)] aria-selected:text-black aria-selected:font-medium"
                   style={{ "--primary-color": primaryColorRgb } as React.CSSProperties}
                   onSelect={() => {
                     // Extract numeric length from format (e.g., "(...) ...-...." -> 10)

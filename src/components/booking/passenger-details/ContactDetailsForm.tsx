@@ -31,7 +31,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
   onChange,
 }) => {
   const themeSettings = useThemeSettings();
-  const { loggedInAccount } = useAuth();
+  const { currentUser } = useAuth();
   const [usePassengerDetails, setUsePassengerDetails] = useState(false);
   const ph = defaultCountries.find(c => parseCountry(c).iso2 === 'ph') || defaultCountries[0];
   const defaultCountry = parseCountry(ph);
@@ -67,8 +67,8 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
 
   // Auto-fill contact details if user is logged in
   useEffect(() => {
-    if (loggedInAccount && !contactDetails.firstname && !contactDetails.lastname && !contactDetails.email) {
-      const profile = loggedInAccount.passenger;
+    if (currentUser && !contactDetails.firstname && !contactDetails.lastname && !contactDetails.email) {
+      const profile = currentUser.passenger;
       const phone = profile?.phone || "";
       let countryIso = defaultCountry.iso2;
       let digits = phone.replace(/\D/g, "");
@@ -99,11 +99,11 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
         firstname: profile?.firstName || "",
         lastname: profile?.lastName || "",
         mobileNumber: phone.startsWith('+') ? phone : (phone ? `+${phone}` : ""),
-        email: loggedInAccount.email || "",
+        email: currentUser.email || "",
         countryCode: countryIso,
       });
     }
-  }, [loggedInAccount, contactDetails.firstname, contactDetails.lastname, contactDetails.email]);
+  }, [currentUser, contactDetails.firstname, contactDetails.lastname, contactDetails.email]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -131,10 +131,6 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
   const handleSelectSuggestion = (email: string) => {
     setContactDetails((prev) => ({ ...prev, email }));
     setShowSuggestions(false);
-  };
-
-  const handleCountryCodeChange = (value: string) => {
-    setContactDetails((prev) => ({ ...prev, countryCode: value }));
   };
 
   const handleCheckboxChange = () => {

@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import UserDropdown from "@/components/UserDropdown";
+import NotificationDropdown from "@/components/NotificationDropdown";
+import { useAuth } from "@/contexts/AuthContexts";
 import { useBranding } from "@/hooks/branding";
 
 interface NavItem {
@@ -25,7 +27,9 @@ export default function HeaderFloating({
   theme,
 }: HeaderFloatingProps) {
   const branding = useBranding();
+  const { currentUser } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const bookingsHref = "/profile?tab=booking-history";
 
   const logoSrc = branding?.logo?.dark || branding?.logo?.light;
 
@@ -91,6 +95,19 @@ export default function HeaderFloating({
 
           {/* Right: UserDropdown + mobile hamburger */}
           <div className="flex items-center gap-4">
+            {currentUser ? (
+              <>
+                <div className="hidden items-center gap-4 lg:flex">
+                  <Link href={bookingsHref} className="text-sm font-medium" style={{ color: theme.text }}>
+                    My Bookings
+                  </Link>
+                  <NotificationDropdown shouldBeTransparent={false} />
+                </div>
+                <div className="flex items-center gap-3 lg:hidden">
+                  <NotificationDropdown shouldBeTransparent={false} mobile />
+                </div>
+              </>
+            ) : null}
             <div className="hidden lg:flex">
               <UserDropdown shouldBeTransparent={false} />
             </div>

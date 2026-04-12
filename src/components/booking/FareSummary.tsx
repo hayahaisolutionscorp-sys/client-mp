@@ -131,7 +131,7 @@ const FareSummary: FC<FareSummaryProps> = ({
   const vehicleCountParam = searchParams.get('vehicleCount');
   const router = useRouter();
   const themeSettings = useThemeSettings();
-  const { loggedInAccount } = useAuth();
+  const { currentUser } = useAuth();
 
   const returnCabinName = searchParams.get('returnCabinName');
 
@@ -1062,7 +1062,7 @@ const handlePayment = async () => {
                   <button
                     type="button"
                     onClick={() => {
-                      if (!loggedInAccount) {
+                      if (!currentUser) {
                         setShowSeatLoginModal(true);
                       } else if (dialogTrips.length > 0 && dialogPassengers.length > 0) {
                         setSeatDialogOpen(true);

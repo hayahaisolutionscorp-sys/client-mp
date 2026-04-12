@@ -22,6 +22,8 @@ import { IVerification } from './dependent.model';
 export interface IAccount {
   // user ID
   id: string;
+  name?: string;
+  profile_picture_url?: string;
   passengerId?: number;
   passenger?: IPassenger;
   shippingLineId?: number;

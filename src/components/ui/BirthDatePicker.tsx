@@ -80,32 +80,34 @@ const BirthDatePicker = ({
     <Popover onOpenChange={(open) => { if (open && !disabled) setShowMonthGrid(false); }}>
       <PopoverTrigger asChild>
         <button
+          data-template-ignore="true"
           type="button"
           aria-label="Select birthday"
           disabled={disabled}
           className={cn(
-            "flex px-3 py-2 rounded-md border border-input bg-background items-center justify-between w-full h-10 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)]",
-            (!date || !isValid(date)) ? "text-muted-foreground" : "text-customText",
+            "flex h-10 w-full items-center justify-between !rounded-md border border-input bg-transparent px-3 py-2 text-sm text-black shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)]",
+            (!date || !isValid(date)) ? "text-gray-500" : "text-black",
             validationErrors.birthday ? "border-red-500" : "",
-            disabled && "opacity-50 cursor-not-allowed bg-slate-50"
+            disabled && "cursor-not-allowed bg-transparent opacity-50"
           )}
           style={{ "--primary-color": primaryRgb } as React.CSSProperties}
         >
           <span>{displayDate}</span>
-          <CalendarIcon className="h-5 w-5" style={{ color: "#051036" }} />
+          <CalendarIcon className="h-5 w-5 text-black" style={{ color: "#000000" }} />
         </button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-auto p-0" align="start">
-        <div className="p-3 space-y-3 select-none">
+      <PopoverContent className="w-auto border border-gray-200 bg-white p-0 text-black shadow-none" align="start">
+        <div className="space-y-3 select-none p-3 text-black">
 
           {/* ── Header ── */}
           <div className="flex items-center justify-between gap-1">
             <button
+              data-template-ignore="true"
               type="button"
               aria-label="Previous month"
               onClick={() => navigateMonth(-1)}
-              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors opacity-60 hover:opacity-100"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-black opacity-60 transition-colors hover:bg-[rgba(var(--primary-color),0.08)] hover:opacity-100"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -113,16 +115,16 @@ const BirthDatePicker = ({
             <div className="flex items-center gap-1 flex-1 justify-center">
               {/* Month button */}
               <button
+                data-template-ignore="true"
                 type="button"
                 aria-label={`Select month. Currently ${MONTHS[viewingMonth.getMonth()]}`}
                 aria-expanded={showMonthGrid}
                 aria-haspopup="listbox"
                 onClick={() => setShowMonthGrid(prev => !prev)}
-                className={cn(
-                  "text-sm font-semibold px-2 py-1 rounded-md transition-colors min-w-[90px]",
-                  showMonthGrid ? "text-white" : "hover:bg-gray-100"
+                  className={cn(
+                  "min-w-[90px] rounded-md px-2 py-1 text-sm font-semibold text-black transition-colors",
+                  showMonthGrid ? "border border-gray-300 bg-white" : "hover:bg-[rgba(var(--primary-color),0.08)]"
                 )}
-                style={showMonthGrid ? { backgroundColor: primaryColor } : {}}
               >
                 {MONTHS[viewingMonth.getMonth()]}
               </button>
@@ -136,16 +138,17 @@ const BirthDatePicker = ({
                 onChange={handleYearInput}
                 onBlur={handleYearBlur}
                 aria-label="Year"
-                className="w-14 text-sm font-semibold text-center border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none focus:border-[rgba(var(--primary-color),1)] py-0.5 sm:py-1 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-14 border-0 border-b-2 border-gray-200 bg-transparent py-0.5 text-center text-sm font-semibold text-black transition-colors focus:border-[rgba(var(--primary-color),1)] focus:outline-none sm:py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 style={{ "--primary-color": primaryRgb } as React.CSSProperties}
               />
             </div>
 
             <button
+              data-template-ignore="true"
               type="button"
               aria-label="Next month"
               onClick={() => navigateMonth(1)}
-              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors opacity-60 hover:opacity-100"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-black opacity-60 transition-colors hover:bg-[rgba(var(--primary-color),0.08)] hover:opacity-100"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -158,6 +161,7 @@ const BirthDatePicker = ({
                 const isSelected = viewingMonth.getMonth() === idx;
                 return (
                   <button
+                    data-template-ignore="true"
                     key={month}
                     type="button"
                     role="option"
@@ -165,10 +169,9 @@ const BirthDatePicker = ({
                     aria-label={month}
                     onClick={() => handleMonthSelect(idx)}
                     className={cn(
-                      "text-xs py-2 px-2 rounded-md transition-colors font-medium",
-                      isSelected ? "text-white" : "hover:bg-gray-100 text-gray-700"
+                      "rounded-md px-2 py-2 text-xs font-medium transition-colors",
+                      isSelected ? "border border-gray-300 bg-white text-black" : "text-gray-700 hover:bg-[rgba(var(--primary-color),0.08)]"
                     )}
-                    style={isSelected ? { backgroundColor: primaryColor } : {}}
                   >
                     {month.slice(0, 3)}
                   </button>
@@ -202,15 +205,15 @@ const BirthDatePicker = ({
                 head_cell: "text-muted-foreground w-9 font-normal text-[0.8rem] text-center",
                 row: "flex w-full mt-1",
                 cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
-                day: "h-9 w-9 p-0 font-normal text-black bg-transparent hover:bg-gray-100 rounded-md transition-colors",
-                day_selected: "text-white rounded-md hover:opacity-90",
+                day: "h-9 w-9 rounded-md bg-transparent p-0 font-normal text-black transition-colors hover:bg-[rgba(var(--primary-color),0.08)]",
+                day_selected: "border border-gray-300 bg-white text-black hover:bg-[rgba(var(--primary-color),0.08)]",
                 day_today: "bg-gray-100 rounded-md font-semibold",
                 day_outside: "text-muted-foreground opacity-50",
                 day_disabled: "text-muted-foreground opacity-30 cursor-not-allowed",
                 day_hidden: "invisible",
               }}
               modifiersStyles={{
-                selected: { backgroundColor: primaryColor },
+                selected: { backgroundColor: "#ffffff", color: "#000000", border: "1px solid #d1d5db" },
               }}
             />
           )}

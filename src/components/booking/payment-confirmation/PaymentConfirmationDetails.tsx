@@ -44,7 +44,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [enabledProviders, setEnabledProviders] = useState<string[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<PaymentPickerMethod | null>(null);
-  const { loggedInAccount } = useAuth();
+  const { currentUser } = useAuth();
   const { error: toastError } = useToast();
   const themeSettings = useThemeSettings();
 
@@ -628,11 +628,11 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           bookingPaymentId,
           totalAmount: { value: amountInPHP, currency: 'PHP' },
           buyer: {
-            firstName: loggedInAccount?.passenger?.firstName || loggedInAccount?.email?.split('@')[0] || 'Guest',
-            lastName: loggedInAccount?.passenger?.lastName || loggedInAccount?.email?.split('@')[1] || 'User',
+            firstName: currentUser?.passenger?.firstName || currentUser?.email?.split('@')[0] || 'Guest',
+            lastName: currentUser?.passenger?.lastName || currentUser?.email?.split('@')[1] || 'User',
             contact: {
-              phone: loggedInAccount?.passenger?.phone || '',
-              email: loggedInAccount?.email || 'noreply@ayahay.com',
+              phone: currentUser?.passenger?.phone || '',
+              email: currentUser?.email || 'noreply@ayahay.com',
             },
           },
           items: [
@@ -718,9 +718,9 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           paymentMethodType: effectiveMethod as 'gcash' | 'paymaya' | 'grab_pay',
           returnUrl: successUrl,
           billing: {
-            name: `${loggedInAccount?.passenger?.firstName || ''} ${loggedInAccount?.passenger?.lastName || ''}`.trim() || undefined,
-            email: loggedInAccount?.email || undefined,
-            phone: loggedInAccount?.passenger?.phone || undefined,
+            name: `${currentUser?.passenger?.firstName || ''} ${currentUser?.passenger?.lastName || ''}`.trim() || undefined,
+            email: currentUser?.email || undefined,
+            phone: currentUser?.passenger?.phone || undefined,
           },
         };
         const intentResponse = await initiatePaymongoPaymentIntent(intentRequest, shippingLineId);
@@ -740,7 +740,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       return false;
     }
 
-  }, [booking, prepareBookingData, departureTripId, returnTripId, commodityId, pricingData, enabledProviders, selectedMethod, loggedInAccount, toastError]);
+  }, [booking, prepareBookingData, departureTripId, returnTripId, commodityId, pricingData, enabledProviders, selectedMethod, currentUser, toastError]);
 
   return (
     <>

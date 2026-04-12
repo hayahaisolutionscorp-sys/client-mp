@@ -5,12 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContexts';
 import { useThemeSettings } from '@/hooks/theme-settings';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: boolean }) => {
-  const pathname = usePathname();
   const router = useRouter();
-  const { logout, currentUser, loggedInAccount, loading } = useAuth();
+  const { logout, currentUser, loading } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const themeSettings = useThemeSettings();
@@ -38,7 +37,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
       <div className="relative" ref={dropdownRef}>
         {!hasMounted || loading ? (
           <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse border border-gray-100" />
-        ) : loggedInAccount?.passenger?.profilePictureUrl ? (
+        ) : currentUser?.passenger?.profilePictureUrl ? (
           <div
             role="button"
             tabIndex={0}
@@ -48,7 +47,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
             style={{ background: 'transparent', boxShadow: 'none' }}
           >
             <Image
-              src={loggedInAccount.passenger.profilePictureUrl}
+              src={currentUser.passenger.profilePictureUrl}
               alt="Profile"
               fill
               className="object-cover"
@@ -67,7 +66,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
               boxShadow: 'none'
             }}
           >
-            {(loggedInAccount?.passenger?.firstName?.charAt(0) || currentUser.email?.charAt(0) || '?').toUpperCase()}
+            {(currentUser?.passenger?.firstName?.charAt(0) || currentUser.email?.charAt(0) || '?').toUpperCase()}
           </div>
         ) : (
           <>

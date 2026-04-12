@@ -31,7 +31,6 @@ const nationalities = Object.values(nationality.getNames("en"))
 
 interface NationalitySelectorProps {
   value?: string;
-  defaultValue?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
   className?: string;
@@ -40,14 +39,14 @@ interface NationalitySelectorProps {
 
 const NationalitySelector = ({
   value: externalValue,
-  defaultValue = "",
   onChange,
   placeholder = "Select nationality",
   className,
   disabled = false,
 }: NationalitySelectorProps) => {
+  const defaultValue = "Filipino";
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState(externalValue ?? defaultValue);
+  const [value, setValue] = React.useState(externalValue ?? "defaultValue");
   const themeSettings = useThemeSettings();
   
   const primaryColorRgb = React.useMemo(() => {
@@ -63,12 +62,13 @@ const NationalitySelector = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          data-template-ignore="true"
           variant={null}
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "h-10 w-full justify-between rounded-md border border-input bg-background px-3 py-2 font-normal text-customText text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+            "h-10 w-full justify-between !rounded-md border border-input bg-transparent px-3 py-2 font-normal text-base text-black shadow-none ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
             className
           )}
           style={{ "--primary-color": primaryColorRgb } as React.CSSProperties}
@@ -78,20 +78,20 @@ const NationalitySelector = ({
               ? nationalities.find((n) => n.value === value)?.label
               : placeholder}
           </span>
-          <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-100" style={{ color: `rgba(${primaryColorRgb}, 1)` }} />
+          <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-100 text-black" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search nationality..." />
-          <CommandList className="max-h-60 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <PopoverContent className="border border-gray-200 bg-white p-0 text-black shadow-none" align="start">
+        <Command className="bg-white text-black shadow-none">
+          <CommandInput className="text-black placeholder:text-gray-500" placeholder="Search nationality..." />
+          <CommandList className="max-h-60 bg-white text-black [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <CommandEmpty>No nationality found.</CommandEmpty>
             <CommandGroup>
               {nationalities.map((item) => (
                 <CommandItem
                   key={item.value}
                   value={item.value}
-                  className="data-[selected='true']:bg-[rgba(var(--primary-color),0.12)] data-[selected='true']:text-inherit aria-selected:bg-[rgba(var(--primary-color),0.12)]"
+                  className="bg-white text-black transition-colors hover:bg-[rgba(var(--primary-color),0.08)] data-[selected='true']:bg-[rgba(var(--primary-color),0.08)] data-[selected='true']:text-black data-[selected='true']:font-medium aria-selected:bg-[rgba(var(--primary-color),0.08)] aria-selected:text-black aria-selected:font-medium"
                   style={{ "--primary-color": primaryColorRgb } as React.CSSProperties}
                   onSelect={() => {
                     const next = item.value === value ? "" : item.value;

@@ -134,7 +134,12 @@ export default function LandingPageBuilder({
       } as IBrandingConfig)
     : ((baseBranding ?? {}) as IBrandingConfig);
   const landingBranding = effectiveBranding;
-  const theme = createBuilderTheme(landingBranding);
+  const builderTheme = createBuilderTheme(landingBranding);
+  const theme = {
+    ...builderTheme,
+    fontStyle: builderTheme.fontFamily,
+    fontTitle: builderTheme.fontFamilyTitle,
+  };
   const cornerRadiusClass =
     landingBranding?.colors?.cornerRadiusClass ||
     templatePreset?.tokens.radiusClass ||

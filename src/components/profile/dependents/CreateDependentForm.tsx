@@ -9,7 +9,6 @@ import { X, Loader2 } from "lucide-react"
 import { IDependent, IPassengerType, CreateDependentDto } from "@/models"
 import BirthDatePicker from "../../ui/BirthDatePicker"
 import { parseISO, isValid, differenceInYears } from "date-fns"
-import Combobox from "../../ui/Combobox"
 import CountryCodeSelector, { CountryData } from "../../ui/CountryCodeSelector"
 import { defaultCountries, parseCountry } from "react-international-phone"
 import NationalitySelector from "../../ui/NationalitySelector"
@@ -47,7 +46,7 @@ export default function DependentForm({
     onCancel, 
     isEditing = false
 }: DependentFormProps) {
-    const { loggedInAccount } = useAuth();
+    const { currentUser } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [useAccountContact, setUseAccountContact] = useState(false);
     const [passengerTypes, setPassengerTypes] = useState<IPassengerType[]>([]);
@@ -194,8 +193,8 @@ export default function DependentForm({
 
     const handleAccountContactToggle = (checked: boolean) => {
         setUseAccountContact(checked);
-        if (checked && loggedInAccount) {
-            const passenger = loggedInAccount.passenger;
+        if (checked && currentUser) {
+            const passenger = currentUser.passenger;
             const updatedPhone = passenger?.phone || "";
             
             // Sync phone digits and country code
@@ -226,7 +225,7 @@ export default function DependentForm({
                 ...prev,
                 address: passenger?.address || prev.address,
                 phone: updatedPhone || prev.phone,
-                email: loggedInAccount.email || prev.email,
+                email: currentUser.email || prev.email,
             }));
         }
     };
