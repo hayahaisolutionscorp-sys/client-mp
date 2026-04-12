@@ -113,6 +113,16 @@ export async function getAvailableTrips(
 
               if (adultFare === undefined) return null;
 
+              const segCabinCapacities = actualSegment.cabin_capacities || seg.cabin_capacities || {};
+              const segRemainingPassengers = actualSegment.remaining_capacities?.passengers || seg.remaining_capacities?.passengers || {};
+              const cabinInfo = segCabinCapacities[c.name] || segCabinCapacities[c.cabin_type_name] || {};
+
+              const availableCap = typeof cabinInfo === 'number' 
+                ? cabinInfo 
+                : (cabinInfo.remaining ?? segRemainingPassengers[c.name] ?? segRemainingPassengers[c.cabin_type_name] ?? c.remaining_capacity ?? c.max_passenger_capacity);
+              
+              const totalCap = cabinInfo.max ?? c.capacity ?? c.max_passenger_capacity;
+
               return {
                 tripId: t.id,
                 cabinId: c.id,
@@ -131,8 +141,8 @@ export async function getAvailableTrips(
                   cabin_type_name: c.cabin_type_name,
                   cabin_type_description: c.cabin_type_description
                 },
-                availablePassengerCapacity: c.max_passenger_capacity,
-                passengerCapacity: c.max_passenger_capacity,
+                availablePassengerCapacity: availableCap,
+                passengerCapacity: totalCap,
                 adultFare: adultFare
               };
             })
