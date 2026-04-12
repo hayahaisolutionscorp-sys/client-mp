@@ -1,4 +1,5 @@
 import { Ship } from 'lucide-react';
+import Image from 'next/image';
 import { useThemeSettings } from '@/hooks/theme-settings';
 
 export interface ScheduleItem {
@@ -6,6 +7,7 @@ export interface ScheduleItem {
   route: string;
   ship: string;
   fare: string;
+  logoUrl?: string;
 }
 
 interface ScheduleItemProps {
@@ -61,7 +63,17 @@ const ScheduleItem = ({
       {/* Ship */}
       <div className="flex items-center gap-3">
         <span className={`sm:hidden text-base ${isHighContrast ? "text-slate-800" : "text-slate-600"}`}>Ship:</span>
-        <Ship className="h-5 w-5" style={{ color: themeSettings?.accent || '#0ea5e9' }} />
+        {item.logoUrl ? (
+          <Image
+            src={item.logoUrl}
+            alt="Shipping Line Logo"
+            width={80}
+            height={40}
+            className="h-8 w-auto object-contain"
+          />
+        ) : (
+          <Ship className="h-5 w-5" style={{ color: themeSettings?.accent || '#0ea5e9' }} />
+        )}
         <div className={`${isComfortable ? "text-lg sm:text-xl" : "text-base sm:text-lg"} font-medium`}>{item.ship}</div>
       </div>
 
