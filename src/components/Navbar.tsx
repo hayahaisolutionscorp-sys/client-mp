@@ -4,8 +4,8 @@ import { useMemo, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LuBell } from 'react-icons/lu';
 
+import NotificationDropdown from './NotificationDropdown';
 import UserDropdown from './UserDropdown';
 import { useBranding } from '@/hooks/branding';
 import { useHeaders } from '@/hooks/headers';
@@ -66,6 +66,7 @@ const Navbar = ({
   const shouldBeTransparent = isHome && !isMenuOpen;
   const position = isHome ? 'absolute' : 'relative';
   const backgroundColor = shouldBeTransparent ? 'text-white bg-transparent' : 'text-black bg-white';
+  const bookingsHref = '/profile?tab=booking-history';
 
   const logoSrc = isHome ? branding.logo?.light : branding.logo?.dark;
 
@@ -131,19 +132,23 @@ const Navbar = ({
 
             {/* Right Side Icons & User Dropdown */}
             <div className={`hidden lg:flex items-center space-x-4 lg:space-x-6 ${shouldBeTransparent ? 'text-white' : 'text-customText'}`}>
-              {isHome && currentUser && (
-                <>
-                  <div role="button" tabIndex={0} className="hover:opacity-80 transition-opacity cursor-pointer">
-                    <LuBell className="w-5 h-5" />
-                  </div>
-                </>
+              {currentUser && (
+                <Link
+                  href={bookingsHref}
+                  className="text-sm lg:text-md font-medium transition-opacity duration-300 whitespace-nowrap hover:opacity-80"
+                >
+                  My Bookings
+                </Link>
               )}
+
+              <NotificationDropdown shouldBeTransparent={shouldBeTransparent} />
 
               <UserDropdown shouldBeTransparent={shouldBeTransparent} />
             </div>
 
             {/* Mobile section - UserDropdown always visible; hamburger only for landing nav */}
             <div className="lg:hidden relative z-50 flex items-center gap-4">
+              <NotificationDropdown shouldBeTransparent={shouldBeTransparent} mobile />
               <div className="flex items-center">
                 <UserDropdown shouldBeTransparent={shouldBeTransparent} />
               </div>
@@ -221,6 +226,15 @@ const Navbar = ({
                       <div className="px-3 py-2 mb-2">
                         <p className="text-xs text-gray-500 truncate">{currentUser.email}</p>
                       </div>
+                      <Link
+                        href={bookingsHref}
+                        onMouseEnter={() => router.prefetch(bookingsHref)}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block w-full text-left px-3 py-4 text-xl font-medium transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
+                          } text-gray-900 hover:text-blue-600`}
+                      >
+                        My Bookings
+                      </Link>
                       <Link
                         href="/profile"
                         onMouseEnter={() => router.prefetch('/profile')}

@@ -8,10 +8,10 @@ export interface IPrepareBookingData {
     routePreference: IRoutePreference;
     departure: ITripSummary[];
     return: ITripSummary[];
-    passengerTypes: string[];
-    vehicleClasses: { code: string; display: string; vehicleTypeId?: number | null }[];
-    cargoClasses: { code: string; display: string }[];
-    accommodationCodes: string[];
+    passengerTypes?: string[];
+    vehicleClasses?: { code: string; display: string; vehicleTypeId?: number | null }[];
+    cargoClasses?: { code: string; display: string }[];
+    accommodationCodes?: string[];
     bookingUiSettings?: Record<string, any>;
     snapshot_mismatch: boolean;
 }
@@ -56,6 +56,10 @@ export interface ITripSummary {
     destination_municipality?: string;
     destination_province?: string;
     route_code: string;
+    cabinPrices?: Record<string, string>;
+    vehicleClasses?: { code: string; display: string; vehicleTypeId?: number | null }[];
+    cargoClasses?: { code: string; display: string }[];
+    passengerTypes?: string[];
     ship: {
         id: number;
         name: string;
@@ -74,6 +78,7 @@ export interface ICabinSummary {
     id: number;
     name: string;
     capacity: number;
-    remaining_capacity: number;
+    remaining_capacity: number | null;
     cabin_type_id: number;
+    code?: string | null;
 }

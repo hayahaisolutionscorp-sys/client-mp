@@ -1,22 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
-import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContexts"
 import Image from "next/image"
 import { ConfirmationModal } from "@/components/ui/ConfirmationModal"
 import { AuthService } from "@/services/auth.service"
 
 export default function ConnectedAccounts() {
-    const { loggedInAccount, refreshProfile, signInWithGoogle, signInWithFacebook, signInWithHayahai } = useAuth();
-    const providers = loggedInAccount?.providers || [];
+    const { currentUser, refreshProfile, signInWithGoogle, signInWithFacebook, signInWithHayahai } = useAuth();
+    const providers = currentUser?.providers || [];
 
-    const isGoogleConnected = providers.some((p: any) => p === 'google');
-    const isFacebookConnected = providers.some((p: any) => p === 'facebook');
-    const isHayahaiConnected = providers.some((p: any) => p === 'hayahai');
+    const isGoogleConnected = providers.some((p: string) => p === 'google');
+    const isFacebookConnected = providers.some((p: string) => p === 'facebook');
+    const isHayahaiConnected = providers.some((p: string) => p === 'hayahai');
     
     const [connectionLoading, setConnectionLoading] = useState({ google: false, facebook: false, hayahai: false });
     const [disconnectingProvider, setDisconnectingProvider] = useState<'google' | 'facebook' | 'hayahai' | null>(null);

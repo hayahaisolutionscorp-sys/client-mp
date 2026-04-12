@@ -9,8 +9,7 @@ import { accountRelatedCacheKeys } from 'constants/cache';
 import { useTheme } from "@/components/ThemeProvider";
 
 interface AuthContextType {
-    currentUser: any | null;
-    loggedInAccount: IAccount | undefined | null;
+    currentUser: IAccount | undefined | null;
     hasPrivilegedAccess: boolean;
     loading: boolean;
     register: (email: string, password: string, values: RegisterForm) => Promise<string>;
@@ -34,6 +33,31 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+
+function normalizeProviders(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+        return [];
+    }
+
+    return value
+        .map((provider) => {
+            if (typeof provider === 'string') {
+                return provider;
+            }
+
+            if (
+                typeof provider === 'object' &&
+                provider !== null &&
+                'provider' in provider &&
+                typeof (provider as { provider?: unknown }).provider === 'string'
+            ) {
+                return (provider as { provider: string }).provider;
+            }
+
+            return '';
+        })
+        .filter(Boolean);
+}
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
@@ -60,10 +84,9 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     // In-memory auth state — never written to localStorage or any storage.
     // The HTTP-only JWT cookie is sent automatically on every request.
     // Login state is determined solely by whether GET /auth/me succeeds.
-    const [currentUser, setCurrentUser] = useState<any | null>(null);
     // Start with null to match server (no localStorage on server) and avoid hydration mismatch.
     // loadProfile will populate this after mount if the user has a valid session.
-    const [loggedInAccount, setLoggedInAccount] = useState<IAccount | null>(null);
+    const [currentUser, setCurrentUser] = useState<IAccount | null>(null);
     const [loading, setLoading] = useState(false);
 
     const [notification, setNotification] = useState<{
@@ -79,7 +102,6 @@ export default function AuthContextProvider({ children }: { children: React.Reac
     const clearSession = useCallback(() => {
         AuthService.clearProfileCache();
         setCurrentUser(null);
-        setLoggedInAccount(null);
         accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
     }, []);
 
@@ -95,7 +117,6 @@ export default function AuthContextProvider({ children }: { children: React.Reac
                 // No valid session — clear in-memory state but keep localStorage cache
                 // so the next refresh still attempts loadProfile instead of showing login.
                 setCurrentUser(null);
-                setLoggedInAccount(null);
                 return null;
             }
 
@@ -105,35 +126,28 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             if (!user || typeof user !== 'object' || Object.keys(user).length === 0) {
                 console.warn('Profile fetch returned invalid user data', result);
                 setCurrentUser(null);
-                setLoggedInAccount(null);
                 return null;
             }
 
-            // Sanitize user for safe rendering
-            const sanitizedUser = {
-                ...user,
-                email: typeof user.email === 'string' ? user.email : '',
-                name: typeof user.name === 'string' ? user.name : '',
-                id: (user.id || user.accountId)?.toString() || ''
-            };
-
             // Mapping from UserResponseDto (which has passenger object) to IAccount
+            const normalizedProviders = normalizeProviders(user.providers);
             const account: IAccount = {
                 id: (user.id || user.accountId)?.toString() || '',
                 email: typeof user.email === 'string' ? user.email : '',
+                name: typeof user.name === 'string' ? user.name : '',
+                profile_picture_url: typeof user.profile_picture_url === 'string' ? user.profile_picture_url : '',
                 role: typeof user.role === 'string' ? user.role : (user.role?.name || user.roles?.[0]?.name || 'Passenger'),
-                emailConsent: false,
+                emailConsent: typeof user.emailConsent === 'boolean' ? user.emailConsent : false,
                 passenger: user.passenger || undefined,
                 verification: Array.isArray(user.verificationDetails) ? user.verificationDetails[0] : (user.verificationDetails || user.verification || undefined),
                 verificationDetails: Array.isArray(user.verificationDetails)
                     ? user.verificationDetails
                     : (user.verificationDetails ? [user.verificationDetails] : undefined),
                 hasPassword: user.hasPassword,
-                providers: user.providers
+                providers: normalizedProviders
             };
 
-            setCurrentUser(sanitizedUser);
-            setLoggedInAccount(account);
+            setCurrentUser(account);
             cacheItem('logged-in-account', account);
 
             return user;
@@ -332,8 +346,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
 
     const value: AuthContextType = useMemo(() => ({
         currentUser,
-        loggedInAccount,
-        hasPrivilegedAccess: loggedInAccount?.role === 'SuperAdmin' || loggedInAccount?.role === 'ShippingLineAdmin' || loggedInAccount?.role === 'TravelAgencyAdmin' || loggedInAccount?.role === 'ClientAdmin',
+        hasPrivilegedAccess: currentUser?.role === 'SuperAdmin' || currentUser?.role === 'ShippingLineAdmin' || currentUser?.role === 'TravelAgencyAdmin' || currentUser?.role === 'ClientAdmin',
         loading,
         register,
         signIn,
@@ -350,7 +363,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         get theme() { return themeRef.current; },
         refreshProfile: loadProfile,
         clearSession
-    }), [currentUser, loggedInAccount, loading, notification, loadProfile, clearSession]);
+    }), [currentUser, loading, notification, loadProfile, clearSession]);
 
     return (
         <AuthContext.Provider value={value}>

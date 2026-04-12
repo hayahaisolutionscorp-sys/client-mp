@@ -12,8 +12,8 @@ import { useAuth } from "@/contexts/AuthContexts"
 import { PasswordStrengthTracker } from "@/components/auth/PasswordStrengthTracker";
 
 export default function SecuritySettingsForm() {
-    const { loggedInAccount, refreshProfile } = useAuth();
-    const hasPassword = loggedInAccount?.hasPassword;
+    const { currentUser, refreshProfile } = useAuth();
+    const hasPassword = currentUser?.hasPassword;
     
     const [passwordData, setPasswordData] = useState({
         currentPassword: "",
@@ -104,9 +104,10 @@ export default function SecuritySettingsForm() {
                                     className="pr-10"
                                 />
                                 <button
+                                    data-template-ignore="true"
                                     type="button"
                                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    className="absolute inset-y-0 right-0 flex h-full w-10 items-center justify-center text-gray-500 hover:text-gray-700"
                                 >
                                     {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
@@ -125,9 +126,10 @@ export default function SecuritySettingsForm() {
                                 className="pr-10"
                             />
                             <button
+                                data-template-ignore="true"
                                 type="button"
                                 onClick={() => setShowNewPassword(!showNewPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                className="absolute inset-y-0 right-0 flex h-full w-10 items-center justify-center text-gray-500 hover:text-gray-700"
                             >
                                 {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
@@ -154,9 +156,10 @@ export default function SecuritySettingsForm() {
                                 onChange={(e) => updatePasswordData('confirmPassword', e.target.value)}
                             />
                             <button
+                                data-template-ignore="true"
                                 type="button"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                className="absolute inset-y-0 right-0 flex h-full w-10 items-center justify-center text-gray-500 hover:text-gray-700"
                             >
                                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>

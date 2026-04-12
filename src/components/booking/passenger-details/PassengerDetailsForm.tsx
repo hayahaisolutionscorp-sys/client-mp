@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, forwardRef, useImperativeHandle, ForwardRefRenderFunction } from 'react';
-import { FiPlus, FiTrash } from 'react-icons/fi';
+import { FiTrash } from 'react-icons/fi';
 import { PiInfo } from 'react-icons/pi';
 import { GiCheckMark } from 'react-icons/gi';
 import { Input } from '@/components/ui/Input';
@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/Select';
-import { DEFAULT_NUM_VEHICLES } from 'constants/default';
 import NationalitySelector from '@/components/ui/NationalitySelector';
 import { AlertModal } from '@/components/ui/AlertModal';
 import type { DISCOUNT_TYPE } from 'constants/enum';
@@ -74,7 +73,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [userDependents, setUserDependents] = useState<IDependent[]>([]);
-  const { loggedInAccount } = useAuth();
+  const { currentUser } = useAuth();
   const searchParams = useSearchParams();
 
   const [formData, setFormData] = useState({
@@ -115,17 +114,17 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
   }, [passengerTypeCodes]);
 
   useEffect(() => {
-    if (loggedInAccount?.id) {
-      getDependents(loggedInAccount.id).then(setUserDependents);
+    if (currentUser?.id) {
+      getDependents(currentUser.id).then(setUserDependents);
     } else {
       setUserDependents([]);
     }
-  }, [loggedInAccount]);
+  }, [currentUser]);
 
   // Auto-fill first passenger details if user is logged in
   useEffect(() => {
-    if (loggedInAccount?.passenger && !passenger.firstname && !passenger.lastname) {
-      const profile = loggedInAccount.passenger;
+    if (currentUser?.passenger && !passenger.firstname && !passenger.lastname) {
+      const profile = currentUser.passenger;
       const updatedPassenger = {
         ...passenger,
         firstname: profile.firstName || '',
@@ -138,7 +137,7 @@ const PassengerDetailsForm: ForwardRefRenderFunction<{ handleAddCompanion: () =>
       setPassenger(updatedPassenger);
       setFormData(prev => ({ ...prev, passenger: updatedPassenger }));
     }
-  }, [loggedInAccount, passenger.firstname, passenger.lastname]);
+  }, [currentUser, passenger.firstname, passenger.lastname]);
 
   useEffect(() => {
     if (rateTableId) {

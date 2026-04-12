@@ -151,7 +151,7 @@ export function LoginVerifyForm({ mode = "default" }: LoginVerifyFormProps) {
               type="button"
               onClick={() => setShowForgotPassword(true)}
               className="text-xs hover:underline"
-              style={{ color: primaryColor }}
+              style={{ color: primaryColor, backgroundColor: "transparent", border: "none", boxShadow: "none" }}
             >
               Forgot password?
             </button>

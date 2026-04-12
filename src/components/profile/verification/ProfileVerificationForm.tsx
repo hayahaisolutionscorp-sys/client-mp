@@ -49,10 +49,10 @@ import CountrySelector from "@/components/ui/CountrySelector"
 const idTypes = ["Philippine National ID (PhilID)","Postal ID","Driver's License","SSS UMID Card","PRC ID","Voter's ID", "PhilHealth ID","Senior Citizen ID","PWD ID","GSIS", "Passport", "Others"]
 
 export default function ProfileVerification({ onCancel, onSubmit, dependentId, dependentName, initialData }: ProfileVerificationFormProps) {
-    const { loggedInAccount, branding } = useAuth();
+    const { currentUser, branding } = useAuth();
     const themeSettings = useThemeSettings();
     const primaryColor = themeSettings?.primary || '#2563eb';
-    const isHayahaiLinked = loggedInAccount?.providers?.includes('hayahai');
+    const isHayahaiLinked = currentUser?.providers?.includes('hayahai');
     const isSelfVerification = !dependentId;
     const isGlobalManaged = isHayahaiLinked && isSelfVerification;
     
@@ -126,7 +126,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
     const handleSubmitVerification = async () => {
         setIsSubmitting(true);
         try {
-            if (loggedInAccount) {
+            if (currentUser) {
                 // Determine URLs to use (newly uploaded or existing)
                 let frontUrl = initialData?.front_image_url || '';
                 let backUrl = initialData?.back_image_url || '';
@@ -165,7 +165,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                         ...(dependentId && { dependent_id: dependentId })
                     };
 
-                    await requestVerification(loggedInAccount.id, dto);
+                    await requestVerification(currentUser.id, dto);
                     onSubmit({
                         ...formData,
                         id_picture_url: combinedUrls

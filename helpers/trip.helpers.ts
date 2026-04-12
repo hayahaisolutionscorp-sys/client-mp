@@ -10,11 +10,14 @@ export interface StatusInfo {
 export const getTripStatusInfo = (trip: ITrip): StatusInfo => {
   const status = trip.status?.toLowerCase();
 
-  // Check if fully booked
-  const totalPassengerCapacity = trip.availableCabins?.reduce(
-    (sum, cabin) => sum + (cabin.availablePassengerCapacity || 0),
-    0
-  );
+  const knownPassengerCapacities = (trip.availableCabins || [])
+    .map((cabin) => cabin.availablePassengerCapacity)
+    .filter((capacity): capacity is number => typeof capacity === 'number');
+
+  // Only mark as fully booked when capacities are known and sum to zero.
+  const isFullyBookedByCapacity =
+    knownPassengerCapacities.length > 0 &&
+    knownPassengerCapacities.reduce((sum, capacity) => sum + capacity, 0) === 0;
 
   if (status === 'cancelled') {
     return {
@@ -25,7 +28,7 @@ export const getTripStatusInfo = (trip: ITrip): StatusInfo => {
     };
   }
 
-  if (totalPassengerCapacity === 0 && (status === 'pending' || status === 'open_for_booking' || status === 'scheduled' || status === 'awaiting')) {
+  if (isFullyBookedByCapacity && (status === 'pending' || status === 'open_for_booking' || status === 'scheduled' || status === 'awaiting')) {
     return {
       label: 'Fully Booked',
       bgColor: 'rgba(107, 114, 128, 0.1)', // gray-500

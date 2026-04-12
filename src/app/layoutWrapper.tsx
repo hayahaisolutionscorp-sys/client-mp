@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { ProactiveRefreshScheduler } from '@/components/auth/ProactiveRefreshScheduler';
 import BuilderLandingHeader from '@/components/landing/builder/BuilderLandingHeader';
 import FooterCentered from '@/components/landing/builder/templates/footer/FooterCentered';
 import FooterPremium from '@/components/landing/builder/templates/footer/FooterPremium';
@@ -52,7 +53,12 @@ export default function LayoutWrapper({
     landingBuilder?.sections.find((section) => section.section_key === 'header')?.variant || 'default';
   const footerVariant =
     landingBuilder?.sections.find((section) => section.section_key === 'footer')?.variant || 'default';
-  const theme = createBuilderTheme((branding ?? {}) as any);
+  const builderTheme = createBuilderTheme((branding ?? {}) as any);
+  const theme = {
+    ...builderTheme,
+    fontStyle: builderTheme.fontFamily,
+    fontTitle: builderTheme.fontFamilyTitle,
+  };
   const mainOffsetClass = shouldRenderChrome && headerVariant === 'floating' ? 'pt-[120px]' : '';
 
   return (
@@ -76,6 +82,7 @@ export default function LayoutWrapper({
       {shouldRenderChrome && !isProfilePage && !['centered', 'premium', 'default-no-banner'].includes(footerVariant) ? (
         <Footer />
       ) : null}
+      <ProactiveRefreshScheduler />
       {mounted && <SessionExpiredModal />}
       {mounted && !isPreviewRoute && <ChatWidget tenantId={parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10)} />}
     </>

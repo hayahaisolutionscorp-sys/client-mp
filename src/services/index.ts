@@ -9,6 +9,9 @@ export * from './auth.service';
 // Booking and payments
 export * from './booking';
 
+// Notifications
+export * from './notification';
+
 // Ferry operations
 export * from './shipping-line';
 

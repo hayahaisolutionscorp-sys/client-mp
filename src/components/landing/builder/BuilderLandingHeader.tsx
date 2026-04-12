@@ -6,8 +6,11 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import UserDropdown from "@/components/UserDropdown";
+import NotificationDropdown from "@/components/NotificationDropdown";
+import { useAuth } from "@/contexts/AuthContexts";
 import { useBranding } from "@/hooks/branding";
 import { useHeaders } from "@/hooks/headers";
+import type { IThemeSettings } from "@/models";
 import HeaderFloating from "./templates/header/HeaderFloating";
 import {
   getFilteredLandingNavItems,
@@ -17,7 +20,7 @@ import {
 
 interface BuilderLandingHeaderProps {
   variant: string;
-  theme: any;
+  theme: IThemeSettings & { text: string; surfaceAlt: string };
   headerSectionOverride?: HeaderNavigationConfig | null;
 }
 
@@ -29,10 +32,12 @@ export default function BuilderLandingHeader({
   const pathname = usePathname();
   const router = useRouter();
   const branding = useBranding();
+  const { currentUser } = useAuth();
   const headerSection = useHeaders(headerSectionOverride) || headerSectionOverride;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const logoSrc = branding?.logo?.dark || branding?.logo?.light;
   const navItems = getFilteredLandingNavItems(headerSection);
+  const bookingsHref = "/profile?tab=booking-history";
 
   const scrollToElement = (id: string) => {
     scrollToLandingTarget({
@@ -64,7 +69,7 @@ export default function BuilderLandingHeader({
         style={{
           borderColor: `${theme.text}14`,
           background: `linear-gradient(135deg, ${theme.surface}F4, ${theme.surfaceAlt}F2)`,
-          color: theme.text,
+          color: theme.text
         }}
       >
         <div className="flex items-center justify-between gap-6">
@@ -79,13 +84,13 @@ export default function BuilderLandingHeader({
               />
             ) : (
               <span className="text-lg font-semibold capitalize" style={{ fontFamily: 'var(--font-title)' }}>
-                {branding?.brand_name || "Ayahay"}
+                {branding?.brand_name || 'Ayahay'}
               </span>
             )}
           </Link>
           <div className="hidden items-center gap-6 lg:flex">
             {navItems.map((item) =>
-              item.trigger.toLowerCase() === "scroll" ? (
+              item.trigger.toLowerCase() === 'scroll' ? (
                 <button
                   key={item.id}
                   type="button"
@@ -97,11 +102,33 @@ export default function BuilderLandingHeader({
                   {item.name}
                 </button>
               ) : (
-                <Link key={item.id} href={item.redirect_url} className="text-sm font-medium transition-colors" style={{ color: `${theme.text}BF` }}>
+                <Link
+                  key={item.id}
+                  href={item.redirect_url}
+                  className="text-sm font-medium transition-colors"
+                  style={{ color: `${theme.text}BF` }}
+                >
                   {item.name}
                 </Link>
               )
             )}
+            {currentUser ? (
+              <>
+                <div className="hidden items-center gap-4 lg:flex">
+                  <Link
+                    href={bookingsHref}
+                    className="text-sm font-medium"
+                    style={{ color: `${theme.text}BF` }}
+                  >
+                    My Bookings
+                  </Link>
+                  <NotificationDropdown shouldBeTransparent={false} />
+                </div>
+                <div className="flex items-center gap-3 lg:hidden">
+                  <NotificationDropdown shouldBeTransparent={false} mobile />
+                </div>
+              </>
+            ) : null}
           </div>
           <button
             type="button"
@@ -110,7 +137,7 @@ export default function BuilderLandingHeader({
             style={{
               borderColor: `${theme.primary}33`,
               backgroundColor: `${theme.primary}14`,
-              color: theme.primary,
+              color: theme.primary
             }}
           >
             Login
@@ -163,7 +190,6 @@ export default function BuilderLandingHeader({
                   data-template-ignore="true"
                   onClick={() => handleScroll(item.id)}
                   className="font-medium transition-all hover:border-b-2 border-transparent"
-                  style={{ "--hover-color": theme.primary } as any}
                   onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.primary)}
                   onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'transparent')}
                 >
@@ -185,6 +211,14 @@ export default function BuilderLandingHeader({
 
           {/* Right: UserDropdown + mobile hamburger */}
           <div className="flex items-center gap-4">
+            {currentUser ? (
+              <>
+                <Link href={bookingsHref} className="hidden text-sm font-medium lg:inline-flex" style={{ color: theme.text }}>
+                  My Bookings
+                </Link>
+                <NotificationDropdown shouldBeTransparent={false} />
+              </>
+            ) : null}
             <div className="hidden lg:flex">
               <UserDropdown shouldBeTransparent={false} />
             </div>

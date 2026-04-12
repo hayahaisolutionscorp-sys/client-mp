@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/Select"
 import { RegisterForm as IRegisterForm } from "@/models";
 import BirthDatePicker from "@/components/ui/BirthDatePicker";
-import Combobox from "@/components/ui/Combobox";
 import CountryCodeSelector, { CountryData } from "@/components/ui/CountryCodeSelector";
 import { defaultCountries, parseCountry } from "react-international-phone";
 import NationalitySelector from "@/components/ui/NationalitySelector";
@@ -98,7 +97,7 @@ export function RegisterForm() {
     sex: "Male",
     birthday: defaultBirthday.toISOString().split('T')[0],
     address: "",
-    nationality: "",
+    nationality: "Filipino",
     phone: "",
   });
 
@@ -302,7 +301,6 @@ export function RegisterForm() {
         <div className="space-y-2">
           <div className="text-sm font-medium">Nationality <span className="text-red-500">*</span></div>
           <NationalitySelector
-            defaultValue={formData.nationality}
             onChange={(value) => setFormData(prev => ({ ...prev, nationality: value }))}
           />
           {validationErrors.nationality && <p className="text-xs text-red-500">{validationErrors.nationality}</p>}

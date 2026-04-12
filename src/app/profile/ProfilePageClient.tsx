@@ -26,7 +26,7 @@ import { useThemeSettings } from "@/hooks/theme-settings"
 
 export default function ProfilePageClient() {
     const router = useRouter();
-    const { loggedInAccount, loading, currentUser } = useAuth();
+    const { currentUser, loading } = useAuth();
     const themeSettings = useThemeSettings();
     const primaryColor = themeSettings?.primary || '#2563eb';
     
@@ -73,12 +73,12 @@ export default function ProfilePageClient() {
     }, []);
 
     const fetchProfileData = useCallback(async (force = false) => {
-        if (!loggedInAccount) return;
+        if (!currentUser) return;
 
         try {
             const [profileResult, dependentsData] = await Promise.all([
                 AuthService.getProfile(force),
-                getDependents(loggedInAccount.id)
+                getDependents(currentUser.id)
             ]);
 
             const profileData = profileResult?.data ?? profileResult;
@@ -103,8 +103,8 @@ export default function ProfilePageClient() {
             }));
 
             setAccount({
-                id: (loggedInAccount.id || profileData.id || profileData.accountId)?.toString() || '',
-                email: typeof profileData.email === 'string' ? profileData.email : (typeof loggedInAccount.email === 'string' ? loggedInAccount.email : ''),
+                id: (currentUser.id || profileData.id || profileData.accountId)?.toString() || '',
+                email: typeof profileData.email === 'string' ? profileData.email : (typeof currentUser.email === 'string' ? currentUser.email : ''),
                 verificationDetails: sanitizedVerifications,
                 qrCodeUrl: typeof profileData.passenger?.qrCodeUrl === 'string' ? profileData.passenger.qrCodeUrl : undefined,  
                 qrCodeId:  profileData.passenger?.hayahaiId || profileData.passenger?.qrId
@@ -145,29 +145,29 @@ export default function ProfilePageClient() {
         } finally {
             setIsProfileLoading(false);
         }
-    }, [loggedInAccount]);
+    }, [currentUser]);
 
     useEffect(() => {
         if (!authReady || loading) return;
 
-        if (loggedInAccount === null) {
+        if (currentUser === null) {
             router.replace('/login');
             return;
         }
 
-        if (loggedInAccount?.role === 'Passenger') {
+        if (currentUser?.role === 'Passenger') {
             void fetchProfileData();
         } else {
             setIsProfileLoading(false);
         }
-    }, [authReady, loggedInAccount, loading, fetchProfileData, router]);
+    }, [authReady, currentUser, loading, fetchProfileData, router]);
 
     // Persist active tab to sessionStorage whenever it changes
     useEffect(() => {
         sessionStorage.setItem(SESSION_KEY, activeTab);
     }, [activeTab]);
 
-    // Update image preview when passenger or currentUser profile picture changes
+    // Update image preview when passenger or logged-in account profile picture changes
     useEffect(() => {
         const initialImage = passenger?.profilePictureUrl || currentUser?.profile_picture_url;
         if (!imagePreview && initialImage) {
@@ -260,11 +260,11 @@ export default function ProfilePageClient() {
         return imagePreview;
     }, [imagePreview]);
 
-    if ((!loggedInAccount && loading) || isProfileLoading) {
+    if ((!currentUser && loading) || isProfileLoading) {
         return <ProfileSkeleton />;
     }
 
-    if (!loggedInAccount) {
+    if (!currentUser) {
         return null;
     }
 
@@ -284,7 +284,7 @@ export default function ProfilePageClient() {
                 onVerificationClick={() => setActiveTab("verification")}
                 fileInputRef={fileInputRef}
                 onImageChange={handleImageChange}
-                isHayahaiLinked={loggedInAccount?.providers?.some((p: any) => p.provider === 'hayahai')}
+                isHayahaiLinked={currentUser?.providers?.includes('hayahai')}
             />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-6">
@@ -344,13 +344,13 @@ export default function ProfilePageClient() {
 
                 <TabsContent value="vehicles">
                     <VehicleTab 
-                        userId={loggedInAccount.id}
+                        userId={currentUser.id}
                     />
                 </TabsContent>
 
                 <TabsContent value="verification">
                     <VerificationTab
-                        accountId={loggedInAccount.id}
+                        accountId={currentUser.id}
                         verificationDetails={account?.verificationDetails}
                         onStatusChange={handleVerificationStatusChange}
                         onRefresh={() => fetchProfileData(true)}
@@ -359,7 +359,7 @@ export default function ProfilePageClient() {
 
                 <TabsContent value="dependents">
                     <DependentTab
-                        userId={loggedInAccount.id}
+                        userId={currentUser.id}
                     />
                 </TabsContent>
             </Tabs>

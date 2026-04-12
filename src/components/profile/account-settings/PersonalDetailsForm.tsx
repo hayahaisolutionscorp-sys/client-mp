@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/Input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import BirthDatePicker from "@/components/ui/BirthDatePicker"
-import Combobox from "@/components/ui/Combobox"
 import CountryCodeSelector, { CountryData } from "@/components/ui/CountryCodeSelector"
 import NationalitySelector from "@/components/ui/NationalitySelector"
 import { defaultCountries, parseCountry } from "react-international-phone"
@@ -26,8 +25,8 @@ interface PersonalDetailsFormProps {
 }
 
 export default function PersonalDetailsForm({ passenger, email, onUpdate }: PersonalDetailsFormProps) {
-    const { refreshProfile, loggedInAccount } = useAuth();
-    const isHayahaiLinked = loggedInAccount?.providers?.includes('hayahai');
+    const { refreshProfile, currentUser } = useAuth();
+    const isHayahaiLinked = currentUser?.providers?.includes('hayahai');
     const [isSaving, setIsSaving] = useState(false);
     const ph = defaultCountries.find(c => parseCountry(c).iso2 === 'ph') || defaultCountries[0];
     const defaultCountry = parseCountry(ph);
@@ -358,7 +357,6 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Nationality <span className="text-red-500">*</span></label>
                             <NationalitySelector
-                                defaultValue={formData.nationality || ''}
                                 onChange={(value) => handleInputChange('nationality', value)}
                             />
                         </div>
