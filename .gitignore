@@ -45,3 +45,8 @@ next-env.d.ts
 /public/sw.js.map
 
 .env
+
+# local assistant instruction files
+CLAUDE.md
+claude.md
+.github/

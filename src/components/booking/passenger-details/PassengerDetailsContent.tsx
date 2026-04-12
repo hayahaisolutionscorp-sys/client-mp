@@ -191,13 +191,14 @@ async function renderCrossTenant({
 
 function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId: number = 0): ITrip {
   const vehicleCapacities = summary.ship.vehicle_capacities;
+  const tripCabinPrices = summary.cabinPrices || {};
 
   const availableVehicleCapacity = vehicleCapacities
-    ? Object.values(vehicleCapacities.remaining).reduce((a, b) => a + b, 0)
+    ? Object.values(vehicleCapacities.remaining || {}).reduce((a, b) => a + b, 0)
     : 0;
 
   const vehicleCapacity = vehicleCapacities
-    ? Object.values(vehicleCapacities.max).reduce((a, b) => a + b, 0)
+    ? Object.values(vehicleCapacities.max || {}).reduce((a, b) => a + b, 0)
     : 0;
 
   return {
@@ -221,9 +222,9 @@ function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId: number = 0)
     availableCabins: summary.ship.cabins.map(c => ({
       tripId: Number(summary.id) || 0,
       cabinId: c.id,
-      availablePassengerCapacity: c.remaining_capacity,
+      availablePassengerCapacity: typeof c.remaining_capacity === 'number' ? c.remaining_capacity : (null as any),
       passengerCapacity: c.capacity,
-      adultFare: 0,
+      adultFare: resolveCabinFare(c, tripCabinPrices),
       cabin: {
         id: c.id,
         name: c.name,
@@ -258,4 +259,31 @@ function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId: number = 0)
       vehicle_capacities: vehicleCapacities,
     } as any
   } as ITrip;
+}
+
+function resolveCabinFare(cabin: { code?: string | null; name: string }, cabinPrices: Record<string, string>): number {
+  const code = String(cabin.code || '')
+    .trim()
+    .toUpperCase();
+
+  if (code && cabinPrices[code]) {
+    return parsePriceToNumber(cabinPrices[code]);
+  }
+
+  const normalizedName = cabin.name
+    .trim()
+    .toUpperCase()
+    .replace(/[\s-]+/g, '_')
+    .replace(/[^A-Z0-9_]/g, '');
+
+  if (normalizedName && cabinPrices[normalizedName]) {
+    return parsePriceToNumber(cabinPrices[normalizedName]);
+  }
+
+  return 0;
+}
+
+function parsePriceToNumber(value: string): number {
+  const parsed = Number(String(value).replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(parsed) ? parsed : 0;
 }
