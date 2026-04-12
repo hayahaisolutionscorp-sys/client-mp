@@ -6,15 +6,13 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     return {
       rules: {
         userAgent: '*',
-        disallow: '/',
-      },
+        disallow: '/'
+      }
     };
   }
 
   const branding = await getBrandingConfig();
-  const baseUrl = branding?.domain_name
-    ? `https://${branding.domain_name}.com`
-    : 'https://hayahai.com';
+  const baseUrl = branding?.domain_name ? `https://${branding.domain_name}.com` : 'https://hayahai.com';
 
   return {
     rules: [
@@ -28,10 +26,10 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
           '/booking/passenger-details',
           '/booking/payment-confirmation',
           '/booking/payment-success',
-          '/booking/confirmed/',
-        ],
-      },
+          '/booking/confirmed/'
+        ]
+      }
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${baseUrl}/sitemap.xml`
   };
 }

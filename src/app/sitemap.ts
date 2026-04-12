@@ -21,12 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/privacy-policy', priority: 0.5, changeFrequency: 'yearly' as const },
     { path: '/terms', priority: 0.5, changeFrequency: 'yearly' as const },
     { path: '/schedule-and-fares', priority: 0.9, changeFrequency: 'daily' as const },
-    { path: '/booking/destination', priority: 0.9, changeFrequency: 'daily' as const },
+    { path: '/booking/destination', priority: 0.9, changeFrequency: 'daily' as const }
   ].map(({ path, priority, changeFrequency }) => ({
     url: `${baseUrl}${path}`,
     lastModified: new Date(),
     changeFrequency,
-    priority,
+    priority
   }));
 
   let pressRoutes: MetadataRoute.Sitemap = [];
@@ -37,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${baseUrl}/press/${press.slug || press.id}`,
         lastModified: new Date(press.publish_date),
         changeFrequency: 'weekly' as const,
-        priority: 0.7,
+        priority: 0.7
       }));
     }
   } catch (error) {
