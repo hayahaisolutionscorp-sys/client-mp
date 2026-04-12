@@ -6,82 +6,91 @@ import { IS_BUILD_TIME, IS_CLIENT } from '../config';
 export type BrandingSource = 'api' | 'fallback';
 
 export interface BrandingConfigResult {
-    data: IBrandingConfig;
-    source: BrandingSource;
+  data: IBrandingConfig;
+  source: BrandingSource;
 }
 
 const appendVersionParam = (url: string, version?: string): string => {
-    if (!url || !version) return url;
+  if (!url || !version) return url;
 
-    try {
-        const parsed = new URL(url);
-        parsed.searchParams.set('v', version);
-        return parsed.toString();
-    } catch {
-        const separator = url.includes('?') ? '&' : '?';
-        return `${url}${separator}v=${encodeURIComponent(version)}`;
-    }
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set('v', version);
+    return parsed.toString();
+  } catch {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}v=${encodeURIComponent(version)}`;
+  }
 };
 
 const withBrandingCacheBuster = (config: IBrandingConfig): IBrandingConfig => {
-    const version = config.updated_at || config.created_at || '';
+  const version = config.updated_at || config.created_at || '';
 
-    return {
-        ...config,
-        favicon_url: appendVersionParam(config.favicon_url, version),
-        logo: {
-            ...config.logo,
-            dark: appendVersionParam(config.logo?.dark, version),
-            light: appendVersionParam(config.logo?.light, version),
-        },
-    };
+  return {
+    ...config,
+    favicon_url: appendVersionParam(config.favicon_url, version),
+    logo: {
+      ...config.logo,
+      dark: appendVersionParam(config.logo?.dark, version),
+      light: appendVersionParam(config.logo?.light, version)
+    }
+  };
 };
 
 export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<BrandingConfigResult> => {
-    if (IS_BUILD_TIME || !IS_CLIENT) {
-        return {
-            data: brandingData as unknown as IBrandingConfig,
-            source: 'fallback'
-        };
-    }
+  if (IS_BUILD_TIME || !IS_CLIENT) {
+    return {
+      data: brandingData as unknown as IBrandingConfig,
+      source: 'fallback'
+    };
+  }
 
-    try {
-        const requestInit: RequestInit = {
-            ...init,
-        };
+  try {
+    const isBrowser = typeof window !== 'undefined';
+    const requestInit: RequestInit = {
+      ...init
+    };
 
-        const res = await fetch(`${BRANDING_API}`, {
+    const res = await fetch(
+      `${BRANDING_API}`,
+      isBrowser
+        ? {
             ...requestInit,
-            next: { tags: ['branding'], revalidate: 3600 }
-        });
+            cache: 'no-store',
+          }
+        : {
+            ...requestInit,
+            next: { tags: ['branding'], revalidate: 3600 },
+          }
+    );
 
-        if (res.ok) {
-            const response: IBrandingResponse = await res.json();
-            if (response.data) {
-                return {
-                    data: withBrandingCacheBuster(response.data),
-                    source: 'api'
-                };
-            }
-        }
-
+    if (res.ok) {
+      const response: IBrandingResponse = await res.json();
+      if (response.data) {
         return {
-            data: brandingData as unknown as IBrandingConfig,
-            source: 'fallback'
+          data: withBrandingCacheBuster(response.data),
+          source: 'api'
         };
-    } catch (error) {
-        if (typeof window === 'undefined') {
-            console.error('Error fetching branding config:', error);
-        }
-
-        return {
-            data: brandingData as unknown as IBrandingConfig,
-            source: 'fallback'
-        };
+      }
     }
+
+    return {
+      data: brandingData as unknown as IBrandingConfig,
+      source: 'fallback'
+    };
+  } catch (error) {
+    if (typeof window === 'undefined') {
+      console.error('Error fetching branding config:', error);
+    }
+
+    return {
+      data: brandingData as unknown as IBrandingConfig,
+      source: 'fallback'
+    };
+  }
 };
 
 export const getBrandingConfig = async (): Promise<IBrandingConfig> => {
-    const result = await getBrandingConfigWithSource();
-    return result.data;
+  const result = await getBrandingConfigWithSource();
+  return result.data;
 };

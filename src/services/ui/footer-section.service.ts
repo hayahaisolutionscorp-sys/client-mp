@@ -10,9 +10,13 @@ export async function getFooterSections(): Promise<IFooterSection | undefined> {
       return footerSectionsData as IFooterSection;
     }
 
-    const res = await fetch(FOOTER_SECTION_API, {
-      // next: { tags: ['footer-sections'], revalidate: 3600 }
-    });
+    const isBrowser = typeof window !== 'undefined';
+    const res = await fetch(
+      FOOTER_SECTION_API,
+      isBrowser
+        ? { cache: 'no-store' }
+        : { next: { tags: ['footer-sections'], revalidate: 3600 } }
+    );
 
     if (res.ok) {
       const { data } = await res.json();
