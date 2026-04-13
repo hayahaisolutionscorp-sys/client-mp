@@ -18,14 +18,13 @@ export default function WhyChooseSteps({ section, reasons, theme }: WhyChooseTem
           )}
         </div>
         <div className="relative">
-          {/* connector line — layout tuned for exactly three columns */}
-          {reasons.length === 3 && (
-            <div className="hidden lg:block absolute top-10 left-[calc(16.67%+1rem)] right-[calc(16.67%+1rem)] h-px bg-white/20" />
-          )}
-          <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:flex lg:justify-center lg:gap-10">
             {reasons.map((reason, i) => (
-              <div key={reason.id} className="flex flex-col items-center text-center">
+              <div key={reason.id} className="relative flex flex-col items-center text-center lg:w-[300px]">
                 <div className="relative mb-6">
+                  {i < reasons.length - 1 && (
+                    <div className="pointer-events-none absolute top-1/2 left-full hidden h-px w-10 -translate-y-1/2 bg-white/20 lg:block" />
+                  )}
                   <div
                     className="flex size-20 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm"
                   >

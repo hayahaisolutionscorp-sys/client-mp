@@ -29,17 +29,8 @@ export default function SchedulePreviewClient({ initialPayload }: SchedulePrevie
     setThemeSettings(theme.themeSettings);
   }, [theme, setBranding, setThemeSettings]);
 
-  if (!payload || !theme) {
-    const isStandalone = typeof window !== "undefined" && window.parent === window;
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--surface-alt)] text-slate-500 text-sm">
-        {isStandalone ? "Open this preview from the TMS editor." : "Loading preview..."}
-      </div>
-    );
-  }
-
   const variants = useMemo(() => {
-    const builder = normalizeScheduleBuilderContent(payload.page?.content);
+    const builder = normalizeScheduleBuilderContent(payload?.page?.content);
     const heroSection = builder.sections.find((section) => section.section_key === "hero");
     const datePickerSection = builder.sections.find((section) => section.section_key === "date_picker");
     const fareTableSection = builder.sections.find((section) => section.section_key === "fare_table");
@@ -53,7 +44,16 @@ export default function SchedulePreviewClient({ initialPayload }: SchedulePrevie
           ? ("default" as const)
           : ((fareTableSection?.variant as "default" | "striped" | "comfortable" | "high-contrast") || "default"),
     };
-  }, [payload.page?.content]);
+  }, [payload?.page?.content]);
+
+  if (!payload || !theme) {
+    const isStandalone = typeof window !== "undefined" && window.parent === window;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--surface-alt)] text-slate-500 text-sm">
+        {isStandalone ? "Open this preview from the TMS editor." : "Loading preview..."}
+      </div>
+    );
+  }
 
   return (
     <div className="wl-brand-radius-scope" style={brandRadiusScopeStyle(theme.branding, "rounded-2xl")}>
