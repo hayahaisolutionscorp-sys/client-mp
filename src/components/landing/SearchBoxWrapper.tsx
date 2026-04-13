@@ -93,9 +93,9 @@ export default function SearchBoxWrapper({
         <div
             className={`flex items-center justify-center absolute z-20 inset-0 w-full px-4 
             ${bookingType?.toLowerCase() === "round trip"
-                    ? "top-[380px]"
-                    : "top-[330px]"
-                } sm:top-[230px] md:top-[340px] lg:top-[600px]`}
+                    ? "top-[440px]"
+                    : "top-[400px]"
+                } sm:top-[260px] md:top-[420px] lg:top-[640px]`}
         >
             <div className="w-full sm:w-[95%] md:w-[95%] lg:w-[1300px]">
                 {mode === "chat" && tripSearchEnabled ? (

@@ -22,6 +22,11 @@ import BookingBanner from "./templates/booking/BookingBanner";
 import BookingCard from "./templates/booking/BookingCard";
 import BookingPremiumDark from "./templates/booking/BookingPremiumDark";
 import BookingProfessional from "./templates/booking/BookingProfessional";
+import BookingHorizontal from "./templates/booking/BookingHorizontal";
+import HeroConcierge from "./templates/hero/HeroConcierge";
+import WhyChooseConcierge from "./templates/why-choose/WhyChooseConcierge";
+import RoutesEditorialGrid from "./templates/routes/RoutesEditorialGrid";
+import PromotionsConcierge from "./templates/promotions/PromotionsConcierge";
 import PromotionsGrid from "./templates/promotions/PromotionsGrid";
 import PromotionsBanner from "./templates/promotions/PromotionsBanner";
 import WhyChooseSteps from "./templates/why-choose/WhyChooseSteps";
@@ -354,6 +359,19 @@ export default function LandingPageBuilder({
                   tripSearchEnabledOverride={true}
                 />
               );
+            } else if (section.variant === "concierge") {
+              content = (
+                <HeroConcierge
+                  heroSectionOverride={heroSection}
+                  forceHomeNavbar={Boolean(previewPayload)}
+                  showNavbar={layout.showNavbarInHero}
+                  showBookingSearch={layout.showBookingInHero}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
+                  portsOverride={landingData?.ports ?? null}
+                  bookingRoutesOverride={landingData?.bookingRoutes ?? null}
+                  tripSearchEnabledOverride={true}
+                />
+              );
             } else {
               content = (
                 <Hero
@@ -380,11 +398,15 @@ export default function LandingPageBuilder({
               content = <BookingPremiumDark theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             } else if (section.variant === "professional-card") {
               content = <BookingProfessional theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "modern-horizontal") {
+              content = <BookingHorizontal theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             }
             break;
           case "promotions":
             if (section.variant === "grid" || section.variant === "professional-banner") {
               content = <PromotionsGrid promos={(promotions as any) ?? []} theme={theme} />;
+            } else if (section.variant === "concierge-mosaic") {
+              content = <PromotionsConcierge promos={(promotions as any) ?? []} theme={theme} />;
             } else if (section.variant === "banner") {
               content = <PromotionsBanner promos={(promotions as any) ?? []} theme={theme} />;
             } else {
@@ -398,6 +420,8 @@ export default function LandingPageBuilder({
               content = <RoutesModernGrid routes={(routes as any) ?? []} theme={theme} />;
             } else if (section.variant === "list") {
               content = <RoutesMinimalList routes={(routes as any) ?? []} theme={theme} />;
+            } else if (section.variant === "editorial-grid" || section.variant === "concierge") {
+              content = <RoutesEditorialGrid routes={(routes as any) ?? []} theme={theme} />;
             } else {
               content = <PopularRoutes routesOverride={routes as any} />;
             }
@@ -409,6 +433,8 @@ export default function LandingPageBuilder({
               content = <WhyChooseGrid section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else if (section.variant === "minimal") {
               content = <WhyChooseMinimal section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            } else if (section.variant === "concierge") {
+              content = <WhyChooseConcierge section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else {
               content = <WhyChooseDefault section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             }
