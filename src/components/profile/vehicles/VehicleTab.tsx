@@ -9,7 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/Card"
-import { Plus, Car, Check, Shield, AlertTriangle } from "lucide-react"
+import { Plus, Car, AlertTriangle } from "lucide-react"
 import { IVehicle, IVehicleType } from "@/models"
 import VehicleForm from "./VehicleForm"
 import VehicleCard from "./VehicleCard"
@@ -83,7 +83,7 @@ export default function VehicleTab({ userId }: VehicleTabProps) {
         }
     };
 
-    const handleFormSuccess = async (vehicleData: IVehicle) => {
+    const handleFormSuccess = async (vehicleData: Partial<IVehicle>) => {
         try {
             if (editingVehicle) {
                 await updateVehicle(editingVehicle.id, vehicleData);
@@ -154,7 +154,7 @@ export default function VehicleTab({ userId }: VehicleTabProps) {
                                         vehicle={vehicle}
                                         vehicleTypes={vehicleTypes}
                                         onEdit={handleEditVehicle}
-                                        onDelete={(id) => handleDeleteVehicle(vehicle)}
+                                        onDelete={() => handleDeleteVehicle(vehicle)}
                                         onRequestVerification={handleRequestVerification}
                                     />
                                 ))}
@@ -169,7 +169,6 @@ export default function VehicleTab({ userId }: VehicleTabProps) {
                     <Card className="w-full max-w-2xl">
                         <CardContent className="p-0">
                             <VehicleForm
-                                userId={userId}
                                 vehicle={editingVehicle}
                                 onSuccess={handleFormSuccess}
                                 onCancel={() => setShowForm(false)}

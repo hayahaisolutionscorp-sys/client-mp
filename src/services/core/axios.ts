@@ -36,6 +36,18 @@ function waitForRefresh(): Promise<void> {
   });
 }
 
+const normalizeErrorText = (value: unknown): string => {
+  if (typeof value === 'string') return value.toLowerCase();
+  if (value && typeof value === 'object') {
+    try {
+      return JSON.stringify(value).toLowerCase();
+    } catch {
+      return '';
+    }
+  }
+  return '';
+};
+
 /**
  * Shared function to handle token refresh.
  * Ensures only one refresh call is made even if multiple requests trigger it.
@@ -111,11 +123,12 @@ instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const errorMessage = normalizeErrorText(error.response?.data?.message);
+    const errorText = normalizeErrorText(error.response?.data?.error);
 
     // Handle 401 Unauthorized errors and "invalid token" messages
     const isUnauthorized = error.response?.status === 401;
-    const isInvalidToken = error.response?.data?.message?.toLowerCase().includes('invalid token') || 
-                          error.response?.data?.error?.toLowerCase().includes('invalid token');
+    const isInvalidToken = errorMessage.includes('invalid token') || errorText.includes('invalid token');
 
     if ((isUnauthorized || isInvalidToken) && !originalRequest._retry) {
       // Use logged-in-account as the indicator for authenticated sessions.
@@ -145,9 +158,11 @@ instance.interceptors.response.use(
 
           return instance(originalRequest);
         } catch (refreshError: any) {
+          const refreshMessage = normalizeErrorText(refreshError.response?.data?.message);
+
           // If refresh itself fails with 401 or invalid token, we're done
           const isRefreshAuthError = refreshError.response?.status === 401 || 
-                                     refreshError.response?.data?.message?.toLowerCase().includes('invalid token');
+                                     refreshMessage.includes('invalid token');
           
           if (isRefreshAuthError) {
             return Promise.reject({ ...refreshError, _silent: true });

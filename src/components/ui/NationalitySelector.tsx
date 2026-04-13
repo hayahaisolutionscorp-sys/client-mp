@@ -91,7 +91,7 @@ const NationalitySelector = ({
                 <CommandItem
                   key={item.value}
                   value={item.value}
-                  className="bg-white text-black transition-colors hover:bg-[rgba(var(--primary-color),0.08)] data-[selected='true']:bg-[rgba(var(--primary-color),0.08)] data-[selected='true']:text-black data-[selected='true']:font-medium aria-selected:bg-[rgba(var(--primary-color),0.08)] aria-selected:text-black aria-selected:font-medium"
+                  className="bg-white text-black transition-colors hover:bg-[rgba(var(--primary-color),0.08)] hover:text-black data-[selected='true']:bg-[rgba(var(--primary-color),0.08)] data-[selected='true']:text-black data-[selected='true']:font-medium aria-selected:bg-[rgba(var(--primary-color),0.08)] aria-selected:text-black aria-selected:font-medium"
                   style={{ "--primary-color": primaryColorRgb } as React.CSSProperties}
                   onSelect={() => {
                     const next = item.value === value ? "" : item.value;

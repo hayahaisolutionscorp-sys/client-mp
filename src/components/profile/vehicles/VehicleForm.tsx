@@ -30,7 +30,7 @@ const isMotorcycleType = (typeName: string) =>
 // ------------------------------------------------------------------
 // Schema factory — plate number rules differ by vehicle category
 // ------------------------------------------------------------------
-const createVehicleSchema = (isMotorcycle: boolean) =>
+const createVehicleSchema = () =>
     z.object({
         plate_number: z
             .string()
@@ -56,13 +56,12 @@ const createVehicleSchema = (isMotorcycle: boolean) =>
 type VehicleFormValues = z.infer<ReturnType<typeof createVehicleSchema>>;
 
 interface VehicleFormProps {
-    userId: string;
     vehicle?: IVehicle;
-    onSuccess: (vehicle: IVehicle) => Promise<void>;
+    onSuccess: (vehicle: Partial<IVehicle>) => Promise<void>;
     onCancel: () => void;
 }
 
-export default function VehicleForm({ userId, vehicle, onSuccess, onCancel }: VehicleFormProps) {
+export default function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) {
     const [models, setModels] = useState<IVehicleModel[]>([]);
     const [vehicleTypes, setVehicleTypes] = useState<IVehicleType[]>([]);
     const [isLoadingModels, setIsLoadingModels] = useState(true);
@@ -72,14 +71,13 @@ export default function VehicleForm({ userId, vehicle, onSuccess, onCancel }: Ve
     // ------------------------------------------------------------------
     // Dynamic schema / resolver — rebuilds when isMotorcycle changes
     // ------------------------------------------------------------------
-    const schema = useMemo(() => createVehicleSchema(isMotorcycle), [isMotorcycle]);
+    const schema = useMemo(() => createVehicleSchema(), []);
 
     const {
         register,
         handleSubmit,
         setValue,
         watch,
-        trigger,
         formState: { errors },
     } = useForm<VehicleFormValues>({
         resolver: zodResolver(schema),
@@ -94,6 +92,7 @@ export default function VehicleForm({ userId, vehicle, onSuccess, onCancel }: Ve
 
     const selectedModelId = watch("vehicle_model_id");
     const selectedTypeId  = watch("vehicle_type_id");
+    const isEditingVehicle = !!vehicle;
 
     // ------------------------------------------------------------------
     // Fetch models & types
@@ -143,9 +142,7 @@ export default function VehicleForm({ userId, vehicle, onSuccess, onCancel }: Ve
     const onSubmit = async (data: VehicleFormValues) => {
         setIsSubmitting(true);
         try {
-            const vehicleData: any = {
-                ...vehicle,
-                user_id: userId,
+            const vehicleData: Partial<IVehicle> = {
                 plate_number: data.plate_number,
             };
 
@@ -153,7 +150,6 @@ export default function VehicleForm({ userId, vehicle, onSuccess, onCancel }: Ve
                 vehicleData.make            = data.make;
                 vehicleData.model           = data.model;
                 vehicleData.vehicle_type_id = parseInt(data.vehicle_type_id!);
-                vehicleData.vehicle_model_id = null;
             } else {
                 vehicleData.vehicle_model_id = parseInt(data.vehicle_model_id);
             }
@@ -211,7 +207,13 @@ export default function VehicleForm({ userId, vehicle, onSuccess, onCancel }: Ve
                         onChange={(value) => setValue("vehicle_model_id", value, { shouldValidate: true })}
                         placeholder={isLoadingModels ? "Loading models..." : "Select model"}
                         className={errors.vehicle_model_id ? "border-red-500" : ""}
+                        disabled={isEditingVehicle}
                     />
+                    {isEditingVehicle && (
+                        <p className="text-xs text-muted-foreground">
+                            Vehicle model cannot be changed after creation.
+                        </p>
+                    )}
                     {errors.vehicle_model_id && (
                         <p className="text-xs text-red-500">{errors.vehicle_model_id.message}</p>
                     )}

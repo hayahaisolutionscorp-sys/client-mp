@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/Button"
 import { Badge } from "@/components/ui/Badge"
 import { 
     Car, 
-    MoreVertical, 
     Shield, 
     Trash2, 
     Edit2, 
@@ -16,12 +15,6 @@ import {
     ShieldCheck
 } from "lucide-react"
 import { IVehicle, IVehicleType } from "@/models"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/DropdownMenu"
 import { 
     getStatusBadge, 
     getStatusVariant,
@@ -43,7 +36,6 @@ interface VehicleCardProps {
 export default function VehicleCard({ vehicle, vehicleTypes, onEdit, onDelete, onRequestVerification }: VehicleCardProps) {
     const themeSettings = useThemeSettings();
     const primaryColor = themeSettings?.primary || '#2563eb';
-    const accentColor = themeSettings?.accent || '#60a5fa';
 
     const [isExpanded, setIsExpanded] = useState(false);
     
@@ -89,52 +81,45 @@ export default function VehicleCard({ vehicle, vehicleTypes, onEdit, onDelete, o
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {canRequestVerification && (
-                            <Button 
-                                size="sm" 
-                                variant="outline" 
-                                className="hidden sm:flex text-primary border-primary/20 hover:bg-primary/5 h-8 gap-1.5"
-                                style={{ color: primaryColor, borderColor: `${primaryColor}40` }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onRequestVerification(vehicle);
-                                }}
-                            >
-                                <Shield className="h-3.5 w-3.5" />
-                                Verify
-                            </Button>
-                        )}
-
-                        <div onClick={(e) => e.stopPropagation()}>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                        <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    {canRequestVerification && (
-                                        <DropdownMenuItem className="sm:hidden" onClick={() => onRequestVerification(vehicle)}>
-                                            <Shield className="mr-2 h-4 w-4" />
-                                            Verify Vehicle
-                                        </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuItem onClick={() => onEdit(vehicle)}>
-                                        <Edit2 className="mr-2 h-4 w-4" />
-                                        Edit Details
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => onDelete(vehicle.id)}>
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete Vehicle
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
                         
+
                         <div className="text-slate-400 ml-1">
                             {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                         </div>
                     </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 px-4 pb-4" onClick={(e) => e.stopPropagation()}>
+                    {canRequestVerification && (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-9 gap-1.5 text-primary border-primary/20 hover:bg-primary/5"
+                            style={{ color: primaryColor, borderColor: `${primaryColor}` }}
+                            onClick={() => onRequestVerification(vehicle)}
+                        >
+                            <Shield className="h-3.5 w-3.5" />
+                            Verify
+                        </Button>
+                    )}
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-9 gap-1.5"
+                        onClick={() => onEdit(vehicle)}
+                    >
+                        <Edit2 className="h-3.5 w-3.5" />
+                        Edit Details
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-9 gap-1.5 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                        onClick={() => onDelete(vehicle.id)}
+                    >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete Vehicle
+                    </Button>
                 </div>
 
                 {/* Expanded Content */}

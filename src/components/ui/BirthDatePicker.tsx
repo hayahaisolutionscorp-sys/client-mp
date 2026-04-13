@@ -169,7 +169,7 @@ const BirthDatePicker = ({
                     aria-label={month}
                     onClick={() => handleMonthSelect(idx)}
                     className={cn(
-                      "rounded-md px-2 py-2 text-xs font-medium transition-colors",
+                      "rounded-md px-2 py-2 text-xs font-medium transition-colors hover:text-black",
                       isSelected ? "border border-gray-300 bg-white text-black" : "text-gray-700 hover:bg-[rgba(var(--primary-color),0.08)]"
                     )}
                   >
