@@ -10,11 +10,13 @@ interface OurPartnersProps {
 }
 
 export default function OurPartners({ partnersOverride }: OurPartnersProps = {}) {
-  const [partners, setPartners] = useState<PreviewPartner[]>(partnersOverride || []);
-  const [loading, setLoading] = useState(!partnersOverride);
+  const [partners, setPartners] = useState<PreviewPartner[]>(() =>
+    partnersOverride != null ? partnersOverride : []
+  );
+  const [loading, setLoading] = useState(() => partnersOverride == null);
 
   useEffect(() => {
-    if (partnersOverride) {
+    if (partnersOverride != null) {
       setPartners(partnersOverride);
       setLoading(false);
       return;

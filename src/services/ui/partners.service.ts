@@ -1,5 +1,5 @@
 import { OUR_PARTNERS_API } from '../../../constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 
 import partnersData from '@/data/partners.json';
 
@@ -18,7 +18,7 @@ export interface IPartnersResponse {
 }
 
 export const getPartners = async (): Promise<IPartnersResponse> => {
-  if (!IS_CLIENT) {
+  if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
     return {
       message: 'Partners successfully fetched.',
       data: partnersData as IPartner[]

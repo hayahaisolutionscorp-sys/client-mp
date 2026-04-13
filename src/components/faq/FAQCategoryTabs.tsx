@@ -12,7 +12,7 @@ interface FAQCategoryTabsProps {
 
 export default function FAQCategoryTabs({ categories, activeCategory, onCategoryChange, themeColor }: FAQCategoryTabsProps) {
   return (
-    <div className="flex flex-wrap gap-2 mb-8 justify-center bg-[#EEF8FC]/95 py-4 z-10">
+    <div className="flex flex-wrap gap-2 mb-8 justify-center bg-[var(--surface-alt)] py-4 z-10">
       {categories.map((category) => (
         <Button
           variant="default"

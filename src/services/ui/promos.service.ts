@@ -1,5 +1,5 @@
 import { PROMOS_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 
 import promosData from '@/data/promos.json';
 
@@ -24,7 +24,7 @@ export interface IPromosResponse {
 
 export async function getPromos(): Promise<IPromo[]> {
   try {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return promosData as IPromo[];
     }
 

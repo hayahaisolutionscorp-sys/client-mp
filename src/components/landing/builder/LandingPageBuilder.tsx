@@ -38,6 +38,7 @@ import PartnersGridPremium from "./templates/partners/PartnersGridPremium";
 import PartnersDefault from "./templates/partners/PartnersDefault";
 import FooterCentered from "./templates/footer/FooterCentered";
 import FooterPremium from "./templates/footer/FooterPremium";
+import FooterProfessional from "./templates/footer/FooterProfessional";
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { cn } from "@/lib/utils";
@@ -50,6 +51,10 @@ import {
   getLandingBuilderLayoutState,
   normalizeLandingBuilderContent,
 } from "@/lib/landing-builder";
+import {
+  brandRadiusScopeStyle,
+  resolveBrandCornerRadiusClass,
+} from "@/lib/branding/brand-radius";
 import type { LandingPreviewPayload } from "@/lib/preview/landing-preview";
 import type { LandingPageData } from "@/services/content/landing-page.service";
 import type { IBrandingConfig } from "@/models";
@@ -140,10 +145,10 @@ export default function LandingPageBuilder({
     fontStyle: builderTheme.fontFamily,
     fontTitle: builderTheme.fontFamilyTitle,
   };
-  const cornerRadiusClass =
-    landingBranding?.colors?.cornerRadiusClass ||
-    templatePreset?.tokens.radiusClass ||
-    "rounded-2xl";
+  const cornerRadiusClass = resolveBrandCornerRadiusClass(
+    landingBranding,
+    templatePreset?.tokens.radiusClass ?? "rounded-2xl"
+  );
 
   const sectionAnimationsRaw = landingBranding?.colors?.sectionAnimations;
   let sectionAnimations: Record<string, string> = {};
@@ -252,6 +257,10 @@ export default function LandingPageBuilder({
 
   return (
     <>
+    <div
+      className="wl-brand-radius-scope"
+      style={brandRadiusScopeStyle(landingBranding, templatePreset?.tokens.radiusClass ?? "rounded-2xl")}
+    >
     <div
       className={templatePreset ? `${templatePreset.tokens.surfaceClass} ${cornerRadiusClass}` : cornerRadiusClass}
       style={{ 
@@ -441,7 +450,7 @@ export default function LandingPageBuilder({
         <>
           {layout.footerSection.variant === "centered" && <FooterCentered key={layout.footerSection.id} theme={theme} />}
           {layout.footerSection.variant === "premium" && <FooterPremium key={layout.footerSection.id} theme={theme} />}
-          {layout.footerSection.variant === "professional-anchored" && <FooterPremium key={layout.footerSection.id} theme={theme} />}
+          {layout.footerSection.variant === "professional-anchored" && <FooterProfessional key={layout.footerSection.id} theme={theme} />}
           {layout.footerSection.variant === "default" && <Footer key={layout.footerSection.id} />}
           {layout.footerSection.variant === "default-no-banner" && <Footer key={layout.footerSection.id} showSubscribeBanner={false} />}
         </>
@@ -453,6 +462,7 @@ export default function LandingPageBuilder({
       tenantId={parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10)} 
       builderConfigOverride={builder}
     />
+    </div>
     </>
   );
 }

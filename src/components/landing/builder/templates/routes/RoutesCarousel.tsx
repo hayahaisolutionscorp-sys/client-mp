@@ -28,14 +28,14 @@ export default function RoutesCarousel({ routes, theme }: RoutesTemplateProps) {
           {items.map((route, i) => (
             <div
               key={route.id}
-              className="group relative overflow-hidden rounded-[24px] h-52 cursor-pointer"
+              className="relative overflow-hidden rounded-[24px] h-52"
               style={{ boxShadow: `0 4px 24px color-mix(in srgb, ${theme.primary} 18%, transparent)` }}
             >
               {route.image_url ? (
                 <img
                   src={route.image_url}
                   alt={route.image_alt || route.route}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
               ) : (
                 <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})` }} />

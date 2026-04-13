@@ -29,7 +29,14 @@ export default function GetToKnowUs({
   const [mainData, setMainData] = useState<IGetToKnowData | null>(mainDataOverride ?? null);
   const [missionData, setMissionData] = useState<IGetToKnowData | null>(missionDataOverride ?? null);
   const [visionData, setVisionData] = useState<IGetToKnowData | null>(visionDataOverride ?? null);
-  const [loading, setLoading] = useState(!(mainDataOverride && missionDataOverride && visionDataOverride));
+  const [loading, setLoading] = useState(
+    () =>
+      !(
+        mainDataOverride !== undefined &&
+        missionDataOverride !== undefined &&
+        visionDataOverride !== undefined
+      )
+  );
   const themeSettings = themeSettingsOverride ?? useThemeSettings();
 
   const TABS = {
@@ -40,10 +47,14 @@ export default function GetToKnowUs({
   type TabName = keyof typeof TABS; // 'Mission' | 'Vision'
 
   useEffect(() => {
-    if (mainDataOverride && missionDataOverride && visionDataOverride) {
-      setMainData(mainDataOverride);
-      setMissionData(missionDataOverride);
-      setVisionData(visionDataOverride);
+    if (
+      mainDataOverride !== undefined &&
+      missionDataOverride !== undefined &&
+      visionDataOverride !== undefined
+    ) {
+      setMainData(mainDataOverride ?? null);
+      setMissionData(missionDataOverride ?? null);
+      setVisionData(visionDataOverride ?? null);
       setLoading(false);
       return;
     }

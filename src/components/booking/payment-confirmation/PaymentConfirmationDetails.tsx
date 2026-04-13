@@ -600,11 +600,9 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
         typeof pricingData?.grandTotal === 'number'
           ? pricingData.grandTotal
           : (pricingData?.trips?.reduce((sum, trip) => sum + (trip.grandTotal || 0), 0) || 0);
-      console.log('Grand total (PHP):', grandTotal);
       
       // Convert grand total to cents for PayMongo
       const amountInCents = Math.round(grandTotal * 100);
-      console.log('Amount in cents:', amountInCents);
       
       if (amountInCents <= 0) {
         console.error('Invalid amount:', amountInCents);
@@ -657,7 +655,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
         }
         checkoutUrl = mayaResponse.data.checkoutUrl;
       } else if (effectiveMethod === 'paymongo-checkout') {
-        // Only PayMongo enabled → use checkout session (user picks method on PayMongo's page)
+        // Only PayMongo enabled â†’ use checkout session (user picks method on PayMongo's page)
         const amountInCentsCalc = Math.round(grandTotal * 100);
         const checkoutRequest = {
           bookingPaymentId,
@@ -774,14 +772,14 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
 
           <div className="space-y-6">
             <PassengerTripCard departureTrips={departureTrips} returnTrips={returnTrips} />
-            {/* Payment method picker — shown when both Maya and PayMongo are enabled */}
+            {/* Payment method picker â€” shown when both Maya and PayMongo are enabled */}
             {enabledProviders.includes('maya') && enabledProviders.includes('paymongo') && (
               <PaymentMethodPicker
                 selected={selectedMethod}
                 onChange={setSelectedMethod}
               />
             )}
-            {/* Booking details — Passengers, Vehicles, Cargo */}
+            {/* Booking details â€” Passengers, Vehicles, Cargo */}
             <TripDetails booking={booking} seatLabels={seatLabels} />
           </div>
         </div>

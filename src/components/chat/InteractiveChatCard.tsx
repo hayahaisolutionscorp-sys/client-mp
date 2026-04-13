@@ -82,12 +82,12 @@ type AvailableRoute = { src: PortInfo; dest: PortInfo };
 const buildRouteOptions = (availableRoutes: AvailableRoute[], showAll: boolean): QuickReplyOption[] => {
     const displayed = showAll ? availableRoutes : availableRoutes.slice(0, ROUTE_PREVIEW_COUNT);
     const options: QuickReplyOption[] = displayed.map((r) => ({
-        label: `📍 ${r.src.name} → ${r.dest.name}`,
+        label: `ðŸ“ ${r.src.name} â†’ ${r.dest.name}`,
         value: `route:${r.src.code}:${r.src.name}:${r.src.id}:${r.dest.code}:${r.dest.name}:${r.dest.id}`,
     }));
     if (!showAll && availableRoutes.length > ROUTE_PREVIEW_COUNT) {
         options.push({
-            label: `🔽 See more (${availableRoutes.length - ROUTE_PREVIEW_COUNT} more routes)`,
+            label: `ðŸ”½ See more (${availableRoutes.length - ROUTE_PREVIEW_COUNT} more routes)`,
             value: "show_more_routes",
         });
     }
@@ -150,7 +150,7 @@ export default function InteractiveChatCard({
     const displayName = agentConfig?.displayName || "AyahAI";
     // Use only the greeting portion of the welcome message (strip trailing questions)
     const rawWelcome = agentConfig?.welcomeMessage
-        || "Hi! I'm AyahAI, your ferry booking assistant. 🛳️";
+        || "Hi! I'm AyahAI, your ferry booking assistant. ðŸ›³ï¸";
     const configWelcomeMsg = rawWelcome.split("\n").filter((line) => !line.trim().endsWith("?")).join("\n").trim()
         || rawWelcome.split("\n")[0];
 
@@ -209,7 +209,7 @@ export default function InteractiveChatCard({
         }
     }, [messages, showDatePicker]);
 
-    // Handle date selection — now triggers search (passengers + vehicles already collected)
+    // Handle date selection â€” now triggers search (passengers + vehicles already collected)
     const handleDateSelect = async (date: Date, label: string) => {
         setShowDatePicker(false);
         const dateStr = date.toLocaleDateString("en-CA");
@@ -251,7 +251,7 @@ export default function InteractiveChatCard({
         const searchingMessage: Message = {
             id: crypto.randomUUID(),
             role: "assistant",
-            content: "🔍 Searching for available trips...",
+            content: "ðŸ” Searching for available trips...",
             timestamp: new Date(),
         };
         setMessages((prev) => [...prev, searchingMessage]);
@@ -274,7 +274,6 @@ export default function InteractiveChatCard({
 
             if (response.ok) {
                 const tripResults = await response.json();
-                console.log("[Chat] Trips API response:", tripResults);
                 
                 // Extract trips array from response - API returns { message, data: [...trips] }
                 const tripsArray = tripResults.data || [];
@@ -306,7 +305,6 @@ export default function InteractiveChatCard({
                     };
                 });
                 
-                console.log("[Chat] Parsed trips:", trips);
 
                 let resultMessage: Message;
 
@@ -314,14 +312,14 @@ export default function InteractiveChatCard({
                     resultMessage = {
                         id: crypto.randomUUID(),
                         role: "assistant",
-                        content: `I found ${trips.length} trip${trips.length > 1 ? "s" : ""} for you! 🎉`,
+                        content: `I found ${trips.length} trip${trips.length > 1 ? "s" : ""} for you! ðŸŽ‰`,
                         tripResults: trips,
                         interactive: {
                             type: "quick_reply",
                             data: {
                                 options: [
-                                    { label: "🔄 Different date", value: "try a different date" },
-                                    { label: "🏠 Start over", value: "start over" },
+                                    { label: "ðŸ”„ Different date", value: "try a different date" },
+                                    { label: "ðŸ  Start over", value: "start over" },
                                 ],
                             },
                         },
@@ -330,7 +328,7 @@ export default function InteractiveChatCard({
                 } else {
                     // No trips found - fetch available dates for this route
                     let availableDatesOptions: QuickReplyOption[] = [
-                        { label: "🔄 Different route", value: "start over" },
+                        { label: "ðŸ”„ Different route", value: "start over" },
                     ];
 
                     try {
@@ -339,7 +337,6 @@ export default function InteractiveChatCard({
                         );
                         if (datesResponse.ok) {
                             const datesData = await datesResponse.json();
-                            console.log("[Chat] Available dates response:", datesData);
                             if (datesData.data && datesData.data.length > 0) {
                                 const dateOptions = datesData.data.map((d: { date: string; trip_count: number }) => {
                                     const date = new Date(d.date + "T00:00:00"); // Parse as local time
@@ -351,11 +348,11 @@ export default function InteractiveChatCard({
                                     // Ensure value is in YYYY-MM-DD format
                                     const dateValue = d.date.split("T")[0]; // Handle ISO format
                                     return {
-                                        label: `📅 ${label} (${d.trip_count} trip${d.trip_count > 1 ? "s" : ""})`,
+                                        label: `ðŸ“… ${label} (${d.trip_count} trip${d.trip_count > 1 ? "s" : ""})`,
                                         value: dateValue,
                                     };
                                 });
-                                availableDatesOptions = [...dateOptions, { label: "🔄 Different route", value: "start over" }];
+                                availableDatesOptions = [...dateOptions, { label: "ðŸ”„ Different route", value: "start over" }];
                             }
                         }
                     } catch (e) {
@@ -392,8 +389,8 @@ export default function InteractiveChatCard({
                     type: "quick_reply",
                     data: {
                         options: [
-                            { label: "🔄 Try again", value: "try again" },
-                            { label: "🏠 Start over", value: "start over" },
+                            { label: "ðŸ”„ Try again", value: "try again" },
+                            { label: "ðŸ  Start over", value: "start over" },
                         ],
                     },
                 },
@@ -440,7 +437,7 @@ export default function InteractiveChatCard({
         return match ?? null;
     }, [availableRoutes]);
 
-    // Detect "from X to Y [at/on DATE]" intent — extracts ports and optional date string
+    // Detect "from X to Y [at/on DATE]" intent â€” extracts ports and optional date string
     const detectRouteQuery = useCallback((text: string): { src: string; dest: string; dateHint?: string } | null => {
         const t = text.toLowerCase();
         // Strip trailing date phrases so they don't bleed into dest name
@@ -480,7 +477,7 @@ export default function InteractiveChatCard({
                         setInput("");
                         const routeObj = findRouteByPorts(routes, srcPort.code, destPort.code) ?? null;
                         pendingRouteRef.current = routeObj;
-                        // Parse date hint if provided ("Apr. 11, 2026" → "2026-04-11")
+                        // Parse date hint if provided ("Apr. 11, 2026" â†’ "2026-04-11")
                         let parsedDate: string | null = null;
                         if (routeQuery.dateHint) {
                             const MONTHS: Record<string, number> = {
@@ -515,18 +512,18 @@ export default function InteractiveChatCard({
                             vehicleCount: prev.vehicleCount ?? 0,
                         }));
                         if (parsedDate) {
-                            // Date known — search immediately with default 1 pax / 0 vehicles
+                            // Date known â€” search immediately with default 1 pax / 0 vehicles
                             setStep("complete");
                             await searchTrips(parsedDate, context.passengerCount || 1, context.vehicleCount ?? 0);
                         } else {
-                            // No date — ask passengers first
+                            // No date â€” ask passengers first
                             const passengerOptions: QuickReplyOption[] = [1,2,3,4,5,6,7,8,9,10].map(n => ({
-                                label: `👤 ${n} passenger${n > 1 ? "s" : ""}`,
+                                label: `ðŸ‘¤ ${n} passenger${n > 1 ? "s" : ""}`,
                                 value: `passengers:${n}`,
                             }));
                             setMessages(prev => [...prev, {
                                 id: crypto.randomUUID(), role: "assistant",
-                                content: `**${srcPort.name} → ${destPort.name}** 🛳️\n\nHow many passengers will be traveling?`,
+                                content: `**${srcPort.name} â†’ ${destPort.name}** ðŸ›³ï¸\n\nHow many passengers will be traveling?`,
                                 interactive: { type: "quick_reply", data: { options: passengerOptions } },
                                 timestamp: new Date(),
                             }]);
@@ -576,7 +573,7 @@ export default function InteractiveChatCard({
                         interactive: {
                             type: "quick_reply",
                             data: {
-                                options: [{ label: "🏠 Start a new search", value: "start over" }],
+                                options: [{ label: "ðŸ  Start a new search", value: "start over" }],
                             },
                         },
                         timestamp: new Date(),
@@ -594,7 +591,7 @@ export default function InteractiveChatCard({
                     interactive: {
                         type: "quick_reply",
                         data: {
-                            options: [{ label: "🏠 Start a new search", value: "start over" }],
+                            options: [{ label: "ðŸ  Start a new search", value: "start over" }],
                         },
                     },
                     timestamp: new Date(),
@@ -607,7 +604,7 @@ export default function InteractiveChatCard({
         [context, messages, availableRoutes, routes, findPort, detectRouteQuery, searchTrips]
     );
 
-    // Handle form submit — intercept typed input for passengers/vehicles steps
+    // Handle form submit â€” intercept typed input for passengers/vehicles steps
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         const trimmed = input.trim();
@@ -691,7 +688,7 @@ export default function InteractiveChatCard({
             return;
         }
 
-        // --- Route selected (combined origin + destination) → ask passengers ---
+        // --- Route selected (combined origin + destination) â†’ ask passengers ---
         if (value.startsWith("route:")) {
             const parts = value.split(":");
             const srcCode = parts[1];
@@ -713,15 +710,15 @@ export default function InteractiveChatCard({
             }
 
             const passengerOptions: QuickReplyOption[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({
-                label: `👤 ${n} passenger${n > 1 ? "s" : ""}`,
+                label: `ðŸ‘¤ ${n} passenger${n > 1 ? "s" : ""}`,
                 value: `passengers:${n}`,
             }));
 
-            const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: `${srcName} → ${destName}`, timestamp: new Date() };
+            const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: `${srcName} â†’ ${destName}`, timestamp: new Date() };
             const assistantMsg: Message = {
                 id: crypto.randomUUID(),
                 role: "assistant",
-                content: `**${srcName} → ${destName}** 🛳️\n\nHow many passengers will be traveling?\nOr type a number below for larger groups.`,
+                content: `**${srcName} â†’ ${destName}** ðŸ›³ï¸\n\nHow many passengers will be traveling?\nOr type a number below for larger groups.`,
                 interactive: { type: "quick_reply", data: { options: passengerOptions } },
                 timestamp: new Date(),
             };
@@ -730,18 +727,18 @@ export default function InteractiveChatCard({
             return;
         }
 
-        // --- Passengers selected → ask vehicles ---
+        // --- Passengers selected â†’ ask vehicles ---
         if (value.startsWith("passengers:")) {
             const count = parseInt(value.split(":")[1], 10);
             setContext((prev) => ({ ...prev, passengerCount: count }));
 
             const vehicleOptions: QuickReplyOption[] = [
-                { label: "🚫 No vehicles", value: "vehicles:0" },
-                { label: "🚗 1 vehicle", value: "vehicles:1" },
-                { label: "🚗 2 vehicles", value: "vehicles:2" },
-                { label: "🚗 3 vehicles", value: "vehicles:3" },
-                { label: "🚗 4 vehicles", value: "vehicles:4" },
-                { label: "🚗 5 vehicles", value: "vehicles:5" },
+                { label: "ðŸš« No vehicles", value: "vehicles:0" },
+                { label: "ðŸš— 1 vehicle", value: "vehicles:1" },
+                { label: "ðŸš— 2 vehicles", value: "vehicles:2" },
+                { label: "ðŸš— 3 vehicles", value: "vehicles:3" },
+                { label: "ðŸš— 4 vehicles", value: "vehicles:4" },
+                { label: "ðŸš— 5 vehicles", value: "vehicles:5" },
             ];
 
             const userMsg: Message = {
@@ -762,7 +759,7 @@ export default function InteractiveChatCard({
             return;
         }
 
-        // --- Vehicles selected → show available dates ---
+        // --- Vehicles selected â†’ show available dates ---
         if (value.startsWith("vehicles:")) {
             const vCount = parseInt(value.split(":")[1], 10);
             setContext((prev) => ({ ...prev, vehicleCount: vCount }));
@@ -793,7 +790,7 @@ export default function InteractiveChatCard({
                                 const lbl = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
                                 const dateValue = d.date.split("T")[0];
                                 return {
-                                    label: `📅 ${lbl} (${d.trip_count} trip${d.trip_count > 1 ? "s" : ""})`,
+                                    label: `ðŸ“… ${lbl} (${d.trip_count} trip${d.trip_count > 1 ? "s" : ""})`,
                                     value: dateValue,
                                 };
                             });
@@ -801,7 +798,7 @@ export default function InteractiveChatCard({
                     }
 
                     if (dateOptions.length > 0) {
-                        dateOptions.push({ label: "🗓️ Pick another date", value: "pick_date" });
+                        dateOptions.push({ label: "ðŸ—“ï¸ Pick another date", value: "pick_date" });
                         const assistantMsg: Message = {
                             id: crypto.randomUUID(),
                             role: "assistant",
@@ -817,7 +814,7 @@ export default function InteractiveChatCard({
                             content: "Sorry, there are no upcoming trips scheduled for this route yet. Would you like to try a different route?",
                             interactive: {
                                 type: "quick_reply",
-                                data: { options: [{ label: "🔄 Different route", value: "start over" }] },
+                                data: { options: [{ label: "ðŸ”„ Different route", value: "start over" }] },
                             },
                             timestamp: new Date(),
                         };
@@ -837,8 +834,8 @@ export default function InteractiveChatCard({
                             type: "quick_reply",
                             data: {
                                 options: [
-                                    { label: `📅 Tomorrow (${tomorrowLabel})`, value: "tomorrow" },
-                                    { label: "🗓️ Pick a date", value: "pick_date" },
+                                    { label: `ðŸ“… Tomorrow (${tomorrowLabel})`, value: "tomorrow" },
+                                    { label: "ðŸ—“ï¸ Pick a date", value: "pick_date" },
                                 ],
                             },
                         },
@@ -928,7 +925,7 @@ export default function InteractiveChatCard({
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                {/* Message row wrapper — avatar + bubble */}
+                                {/* Message row wrapper â€” avatar + bubble */}
                                 <div className={cn(
                                     "flex items-start gap-2",
                                     message.role === "user" ? "flex-row-reverse" : "flex-row"

@@ -1,14 +1,11 @@
+import { EFFECTIVE_API_BASE_URL, isEffectiveClientApiMode } from 'constants/api';
+
 const trimTrailingSlash = (url?: string | null) => (url ?? '').replace(/\/+$/, '');
 
-export const isClientMode = process.env.NEXT_PUBLIC_IS_CLIENT === 'true';
+/** Matches tenant client-api resolution in constants/api (incl. API_BASE_URL without IS_CLIENT flag). */
+export const isClientMode = isEffectiveClientApiMode;
 
-export const resolveApiBaseUrl = () => {
-  const clientApiBaseUrl = trimTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000');
-
-  const defaultApiUrl = trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002');
-
-  return isClientMode ? clientApiBaseUrl : defaultApiUrl;
-};
+export const resolveApiBaseUrl = () => EFFECTIVE_API_BASE_URL;
 
 // Knowledge-base endpoints (chat, agent-config) route to the dedicated KB API
 // when NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL is explicitly set (e.g. local dev).
@@ -18,7 +15,7 @@ export const resolveKnowledgeBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL) {
     return trimTrailingSlash(process.env.NEXT_PUBLIC_KNOWLEDGE_BASE_API_URL);
   }
-  if (isClientMode) {
+  if (isEffectiveClientApiMode) {
     return trimTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000');
   }
   return trimTrailingSlash('http://localhost:3002');

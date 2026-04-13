@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Suspense } from "react";
 import ContactPreviewClient from "./ContactPreviewClient";
 import { getContactDraft } from "@/lib/preview/contact-draft-store";

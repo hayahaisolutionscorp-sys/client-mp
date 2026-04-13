@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContexts"
 import Image from "next/image"
 import { ConfirmationModal } from "@/components/ui/ConfirmationModal"
 import { AuthService } from "@/services/auth.service"
+import { isEffectiveClientApiMode } from "constants/api"
 
 export default function ConnectedAccounts() {
     const { currentUser, refreshProfile, signInWithGoogle, signInWithFacebook, signInWithHayahai } = useAuth();
@@ -152,7 +153,7 @@ export default function ConnectedAccounts() {
                         )}
                     </div>
 
-                    {process.env.NEXT_PUBLIC_IS_CLIENT === "true" && (
+                    {isEffectiveClientApiMode && (
                         <div className="flex items-center justify-between p-4 border rounded-lg bg-white">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 flex items-center justify-center border rounded-md overflow-hidden">

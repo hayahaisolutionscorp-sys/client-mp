@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Suspense } from "react";
 import LandingPreviewClient from "./LandingPreviewClient";
 import { getLandingDraft } from "@/lib/preview/landing-draft-store";

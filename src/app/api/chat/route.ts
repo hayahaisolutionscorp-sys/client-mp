@@ -20,18 +20,16 @@ interface IncomingChatMessage {
 }
 
 export async function POST(req: Request) {
-  console.log('--> /api/chat [Proxy Mode] POST received');
   try {
     const url = new URL(req.url);
     const queryTenantId = url.searchParams.get('tenantId');
     const queryScope = url.searchParams.get('scope');
 
     const body = await req.json();
-    console.log('--> Request body:', JSON.stringify(body, null, 2));
 
     const { messages } = body as { messages?: IncomingChatMessage[] };
 
-    // AI Configuration is the source of truth — pass agentType so backend resolves from agent_configs
+    // AI Configuration is the source of truth â€” pass agentType so backend resolves from agent_configs
     const agentType = 'chatbot';
     // In client mode, scope to tenant; in aggregator mode, omit tenantId to query all tenants
     const tenantId = queryTenantId
@@ -78,14 +76,9 @@ export async function POST(req: Request) {
     }
 
     if (!query) {
-      console.error('--> No user message found. Body keys:', Object.keys(body));
-      console.error('--> Full body:', JSON.stringify(body, null, 2));
       return new Response('No user message found', { status: 400 });
     }
 
-    console.log(
-      `--> Extracted query: "${query.substring(0, 100)}..." (agentType: ${agentType}, tenantId: ${tenantId})`
-    );
 
     // Extract conversation history (exclude the current message)
     const history: Array<{ role: 'user' | 'assistant'; content: string }> = [];
@@ -112,8 +105,6 @@ export async function POST(req: Request) {
       }
     }
 
-    console.log(`--> Conversation history: ${history.length} messages`);
-    console.log(`--> Proxying query to ${API_BASE_URL}/knowledge-base/chat...`);
 
     const apiRes = await fetch(`${API_BASE_URL}/knowledge-base/chat`, {
       method: 'POST',
@@ -137,7 +128,6 @@ export async function POST(req: Request) {
 
     // Get the plain text response
     const responseText = await apiRes.text();
-    console.log(`--> Received response (${responseText.length} chars)`);
 
     // Return as plain text for AI SDK compatibility
     return new Response(responseText, {

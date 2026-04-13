@@ -5,6 +5,13 @@ import Image from "next/image"
 import { useBranding } from "@/hooks/branding"
 import { useTheme } from "@/components/ThemeProvider"
 import { useThemeSettings } from "@/hooks/theme-settings"
+import {
+  FALLBACK_CSS_ACCENT,
+  FALLBACK_CSS_PRIMARY,
+  FALLBACK_CSS_SECONDARY,
+  FALLBACK_CSS_SURFACE,
+  FALLBACK_CSS_SURFACE_ALT,
+} from "@/lib/theme-css-fallbacks"
 
 type AuthSidebarVariant = "default" | "image" | "testimonial" | "gradient";
 
@@ -36,11 +43,11 @@ export function AuthSidebar({ variant = "default", embedded = false, tone = "bra
 
   const [slogan, setSlogan] = useState("Kay Ang Pagsakay, Dapat AYAHAY!")
   const branding = useBranding()
-  const primaryColor = theme?.primaryColor || theme?.primary || "#0ea5e9";
-  const secondaryColor = theme?.secondaryColor || theme?.secondary || "#38bdf8";
-  const accentColor = theme?.accent || "#0f172a";
-  const surfaceColor = theme?.surface || "#ffffff";
-  const surfaceAltColor = theme?.surfaceAlt || "#eef8fc";
+  const primaryColor = theme?.primaryColor || theme?.primary || FALLBACK_CSS_PRIMARY;
+  const secondaryColor = theme?.secondaryColor || theme?.secondary || FALLBACK_CSS_SECONDARY;
+  const accentColor = theme?.accent || FALLBACK_CSS_ACCENT;
+  const surfaceColor = theme?.surface || FALLBACK_CSS_SURFACE;
+  const surfaceAltColor = theme?.surfaceAlt || FALLBACK_CSS_SURFACE_ALT;
 
   useEffect(() => {
     if (branding?.slogan) {

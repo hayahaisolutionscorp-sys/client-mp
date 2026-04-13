@@ -14,6 +14,9 @@ import type { IBrandingConfig, IThemeSettings } from "@/models";
 import type { IPress } from "@/models";
 import type { IPressPage, IPressSection } from "@/services/content/press.service";
 import { AnimatedSection } from "@/components/whitelabel/AnimatedSection";
+import { useThemeSettings as useThemeSettingsHook } from "@/hooks/theme-settings";
+import { useBranding as useBrandingHook } from "@/hooks/branding";
+import { brandRadiusScopeStyle } from "@/lib/branding/brand-radius";
 
 type PressRenderableSectionKey = "hero" | "press_list";
 
@@ -51,6 +54,11 @@ export function PressPageContent({
   themeSettings,
   branding,
 }: PressPageContentProps) {
+  const contextThemeSettings = useThemeSettingsHook();
+  const contextBranding = useBrandingHook();
+  const resolvedThemeSettings = themeSettings ?? contextThemeSettings ?? null;
+  const resolvedBranding = branding ?? contextBranding ?? null;
+
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -69,7 +77,7 @@ export function PressPageContent({
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const sectionAnimationsRaw = branding?.colors?.sectionAnimations;
+  const sectionAnimationsRaw = resolvedBranding?.colors?.sectionAnimations;
   let sectionAnimations: Record<string, string> = {};
   if (sectionAnimationsRaw) {
     if (typeof sectionAnimationsRaw === 'string') {
@@ -166,11 +174,11 @@ export function PressPageContent({
     .map(([id, anim]) => getAnimationCSSForSection(id, anim))
     .join("\n");
   const builderConfig = normalizePressBuilderContent(pressPage?.content);
-  const theme = createBuilderTheme((branding ?? {}) as IBrandingConfig);
-  const primaryColor = themeSettings?.primary || theme.primary;
-  const secondaryColor = themeSettings?.secondary || theme.secondary;
-  const surfaceColor = themeSettings?.surface || theme.surface;
-  const surfaceAltColor = themeSettings?.surfaceAlt || theme.surfaceAlt;
+  const theme = createBuilderTheme((resolvedBranding ?? {}) as IBrandingConfig);
+  const primaryColor = resolvedThemeSettings?.primary || theme.primary;
+  const secondaryColor = resolvedThemeSettings?.secondary || theme.secondary;
+  const surfaceColor = resolvedThemeSettings?.surface || theme.surface;
+  const surfaceAltColor = resolvedThemeSettings?.surfaceAlt || theme.surfaceAlt;
   const textOnSurface = getReadableTextColor(surfaceColor);
   const textOnSurfaceAlt = getReadableTextColor(surfaceAltColor);
   const mutedOnSurface = textOnSurface === "#f8fafc" ? "#cbd5e1" : "#64748b";
@@ -195,7 +203,10 @@ export function PressPageContent({
   const pressListVariant = builderConfig.sections.find((section) => section.section_key === "press_list")?.variant ?? "default";
 
   return (
-    <div className="min-h-screen px-4 py-8 sm:px-6 sm:py-12" style={{ backgroundColor: surfaceAltColor, color: textOnSurfaceAlt }}>
+    <div
+      className="wl-brand-radius-scope min-h-screen px-4 py-8 sm:px-6 sm:py-12"
+      style={{ backgroundColor: surfaceAltColor, color: textOnSurfaceAlt, ...brandRadiusScopeStyle(resolvedBranding) }}
+    >
       <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         {!heroEnabled ? (

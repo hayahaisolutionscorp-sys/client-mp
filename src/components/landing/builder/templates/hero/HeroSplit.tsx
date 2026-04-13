@@ -67,7 +67,7 @@ export default function HeroSplit({
   if (loading) return null;
 
   return (
-    <header id="Book" className="relative bg-[#EEF8FC]">
+    <header id="Book" className="relative bg-[var(--surface-alt)]">
       <div className="relative mx-4 mt-4 overflow-hidden rounded-[32px]">
         {/* Navbar */}
         {showNavbar ? (

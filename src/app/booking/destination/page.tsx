@@ -13,7 +13,7 @@ export default function Destination() {
       <Suspense fallback={null}>
         <SearchHeader />
       </Suspense>
-      <div className="flex flex-col bg-gray-50 px-3 pt-2 pb-8 lg:flex-row lg:px-10">
+      <div className="flex flex-col bg-[var(--surface-alt)] px-3 pt-2 pb-8 lg:flex-row lg:px-10">
         {/* Sidebar - Hidden on mobile */}
         <div className="hidden lg:block lg:w-[300px] pt-[140px]">
           <Suspense fallback={<div className="w-72 h-96 bg-gray-100 animate-pulse rounded-lg" />}>

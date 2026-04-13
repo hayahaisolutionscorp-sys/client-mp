@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Suspense } from "react";
 import LoginPreviewClient from "./LoginPreviewClient";
 import { getLoginDraft } from "@/lib/preview/login-draft-store";

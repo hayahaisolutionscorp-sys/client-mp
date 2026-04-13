@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { BrandingLogo } from "@/components/BrandingLogo";
 import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import UserDropdown from "@/components/UserDropdown";
@@ -64,86 +64,163 @@ export default function BuilderLandingHeader({
 
   if (variant === "professional-slate") {
     return (
-      <header
-        className="mx-4 mt-4 rounded-[28px] border px-5 py-4 shadow-[0_20px_60px_-20px_rgba(15,23,42,0.18)] backdrop-blur"
-        style={{
-          borderColor: `${theme.text}14`,
-          background: `linear-gradient(135deg, ${theme.surface}F4, ${theme.surfaceAlt}F2)`,
-          color: theme.text
-        }}
-      >
-        <div className="flex items-center justify-between gap-6">
-          <Link href="/" className="flex items-center gap-3">
-            {logoSrc ? (
-              <Image
-                alt="Company Logo"
-                src={logoSrc}
-                width={150}
-                height={150}
-                className="h-[40px] w-auto object-contain"
+      <>
+        <header
+          className="relative z-[200] mx-4 mt-4 rounded-[28px] border px-5 py-4 shadow-[0_20px_60px_-20px_rgba(15,23,42,0.18)] backdrop-blur"
+          style={{
+            borderColor: `${theme.text}14`,
+            background: `linear-gradient(135deg, ${theme.surface}F4, ${theme.surfaceAlt}F2)`,
+            color: theme.text,
+          }}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <Link href="/" className="flex flex-shrink-0 items-center gap-3">
+              <BrandingLogo
+                logoSrc={logoSrc}
+                brandName={branding?.brand_name}
+                imageClassName="h-[40px] w-auto object-contain transition-all duration-300"
+                textClassName="text-lg font-semibold capitalize"
+                textStyle={{ fontFamily: "var(--font-title)" }}
               />
-            ) : (
-              <span className="text-lg font-semibold capitalize" style={{ fontFamily: 'var(--font-title)' }}>
-                {branding?.brand_name || 'Ayahay'}
-              </span>
-            )}
-          </Link>
-          <div className="hidden items-center gap-6 lg:flex">
-            {navItems.map((item) =>
-              item.trigger.toLowerCase() === 'scroll' ? (
-                <button
-                  key={item.id}
-                  type="button"
-                  data-template-ignore="true"
-                  onClick={() => handleScroll(item.id)}
-                  className="text-sm font-medium transition-colors"
-                  style={{ color: `${theme.text}BF` }}
-                >
-                  {item.name}
-                </button>
-              ) : (
-                <Link
-                  key={item.id}
-                  href={item.redirect_url}
-                  className="text-sm font-medium transition-colors"
-                  style={{ color: `${theme.text}BF` }}
-                >
-                  {item.name}
-                </Link>
-              )
-            )}
-            {currentUser ? (
-              <>
-                <div className="hidden items-center gap-4 lg:flex">
-                  <Link
-                    href={bookingsHref}
-                    className="text-sm font-medium"
-                    style={{ color: `${theme.text}BF` }}
+            </Link>
+
+            <nav
+              className="hidden flex-1 flex-wrap items-center justify-center gap-4 lg:flex lg:gap-6"
+              style={{ color: theme.text }}
+            >
+              {navItems.map((item) =>
+                item.trigger.toLowerCase() === "scroll" ? (
+                  <button
+                    key={item.id}
+                    type="button"
+                    data-template-ignore="true"
+                    onClick={() => handleScroll(item.id)}
+                    className="text-sm font-medium transition-all hover:border-b-2 border-transparent"
+                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.primary)}
+                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = "transparent")}
                   >
-                    My Bookings
+                    {item.name}
+                  </button>
+                ) : (
+                  <Link
+                    key={item.id}
+                    href={item.redirect_url}
+                    className="text-sm font-medium transition-all hover:border-b-2 border-transparent"
+                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.primary)}
+                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = "transparent")}
+                  >
+                    {item.name}
                   </Link>
-                  <NotificationDropdown shouldBeTransparent={false} />
+                )
+              )}
+            </nav>
+
+            <div className="flex items-center gap-4">
+              {currentUser ? (
+                <>
+                  <div className="hidden items-center gap-4 lg:flex">
+                    <Link href={bookingsHref} className="text-sm font-medium" style={{ color: theme.text }}>
+                      My Bookings
+                    </Link>
+                    <NotificationDropdown shouldBeTransparent={false} />
+                  </div>
+                  <div className="flex items-center gap-3 lg:hidden">
+                    <NotificationDropdown shouldBeTransparent={false} mobile />
+                  </div>
+                </>
+              ) : null}
+              <div className="hidden lg:flex">
+                <UserDropdown shouldBeTransparent={false} />
+              </div>
+              <button
+                type="button"
+                className="relative z-50 inline-flex items-center justify-center p-2 lg:hidden"
+                data-template-ignore="true"
+                aria-label="Toggle menu"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <div className="relative h-6 w-6">
+                  <span
+                    className={`absolute block h-0.5 w-6 transform transition-all duration-300 ease-in-out ${
+                      isMenuOpen ? "translate-y-0 rotate-45" : "-translate-y-2"
+                    }`}
+                    style={{ backgroundColor: theme.text }}
+                  />
+                  <span
+                    className={`absolute block h-0.5 w-6 transform transition-all duration-300 ease-in-out ${
+                      isMenuOpen ? "opacity-0" : "opacity-100"
+                    }`}
+                    style={{ backgroundColor: theme.text }}
+                  />
+                  <span
+                    className={`absolute block h-0.5 w-6 transform transition-all duration-300 ease-in-out ${
+                      isMenuOpen ? "translate-y-0 -rotate-45" : "translate-y-2"
+                    }`}
+                    style={{ backgroundColor: theme.text }}
+                  />
                 </div>
-                <div className="flex items-center gap-3 lg:hidden">
-                  <NotificationDropdown shouldBeTransparent={false} mobile />
-                </div>
-              </>
-            ) : null}
+              </button>
+            </div>
           </div>
+        </header>
+
+        <div
+          className={`fixed inset-0 z-[150] transition-opacity duration-300 lg:hidden ${
+            isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
+          style={{ backgroundColor: theme.surface }}
+        >
           <button
             type="button"
+            className="absolute right-4 top-4 z-50 p-2"
             data-template-ignore="true"
-            className="rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em]"
-            style={{
-              borderColor: `${theme.primary}33`,
-              backgroundColor: `${theme.primary}14`,
-              color: theme.primary
-            }}
+            aria-label="Close menu"
+            onClick={() => setIsMenuOpen(false)}
           >
-            Login
+            <div className="relative h-6 w-6">
+              <span
+                className="absolute block h-0.5 w-6 translate-y-0 rotate-45"
+                style={{ backgroundColor: theme.text }}
+              />
+              <span
+                className="absolute block h-0.5 w-6 translate-y-0 -rotate-45"
+                style={{ backgroundColor: theme.text }}
+              />
+            </div>
           </button>
+          <div className="h-full w-full overflow-y-auto px-4 pt-[100px]">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              {navItems.map((item) =>
+                item.trigger.toLowerCase() === "scroll" ? (
+                  <button
+                    key={item.id}
+                    type="button"
+                    data-template-ignore="true"
+                    onClick={() => handleScroll(item.id)}
+                    className="block w-full text-center text-lg font-medium transition-colors hover:opacity-80"
+                    style={{ color: theme.text }}
+                  >
+                    {item.name}
+                  </button>
+                ) : (
+                  <Link
+                    key={item.id}
+                    href={item.redirect_url}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full py-4 text-center text-lg font-medium transition-colors hover:opacity-80"
+                    style={{ color: theme.text }}
+                  >
+                    {item.name}
+                  </Link>
+                )
+              )}
+              <div className="flex w-full justify-center pt-6">
+                <UserDropdown shouldBeTransparent={false} />
+              </div>
+            </div>
+          </div>
         </div>
-      </header>
+      </>
     );
   }
 
@@ -159,25 +236,19 @@ export default function BuilderLandingHeader({
   return (
     <>
       <header 
-        className="w-full border-b border-black/5 backdrop-blur z-50"
+        className="relative z-[200] w-full border-b border-black/5 backdrop-blur"
         style={{ backgroundColor: `${theme.surface}F2` }} // ~95% opacity
       >
         <div className="flex items-center justify-between gap-6 px-4 sm:px-6 lg:px-10 py-5">
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            {logoSrc ? (
-              <Image
-                alt="Company Logo"
-                src={logoSrc}
-                width={150}
-                height={150}
-                className="h-[40px] w-auto object-contain transition-all duration-300"
-              />
-            ) : (
-              <span className="text-xl font-semibold capitalize" style={{ color: theme.text, fontFamily: 'var(--font-title)' }}>
-                {branding?.brand_name || "Ayahay"}
-              </span>
-            )}
+            <BrandingLogo
+              logoSrc={logoSrc}
+              brandName={branding?.brand_name}
+              imageClassName="h-[40px] w-auto object-contain transition-all duration-300"
+              textClassName="text-xl font-semibold capitalize"
+              textStyle={{ color: theme.text, fontFamily: "var(--font-title)" }}
+            />
           </Link>
 
           {/* Desktop Nav — centered */}
@@ -246,7 +317,7 @@ export default function BuilderLandingHeader({
 
       {/* Mobile menu overlay */}
       <div
-        className={`fixed inset-0 z-40 transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-[150] transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         style={{ backgroundColor: theme.surface }}
       >
         {/* Close button */}

@@ -132,7 +132,7 @@ export default function HeroMinimal({
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-[5] pointer-events-none" />
 
         {/* Editorial text block — bottom-left anchored */}
-        <div className="absolute z-[10] bottom-10 left-0 px-4 sm:px-8 lg:px-14 max-w-full md:max-w-[65%] lg:max-w-[55%]">
+        <div className="absolute z-[10] bottom-28 md:bottom-32 left-0 px-4 sm:px-8 lg:px-14 max-w-full md:max-w-[65%] lg:max-w-[55%]">
           {/* Thick customPrimary left accent bar */}
           <div className="flex items-stretch gap-5">
             <div className="w-1.5 rounded-full bg-customPrimary flex-shrink-0" />

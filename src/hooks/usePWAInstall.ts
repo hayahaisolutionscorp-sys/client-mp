@@ -11,7 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
     prompt(): Promise<void>;
 }
 
-// Capture beforeinstallprompt at module load — before React hydrates.
+// Capture beforeinstallprompt at module load â€” before React hydrates.
 // Chrome can fire this event during initial page load, before useEffect runs.
 let _earlyPrompt: BeforeInstallPromptEvent | null = null;
 if (typeof window !== "undefined") {
@@ -102,7 +102,7 @@ export const usePWAInstall = () => {
             if (/iPhone|iPad|iPod/i.test(ua)) {
                 alert("To install: Tap the 'Share' icon and then 'Add to Home Screen'.");
             } else if (/Android/i.test(ua)) {
-                alert("To install: Open browser menu (⋮) then tap 'Install app' or 'Add to Home screen'.");
+                alert("To install: Open browser menu (â‹®) then tap 'Install app' or 'Add to Home screen'.");
             } else {
                 alert("Install option is not available yet on this browser. Try Chrome or Safari on mobile.");
             }
@@ -113,11 +113,9 @@ export const usePWAInstall = () => {
         const { outcome } = await prompt.userChoice;
 
         if (outcome === "accepted") {
-            console.log("User accepted the PWA install");
             try { localStorage.setItem("pwa_installed", "true"); } catch { /* ignore */ }
             try { sessionStorage.removeItem("pwa_banner_dismissed"); } catch { /* ignore */ }
         } else {
-            console.log("User dismissed the PWA install");
         }
 
         setDeferredPrompt(null);

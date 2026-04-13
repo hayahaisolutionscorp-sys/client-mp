@@ -1,6 +1,6 @@
 import { IFaq } from '@/models';
 import { FAQS_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 import { DEFAULT_FAQ_BUILDER_CONTENT, type FaqBuilderContent } from '@/lib/faq-builder';
 
 import faqsData from '@/data/faqs.json';
@@ -38,7 +38,7 @@ export async function getFaqPage(): Promise<IFaqPage> {
 
 export async function getFaqs(): Promise<IFaq[]> {
   try {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return (faqsData as unknown as IFaq[])
         .filter((f) => f.is_active)
         .sort((a, b) => a.display_order - b.display_order);

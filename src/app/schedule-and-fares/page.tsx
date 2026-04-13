@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function ScheduleAndFaresPage() {
   return (
-    <div className="min-h-screen bg-[#EEF8FC]">
+    <div className="min-h-screen bg-[var(--surface-alt)]">
       <div className="container max-w-[1500px] mx-auto pt-8 pb-2 px-4 sm:px-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Schedule &amp; Fares</h1>
       </div>

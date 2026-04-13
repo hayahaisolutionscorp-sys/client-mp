@@ -11,19 +11,25 @@ interface PromosProps {
   promosOverride?: PreviewTravelPromotion[] | null;
 }
 
+function mapPromoOverrides(override: PreviewTravelPromotion[]): IThumbnail[] {
+  return override.map((promo) => ({
+    id: 0,
+    label: promo.image_alt || '',
+    filename: promo.image_url,
+    location: '',
+    imageOrder: promo.display_order ?? 0,
+  }));
+}
+
 export default function Promos({ promosOverride }: PromosProps = {}) {
-  const [promos, setPromos] = useState<IThumbnail[]>([]);
-  const [loading, setLoading] = useState(!promosOverride);
+  const [promos, setPromos] = useState<IThumbnail[]>(() =>
+    promosOverride != null ? mapPromoOverrides(promosOverride) : []
+  );
+  const [loading, setLoading] = useState(() => promosOverride == null);
 
   useEffect(() => {
-    if (promosOverride) {
-      setPromos(promosOverride.map((promo) => ({
-        id: 0,
-        label: promo.image_alt || '',
-        filename: promo.image_url,
-        location: '',
-        imageOrder: promo.display_order ?? 0,
-      })));
+    if (promosOverride != null) {
+      setPromos(mapPromoOverrides(promosOverride));
       setLoading(false);
       return;
     }

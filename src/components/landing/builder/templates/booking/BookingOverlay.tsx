@@ -8,6 +8,7 @@ import type { TripData } from "@oltek/hayahai-sdk/react";
 import { HayahAIButton, SearchBoxFormContent } from "@/components/landing/SearchBoxWrapper";
 import type { BookingTemplateProps } from "../../types";
 import { DEFAULT_BOOKING_TYPE } from "constants/default";
+import { isEffectiveClientApiMode } from "constants/api";
 
 const TripSearchWidget = dynamic(
   () => import("@oltek/hayahai-sdk/react").then((mod) => mod.TripSearchWidget),
@@ -23,9 +24,10 @@ export default function BookingOverlay({ theme, ports = [], routes = [], variant
   const [bookingType, setBookingType] = useState<string | undefined>(DEFAULT_BOOKING_TYPE);
   const [tripSearchEnabled, setTripSearchEnabled] = useState(true);
 
-  const tenantId = process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
-    ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
-    : 1;
+  const tenantId =
+    isEffectiveClientApiMode && process.env.NEXT_PUBLIC_TENANT_ID
+      ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
+      : 1;
 
   useEffect(() => {
     (async () => {

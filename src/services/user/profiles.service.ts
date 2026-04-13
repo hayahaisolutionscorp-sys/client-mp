@@ -63,7 +63,6 @@ export async function requestVerification(
   userId: string,
   verificationData: RequestVerificationDto
 ): Promise<IVerification | undefined> {
-  console.log("verificationData", verificationData);
   try {
     const { data } = await axios.post(
       `${PROFILES_API}/${userId}/verification-request`,

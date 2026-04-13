@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { setLandingDraft } from "@/lib/preview/landing-draft-store";

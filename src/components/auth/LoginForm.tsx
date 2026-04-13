@@ -10,6 +10,8 @@ import { useAuth } from "@/contexts/AuthContexts";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
 import { buildReturnUrlParam, resolvePostAuthPath, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
+import { isEffectiveClientApiMode } from "constants/api";
+import { FALLBACK_CSS_PRIMARY } from "@/lib/theme-css-fallbacks";
 
 const STEP_KEY = 'login-step';
 
@@ -25,7 +27,7 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
   const returnUrlParam = buildReturnUrlParam(safeReturnUrl);
   const branding = useBranding();
   const theme = useThemeSettings();
-  const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
+  const primaryColor = theme?.primaryColor || theme?.primary || FALLBACK_CSS_PRIMARY;
 
   const { clearSession, signInWithGoogle, signInWithFacebook, signInWithHayahai } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -69,7 +71,6 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
       router.push(resolvePostAuthPath(safeReturnUrl));
     } catch (error: any) {
       if (error?.code === 'auth/popup-closed-by-user') {
-        console.log('Google sign-in cancelled');
       } else {
         console.error('Google sign-in error:', error);
       }
@@ -96,7 +97,6 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
       router.push('/');
     } catch (error: any) {
       if (error?.message === 'Authentication cancelled') {
-        console.log('Hayahai sign-in cancelled');
       } else {
         console.error('Hayahai sign-in error:', error);
       }
@@ -140,7 +140,7 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
           />
           {email && !emailValidation.isValid && (
             <div className="flex items-center gap-1 text-xs mt-1">
-              <span className="text-red-500">✗ Invalid email format</span>
+              <span className="text-red-500">âœ— Invalid email format</span>
             </div>
           )}
         </div>
@@ -181,7 +181,7 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
           <Image src="/assets/icons/facebook_logo.svg" alt="Facebook" width={20} height={20} className="mr-2" />
           Continue with Facebook
         </Button>
-        {process.env.NEXT_PUBLIC_IS_CLIENT === "true" && (
+        {isEffectiveClientApiMode && (
           <Button
             onClick={handleHayahaiLogin}
             variant="outline"

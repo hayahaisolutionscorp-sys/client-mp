@@ -1,5 +1,5 @@
 import { HERO_SECTION_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 
 import heroSectionData from '@/data/hero-sections.json';
 
@@ -20,7 +20,7 @@ export interface IHeroSection {
 
 export async function getHeroSections(): Promise<IHeroSection | undefined> {
   try {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return heroSectionData as IHeroSection;
     }
 

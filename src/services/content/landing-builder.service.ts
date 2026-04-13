@@ -1,5 +1,6 @@
 import { SEO_API } from "constants/api";
-import { IS_BUILD_TIME } from "../config";
+import { IS_BUILD_TIME, SHOULD_FETCH_REMOTE_WHITELABEL } from "../config";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import {
   normalizeLandingBuilderContent,
   type LandingBuilderContent,
@@ -10,9 +11,17 @@ export async function getLandingBuilderContent(): Promise<LandingBuilderContent 
     return null;
   }
 
+  if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
+    return null;
+  }
+
   try {
-    const response = await fetch(`${SEO_API}/home`, {
-      next: { tags: ['landing-builder'], revalidate: 3600 },
+    const isBrowser = typeof window !== "undefined";
+    const response = await fetchWithTimeout(`${SEO_API}/home`, {
+      ...(isBrowser
+        ? { cache: "no-store" as RequestCache }
+        : { next: { tags: ["landing-builder"], revalidate: 3600 } }),
+      timeoutMs: 12_000,
     });
 
     if (!response.ok) {

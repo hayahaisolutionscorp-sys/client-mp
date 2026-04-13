@@ -21,7 +21,7 @@ import {
   DEFAULT_NUM_PASSENGERS,
 } from "constants/default";
 import { getPorts, getDestinationPortsByOrigin } from "@/services";
-import { IS_CLIENT } from 'constants/api';
+import { isEffectiveClientApiMode } from 'constants/api';
 
 const SearchBox: React.FC = () => {
   const router = useRouter();
@@ -152,7 +152,7 @@ const SearchBox: React.FC = () => {
         page: "1",
       };
 
-      if (!IS_CLIENT) {
+      if (!isEffectiveClientApiMode) {
         if (selectedOriginPort?.province) searchValues.origin_province = selectedOriginPort.province;
         if (selectedOriginPort?.municipality) searchValues.origin_municipality = selectedOriginPort.municipality;
         if (selectedDestinationPort?.province) searchValues.destination_province = selectedDestinationPort.province;

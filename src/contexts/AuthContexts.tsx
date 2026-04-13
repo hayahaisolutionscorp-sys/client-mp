@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { cacheItem, fetchItem, invalidateItem } from 'helpers/cache.helpers';
 import { accountRelatedCacheKeys } from 'constants/cache';
 import { useTheme } from "@/components/ThemeProvider";
+import { mapApiUserToAccount } from '@/lib/auth/map-api-user-to-account';
 
 interface AuthContextType {
     currentUser: IAccount | undefined | null;
@@ -34,31 +35,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-function normalizeProviders(value: unknown): string[] {
-    if (!Array.isArray(value)) {
-        return [];
-    }
-
-    return value
-        .map((provider) => {
-            if (typeof provider === 'string') {
-                return provider;
-            }
-
-            if (
-                typeof provider === 'object' &&
-                provider !== null &&
-                'provider' in provider &&
-                typeof (provider as { provider?: unknown }).provider === 'string'
-            ) {
-                return (provider as { provider: string }).provider;
-            }
-
-            return '';
-        })
-        .filter(Boolean);
-}
-
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
@@ -67,7 +43,17 @@ export const useAuth = () => {
     return context;
 };
 
-export default function AuthContextProvider({ children }: { children: React.ReactNode }) {
+export default function AuthContextProvider({
+    children,
+    initialUser = null,
+    hasSessionCookies = false,
+}: {
+    children: React.ReactNode;
+    /** From server cookies â€” matches client first paint so navbar auth chrome is immediate */
+    initialUser?: IAccount | null;
+    /** From server: access/refresh token present (run /me on client even if user cookie missing) */
+    hasSessionCookies?: boolean;
+}) {
     const router = useRouter();
     // Read branding/theme directly from ThemeProvider to avoid the extra local-state
     // layer that useBranding()/useThemeSettings() maintain.  Those hooks each call
@@ -81,12 +67,9 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         () => fetchItem<IAccount>('logged-in-account') || null
     );
 
-    // In-memory auth state — never written to localStorage or any storage.
-    // The HTTP-only JWT cookie is sent automatically on every request.
-    // Login state is determined solely by whether GET /auth/me succeeds.
-    // Start with null to match server (no localStorage on server) and avoid hydration mismatch.
-    // loadProfile will populate this after mount if the user has a valid session.
-    const [currentUser, setCurrentUser] = useState<IAccount | null>(null);
+    // When `initialUser` is set from root layout (session cookies), first paint matches SSR and
+    // navbar shows My Bookings / notifications immediately; loadProfile still refreshes from /me.
+    const [currentUser, setCurrentUser] = useState<IAccount | null>(() => initialUser ?? null);
     const [loading, setLoading] = useState(false);
 
     const [notification, setNotification] = useState<{
@@ -107,20 +90,23 @@ export default function AuthContextProvider({ children }: { children: React.Reac
 
     const loadingRef = useRef(false);
 
-    const loadProfile = useCallback(async (_force: boolean = false) => {
+    const loadProfile = useCallback(async (
+        _force: boolean = false,
+        options?: { skipLoadingSpinner?: boolean }
+    ) => {
         if (loadingRef.current) return;
         loadingRef.current = true;
+        const showSpinner = !options?.skipLoadingSpinner;
         try {
-            setLoading(true);
+            if (showSpinner) {
+                setLoading(true);
+            }
             const result = await AuthService.getProfile(_force);
             if (!result) {
-                // No valid session — clear in-memory state but keep localStorage cache
-                // so the next refresh still attempts loadProfile instead of showing login.
                 setCurrentUser(null);
                 return null;
             }
 
-            // result is { message: string, data: UserResponseDto }
             const user = result.data || result;
 
             if (!user || typeof user !== 'object' || Object.keys(user).length === 0) {
@@ -129,31 +115,17 @@ export default function AuthContextProvider({ children }: { children: React.Reac
                 return null;
             }
 
-            // Mapping from UserResponseDto (which has passenger object) to IAccount
-            const normalizedProviders = normalizeProviders(user.providers);
-            const account: IAccount = {
-                id: (user.id || user.accountId)?.toString() || '',
-                email: typeof user.email === 'string' ? user.email : '',
-                name: typeof user.name === 'string' ? user.name : '',
-                profile_picture_url: typeof user.profile_picture_url === 'string' ? user.profile_picture_url : '',
-                role: typeof user.role === 'string' ? user.role : (user.role?.name || user.roles?.[0]?.name || 'Passenger'),
-                emailConsent: typeof user.emailConsent === 'boolean' ? user.emailConsent : false,
-                passenger: user.passenger || undefined,
-                verification: Array.isArray(user.verificationDetails) ? user.verificationDetails[0] : (user.verificationDetails || user.verification || undefined),
-                verificationDetails: Array.isArray(user.verificationDetails)
-                    ? user.verificationDetails
-                    : (user.verificationDetails ? [user.verificationDetails] : undefined),
-                hasPassword: user.hasPassword,
-                providers: normalizedProviders
-            };
+            const account = mapApiUserToAccount(user);
+            if (!account) {
+                setCurrentUser(null);
+                return null;
+            }
 
             setCurrentUser(account);
             cacheItem('logged-in-account', account);
 
             return user;
         } catch (error: any) {
-            console.log('Failed to load profile', error);
-            // Only clear session if it's a 401 Unauthorized error
             if (error.response?.status === 401) {
                 clearSession();
                 accountRelatedCacheKeys.forEach(key => invalidateItem(key as any));
@@ -161,28 +133,41 @@ export default function AuthContextProvider({ children }: { children: React.Reac
             return null;
         } finally {
             loadingRef.current = false;
-            setLoading(false);
+            if (showSpinner) {
+                setLoading(false);
+            }
         }
     }, [clearSession]);
 
-    // Immediately set loading before paint if we have a cached account,
-    // so UserDropdown shows a skeleton instead of flashing "Login/Create Account".
+    // Match pre-change behavior: skeleton only when localStorage says we were logged in (cachedAccount).
+    // Do not tie loading to hasSessionCookies alone â€” stale/orphan token cookies would hide the Login
+    // button behind a non-clickable skeleton (UserDropdown treats loading as avatar placeholder).
     useLayoutEffect(() => {
-        if (cachedAccount) {
-            setLoading(true);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Initial load — checks the HTTP-only cookie implicitly via /auth/me
-    // cachedAccount is stable (from useState initializer), so this runs only once.
-    useEffect(() => {
-        if (!cachedAccount) {
+        if (initialUser) {
             setLoading(false);
+        } else if (cachedAccount) {
+            setLoading(true);
+        } else {
+            setLoading(false);
+        }
+    }, [initialUser, cachedAccount]);
+
+    // Refresh from API once; skip spinner when we already show the user (initialUser) or when we only
+    // have token cookies (keep Login/Create Account visible until /me resolves).
+    useEffect(() => {
+        if (initialUser) {
+            void loadProfile(false, { skipLoadingSpinner: true });
             return;
         }
-
-        loadProfile();
+        if (cachedAccount) {
+            void loadProfile();
+            return;
+        }
+        if (hasSessionCookies) {
+            void loadProfile(false, { skipLoadingSpinner: true });
+            return;
+        }
+        setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -200,7 +185,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
 
             showNotification('success', `Welcome to ${themeBranding?.brand_name || 'Ayahay'}! Registration successful!`);
 
-            // Load profile in background — caller will redirect immediately
+            // Load profile in background â€” caller will redirect immediately
             loadProfile();
 
             return 'success';
@@ -215,7 +200,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         try {
             await AuthService.login({ email, password });
             showNotification('success', `Welcome back to ${themeBranding?.brand_name || 'Ayahay'}!`);
-            // Load profile in background — caller will redirect immediately
+            // Load profile in background â€” caller will redirect immediately
             loadProfile();
             return 'success';
         } catch (error: any) {
@@ -230,7 +215,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         try {
             await AuthService.signInWithGoogle();
             showNotification('success', `Welcome to ${themeBranding?.brand_name || 'Ayahay'}!`);
-            // Load profile in background — caller will redirect immediately
+            // Load profile in background â€” caller will redirect immediately
             loadProfile(true);
             return 'success';
         } catch (error: any) {
@@ -245,7 +230,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         try {
             await AuthService.signInWithFacebook();
             showNotification('success', `Welcome to ${themeBranding?.brand_name || 'Ayahay'}!`);
-            // Load profile in background — caller will redirect immediately
+            // Load profile in background â€” caller will redirect immediately
             loadProfile(true);
             return 'success';
         } catch (error: any) {
@@ -260,7 +245,7 @@ export default function AuthContextProvider({ children }: { children: React.Reac
         try {
             await AuthService.signInWithHayahai();
             showNotification('success', `Welcome back to ${themeBranding?.brand_name || 'Ayahay'}!`);
-            // Load profile in background — caller will redirect immediately
+            // Load profile in background â€” caller will redirect immediately
             loadProfile(true);
             return 'success';
         } catch (error: any) {

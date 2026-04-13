@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Suspense } from "react";
 import SchedulePreviewClient from "./SchedulePreviewClient";
 import { getScheduleDraft } from "@/lib/preview/schedule-draft-store";

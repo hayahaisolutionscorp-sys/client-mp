@@ -37,6 +37,9 @@ import CoreValuesTimeline from './templates/core-values/CoreValuesTimeline';
 import CoreValuesAccordion from './templates/core-values/CoreValuesAccordion';
 import CoreValuesCompact from './templates/core-values/CoreValuesCompact';
 import CTASection from './CTASection';
+import { useThemeSettings as useThemeSettingsHook } from '@/hooks/theme-settings';
+import { useBranding as useBrandingHook } from '@/hooks/branding';
+import { brandRadiusScopeStyle } from '@/lib/branding/brand-radius';
 
 export interface AboutPageBuilderProps {
   aboutPage: { title: string; content: unknown | null } | null;
@@ -53,6 +56,11 @@ export default function AboutPageBuilder({
   themeSettings,
   branding,
 }: AboutPageBuilderProps) {
+  const contextThemeSettings = useThemeSettingsHook();
+  const contextBranding = useBrandingHook();
+  const resolvedThemeSettings = themeSettings ?? contextThemeSettings ?? null;
+  const resolvedBranding = branding ?? contextBranding ?? null;
+
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,7 +79,7 @@ export default function AboutPageBuilder({
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const sectionAnimationsRaw = branding?.colors?.sectionAnimations;
+  const sectionAnimationsRaw = resolvedBranding?.colors?.sectionAnimations;
   let sectionAnimations: Record<string, string> = {};
   if (sectionAnimationsRaw) {
     if (typeof sectionAnimationsRaw === 'string') {
@@ -165,10 +173,10 @@ export default function AboutPageBuilder({
   };
 
   const builderConfig = normalizeAboutBuilderContent(aboutPage?.content);
-  const theme = createBuilderTheme((branding ?? {}) as IBrandingConfig);
-  const primaryColor = themeSettings?.primary || theme.primary;
-  const surfaceColor = themeSettings?.surface || theme.surface;
-  const surfaceAltColor = themeSettings?.surfaceAlt || theme.surfaceAlt;
+  const theme = createBuilderTheme((resolvedBranding ?? {}) as IBrandingConfig);
+  const primaryColor = resolvedThemeSettings?.primary || theme.primary;
+  const surfaceColor = resolvedThemeSettings?.surface || theme.surface;
+  const surfaceAltColor = resolvedThemeSettings?.surfaceAlt || theme.surfaceAlt;
   const textOnSurface = getReadableTextColor(surfaceColor);
   const textOnSurfaceAlt = getReadableTextColor(surfaceAltColor);
   const mutedOnSurface = textOnSurface === '#f8fafc' ? '#cbd5e1' : '#64748b';
@@ -195,6 +203,7 @@ export default function AboutPageBuilder({
 
   return (
     <div
+      className="wl-brand-radius-scope"
       style={{
         backgroundColor: surfaceAltColor,
         color: textOnSurfaceAlt,
@@ -202,6 +211,7 @@ export default function AboutPageBuilder({
         '--primary-color': primaryColor,
         '--font-title': theme.fontFamilyTitle,
         '--font-body': theme.fontFamily,
+        ...brandRadiusScopeStyle(resolvedBranding),
       } as React.CSSProperties}
     >
       <style dangerouslySetInnerHTML={{ __html: `

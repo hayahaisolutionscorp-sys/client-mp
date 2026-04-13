@@ -7,6 +7,7 @@ import { DEFAULT_BOOKING_TYPE } from "constants/default";
 import { IPort } from "@/models";
 import dynamic from "next/dynamic";
 import type { IRoute } from "@/models/shipping-line/route.model";
+import { isEffectiveClientApiMode } from "constants/api";
 
 const TripSearchWidget = dynamic(
     () => import("@oltek/hayahai-sdk/react").then((mod) => mod.TripSearchWidget),
@@ -41,9 +42,10 @@ export default function SearchBoxWrapper({
     );
     const router = useRouter();
 
-    const tenantId = process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
-        ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
-        : 1;
+    const tenantId =
+        isEffectiveClientApiMode && process.env.NEXT_PUBLIC_TENANT_ID
+            ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
+            : 1;
 
     useEffect(() => { router.prefetch('/booking/destination'); }, [router]);
 
@@ -98,9 +100,11 @@ export default function SearchBoxWrapper({
             <div className="w-full sm:w-[95%] md:w-[95%] lg:w-[1300px]">
                 {mode === "chat" && tripSearchEnabled ? (
                     <TripSearchWidget
-                        tenantId={process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
-                            ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
-                            : undefined}
+                        tenantId={
+                            isEffectiveClientApiMode && process.env.NEXT_PUBLIC_TENANT_ID
+                                ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
+                                : undefined
+                        }
                         chatApiUrl="/api/chat-booking"
                         routesApiUrl="/api/routes"
                         tripsApiUrl="/api/trips"
@@ -218,6 +222,7 @@ import DatePickerFieldset from "@/components/ui/DatePickerFieldset";
 import { Button } from "@/components/ui/Button";
 
 import { useThemeSettings } from "@/hooks/theme-settings";
+import { getReadableTextColor } from "@/lib/color-utils";
 import {
     DEFAULT_NUM_VEHICLES,
     DEFAULT_NUM_PASSENGERS,
@@ -253,7 +258,9 @@ export function SearchBoxFormContent({
     useEffect(() => { portsRef.current = ports; }, [ports]);
     const [isFormValid, setIsFormValid] = useStateForm<boolean>(false);
     const [error, setError] = useStateForm<string | null>(null);
+    const [isSearching, setIsSearching] = useStateForm<boolean>(false);
     const themeSettings = useThemeSettings();
+    const buttonTextColor = getReadableTextColor(themeSettings?.primary);
     
     useEffect(() => {
         router.prefetch("/booking/destination");
@@ -356,7 +363,7 @@ export function SearchBoxFormContent({
     const handleSearchClick = () => {
         setError(null);
 
-        if (!isFormValid) {
+        if (!isFormValid || isSearching) {
             return;
         }
 
@@ -364,6 +371,8 @@ export function SearchBoxFormContent({
             setError("Vehicle count must be less than or equal to passenger count.");
             return;
         }
+
+        setIsSearching(true);
 
         try {
             const searchValues = {
@@ -387,6 +396,7 @@ export function SearchBoxFormContent({
             router.push(`/booking/destination?${queryParams}`);
         } catch (error) {
             console.error("Error occurred while searching:", error);
+            setIsSearching(false);
         }
     };
 
@@ -443,12 +453,23 @@ export function SearchBoxFormContent({
                 <div className={`hidden lg:flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1 mt-4 sm:mt-0 h-[55px] pt-2 ${!isFormValid ? "cursor-not-allowed" : ""}`}>
                     <Button
                         variant="default"
+                        data-booking-search-submit=""
                         onClick={handleSearchClick}
-                        disabled={!isFormValid}
+                        disabled={!isFormValid || isSearching}
                         className={`${!isFormValid ? "bg-gray-400" : ""
-                            } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
-                        <BiSolidShip className="h-5 w-5 text-white" />
-                        <span>Search Trip</span>
+                            } px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}
+                        style={{ color: isFormValid ? buttonTextColor : undefined }}>
+                        {isSearching ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                <span>Searching...</span>
+                            </>
+                        ) : (
+                            <>
+                                <BiSolidShip className="h-5 w-5" />
+                                <span>Search Trip</span>
+                            </>
+                        )}
                     </Button>
                 </div>
             </div>
@@ -469,15 +490,26 @@ export function SearchBoxFormContent({
                         />
                     )}
                 </div>
-                <div className={`flex items-center justify-center mt-2 mb-4 ${!isFormValid ? "cursor-not-allowed" : ""}`}>
+                <div className={`flex items-center justify-center mt-2 mb-4 ${!isFormValid || isSearching ? "cursor-not-allowed" : ""}`}>
                     <Button
                         variant="default"
+                        data-booking-search-submit=""
                         onClick={handleSearchClick}
-                        disabled={!isFormValid}
+                        disabled={!isFormValid || isSearching}
                         className={`${!isFormValid ? "bg-gray-400" : ""
-                            } text-white px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}>
-                        <BiSolidShip className="h-5 w-5 text-white" />
-                        <span>Search Trip</span>
+                            } px-4 py-3 rounded-lg w-full h-[50px] text-md lg:text-sm flex items-center justify-center gap-2 transition-all duration-300 disabled:hover:bg-gray-400`}
+                        style={{ color: isFormValid ? buttonTextColor : undefined }}>
+                        {isSearching ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                <span>Searching...</span>
+                            </>
+                        ) : (
+                            <>
+                                <BiSolidShip className="h-5 w-5" />
+                                <span>Search Trip</span>
+                            </>
+                        )}
                     </Button>
                 </div>
             </div>

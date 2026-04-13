@@ -3,9 +3,8 @@
 import { useMemo, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-
 import NotificationDropdown from './NotificationDropdown';
+import { BrandingLogo } from './BrandingLogo';
 import UserDropdown from './UserDropdown';
 import { useBranding } from '@/hooks/branding';
 import { useHeaders } from '@/hooks/headers';
@@ -68,30 +67,24 @@ const Navbar = ({
   const backgroundColor = shouldBeTransparent ? 'text-white bg-transparent' : 'text-black bg-white';
   const bookingsHref = '/profile?tab=booking-history';
 
-  const logoSrc = isHome ? branding.logo?.light : branding.logo?.dark;
+  const logoSrc = branding.logo?.dark || branding.logo?.light;
 
   return (
     <>
       <nav
         aria-label="Main navigation"
-        className={`w-full h-auto top-0 z-50 ${position} ${backgroundColor} transition-all duration-300`}
+        className={`w-full h-auto top-0 z-[200] ${position} ${backgroundColor} transition-all duration-300`}
       >
         <div className="px-4 sm:px-6 lg:px-10">
           <div className="flex items-center justify-between h-[80px] relative">
             {/* Logo */}
             <div className="flex-shrink-0 relative z-50">
               <Link href="/">
-                {logoSrc ? (
-                  <Image
-                    alt="Company Logo"
-                    src={logoSrc}
-                    width={150}
-                    height={150}
-                    className="w-auto h-[40px] object-contain sm:h-[55px] transition-all duration-300"
-                  />
-                ) : (
-                  <span className="text-xl font-semibold">{branding.brand_name}</span>
-                )}
+                <BrandingLogo
+                  logoSrc={logoSrc}
+                  brandName={branding.brand_name}
+                  priority
+                />
               </Link>
             </div>
 
@@ -187,7 +180,7 @@ const Navbar = ({
           <div
             className={`fixed inset-0 bg-white transition-opacity duration-300 lg:hidden ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
               }`}
-            style={{ zIndex: 40 }}
+            style={{ zIndex: 150 }}
           >
             <div className="h-full w-full px-4 pt-[100px] overflow-y-auto">
               <div className="space-y-1">

@@ -56,7 +56,7 @@ export default async function Home() {
   return (
     <>
       <WebSiteSchema />
-      <div className="bg-[#EEF8FC]">
+      <div className="bg-[var(--surface-alt)]">
         <Hero
           heroSectionOverride={landingData.heroSection}
           headerSectionOverride={landingData.headerSection}
@@ -65,7 +65,7 @@ export default async function Home() {
           tripSearchEnabledOverride={true}
         />
 
-        <div className="bg-[#EEF8FC]">
+        <div className="bg-[var(--surface-alt)]">
           <Promos promosOverride={landingData.promotions as any} />
           <PopularRoutes routesOverride={landingData.routes as any} />
           <WhyChooseUs

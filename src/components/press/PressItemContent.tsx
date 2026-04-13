@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { IPress } from "@/models";
-import { hexToRgb } from "helpers/theme.helpers";
+import { FALLBACK_CSS_PRIMARY } from "@/lib/theme-css-fallbacks";
 import TipTapRenderer from "@/components/shared/TipTapRenderer";
 
 interface PressItemContentProps {
@@ -20,13 +20,14 @@ interface PressItemContentProps {
 
 export function PressItemContent({ pressItem }: PressItemContentProps) {
   const themeSettings = useThemeSettings();
-  const primaryColor = themeSettings?.primary || "#000000";
+  const primaryColor =
+    themeSettings?.primaryColor || themeSettings?.primary || FALLBACK_CSS_PRIMARY;
 
   return (
     <div
       className="min-h-screen px-4 sm:px-6 py-8 sm:py-12 pb-32 sm:pb-60"
       style={{
-        background: `linear-gradient(180deg, rgba(${hexToRgb(primaryColor)}, 0.1) 0%, #FFFFFF 100%)`,
+        background: `linear-gradient(180deg, color-mix(in srgb, ${primaryColor} 10%, transparent) 0%, var(--surface) 100%)`,
       }}
     >
       <div className="max-w-4xl mx-auto">

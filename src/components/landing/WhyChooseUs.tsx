@@ -19,11 +19,11 @@ export default function WhyChooseUs({
   themeSettingsOverride,
   brandingConfigOverride,
 }: WhyChooseUsProps = {}) {
-  const [reasons, setReasons] = useState<IWhyChooseReason[]>(reasonsOverride ?? []);
-  const [loading, setLoading] = useState(!reasonsOverride);
+  const [reasons, setReasons] = useState<IWhyChooseReason[]>(() => reasonsOverride ?? []);
+  const [loading, setLoading] = useState(() => reasonsOverride == null);
 
   useEffect(() => {
-    if (reasonsOverride) {
+    if (reasonsOverride != null) {
       setReasons(reasonsOverride);
       setLoading(false);
       return;

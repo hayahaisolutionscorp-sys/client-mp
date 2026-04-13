@@ -1,5 +1,6 @@
 import { DESTINATIONS_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 import destinationsData from '@/data/destinations.json';
 
@@ -21,16 +22,19 @@ export interface IDestinationsResponse {
 
 export async function getDestinations(): Promise<IDestination[]> {
   try {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return destinationsData as IDestination[];
     }
 
     const isBrowser = typeof window !== 'undefined';
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       DESTINATIONS_API,
-      isBrowser
-        ? { cache: 'no-store' }
-        : { next: { tags: ['destinations'], revalidate: 3600 } }
+      {
+        ...(isBrowser
+          ? { cache: 'no-store' as RequestCache }
+          : { next: { tags: ['destinations'], revalidate: 3600 } }),
+        timeoutMs: 12_000,
+      }
     );
 
     if (res.ok) {
