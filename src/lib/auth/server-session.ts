@@ -45,7 +45,9 @@ export async function setSessionCookiesFromPayload(payload: Record<string, unkno
   const user = payload.user;
 
   if (accessToken) {
-    cookieStore.set('access_token', accessToken, authCookieOptions(metadata.accessTokenExpiresIn));
+    // httpOnly=false so client-side axios can read it via document.cookie
+    // and attach it as Authorization: Bearer for cross-origin API calls.
+    cookieStore.set('access_token', accessToken, authCookieOptions(metadata.accessTokenExpiresIn, false));
   }
 
   if (refreshToken) {

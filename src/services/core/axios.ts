@@ -110,8 +110,20 @@ const handleTokenRefresh = async () => {
 
 instance.interceptors.request.use(
   async (config) => {
-    // Note: The system now relies on httpOnly cookies for authentication.
-    // withCredentials: true ensures cookies are sent automatically.
+    // Read access_token from document.cookie (non-httpOnly) and attach as Authorization header.
+    // This is required for cross-origin requests to api.hayahai.com since browser cookies
+    // are scoped to client-mp.hayahai.com and cannot be sent cross-subdomain.
+    if (typeof document !== 'undefined') {
+      const match = document.cookie
+        .split(';')
+        .map((c) => c.trim())
+        .find((c) => c.startsWith('access_token='));
+      if (match) {
+        const accessToken = decodeURIComponent(match.split('=')[1]);
+        config.headers = config.headers || {};
+        (config.headers as Record<string, string>).Authorization = `Bearer ${accessToken}`;
+      }
+    }
     return config;
   },
   (error) => {
