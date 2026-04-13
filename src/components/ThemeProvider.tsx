@@ -1,11 +1,11 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { createContext, useContext, useState, useEffect, useLayoutEffect, useMemo } from "react";
 import { IThemeSettings, IBrandingConfig } from "@/models";
 import { IDestination } from "@/services/ui/destinations.service";
-import { getReadableTextColor, hexToHsl, toRgbCssValue } from "@/lib/color-utils";
 import { deriveThemeFromBranding } from "@/lib/derive-theme-from-branding";
 import { getBrandRadiusCssLength, resolveBrandCornerRadiusClass } from "@/lib/branding/brand-radius";
+import { applyFullThemeToDocument } from "@/lib/theme-document";
 
 interface ThemeContextType {
   themeSettings: IThemeSettings | null;
@@ -185,25 +185,10 @@ export default function ThemeProvider({ children, initialTheme, initialBranding,
     [themeSettings, branding]
   );
 
-  // Keep :root CSS variables aligned with resolved theme (same tokens as app/layout.tsx head block).
-  useEffect(() => {
+  // Keep :root aligned with resolved theme (colors + typography) — same tokens as app/layout.tsx head block.
+  useLayoutEffect(() => {
     if (typeof document === "undefined" || !resolvedTheme) return;
-    const root = document.documentElement;
-    const surface = resolvedTheme.surface || "#FFFFFF";
-    const surfaceAlt = resolvedTheme.surfaceAlt || "#EEF8FC";
-    const textOnSurface = getReadableTextColor(surface);
-    const textOnSurfaceAlt = getReadableTextColor(surfaceAlt);
-    const mutedOnSurface = textOnSurface === "#f8fafc" ? "#cbd5e1" : "#64748b";
-
-    root.style.setProperty("--primary", hexToHsl(resolvedTheme.primary));
-    root.style.setProperty("--secondary", hexToHsl(resolvedTheme.secondary));
-    root.style.setProperty("--accent", hexToHsl(resolvedTheme.accent));
-    root.style.setProperty("--surface", surface);
-    root.style.setProperty("--surface-alt", surfaceAlt);
-    root.style.setProperty("--text-on-surface", textOnSurface);
-    root.style.setProperty("--text-on-surface-alt", textOnSurfaceAlt);
-    root.style.setProperty("--muted-on-surface", mutedOnSurface);
-    root.style.setProperty("--text-default-rgb", toRgbCssValue(textOnSurface));
+    applyFullThemeToDocument(resolvedTheme);
   }, [resolvedTheme]);
 
   useEffect(() => {

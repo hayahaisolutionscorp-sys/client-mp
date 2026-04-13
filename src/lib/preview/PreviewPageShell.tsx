@@ -1,5 +1,7 @@
 "use client";
 
+import { useLayoutEffect, useMemo } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 import AboutPageBuilder from "@/components/about-us/builder/AboutPageBuilder";
 import ContactPageBuilder from "@/components/contact-us/builder/ContactPageBuilder";
 import FAQPageBuilder from "@/components/faq/builder/FAQPageBuilder";
@@ -38,8 +40,20 @@ export function PreviewPageShell<TPayload extends { config?: PreviewGeneralConfi
   pageKey,
   baseBranding = null,
 }: PreviewPageShellProps<TPayload>) {
+  const { setBranding, setThemeSettings } = useTheme();
   const payload = usePreviewSyncPayload(initialPayload, messageType);
   usePreviewScrollToSection();
+
+  const theme = useMemo(
+    () => (payload ? buildPreviewThemeSettings(payload.config ?? null, baseBranding) : null),
+    [payload, baseBranding]
+  );
+
+  useLayoutEffect(() => {
+    if (!theme) return;
+    setBranding(theme.branding);
+    setThemeSettings(theme.themeSettings);
+  }, [theme, setBranding, setThemeSettings]);
 
   if (!payload) {
     // Standalone visit (no parent iframe sending data) — show a hint instead
@@ -52,7 +66,9 @@ export function PreviewPageShell<TPayload extends { config?: PreviewGeneralConfi
     );
   }
 
-  const theme = buildPreviewThemeSettings(payload.config ?? null, baseBranding);
+  if (!theme) {
+    return null;
+  }
 
   if (pageKey === "about") {
     const aboutPayload = payload as unknown as AboutPreviewPayload;

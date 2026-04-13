@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import Hero from "@/components/landing/Hero";
 import Footer from "@/components/Footer";
 import SubscribeBanner from "@/components/landing/SubscribeBanner";
@@ -55,6 +55,7 @@ import {
   brandRadiusScopeStyle,
   resolveBrandCornerRadiusClass,
 } from "@/lib/branding/brand-radius";
+import { formatCssFontStack } from "@/lib/theme-document";
 import type { LandingPreviewPayload } from "@/lib/preview/landing-preview";
 import type { LandingPageData } from "@/services/content/landing-page.service";
 import type { IBrandingConfig } from "@/models";
@@ -148,6 +149,18 @@ export default function LandingPageBuilder({
   const cornerRadiusClass = resolveBrandCornerRadiusClass(
     landingBranding,
     templatePreset?.tokens.radiusClass ?? "rounded-2xl"
+  );
+
+  // Whitelabel general typography (theme) must win over template-preset token defaults;
+  // otherwise the landing layout preset always pins fonts (e.g. default → Jost) and
+  // body/title picks in the editor appear to do nothing.
+  const bodyFontStack = formatCssFontStack(
+    theme.fontFamily,
+    templatePreset?.tokens.fontFamily
+  );
+  const titleFontStack = formatCssFontStack(
+    theme.fontFamilyTitle,
+    templatePreset?.tokens.fontFamilyTitle || templatePreset?.tokens.fontFamily
   );
 
   const sectionAnimationsRaw = landingBranding?.colors?.sectionAnimations;
@@ -264,11 +277,11 @@ export default function LandingPageBuilder({
     <div
       className={templatePreset ? `${templatePreset.tokens.surfaceClass} ${cornerRadiusClass}` : cornerRadiusClass}
       style={{ 
-        fontFamily: templatePreset?.tokens.fontFamily || theme.fontFamily,
+        fontFamily: bodyFontStack,
         background: theme.surface,
-        '--font-title': templatePreset?.tokens.fontFamilyTitle || theme.fontFamilyTitle,
-        '--font-body': templatePreset?.tokens.fontFamily || theme.fontFamily
-      } as any}
+        '--font-title': titleFontStack,
+        '--font-body': bodyFontStack,
+      } as CSSProperties}
     >
       <style dangerouslySetInnerHTML={{ __html: `
         h1, h2, h3, h4, h5, h6, .brand-title {

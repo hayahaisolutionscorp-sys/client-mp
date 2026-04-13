@@ -145,3 +145,13 @@ html[data-wl-br-active] :is([class*="rounded-"], [class~="rounded"]):not([class*
 .wl-brand-radius-scope :is([class*="rounded-"], [class~="rounded"]):not([class*="rounded-full"]) {
   border-radius: var(--wl-br) !important;
 }
+
+/* Whitelabel builders (home sections, about, contact, FAQ, press, login preview): enforce tenant fonts.
+   Fixes templates that omit local --font-body / headings when only brandRadiusScopeStyle is applied. */
+.wl-brand-radius-scope {
+  font-family: var(--font-body), sans-serif !important;
+}
+
+.wl-brand-radius-scope :is(h1, h2, h3, h4, h5, h6, .brand-title, .title) {
+  font-family: var(--font-title), var(--font-body), sans-serif !important;
+}
