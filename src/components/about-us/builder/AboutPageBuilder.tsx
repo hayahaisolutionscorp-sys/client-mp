@@ -15,6 +15,7 @@ import HeroMinimal from './templates/hero/HeroMinimal';
 import HeroOverlay from './templates/hero/HeroOverlay';
 import HeroCards from './templates/hero/HeroCards';
 import HeroCentered from './templates/hero/HeroCentered';
+import HeroConcierge from './templates/hero/HeroConcierge';
 import WelcomeDefault from './templates/welcome/WelcomeDefault';
 import WelcomeSpotlight from './templates/welcome/WelcomeSpotlight';
 import WelcomeHighlight from './templates/welcome/WelcomeHighlight';
@@ -25,6 +26,7 @@ import OurStoryTimeline from './templates/our-story/OurStoryTimeline';
 import OurStoryMilestone from './templates/our-story/OurStoryMilestone';
 import OurStoryNarrative from './templates/our-story/OurStoryNarrative';
 import OurStoryJourney from './templates/our-story/OurStoryJourney';
+import OurStoryConcierge from './templates/our-story/OurStoryConcierge';
 import OurExpertiseDefault from './templates/our-expertise/OurExpertiseDefault';
 import OurExpertiseChecklist from './templates/our-expertise/OurExpertiseChecklist';
 import OurExpertiseGrid from './templates/our-expertise/OurExpertiseGrid';
@@ -40,6 +42,7 @@ import CTASection from './CTASection';
 import { useThemeSettings as useThemeSettingsHook } from '@/hooks/theme-settings';
 import { useBranding as useBrandingHook } from '@/hooks/branding';
 import { brandRadiusScopeStyle } from '@/lib/branding/brand-radius';
+import { formatCssFontStack } from '@/lib/theme-document';
 
 export interface AboutPageBuilderProps {
   aboutPage: { title: string; content: unknown | null } | null;
@@ -174,6 +177,8 @@ export default function AboutPageBuilder({
 
   const builderConfig = normalizeAboutBuilderContent(aboutPage?.content);
   const theme = createBuilderTheme((resolvedBranding ?? {}) as IBrandingConfig);
+  const bodyFontStack = formatCssFontStack(theme.fontFamily);
+  const titleFontStack = formatCssFontStack(theme.fontFamilyTitle, theme.fontFamily);
   const primaryColor = resolvedThemeSettings?.primary || theme.primary;
   const surfaceColor = resolvedThemeSettings?.surface || theme.surface;
   const surfaceAltColor = resolvedThemeSettings?.surfaceAlt || theme.surfaceAlt;
@@ -207,10 +212,10 @@ export default function AboutPageBuilder({
       style={{
         backgroundColor: surfaceAltColor,
         color: textOnSurfaceAlt,
-        fontFamily: theme.fontFamily,
+        fontFamily: bodyFontStack,
         '--primary-color': primaryColor,
-        '--font-title': theme.fontFamilyTitle,
-        '--font-body': theme.fontFamily,
+        '--font-title': titleFontStack,
+        '--font-body': bodyFontStack,
         ...brandRadiusScopeStyle(resolvedBranding),
       } as React.CSSProperties}
     >
@@ -292,6 +297,19 @@ export default function AboutPageBuilder({
               else if (section.variant === 'centered') {
                 sectionContent = (
                   <HeroCentered
+                    key={section.id}
+                    hero={hero ?? null}
+                    aboutPageTitle={aboutPage?.title || 'About Us'}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'concierge') {
+                sectionContent = (
+                  <HeroConcierge
                     key={section.id}
                     hero={hero ?? null}
                     aboutPageTitle={aboutPage?.title || 'About Us'}
@@ -419,6 +437,19 @@ export default function AboutPageBuilder({
               else if (section.variant === 'journey') {
                 sectionContent = (
                   <OurStoryJourney
+                    key={section.id}
+                    content={ourStory ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                    surfaceAltColor={surfaceAltColor}
+                  />
+                );
+              }
+              else if (section.variant === 'concierge') {
+                sectionContent = (
+                  <OurStoryConcierge
                     key={section.id}
                     content={ourStory ?? null}
                     primaryColor={primaryColor}

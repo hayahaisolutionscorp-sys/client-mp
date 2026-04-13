@@ -1,7 +1,6 @@
 import type { WhyChooseTemplateProps } from "../../types";
 export default function WhyChooseSteps({ section, reasons, theme }: WhyChooseTemplateProps) {
-  const items = reasons.slice(0, 3);
-  if (items.length === 0) return null;
+  if (reasons.length === 0) return null;
   return (
     <section id="WhyChooseUs" className="py-16 px-4 sm:px-6 lg:px-10" style={{ background: `linear-gradient(160deg, ${theme.primary} 0%, ${theme.accent} 100%)` }}>
       <div className="container mx-auto max-w-7xl">
@@ -19,10 +18,12 @@ export default function WhyChooseSteps({ section, reasons, theme }: WhyChooseTem
           )}
         </div>
         <div className="relative">
-          {/* connector line */}
-          <div className="hidden lg:block absolute top-10 left-[calc(16.67%+1rem)] right-[calc(16.67%+1rem)] h-px bg-white/20" />
-          <div className="grid gap-8 lg:grid-cols-3">
-            {items.map((reason, i) => (
+          {/* connector line — layout tuned for exactly three columns */}
+          {reasons.length === 3 && (
+            <div className="hidden lg:block absolute top-10 left-[calc(16.67%+1rem)] right-[calc(16.67%+1rem)] h-px bg-white/20" />
+          )}
+          <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {reasons.map((reason, i) => (
               <div key={reason.id} className="flex flex-col items-center text-center">
                 <div className="relative mb-6">
                   <div

@@ -56,6 +56,8 @@ export default function FAQListMinimal({
               className={`border-b ${isLast ? 'border-transparent' : 'border-slate-200'}`}
             >
               <button
+                type="button"
+                data-template-ignore="true"
                 onClick={() => toggleItem(faq.id)}
                 className="flex w-full items-center justify-between py-4 text-left hover:opacity-75"
               >

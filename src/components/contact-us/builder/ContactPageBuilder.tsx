@@ -18,6 +18,7 @@ import HeroMinimal from './templates/hero/HeroMinimal';
 import HeroCentered from './templates/hero/HeroCentered';
 import HeroGradient from './templates/hero/HeroGradient';
 import HeroSplit from './templates/hero/HeroSplit';
+import HeroConcierge from './templates/hero/HeroConcierge';
 
 // Contact Form variants
 import ContactFormDefault from './templates/contact-form/ContactFormDefault';
@@ -209,6 +210,11 @@ export default function ContactPageBuilder({
           case 'split':
             sectionContent = (
               <HeroSplit key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+            );
+            break;
+          case 'concierge':
+            sectionContent = (
+              <HeroConcierge key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
           case 'default':

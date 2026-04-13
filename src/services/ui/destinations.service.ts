@@ -27,10 +27,12 @@ export async function getDestinations(): Promise<IDestination[]> {
     }
 
     const isBrowser = typeof window !== 'undefined';
+    const isDevSsr =
+      !isBrowser && process.env.NODE_ENV === 'development';
     const res = await fetchWithTimeout(
       DESTINATIONS_API,
       {
-        ...(isBrowser
+        ...(isBrowser || isDevSsr
           ? { cache: 'no-store' as RequestCache }
           : { next: { tags: ['destinations'], revalidate: 3600 } }),
         timeoutMs: 12_000,

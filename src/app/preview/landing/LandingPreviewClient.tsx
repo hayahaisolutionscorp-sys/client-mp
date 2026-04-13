@@ -3,12 +3,12 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import LandingPageBuilder from "@/components/landing/builder/LandingPageBuilder";
 import { useTheme } from "@/components/ThemeProvider";
-import { getReadableTextColor, hexToHsl, toRgbCssValue } from "@/lib/color-utils";
 import { normalizeLandingBuilderContent } from "@/lib/landing-builder";
 import type { LandingBuilderContent } from "@/lib/landing-builder";
 import type { LandingPreviewPayload } from "@/lib/preview/landing-preview";
 import type { LandingPageData } from "@/services/content/landing-page.service";
 import { buildPreviewBranding } from "@/lib/preview/theme";
+import { applyFullThemeToDocument } from "@/lib/theme-document";
 import { usePreviewSyncPayload } from "@/lib/preview/use-preview-sync-payload";
 import { usePreviewScrollToSection } from "@/lib/preview/use-preview-scroll-to-section";
 import type { IThemeSettings } from "@/models";
@@ -58,8 +58,6 @@ export default function LandingPreviewClient({
 
   useLayoutEffect(() => {
     const previewConfig = payload?.config;
-    // When opened standalone (no payload), use the server-fetched branding
-    // so the page doesn't flash white before styles are applied.
     const baseBranding = initialLandingData?.brandingConfig;
     if (!previewConfig && !baseBranding) return;
 
@@ -72,9 +70,6 @@ export default function LandingPreviewClient({
     const accent = colors?.accent || "#042B3F";
     const surface = colors?.surface || "#FFFFFF";
     const surfaceAlt = colors?.surfaceAlt || "#EEF8FC";
-    const textOnSurface = getReadableTextColor(surface);
-    const textOnSurfaceAlt = getReadableTextColor(surfaceAlt);
-    const mutedOnSurface = textOnSurface === "#f8fafc" ? "#cbd5e1" : "#64748b";
 
     const themeSettings: IThemeSettings = {
       primary,
@@ -93,19 +88,9 @@ export default function LandingPreviewClient({
         "Jost",
     };
 
+    applyFullThemeToDocument(themeSettings);
     setBranding(mergedBranding);
     setThemeSettings(themeSettings);
-
-    const root = document.documentElement;
-    root.style.setProperty("--primary", hexToHsl(primary));
-    root.style.setProperty("--secondary", hexToHsl(secondary));
-    root.style.setProperty("--accent", hexToHsl(accent));
-    root.style.setProperty("--surface", surface);
-    root.style.setProperty("--surface-alt", surfaceAlt);
-    root.style.setProperty("--text-on-surface", textOnSurface);
-    root.style.setProperty("--text-on-surface-alt", textOnSurfaceAlt);
-    root.style.setProperty("--muted-on-surface", mutedOnSurface);
-    root.style.setProperty("--text-default-rgb", toRgbCssValue(textOnSurface));
   }, [initialLandingData?.brandingConfig, payload?.config, setBranding, setThemeSettings]);
 
   if (!payload) {

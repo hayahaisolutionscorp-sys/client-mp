@@ -19,6 +19,7 @@ import ThemeHydrator from '@/components/ThemeHydrator';
 import { getInitialAuthFromCookies } from '@/lib/auth/get-initial-account-from-cookies';
 import { IThemeSettings } from "@/models";
 import { getBrandRadiusCssLength, resolveBrandCornerRadiusClass } from '@/lib/branding/brand-radius';
+import { THEME_FONT_SCALE_MAP } from '@/lib/theme-document';
 
 
 export { generateMetadata };
@@ -69,22 +70,11 @@ export default async function RootLayout({
   const accentHsl = hexToHsl(themeSettings.accent);
   const textOnSurface = getReadableTextColor(themeSettings.surface);
   const textOnSurfaceAlt = getReadableTextColor(themeSettings.surfaceAlt);
+  const textOnPrimary = getReadableTextColor(themeSettings.primaryColor || themeSettings.primary);
   const mutedOnSurface = textOnSurface === '#f8fafc' ? '#cbd5e1' : '#64748b';
 
 
-  const fontScaleMap: Record<string, string> = {
-    'Jost': '100%',
-    'Roboto': '100%',
-    'Inter': '100%',
-    'Poppins': '98%',
-    'Montserrat': '95%',
-    'League Spartan': '105%',
-    'Manrope': '100%',
-    'Urbanist': '100%',
-    'Plus Jakarta Sans': '98%'
-  };
-
-  const fontScale = fontScaleMap[themeSettings.fontStyle] || '100%';
+  const fontScale = THEME_FONT_SCALE_MAP[themeSettings.fontStyle] || '100%';
 
   const wlBr = getBrandRadiusCssLength(resolveBrandCornerRadiusClass(brandingConfig as any));
 
@@ -103,6 +93,7 @@ export default async function RootLayout({
               --surface-alt: ${themeSettings.surfaceAlt};
               --text-on-surface: ${textOnSurface};
               --text-on-surface-alt: ${textOnSurfaceAlt};
+              --text-on-primary: ${textOnPrimary};
               --muted-on-surface: ${mutedOnSurface};
               --text-default-rgb: ${toRgbCssValue(textOnSurface)};
               --font-body: "${themeSettings.fontStyle}", sans-serif;

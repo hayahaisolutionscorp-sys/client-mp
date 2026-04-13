@@ -11,6 +11,7 @@ interface FAQListAccordionProps {
   categories: string[];
   primaryColor: string;
   textColor: string;
+  textOnPrimary: string;
   mutedColor: string;
   surfaceColor: string;
 }
@@ -19,7 +20,8 @@ export default function FAQListAccordion({
   faqs,
   categories,
   primaryColor,
-  textColor,
+  textColor: _textColor,
+  textOnPrimary,
   mutedColor,
   surfaceColor,
 }: FAQListAccordionProps) {
@@ -32,6 +34,12 @@ export default function FAQListAccordion({
     setOpenItem(openItem === id ? null : id);
   };
 
+  /**
+   * Matches homepage tokens: :root --text-on-primary (layout + ThemeProvider applyFullThemeToDocument).
+   * `textOnPrimary` prop is the JS fallback when CSS vars are not yet applied.
+   */
+  const onPrimaryControlBg = `color-mix(in srgb, var(--text-on-primary, ${textOnPrimary}) 22%, ${primaryColor})`;
+
   return (
     <>
       <FAQCategoryTabs
@@ -41,40 +49,49 @@ export default function FAQListAccordion({
         themeColor={primaryColor}
       />
 
-      <div
-        className="overflow-hidden rounded-[28px] border border-slate-200 shadow-sm"
-        style={{ backgroundColor: surfaceColor }}
-      >
-        {filteredFaqs.map((faq, index) => {
+      <div className="space-y-3">
+        {filteredFaqs.map((faq) => {
           const isOpen = openItem === faq.id;
-          const isLast = index === filteredFaqs.length - 1;
 
           return (
-            <div key={faq.id} className={!isLast ? 'border-b border-slate-200' : ''}>
+            <div
+              key={faq.id}
+              className="overflow-hidden rounded-2xl border border-black/5 shadow-sm"
+            >
               <button
+                type="button"
+                data-template-ignore="true"
                 onClick={() => toggleItem(faq.id)}
-                className="flex w-full items-center justify-between px-6 py-4 text-left hover:bg-slate-50"
+                className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-[filter] hover:brightness-105"
+                style={{
+                  backgroundColor: primaryColor,
+                  color: 'var(--text-on-primary, ' + textOnPrimary + ')',
+                }}
               >
-                <span className="pr-4 font-semibold" style={{ color: textColor }}>
+                <span
+                  className="pr-2 font-semibold"
+                  style={{ color: 'var(--text-on-primary, ' + textOnPrimary + ')' }}
+                >
                   {faq.question}
                 </span>
                 <div
                   className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all"
-                  style={{
-                    backgroundColor: isOpen ? primaryColor : `${primaryColor}20`,
-                  }}
+                  style={{ backgroundColor: onPrimaryControlBg }}
                 >
                   <IoIosArrowDown
                     className={`h-4 w-4 transition-transform duration-300 ${
                       isOpen ? 'rotate-180' : ''
                     }`}
-                    style={{ color: isOpen ? '#ffffff' : primaryColor }}
+                    style={{ color: 'var(--text-on-primary, ' + textOnPrimary + ')' }}
                   />
                 </div>
               </button>
 
               {isOpen && (
-                <div className="px-6 pb-4" style={{ color: mutedColor }}>
+                <div
+                  className="border-t border-black/5 px-6 py-4"
+                  style={{ backgroundColor: surfaceColor, color: mutedColor }}
+                >
                   <TipTapRenderer content={faq.answer} />
                 </div>
               )}

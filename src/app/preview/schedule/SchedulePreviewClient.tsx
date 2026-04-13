@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo } from "react";
 import { usePreviewSyncPayload } from "@/lib/preview/use-preview-sync-payload";
 import type { SchedulePreviewPayload } from "@/lib/preview/schedule-preview";
 import { normalizeScheduleBuilderContent } from "@/lib/schedule-builder";
 import { ScheduleAndFaresClientPage } from "@/components/schedule-and-fares/ScheduleAndFaresClientPage";
-import ThemeProvider from "@/components/ThemeProvider";
-import type { IThemeSettings, IBrandingConfig } from "@/models";
+import { useTheme } from "@/components/ThemeProvider";
+import type { IBrandingConfig } from "@/models";
 import { buildPreviewThemeSettings } from "@/lib/preview/theme";
 import { brandRadiusScopeStyle } from "@/lib/branding/brand-radius";
 
@@ -14,9 +14,22 @@ interface SchedulePreviewClientProps {
   initialPayload: SchedulePreviewPayload | null;
 }
 export default function SchedulePreviewClient({ initialPayload }: SchedulePreviewClientProps) {
+  const { setBranding, setThemeSettings } = useTheme();
   const payload = usePreviewSyncPayload(initialPayload, "AYAHAY_SCHEDULE_PREVIEW_SYNC");
 
-  if (!payload) {
+  const theme = useMemo(
+    () =>
+      payload ? buildPreviewThemeSettings(payload.config ?? null, null as IBrandingConfig | null) : null,
+    [payload]
+  );
+
+  useLayoutEffect(() => {
+    if (!theme) return;
+    setBranding(theme.branding);
+    setThemeSettings(theme.themeSettings);
+  }, [theme, setBranding, setThemeSettings]);
+
+  if (!payload || !theme) {
     const isStandalone = typeof window !== "undefined" && window.parent === window;
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--surface-alt)] text-slate-500 text-sm">
@@ -24,8 +37,6 @@ export default function SchedulePreviewClient({ initialPayload }: SchedulePrevie
       </div>
     );
   }
-
-  const theme = buildPreviewThemeSettings(payload.config ?? null, null as IBrandingConfig | null);
 
   const variants = useMemo(() => {
     const builder = normalizeScheduleBuilderContent(payload.page?.content);
@@ -46,13 +57,11 @@ export default function SchedulePreviewClient({ initialPayload }: SchedulePrevie
 
   return (
     <div className="wl-brand-radius-scope" style={brandRadiusScopeStyle(theme.branding, "rounded-2xl")}>
-      <ThemeProvider initialTheme={theme.themeSettings as IThemeSettings} initialBranding={theme.branding}>
-        <ScheduleAndFaresClientPage
-          heroVariant={variants.heroVariant}
-          datePickerVariant={variants.datePickerVariant}
-          fareTableVariant={variants.fareTableVariant}
-        />
-      </ThemeProvider>
+      <ScheduleAndFaresClientPage
+        heroVariant={variants.heroVariant}
+        datePickerVariant={variants.datePickerVariant}
+        fareTableVariant={variants.fareTableVariant}
+      />
     </div>
   );
 }

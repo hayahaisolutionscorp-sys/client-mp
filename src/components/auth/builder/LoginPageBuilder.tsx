@@ -17,6 +17,7 @@ import { AnimatedSection } from "@/components/whitelabel/AnimatedSection";
 import { useThemeSettings as useThemeSettingsHook } from "@/hooks/theme-settings";
 import { useBranding as useBrandingHook } from "@/hooks/branding";
 import { brandRadiusScopeStyle, resolveBrandCornerRadiusClass } from "@/lib/branding/brand-radius";
+import { formatCssFontStack } from "@/lib/theme-document";
 
 interface LoginPageBuilderProps {
   loginPage: ILoginPage | null;
@@ -177,7 +178,9 @@ export function LoginPageBuilder({
   const brandName = resolvedBranding?.brand_name || "Ayahay";
   const brandTagline = resolvedBranding?.tagline || resolvedBranding?.slogan || "";
   const brandRadiusClass = resolveBrandCornerRadiusClass(resolvedBranding, "rounded-2xl");
-  const heroFontStyle = { fontFamily: theme.fontFamilyTitle };
+  const bodyFontStack = formatCssFontStack(theme.fontFamily);
+  const titleFontStack = formatCssFontStack(theme.fontFamilyTitle, theme.fontFamily);
+  const heroFontStyle = { fontFamily: titleFontStack };
   const splitDirectionGradient = isLeftLayout
     ? `radial-gradient(circle at 18% 18%, ${primaryColor}55 0, transparent 28%), radial-gradient(circle at 82% 12%, ${secondaryColor}40 0, transparent 24%), linear-gradient(135deg, color-mix(in srgb, ${primaryColor} 82%, #0f172a 18%), color-mix(in srgb, ${accentColor} 84%, #0f172a 16%))`
     : surfaceColor;
@@ -276,8 +279,9 @@ export function LoginPageBuilder({
         style={{
           backgroundColor: surfaceAltColor,
           color: textOnSurfaceAlt,
-          fontFamily: theme.fontFamily,
-          ["--font-title" as string]: theme.fontFamilyTitle,
+          fontFamily: bodyFontStack,
+          ["--font-body" as string]: bodyFontStack,
+          ["--font-title" as string]: titleFontStack,
           ...brandRadiusScopeStyle(resolvedBranding, "rounded-2xl"),
         }}
       >
@@ -425,8 +429,9 @@ export function LoginPageBuilder({
         style={{
           backgroundColor: surfaceAltColor,
           color: textOnSurfaceAlt,
-          fontFamily: theme.fontFamily,
-          ["--font-title" as string]: theme.fontFamilyTitle,
+          fontFamily: bodyFontStack,
+          ["--font-body" as string]: bodyFontStack,
+          ["--font-title" as string]: titleFontStack,
           ...brandRadiusScopeStyle(resolvedBranding, "rounded-2xl"),
         }}
       >
@@ -542,8 +547,9 @@ export function LoginPageBuilder({
       style={{
         backgroundColor: surfaceAltColor,
         color: textOnSurfaceAlt,
-        fontFamily: theme.fontFamily,
-        ["--font-title" as string]: theme.fontFamilyTitle,
+        fontFamily: bodyFontStack,
+        ["--font-body" as string]: bodyFontStack,
+        ["--font-title" as string]: titleFontStack,
         ...brandRadiusScopeStyle(resolvedBranding, "rounded-2xl"),
       }}
     >

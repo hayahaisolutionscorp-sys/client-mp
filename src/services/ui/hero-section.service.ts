@@ -24,8 +24,13 @@ export async function getHeroSections(): Promise<IHeroSection | undefined> {
       return heroSectionData as IHeroSection;
     }
 
+    const isBrowser = typeof window !== 'undefined';
+    const isDevSsr =
+      !isBrowser && process.env.NODE_ENV === 'development';
     const res = await fetch(HERO_SECTION_API, {
-      next: { tags: ['hero-sections'], revalidate: 3600 }
+      ...(isBrowser || isDevSsr
+        ? { cache: 'no-store' as RequestCache }
+        : { next: { tags: ['hero-sections'], revalidate: 3600 } }),
     });
 
     if (res.ok) {

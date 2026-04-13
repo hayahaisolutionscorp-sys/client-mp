@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import Hero from "@/components/landing/Hero";
 import Footer from "@/components/Footer";
 import SubscribeBanner from "@/components/landing/SubscribeBanner";
@@ -22,6 +22,11 @@ import BookingBanner from "./templates/booking/BookingBanner";
 import BookingCard from "./templates/booking/BookingCard";
 import BookingPremiumDark from "./templates/booking/BookingPremiumDark";
 import BookingProfessional from "./templates/booking/BookingProfessional";
+import BookingHorizontal from "./templates/booking/BookingHorizontal";
+import HeroConcierge from "./templates/hero/HeroConcierge";
+import WhyChooseConcierge from "./templates/why-choose/WhyChooseConcierge";
+import RoutesEditorialGrid from "./templates/routes/RoutesEditorialGrid";
+import PromotionsConcierge from "./templates/promotions/PromotionsConcierge";
 import PromotionsGrid from "./templates/promotions/PromotionsGrid";
 import PromotionsBanner from "./templates/promotions/PromotionsBanner";
 import WhyChooseSteps from "./templates/why-choose/WhyChooseSteps";
@@ -55,6 +60,7 @@ import {
   brandRadiusScopeStyle,
   resolveBrandCornerRadiusClass,
 } from "@/lib/branding/brand-radius";
+import { formatCssFontStack } from "@/lib/theme-document";
 import type { LandingPreviewPayload } from "@/lib/preview/landing-preview";
 import type { LandingPageData } from "@/services/content/landing-page.service";
 import type { IBrandingConfig } from "@/models";
@@ -148,6 +154,18 @@ export default function LandingPageBuilder({
   const cornerRadiusClass = resolveBrandCornerRadiusClass(
     landingBranding,
     templatePreset?.tokens.radiusClass ?? "rounded-2xl"
+  );
+
+  // Whitelabel general typography (theme) must win over template-preset token defaults;
+  // otherwise the landing layout preset always pins fonts (e.g. default → Jost) and
+  // body/title picks in the editor appear to do nothing.
+  const bodyFontStack = formatCssFontStack(
+    theme.fontFamily,
+    templatePreset?.tokens.fontFamily
+  );
+  const titleFontStack = formatCssFontStack(
+    theme.fontFamilyTitle,
+    templatePreset?.tokens.fontFamilyTitle || templatePreset?.tokens.fontFamily
   );
 
   const sectionAnimationsRaw = landingBranding?.colors?.sectionAnimations;
@@ -264,11 +282,11 @@ export default function LandingPageBuilder({
     <div
       className={templatePreset ? `${templatePreset.tokens.surfaceClass} ${cornerRadiusClass}` : cornerRadiusClass}
       style={{ 
-        fontFamily: templatePreset?.tokens.fontFamily || theme.fontFamily,
+        fontFamily: bodyFontStack,
         background: theme.surface,
-        '--font-title': templatePreset?.tokens.fontFamilyTitle || theme.fontFamilyTitle,
-        '--font-body': templatePreset?.tokens.fontFamily || theme.fontFamily
-      } as any}
+        '--font-title': titleFontStack,
+        '--font-body': bodyFontStack,
+      } as CSSProperties}
     >
       <style dangerouslySetInnerHTML={{ __html: `
         h1, h2, h3, h4, h5, h6, .brand-title {
@@ -341,6 +359,19 @@ export default function LandingPageBuilder({
                   tripSearchEnabledOverride={true}
                 />
               );
+            } else if (section.variant === "concierge") {
+              content = (
+                <HeroConcierge
+                  heroSectionOverride={heroSection}
+                  forceHomeNavbar={Boolean(previewPayload)}
+                  showNavbar={layout.showNavbarInHero}
+                  showBookingSearch={layout.showBookingInHero}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
+                  portsOverride={landingData?.ports ?? null}
+                  bookingRoutesOverride={landingData?.bookingRoutes ?? null}
+                  tripSearchEnabledOverride={true}
+                />
+              );
             } else {
               content = (
                 <Hero
@@ -367,11 +398,15 @@ export default function LandingPageBuilder({
               content = <BookingPremiumDark theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             } else if (section.variant === "professional-card") {
               content = <BookingProfessional theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "modern-horizontal") {
+              content = <BookingHorizontal theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             }
             break;
           case "promotions":
             if (section.variant === "grid" || section.variant === "professional-banner") {
               content = <PromotionsGrid promos={(promotions as any) ?? []} theme={theme} />;
+            } else if (section.variant === "concierge-mosaic") {
+              content = <PromotionsConcierge promos={(promotions as any) ?? []} theme={theme} />;
             } else if (section.variant === "banner") {
               content = <PromotionsBanner promos={(promotions as any) ?? []} theme={theme} />;
             } else {
@@ -385,6 +420,8 @@ export default function LandingPageBuilder({
               content = <RoutesModernGrid routes={(routes as any) ?? []} theme={theme} />;
             } else if (section.variant === "list") {
               content = <RoutesMinimalList routes={(routes as any) ?? []} theme={theme} />;
+            } else if (section.variant === "editorial-grid" || section.variant === "concierge") {
+              content = <RoutesEditorialGrid routes={(routes as any) ?? []} theme={theme} />;
             } else {
               content = <PopularRoutes routesOverride={routes as any} />;
             }
@@ -396,6 +433,8 @@ export default function LandingPageBuilder({
               content = <WhyChooseGrid section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else if (section.variant === "minimal") {
               content = <WhyChooseMinimal section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            } else if (section.variant === "concierge") {
+              content = <WhyChooseConcierge section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else {
               content = <WhyChooseDefault section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             }

@@ -69,6 +69,81 @@ function parseRgbString(value: string): RGB | null {
     return { r, g, b };
 }
 
+/**
+ * Parse hsl()/hsla() (comma or modern space-separated) to sRGB for contrast helpers.
+ */
+function parseHslString(value: string): RGB | null {
+    const trimmed = value.trim();
+    const m = trimmed.match(/^hsla?\(\s*([\s\S]+?)\s*\)/i);
+    if (!m) {
+        return null;
+    }
+
+    const inner = m[1].trim();
+    let h = 0;
+    let s = 0;
+    let l = 0;
+
+    const commaParts = inner.split(",").map((p) => p.trim());
+    if (commaParts.length >= 3) {
+        h = Number.parseFloat(commaParts[0]);
+        s = Number.parseFloat(commaParts[1].replace("%", "")) / 100;
+        l = Number.parseFloat(commaParts[2].replace("%", "")) / 100;
+    } else {
+        const spaceParts = inner.split(/\s+/).filter(Boolean);
+        if (spaceParts.length < 3) {
+            return null;
+        }
+        h = Number.parseFloat(spaceParts[0]);
+        s = Number.parseFloat(spaceParts[1].replace("%", "")) / 100;
+        l = Number.parseFloat(spaceParts[2].replace("%", "")) / 100;
+    }
+
+    if (Number.isNaN(h) || Number.isNaN(s) || Number.isNaN(l)) {
+        return null;
+    }
+
+    const hh = ((h % 360) + 360) % 360;
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((hh / 60) % 2) - 1));
+    const m0 = l - c / 2;
+
+    let r1 = 0;
+    let g1 = 0;
+    let b1 = 0;
+    if (hh < 60) {
+        r1 = c;
+        g1 = x;
+        b1 = 0;
+    } else if (hh < 120) {
+        r1 = x;
+        g1 = c;
+        b1 = 0;
+    } else if (hh < 180) {
+        r1 = 0;
+        g1 = c;
+        b1 = x;
+    } else if (hh < 240) {
+        r1 = 0;
+        g1 = x;
+        b1 = c;
+    } else if (hh < 300) {
+        r1 = x;
+        g1 = 0;
+        b1 = c;
+    } else {
+        r1 = c;
+        g1 = 0;
+        b1 = x;
+    }
+
+    return {
+        r: Math.round((r1 + m0) * 255),
+        g: Math.round((g1 + m0) * 255),
+        b: Math.round((b1 + m0) * 255),
+    };
+}
+
 export function parseColorToRgb(value: string | null | undefined): RGB | null {
     if (!value) {
         return null;
@@ -93,7 +168,16 @@ export function parseColorToRgb(value: string | null | undefined): RGB | null {
         };
     }
 
-    return parseRgbString(input);
+    const rgb = parseRgbString(input);
+    if (rgb) {
+        return rgb;
+    }
+
+    if (/^hsla?\(/i.test(input)) {
+        return parseHslString(input);
+    }
+
+    return null;
 }
 
 function linearizeChannel(channel: number): number {

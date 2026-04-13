@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Media from "@/components/landing/Media";
 import { useBranding } from "@/hooks/branding";
@@ -59,7 +58,6 @@ export default function HeroProfessional({
 
   const title = heroSection?.title || `Sail better with ${branding?.brand_name || "Ayahay"}`;
   const subtitle = heroSection?.subtitle || "A better marketplace for ferry passengers.";
-  const logoSrc = branding?.logo?.dark || branding?.logo?.light;
 
   const renderMedia = () => {
     if (heroSection?.bg_type?.toLowerCase() === "youtube" && heroSection?.bg_url) {
@@ -128,20 +126,6 @@ export default function HeroProfessional({
 
         <div className="relative z-10 grid min-h-[720px] lg:grid-cols-[0.92fr_1.08fr]">
           <div className="flex flex-col justify-center gap-6 px-6 py-16 lg:px-14 lg:py-20">
-            <div className="flex items-center gap-4">
-              {logoSrc ? (
-                <Image
-                  src={logoSrc}
-                  alt={`${branding?.brand_name || "Brand"} Logo`}
-                  width={120}
-                  height={48}
-                  className="h-10 w-auto object-contain"
-                />
-              ) : (
-                <span className="text-lg font-semibold">{branding?.brand_name || "Ayahay"}</span>
-              )}
-            </div>
-
             <div className="space-y-4">
               <h1 className="max-w-2xl text-[30px] font-semibold leading-tight md:text-[48px] lg:text-[60px]">
                 {title}

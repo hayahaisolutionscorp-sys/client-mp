@@ -39,8 +39,13 @@ export async function getWhyChooseSection(): Promise<IWhyChooseSection | undefin
       return whyChooseSectionData as IWhyChooseSection;
     }
 
+    const isBrowser = typeof window !== 'undefined';
+    const isDevSsr =
+      !isBrowser && process.env.NODE_ENV === 'development';
     const res = await fetch(WHY_CHOOSE_SECTION_API, {
-      next: { tags: ['why-choose-section'], revalidate: 3600 }
+      ...(isBrowser || isDevSsr
+        ? { cache: 'no-store' as RequestCache }
+        : { next: { tags: ['why-choose-section'], revalidate: 3600 } }),
     });
 
     if (!res.ok) {
@@ -63,8 +68,13 @@ export async function getWhyChooseReasons(): Promise<IWhyChooseReason[] | undefi
       return whyChooseReasonsData as IWhyChooseReason[];
     }
 
+    const isBrowser = typeof window !== 'undefined';
+    const isDevSsr =
+      !isBrowser && process.env.NODE_ENV === 'development';
     const res = await fetch(WHY_CHOOSE_REASONS_API, {
-      next: { tags: ['why-choose-reasons'], revalidate: 3600 }
+      ...(isBrowser || isDevSsr
+        ? { cache: 'no-store' as RequestCache }
+        : { next: { tags: ['why-choose-reasons'], revalidate: 3600 } }),
     });
 
     if (!res.ok) {
