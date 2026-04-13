@@ -55,6 +55,13 @@ const withPWA = withPWAInit({
       urlPattern: /^https:\/\/ayahay-assets\.s3\.ap-southeast-2\.amazonaws\.com\/.*/,
       handler: 'NetworkOnly',
     },
+    // Raster / vector logos and UI images: never serve from SW cache. The catch-all
+    // NetworkFirst + timeout can otherwise return a stale failed response so the navbar
+    // logo appears missing until cache expires or the network wins.
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|webp|svg|gif|ico)(?:\?[^#]*)?(?:#.*)?$/i,
+      handler: 'NetworkOnly',
+    },
     // ─── Static assets / pages: NetworkFirst ────────────────────────────────────
     {
       urlPattern: /^https?.*/,

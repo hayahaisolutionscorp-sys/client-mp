@@ -51,7 +51,7 @@ export default async function PassengerDetails(props: PageProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 bg-gray-50 px-3 pt-3 md:grid-cols-2 lg:grid-cols-[2fr_1fr] lg:px-10">
+    <div className="grid grid-cols-1 gap-4 bg-[var(--surface-alt)] px-3 pt-3 md:grid-cols-2 lg:grid-cols-[2fr_1fr] lg:px-10">
       <Suspense fallback={<div className="col-span-full"><LoadingScreen fullScreen={false} /></div>}>
         <PassengerDetailsContent
           departureTripId={departureTripId}

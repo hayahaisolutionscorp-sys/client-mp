@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import LandingPageBuilder from "@/components/landing/builder/LandingPageBuilder";
 import { useTheme } from "@/components/ThemeProvider";
 import { getReadableTextColor, hexToHsl, toRgbCssValue } from "@/lib/color-utils";
@@ -12,6 +12,29 @@ import { buildPreviewBranding } from "@/lib/preview/theme";
 import { usePreviewSyncPayload } from "@/lib/preview/use-preview-sync-payload";
 import { usePreviewScrollToSection } from "@/lib/preview/use-preview-scroll-to-section";
 import type { IThemeSettings } from "@/models";
+
+function NoPayloadPlaceholder() {
+  const [standalone, setStandalone] = useState<boolean | null>(null);
+  useEffect(() => {
+    setStandalone(window.parent === window);
+  }, []);
+  if (standalone !== true) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--surface-alt)] text-slate-500 text-sm">
+        Loading preview…
+      </div>
+    );
+  }
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-2 bg-[var(--surface-alt)] px-4 text-center text-slate-500 text-sm">
+      <span>Preview data is not available in this tab yet.</span>
+      <span className="max-w-md text-xs text-slate-400">
+        Open this preview from the TMS whitelabel editor and wait for the iframe to sync. If this URL has no{" "}
+        <code className="rounded bg-slate-200/80 px-1">draftId</code> query, open the preview again from the editor.
+      </span>
+    </div>
+  );
+}
 
 interface LandingPreviewClientProps {
   initialPayload: LandingPreviewPayload | null;
@@ -33,11 +56,16 @@ export default function LandingPreviewClient({
     setConfig(normalizeLandingBuilderContent(payload.builderConfig));
   }, [payload?.builderConfig]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const previewConfig = payload?.config;
-    if (!previewConfig) return;
+    // When opened standalone (no payload), use the server-fetched branding
+    // so the page doesn't flash white before styles are applied.
+    const baseBranding = initialLandingData?.brandingConfig;
+    if (!previewConfig && !baseBranding) return;
 
-    const mergedBranding = buildPreviewBranding(previewConfig, initialLandingData?.brandingConfig);
+    const mergedBranding = previewConfig
+      ? buildPreviewBranding(previewConfig, baseBranding)
+      : baseBranding!;
     const colors = mergedBranding.colors;
     const primary = colors?.primaryColor || colors?.primary || "#004C70";
     const secondary = colors?.secondaryColor || colors?.secondary || "#7ACCFA";
@@ -81,11 +109,12 @@ export default function LandingPreviewClient({
   }, [initialLandingData?.brandingConfig, payload?.config, setBranding, setThemeSettings]);
 
   if (!payload) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500 text-sm">
-        Loading preview...
-      </div>
-    );
+    // When opened standalone (no parent iframe), render with landing data only
+    // instead of showing a permanent "Loading..." screen
+    if (initialLandingData) {
+      return <LandingPageBuilder config={config} previewPayload={null} landingData={initialLandingData} />;
+    }
+    return <NoPayloadPlaceholder />;
   }
 
   return <LandingPageBuilder config={config} previewPayload={payload} landingData={initialLandingData} />;

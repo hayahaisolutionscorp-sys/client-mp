@@ -8,6 +8,7 @@ import { ScheduleAndFaresClientPage } from "@/components/schedule-and-fares/Sche
 import ThemeProvider from "@/components/ThemeProvider";
 import type { IThemeSettings, IBrandingConfig } from "@/models";
 import { buildPreviewThemeSettings } from "@/lib/preview/theme";
+import { brandRadiusScopeStyle } from "@/lib/branding/brand-radius";
 
 interface SchedulePreviewClientProps {
   initialPayload: SchedulePreviewPayload | null;
@@ -16,9 +17,10 @@ export default function SchedulePreviewClient({ initialPayload }: SchedulePrevie
   const payload = usePreviewSyncPayload(initialPayload, "AYAHAY_SCHEDULE_PREVIEW_SYNC");
 
   if (!payload) {
+    const isStandalone = typeof window !== "undefined" && window.parent === window;
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500 text-sm">
-        Loading preview...
+      <div className="flex min-h-screen items-center justify-center bg-[var(--surface-alt)] text-slate-500 text-sm">
+        {isStandalone ? "Open this preview from the TMS editor." : "Loading preview..."}
       </div>
     );
   }
@@ -43,12 +45,14 @@ export default function SchedulePreviewClient({ initialPayload }: SchedulePrevie
   }, [payload.page?.content]);
 
   return (
-    <ThemeProvider initialTheme={theme.themeSettings as IThemeSettings} initialBranding={theme.branding}>
-      <ScheduleAndFaresClientPage
-        heroVariant={variants.heroVariant}
-        datePickerVariant={variants.datePickerVariant}
-        fareTableVariant={variants.fareTableVariant}
-      />
-    </ThemeProvider>
+    <div className="wl-brand-radius-scope" style={brandRadiusScopeStyle(theme.branding, "rounded-2xl")}>
+      <ThemeProvider initialTheme={theme.themeSettings as IThemeSettings} initialBranding={theme.branding}>
+        <ScheduleAndFaresClientPage
+          heroVariant={variants.heroVariant}
+          datePickerVariant={variants.datePickerVariant}
+          fareTableVariant={variants.fareTableVariant}
+        />
+      </ThemeProvider>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { isEffectiveClientApiMode } from 'constants/api';
 import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
@@ -191,7 +192,7 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
         )}
 
         {/* Shipping Lines Section */}
-        {process.env.NEXT_PUBLIC_IS_CLIENT !== 'true' && filters.shippingLines.length > 0 && (
+        {!isEffectiveClientApiMode && filters.shippingLines.length > 0 && (
           <div>
             <h4 className="font-bold text-base text-gray-800 mb-3">Shipping Lines</h4>
             <div className="space-y-3">

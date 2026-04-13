@@ -11,6 +11,7 @@ import { useBranding } from "@/hooks/branding";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { AuthService } from "@/services/auth.service";
 import { buildReturnUrlParam, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
+import { FALLBACK_CSS_PRIMARY } from "@/lib/theme-css-fallbacks";
 
 const REGISTER_STEP_KEY = 'register-step';
 const REGISTER_TTL_MS = 30 * 60 * 1000; // 30 minutes
@@ -23,7 +24,7 @@ export function RegisterEmailForm() {
   const returnUrlParam = buildReturnUrlParam(safeReturnUrl);
   const branding = useBranding();
   const theme = useThemeSettings();
-  const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
+  const primaryColor = theme?.primaryColor || theme?.primary || FALLBACK_CSS_PRIMARY;
 
   const [stepData, setStepData] = useState<any>(null);
   const [email, setEmail] = useState("");

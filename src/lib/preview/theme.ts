@@ -56,6 +56,9 @@ export function buildPreviewBranding(
         baseBranding?.logo?.light ||
         "",
     },
+    corner_radius_class: previewConfig?.corner_radius_class ?? baseBranding?.corner_radius_class ?? null,
+    card_surface_class: previewConfig?.card_surface_class ?? baseBranding?.card_surface_class ?? null,
+    load_classes: previewConfig?.load_classes ?? baseBranding?.load_classes ?? null,
     slogan: previewConfig?.slogan ?? baseBranding?.slogan ?? null,
     motto: previewConfig?.motto ?? baseBranding?.motto ?? null,
     tagline: previewConfig?.tagline ?? baseBranding?.tagline ?? null,

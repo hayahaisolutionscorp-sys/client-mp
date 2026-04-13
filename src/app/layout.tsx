@@ -16,7 +16,9 @@ import NextTopLoader from 'nextjs-toploader';
 import { Suspense } from 'react';
 import { getReadableTextColor, hexToHsl, toRgbCssValue } from '@/lib/color-utils';
 import ThemeHydrator from '@/components/ThemeHydrator';
+import { getInitialAuthFromCookies } from '@/lib/auth/get-initial-account-from-cookies';
 import { IThemeSettings } from "@/models";
+import { getBrandRadiusCssLength, resolveBrandCornerRadiusClass } from '@/lib/branding/brand-radius';
 
 
 export { generateMetadata };
@@ -33,11 +35,18 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [{ data: brandingConfig, source: brandingSource }, destinations, landingBuilderConfig, initialHeaderSection] = await Promise.all([
+  const [
+    { data: brandingConfig, source: brandingSource },
+    destinations,
+    landingBuilderConfig,
+    initialHeaderSection,
+    initialAuth,
+  ] = await Promise.all([
     getBrandingConfigWithSource(),
     getDestinations(),
     getLandingBuilderContent(),
     getHeadersSections(),
+    getInitialAuthFromCookies(),
   ]);
 
   const isFallbackBranding = brandingSource === 'fallback';
@@ -77,8 +86,10 @@ export default async function RootLayout({
 
   const fontScale = fontScaleMap[themeSettings.fontStyle] || '100%';
 
+  const wlBr = getBrandRadiusCssLength(resolveBrandCornerRadiusClass(brandingConfig as any));
+
   return (
-    <html lang="en" style={{ fontSize: fontScale }} suppressHydrationWarning>
+    <html lang="en" data-wl-br-active="true" style={{ fontSize: fontScale }} suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{
           __html: `
@@ -96,6 +107,7 @@ export default async function RootLayout({
               --text-default-rgb: ${toRgbCssValue(textOnSurface)};
               --font-body: "${themeSettings.fontStyle}", sans-serif;
               --font-title: "${themeSettings.fontTitle || themeSettings.fontStyle}", sans-serif;
+              --wl-br: ${wlBr};
             }
             body, html {
               background: var(--surface);
@@ -112,11 +124,14 @@ export default async function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <ThemeProvider initialTheme={themeSettings} initialBranding={brandingConfig} initialDestinations={destinations}>
-          <AuthContextProvider>
+          <AuthContextProvider
+            initialUser={initialAuth.initialUser}
+            hasSessionCookies={initialAuth.hasSessionCookies}
+          >
             <ThemeHydrator theme={themeSettings} isFallback={isFallbackBranding} />
             <Suspense fallback={null}>
               <BodyWrapper>
-                <NextTopLoader color="#2563eb" height={3} showSpinner={false} />
+                <NextTopLoader color={themeSettings.primary} height={3} showSpinner={false} />
                 <ToasterProvider />
                 <DevServiceWorkerReset />
                 <PwaInstallBanner />

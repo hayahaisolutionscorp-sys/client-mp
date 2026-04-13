@@ -7,6 +7,7 @@ import type { TripData } from "@oltek/hayahai-sdk/react";
 import { HayahAIButton, SearchBoxFormContent } from "@/components/landing/SearchBoxWrapper";
 import type { BookingTemplateProps } from "../../types";
 import { DEFAULT_BOOKING_TYPE } from "constants/default";
+import { isEffectiveClientApiMode } from "constants/api";
 
 const TripSearchWidget = dynamic(
   () => import("@oltek/hayahai-sdk/react").then((mod) => mod.TripSearchWidget),
@@ -18,9 +19,10 @@ export default function BookingCleanMinimal({ theme, ports = [], routes = [] }: 
   const [bookingType, setBookingType] = useState<string | undefined>(DEFAULT_BOOKING_TYPE);
   const [tripSearchEnabled, setTripSearchEnabled] = useState(true);
 
-  const tenantId = process.env.NEXT_PUBLIC_IS_CLIENT === "true" && process.env.NEXT_PUBLIC_TENANT_ID
-    ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
-    : 1;
+  const tenantId =
+    isEffectiveClientApiMode && process.env.NEXT_PUBLIC_TENANT_ID
+      ? Number(process.env.NEXT_PUBLIC_TENANT_ID)
+      : 1;
 
   useEffect(() => {
     (async () => {
@@ -158,7 +160,8 @@ export default function BookingCleanMinimal({ theme, ports = [], routes = [] }: 
           margin-left: 8px !important;
         }
 
-        .clean-minimal-form-wrapper button[variant="default"] {
+        /* Submit uses data attr — Shadcn Button does not render a DOM variant attribute */
+        .clean-minimal-form-wrapper button[data-booking-search-submit]:not(:disabled) {
           background: ${theme.primary} !important;
           border-radius: 12px !important;
           font-weight: 700 !important;
@@ -167,13 +170,14 @@ export default function BookingCleanMinimal({ theme, ports = [], routes = [] }: 
           transition: all 0.3s ease !important;
         }
 
-        .clean-minimal-form-wrapper button[variant="default"]:hover {
+        .clean-minimal-form-wrapper button[data-booking-search-submit]:not(:disabled):hover {
           filter: brightness(1.1) !important;
           box-shadow: 0 16px 35px -8px ${theme.primary}77 !important;
           transform: translateY(-1px);
         }
 
-        .clean-minimal-form-wrapper button.flex.items-center {
+        /* Port/date triggers live inside fieldsets; do not match the search Button (outside fieldset) */
+        .clean-minimal-form-wrapper fieldset button {
           background: transparent !important;
           box-shadow: none !important;
           height: 100% !important;

@@ -109,7 +109,7 @@ export default function HeroCards({
   }
 
   return (
-    <header id="Book" className="relative bg-[#EEF8FC]">
+    <header id="Book" className="relative bg-[var(--surface-alt)]">
       <div className="relative w-auto h-[650px] mx-4 mt-4 rounded-[32px] overflow-hidden">
         {showNavbar ? (
           <Navbar forceHomeStyle={forceHomeNavbar} initialHeaderSection={headerSection} />

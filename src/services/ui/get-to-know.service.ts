@@ -1,5 +1,5 @@
 import { GET_TO_KNOW_API, GET_TO_KNOW_MISSION_API, GET_TO_KNOW_VISION_API } from '../../../constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 
 import getToKnowData from '@/data/get-to-know.json';
 import getToKnowMissionData from '@/data/get-to-know-mission.json';
@@ -26,7 +26,7 @@ export interface IGetToKnowResponse {
 }
 
 export const getGetToKnow = async (): Promise<IGetToKnowResponse> => {
-  if (!IS_CLIENT) {
+  if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
     return {
       message: 'Page section with ID get_to_know successfully fetched.',
       data: getToKnowData as IGetToKnowData
@@ -54,7 +54,7 @@ export const getGetToKnow = async (): Promise<IGetToKnowResponse> => {
 };
 
 export const getGetToKnowMission = async (): Promise<IGetToKnowResponse> => {
-  if (!IS_CLIENT) {
+  if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
     return {
       message: 'Page section with ID get_to_know_mission successfully fetched.',
       data: getToKnowMissionData as IGetToKnowData
@@ -81,7 +81,7 @@ export const getGetToKnowMission = async (): Promise<IGetToKnowResponse> => {
 };
 
 export const getGetToKnowVision = async (): Promise<IGetToKnowResponse> => {
-  if (!IS_CLIENT) {
+  if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
     return {
       message: 'Page section with ID get_to_know_vision successfully fetched.',
       data: getToKnowVisionData as IGetToKnowData

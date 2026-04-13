@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <main className="grid min-h-screen md:grid-cols-2">
-      <div className="flex items-center justify-center p-6 lg:p-8 relative">
+    <main className="grid min-h-screen bg-[var(--surface-alt)] md:grid-cols-2">
+      <div className="relative flex items-center justify-center p-6 lg:p-8">
         <Link 
           href="/" 
           className="absolute top-4 left-4 p-2 text-gray-600 hover:text-gray-900 transition-colors" 

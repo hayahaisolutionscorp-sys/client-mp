@@ -4,13 +4,14 @@ import { useEffect, useMemo } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { getThemeSettings } from "@/services/ui/theme-settings.service";
 import { IThemeSettings } from "@/models";
-import { IS_CLIENT } from "@/services/config";
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from "@/services/config";
 import brandingData from "@/data/branding.json";
+import { deriveThemeFromBranding } from "@/lib/derive-theme-from-branding";
 
 const BRANDING_CACHE_KEY = "branding_config";
 
 export const useThemeSettings = () => {
-  const { themeSettings, setThemeSettings } = useTheme();
+  const { themeSettings, setThemeSettings, branding } = useTheme();
 
   const defaultTheme = useMemo(() => {
     return {
@@ -24,12 +25,19 @@ export const useThemeSettings = () => {
   }, []);
 
   useEffect(() => {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return;
     }
 
     // Skip if ThemeProvider already supplied theme settings (from server-side fetch)
     if (themeSettings) {
+      return;
+    }
+
+    // Prefer live branding from SSR/context over localStorage (avoids stale tenant cache on deploy)
+    const fromBranding = deriveThemeFromBranding(branding);
+    if (fromBranding) {
+      setThemeSettings(fromBranding);
       return;
     }
 
@@ -79,7 +87,12 @@ export const useThemeSettings = () => {
         }
       })
       .catch((error) => console.error("Error fetching theme settings:", error));
-  }, [setThemeSettings, themeSettings]);
+  }, [setThemeSettings, themeSettings, branding]);
 
-  return themeSettings || (!IS_CLIENT ? defaultTheme : null);
+  const effective = useMemo(
+    () => themeSettings ?? deriveThemeFromBranding(branding),
+    [themeSettings, branding]
+  );
+
+  return effective ?? (!SHOULD_FETCH_REMOTE_WHITELABEL ? defaultTheme : null);
 };

@@ -8,7 +8,10 @@ export const CORE_API_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL ||
 // If NEXT_PUBLIC_IS_CLIENT is omitted but a client API base URL is provided,
 // default to client mode to avoid silently falling back to core API endpoints.
 const hasClientApiBase = Boolean(process.env.NEXT_PUBLIC_API_BASE_URL);
-const BASE_URL = IS_CLIENT || (!clientModeFlag && hasClientApiBase) ? CLIENT_API_BASE_URL : CORE_API_URL;
+/** Same boolean as choosing CLIENT_API_BASE_URL for BASE_URL (tenant client-api vs core). */
+export const isEffectiveClientApiMode =
+  IS_CLIENT || (!clientModeFlag && hasClientApiBase);
+const BASE_URL = isEffectiveClientApiMode ? CLIENT_API_BASE_URL : CORE_API_URL;
 
 const WHITELABEL_DEBUG = process.env.NEXT_PUBLIC_WHITELABEL_DEBUG === 'true';
 const logScope = globalThis as typeof globalThis & {
@@ -19,6 +22,7 @@ if (WHITELABEL_DEBUG && !logScope.__WHITELABEL_API_CONFIG_LOGGED__) {
   logScope.__WHITELABEL_API_CONFIG_LOGGED__ = true;
   console.info('[WhitelabelAPI] endpoint resolution', {
     isClientMode: IS_CLIENT,
+    isEffectiveClientApiMode,
     clientModeFlag,
     hasClientApiBase,
     clientApiBaseUrl: CLIENT_API_BASE_URL,

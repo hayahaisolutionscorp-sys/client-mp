@@ -154,5 +154,5 @@ export async function getPressById(
   idOrSlug: number | string
 ): Promise<IPress | undefined> {
   const press = await getPress();
-  return press.find(p => p.id === idOrSlug || p.slug === idOrSlug);
+  return press.find(p => String(p.id) === String(idOrSlug) || p.slug === idOrSlug);
 }

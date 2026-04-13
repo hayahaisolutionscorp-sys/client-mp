@@ -40,7 +40,7 @@ const buttonVariants = cva(
 );
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size, asChild = false, disabled, onClick, children, ...props }, ref) => {
+  ({ className, variant = "default", size, asChild = false, disabled, onClick, children, style: callerStyle, ...props }, ref) => {
     const themeSettings = useThemeSettings();
     const branding = useBranding();
     const Comp = asChild ? Slot : "button";
@@ -90,9 +90,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     // Override disabled button color to gray
     if (disabled) {
-      style.backgroundColor = "gray";
-      style.color = "white";
-      style.opacity = "0.25";
+      style.backgroundColor = "#9ca3af";
+      style.color = "#f3f4f6";
+      style.opacity = "1";
       style.cursor = "not-allowed";
     }
 
@@ -123,7 +123,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const templateClass = templateClassByKey[buttonTemplate] || templateClassByKey["modern-solid"];
     const templateAccentClass = templateAccentClassByKey[buttonTemplate] || "";
-    const entranceClass = isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2";
+    const entranceClass = disabled ? "opacity-100 translate-y-0" : isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2";
 
     const handleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
       if (!asChild && !disabled && localRef.current) {
@@ -162,7 +162,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           if (typeof ref === "function") ref(node);
           else if (ref) (ref as React.MutableRefObject<HTMLButtonElement | null>).current = node;
         }}
-        style={style}
+        style={{ ...style, ...callerStyle }}
         disabled={disabled}
         onClick={handleClick}
         {...(isTemplateIgnored ? { "data-template-ignore": "true" } : {})}

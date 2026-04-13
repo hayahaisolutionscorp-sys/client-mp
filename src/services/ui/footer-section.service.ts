@@ -1,12 +1,12 @@
 import { IFooterSection } from '@/models';
 import { FOOTER_SECTION_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 
 import footerSectionsData from '@/data/footer-sections.json';
 
 export async function getFooterSections(): Promise<IFooterSection | undefined> {
   try {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return footerSectionsData as IFooterSection;
     }
 

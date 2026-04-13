@@ -1,5 +1,5 @@
 import { PRIVACY_POLICY_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 
 import privacyPolicyData from '@/data/privacy-policy.json';
 
@@ -16,7 +16,7 @@ export interface IPrivacyPolicyTipTap {
 
 export async function getPrivacyPolicy(): Promise<IPrivacyPolicyTipTap | undefined> {
   try {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return privacyPolicyData as IPrivacyPolicyTipTap;
     }
 

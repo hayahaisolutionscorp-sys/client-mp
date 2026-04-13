@@ -36,9 +36,28 @@ export default function Hero({
     headerSectionOverride ?? null
   );
   const [ports, setPorts] = useState<IPort[]>(portsOverride ?? []);
-  const [loading, setLoading] = useState(!(heroSectionOverride && headerSectionOverride !== undefined && portsOverride !== undefined));
+  const [loading, setLoading] = useState(
+    () =>
+      !(
+        heroSectionOverride !== undefined &&
+        headerSectionOverride !== undefined &&
+        portsOverride !== undefined
+      )
+  );
 
   useEffect(() => {
+    if (
+      heroSectionOverride !== undefined &&
+      headerSectionOverride !== undefined &&
+      portsOverride !== undefined
+    ) {
+      setHeroSection(heroSectionOverride ?? null);
+      setHeaderSection(headerSectionOverride ?? null);
+      setPorts(portsOverride ?? []);
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const [heroRes, headerRes, portsRes] = await Promise.all([
@@ -50,10 +69,10 @@ export default function Hero({
             ? Promise.resolve(portsOverride ?? [])
             : getPorts().catch(() => []).then((res: any) => res?.data || res),
         ]);
-        
+
         setHeroSection(heroRes as any);
         setHeaderSection(headerRes as any);
-        setPorts(portsRes as any); 
+        setPorts(portsRes as any);
       } catch (error) {
         console.error("Failed to load hero data", error);
       } finally {
@@ -61,10 +80,10 @@ export default function Hero({
       }
     };
 
-    fetchData();
+    void fetchData();
   }, [heroSectionOverride, headerSectionOverride, portsOverride]);
 
-  if (loading) return <div className="h-[650px] bg-[#EEF8FC] animate-pulse rounded-[32px] m-4" />;
+  if (loading) return <div className="h-[650px] bg-[var(--surface-alt)] animate-pulse rounded-[32px] m-4" />;
 
   let captionBackground;
 
@@ -103,7 +122,7 @@ export default function Hero({
   }
 
   return (
-    <header id="Book" className="relative bg-[#EEF8FC]">
+    <header id="Book" className="relative bg-[var(--surface-alt)]">
       <div className="relative w-auto h-[650px] mx-4 mt-4 rounded-[32px] overflow-hidden">
         {showNavbar ? (
           <Navbar

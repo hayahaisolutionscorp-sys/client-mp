@@ -1,5 +1,5 @@
 import { TERMS_AND_CONDITIONS_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 
 import termsAndConditionsData from '@/data/terms-and-conditions.json';
 
@@ -16,7 +16,7 @@ export interface ITermsAndConditions {
 
 export async function getTermsAndConditions(): Promise<ITermsAndConditions | undefined> {
   try {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return termsAndConditionsData as ITermsAndConditions;
     }
 

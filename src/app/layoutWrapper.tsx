@@ -11,6 +11,7 @@ import FooterPremium from '@/components/landing/builder/templates/footer/FooterP
 import { useLandingBuilder } from '@/hooks/landing-builder';
 import { useBranding } from '@/hooks/branding';
 import { createBuilderTheme } from '@/components/landing/builder/theme';
+import { cn } from '@/lib/utils';
 import type { LandingBuilderContent } from '@/lib/landing-builder';
 import type { HeaderNavigationConfig } from '@/lib/landing-nav';
 
@@ -59,21 +60,31 @@ export default function LayoutWrapper({
     fontStyle: builderTheme.fontFamily,
     fontTitle: builderTheme.fontFamilyTitle,
   };
-  const mainOffsetClass = shouldRenderChrome && headerVariant === 'floating' ? 'pt-[120px]' : '';
+  const mainOffsetClass = shouldRenderChrome
+    ? headerVariant === 'floating'
+      ? 'pt-[120px]'
+      : headerVariant === 'professional-slate'
+        ? 'pt-4'
+        : ''
+    : '';
+  const useBuilderLandingHeader =
+    headerVariant === 'centered' ||
+    headerVariant === 'floating' ||
+    headerVariant === 'professional-slate';
 
   return (
     <>
-      {shouldRenderChrome && (headerVariant === 'centered' || headerVariant === 'floating') ? (
+      {shouldRenderChrome && useBuilderLandingHeader ? (
         <BuilderLandingHeader
           variant={headerVariant}
           theme={theme}
           headerSectionOverride={initialHeaderSection}
         />
       ) : null}
-      {shouldRenderChrome && !(headerVariant === 'centered' || headerVariant === 'floating') ? (
+      {shouldRenderChrome && !useBuilderLandingHeader ? (
         <Navbar showLandingNav initialHeaderSection={initialHeaderSection} />
       ) : null}
-      <main className={mainOffsetClass}>{children}</main>
+      <main className={cn("wl-brand-radius-scope", mainOffsetClass)}>{children}</main>
       {shouldRenderChrome && !isProfilePage && footerVariant === 'centered' ? <FooterCentered theme={theme} /> : null}
       {shouldRenderChrome && !isProfilePage && footerVariant === 'premium' ? <FooterPremium theme={theme} /> : null}
       {shouldRenderChrome && !isProfilePage && footerVariant === 'default-no-banner' ? (

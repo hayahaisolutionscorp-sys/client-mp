@@ -1,7 +1,8 @@
 import { BRANDING_API } from 'constants/api';
 import { IBrandingConfig, IBrandingResponse } from '@/models/branding.model';
 import brandingData from '@/data/branding.json';
-import { IS_BUILD_TIME, IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 export type BrandingSource = 'api' | 'fallback';
 
@@ -38,7 +39,7 @@ const withBrandingCacheBuster = (config: IBrandingConfig): IBrandingConfig => {
 };
 
 export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<BrandingConfigResult> => {
-  if (!IS_CLIENT) {
+  if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
     return {
       data: brandingData as unknown as IBrandingConfig,
       source: 'fallback'
@@ -51,17 +52,20 @@ export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<B
       ...init
     };
 
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `${BRANDING_API}`,
-      isBrowser
-        ? {
-            ...requestInit,
-            cache: 'no-store',
-          }
-        : {
-            ...requestInit,
-            next: { tags: ['branding'], revalidate: 3600 },
-          }
+      {
+        ...(isBrowser
+          ? {
+              ...requestInit,
+              cache: 'no-store',
+            }
+          : {
+              ...requestInit,
+              next: { tags: ['branding'], revalidate: 3600 },
+            }),
+        timeoutMs: 12_000,
+      }
     );
 
     if (res.ok) {

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { Suspense } from "react";
 import PressPreviewClient from "./PressPreviewClient";
 import { getPressDraft } from "@/lib/preview/press-draft-store";

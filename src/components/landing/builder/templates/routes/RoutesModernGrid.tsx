@@ -30,7 +30,7 @@ export default function RoutesModernGrid({ routes, theme }: RoutesTemplateProps)
           {items.map((route, index) => (
             <div
               key={route.id || index}
-              className="group flex flex-col bg-white rounded-[40px] overflow-hidden border border-slate-100 shadow-sm transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+              className="flex flex-col bg-white rounded-[40px] overflow-hidden border border-slate-100 shadow-sm"
             >
               {/* Image with Accent Glow */}
               <div className="relative h-64 overflow-hidden">
@@ -38,7 +38,7 @@ export default function RoutesModernGrid({ routes, theme }: RoutesTemplateProps)
                   <img
                     src={route.image_url}
                     alt={route.image_alt || route.route}
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full bg-slate-100" />
@@ -57,21 +57,16 @@ export default function RoutesModernGrid({ routes, theme }: RoutesTemplateProps)
               {/* Enhanced Content area */}
               <div className="p-8 flex flex-col flex-grow items-start">
                 <div 
-                  className="w-10 h-1 rounded-full mb-4 transition-all duration-500 group-hover:w-20"
+                  className="w-10 h-1 rounded-full mb-4"
                   style={{ backgroundColor: theme.primary }}
                 />
-                <h3 className="text-2xl font-black tracking-tight mb-2 group-hover:text-primary transition-colors duration-300" style={{ color: theme.text }}>
+                <h3 className="text-2xl font-black tracking-tight mb-2" style={{ color: theme.text }}>
                   {route.route}
                 </h3>
                 <p className="text-sm font-medium leading-relaxed" style={{ color: theme.muted }}>
-                  Click to view seasonal schedules and secure your booking for this popular route.
+                  Seasonal schedules available for this popular route.
                 </p>
                 
-                {/* Micro Action */}
-                <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest opacity-0 -translate-x-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-x-0" style={{ color: theme.primary }}>
-                  View Schedules
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                </div>
               </div>
             </div>
           ))}

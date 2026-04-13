@@ -2,7 +2,7 @@ import { IThemeSettings } from '@/models';
 import { IBrandingResponse } from '@/models/branding.model';
 import { THEME_SETTINGS_API } from 'constants/api';
 import brandingData from '@/data/branding.json';
-import { IS_BROWSER, IS_BUILD_TIME, IS_CLIENT } from '../config';
+import { IS_BROWSER, SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 
 const WHITELABEL_DEBUG = process.env.NEXT_PUBLIC_WHITELABEL_DEBUG === 'true';
 
@@ -18,7 +18,7 @@ const DEFAULT_THEME: IThemeSettings = {
 };
 
 export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
-  if (!IS_CLIENT) {
+  if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
     return DEFAULT_THEME;
   }
 

@@ -1,5 +1,5 @@
 import { WHY_CHOOSE_REASONS_API, WHY_CHOOSE_SECTION_API } from 'constants/api';
-import { IS_CLIENT } from '../config';
+import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 
 import whyChooseSectionData from '@/data/why-choose-section.json';
 import whyChooseReasonsData from '@/data/why-choose-reasons.json';
@@ -35,7 +35,7 @@ export interface IWhyChooseReason {
 
 export async function getWhyChooseSection(): Promise<IWhyChooseSection | undefined> {
   try {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return whyChooseSectionData as IWhyChooseSection;
     }
 
@@ -59,7 +59,7 @@ export async function getWhyChooseSection(): Promise<IWhyChooseSection | undefin
 
 export async function getWhyChooseReasons(): Promise<IWhyChooseReason[] | undefined> {
   try {
-    if (!IS_CLIENT) {
+    if (!SHOULD_FETCH_REMOTE_WHITELABEL) {
       return whyChooseReasonsData as IWhyChooseReason[];
     }
 

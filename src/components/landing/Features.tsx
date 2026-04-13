@@ -24,20 +24,39 @@ export default function Features({
   const [section, setSection] = useState<IWhyChooseSection | null>(sectionOverride ?? null);
   const [themeSettings, setThemeSettings] = useState<IThemeSettings | null>(themeSettingsOverride ?? null);
   const [brandingConfig, setBrandingConfig] = useState<IBrandingConfig | null>(brandingConfigOverride ?? null);
-  const [loading, setLoading] = useState(!(sectionOverride && themeSettingsOverride && brandingConfigOverride));
+  const [loading, setLoading] = useState(
+    () =>
+      !(
+        sectionOverride != null &&
+        themeSettingsOverride != null &&
+        brandingConfigOverride != null
+      )
+  );
 
   useEffect(() => {
+    if (
+      sectionOverride != null &&
+      themeSettingsOverride != null &&
+      brandingConfigOverride != null
+    ) {
+      setSection(sectionOverride);
+      setThemeSettings(themeSettingsOverride);
+      setBrandingConfig(brandingConfigOverride);
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const [sectionRes, themeRes, brandingRes] = await Promise.all([
-          sectionOverride ? Promise.resolve({ data: sectionOverride }) : getWhyChooseSection(),
-          themeSettingsOverride ? Promise.resolve({ data: themeSettingsOverride }) : getThemeSettings(),
-          brandingConfigOverride ? Promise.resolve({ data: brandingConfigOverride }) : getBrandingConfig()
+          sectionOverride != null ? Promise.resolve(sectionOverride) : getWhyChooseSection(),
+          themeSettingsOverride != null ? Promise.resolve(themeSettingsOverride) : getThemeSettings(),
+          brandingConfigOverride != null ? Promise.resolve(brandingConfigOverride) : getBrandingConfig()
         ]);
-        
-        setSection((sectionRes as any).data || sectionRes);
-        setThemeSettings((themeRes as any).data || themeRes);
-        setBrandingConfig((brandingRes as any).data || brandingRes);
+
+        setSection((sectionRes as any)?.data ?? sectionRes);
+        setThemeSettings((themeRes as any)?.data ?? themeRes);
+        setBrandingConfig((brandingRes as any)?.data ?? brandingRes);
       } catch (error) {
         console.error("Failed to load features data", error);
       } finally {
@@ -45,7 +64,7 @@ export default function Features({
       }
     };
 
-    fetchData();
+    void fetchData();
   }, [sectionOverride, themeSettingsOverride, brandingConfigOverride]);
 
   if (loading || !section || !reasons) return null;

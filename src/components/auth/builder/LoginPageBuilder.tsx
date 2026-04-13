@@ -14,6 +14,9 @@ import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import type { ILoginPage } from "@/services/content/login.service";
 import { cn } from "@/lib/utils";
 import { AnimatedSection } from "@/components/whitelabel/AnimatedSection";
+import { useThemeSettings as useThemeSettingsHook } from "@/hooks/theme-settings";
+import { useBranding as useBrandingHook } from "@/hooks/branding";
+import { brandRadiusScopeStyle, resolveBrandCornerRadiusClass } from "@/lib/branding/brand-radius";
 
 interface LoginPageBuilderProps {
   loginPage: ILoginPage | null;
@@ -28,6 +31,11 @@ export function LoginPageBuilder({
   themeSettings,
   branding,
 }: LoginPageBuilderProps) {
+  const contextThemeSettings = useThemeSettingsHook();
+  const contextBranding = useBrandingHook();
+  const resolvedThemeSettings = themeSettings ?? contextThemeSettings ?? null;
+  const resolvedBranding = branding ?? contextBranding ?? null;
+
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,7 +54,7 @@ export function LoginPageBuilder({
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const sectionAnimationsRaw = branding?.colors?.sectionAnimations;
+  const sectionAnimationsRaw = resolvedBranding?.colors?.sectionAnimations;
   let sectionAnimations: Record<string, string> = {};
   if (sectionAnimationsRaw) {
     if (typeof sectionAnimationsRaw === 'string') {
@@ -143,12 +151,12 @@ export function LoginPageBuilder({
     .map(([id, anim]) => getAnimationCSSForSection(id, anim))
     .join("\n");
   const builderConfig = normalizeLoginBuilderContent(loginPage?.content);
-  const theme = createBuilderTheme((branding ?? {}) as IBrandingConfig);
-  const primaryColor = themeSettings?.primaryColor || themeSettings?.primary || theme.primary;
-  const secondaryColor = themeSettings?.secondaryColor || themeSettings?.secondary || theme.secondary;
-  const accentColor = themeSettings?.accent || theme.accent;
-  const surfaceColor = themeSettings?.surface || theme.surface;
-  const surfaceAltColor = themeSettings?.surfaceAlt || theme.surfaceAlt;
+  const theme = createBuilderTheme((resolvedBranding ?? {}) as IBrandingConfig);
+  const primaryColor = resolvedThemeSettings?.primaryColor || resolvedThemeSettings?.primary || theme.primary;
+  const secondaryColor = resolvedThemeSettings?.secondaryColor || resolvedThemeSettings?.secondary || theme.secondary;
+  const accentColor = resolvedThemeSettings?.accent || theme.accent;
+  const surfaceColor = resolvedThemeSettings?.surface || theme.surface;
+  const surfaceAltColor = resolvedThemeSettings?.surfaceAlt || theme.surfaceAlt;
   const textOnSurface = getReadableTextColor(surfaceColor);
   const textOnSurfaceAlt = getReadableTextColor(surfaceAltColor);
   const formSection = builderConfig.sections.find((section) => section.section_key === "form");
@@ -166,9 +174,9 @@ export function LoginPageBuilder({
   const isBrandImmersive = layout.shell === "immersive";
   const heroTextColor = isLeftLayout ? "#f8fafc" : textOnSurface;
   const heroMutedColor = isLeftLayout ? "rgba(248,250,252,0.74)" : textOnSurfaceAlt;
-  const brandName = branding?.brand_name || "Ayahay";
-  const brandTagline = branding?.tagline || branding?.slogan || "";
-  const brandRadiusClass = branding?.colors?.cornerRadiusClass?.trim() || "rounded-[32px]";
+  const brandName = resolvedBranding?.brand_name || "Ayahay";
+  const brandTagline = resolvedBranding?.tagline || resolvedBranding?.slogan || "";
+  const brandRadiusClass = resolveBrandCornerRadiusClass(resolvedBranding, "rounded-2xl");
   const heroFontStyle = { fontFamily: theme.fontFamilyTitle };
   const splitDirectionGradient = isLeftLayout
     ? `radial-gradient(circle at 18% 18%, ${primaryColor}55 0, transparent 28%), radial-gradient(circle at 82% 12%, ${secondaryColor}40 0, transparent 24%), linear-gradient(135deg, color-mix(in srgb, ${primaryColor} 82%, #0f172a 18%), color-mix(in srgb, ${accentColor} 84%, #0f172a 16%))`
@@ -264,12 +272,13 @@ export function LoginPageBuilder({
   if (isBrandImmersive) {
     return (
       <main
-        className="relative min-h-screen overflow-hidden px-4 py-6 md:px-6 md:py-8"
+        className={cn("wl-brand-radius-scope relative min-h-screen overflow-hidden px-4 py-6 md:px-6 md:py-8")}
         style={{
           backgroundColor: surfaceAltColor,
           color: textOnSurfaceAlt,
           fontFamily: theme.fontFamily,
           ["--font-title" as string]: theme.fontFamilyTitle,
+          ...brandRadiusScopeStyle(resolvedBranding, "rounded-2xl"),
         }}
       >
         <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
@@ -296,7 +305,7 @@ export function LoginPageBuilder({
               <div className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/35 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-700 backdrop-blur-sm">
                 <span className="size-2 rounded-full" style={{ backgroundColor: primaryColor }} />
                 <Image
-                  src={branding?.logo?.dark || branding?.logo?.light || "/assets/icons/Ayahay_blue_vertical.svg"}
+                  src={resolvedBranding?.logo?.dark || resolvedBranding?.logo?.light || "/assets/icons/Ayahay_blue_vertical.svg"}
                   alt={`${brandName} Logo`}
                   width={20}
                   height={20}
@@ -351,7 +360,7 @@ export function LoginPageBuilder({
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white">
                       <Image
-                        src={branding?.logo?.dark || branding?.logo?.light || "/assets/icons/Ayahay_blue_vertical.svg"}
+                        src={resolvedBranding?.logo?.dark || resolvedBranding?.logo?.light || "/assets/icons/Ayahay_blue_vertical.svg"}
                         alt={`${brandName} Logo`}
                         width={32}
                         height={32}
@@ -412,12 +421,13 @@ export function LoginPageBuilder({
   if (isRoundedCanvas) {
     return (
       <main
-        className="relative min-h-screen overflow-hidden px-4 py-6 md:px-6 md:py-8"
+        className={cn("wl-brand-radius-scope relative min-h-screen overflow-hidden px-4 py-6 md:px-6 md:py-8")}
         style={{
           backgroundColor: surfaceAltColor,
           color: textOnSurfaceAlt,
           fontFamily: theme.fontFamily,
           ["--font-title" as string]: theme.fontFamilyTitle,
+          ...brandRadiusScopeStyle(resolvedBranding, "rounded-2xl"),
         }}
       >
         <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
@@ -450,7 +460,7 @@ export function LoginPageBuilder({
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
                     <Image
-                      src={branding?.logo?.dark || branding?.logo?.light || "/assets/icons/Ayahay_blue_vertical.svg"}
+                      src={resolvedBranding?.logo?.dark || resolvedBranding?.logo?.light || "/assets/icons/Ayahay_blue_vertical.svg"}
                       alt={`${brandName} Logo`}
                       width={32}
                       height={32}
@@ -528,12 +538,13 @@ export function LoginPageBuilder({
 
   return (
     <main
-      className="min-h-screen px-4 py-6 md:px-6 md:py-8"
+      className={cn("wl-brand-radius-scope min-h-screen px-4 py-6 md:px-6 md:py-8")}
       style={{
         backgroundColor: surfaceAltColor,
         color: textOnSurfaceAlt,
         fontFamily: theme.fontFamily,
         ["--font-title" as string]: theme.fontFamilyTitle,
+        ...brandRadiusScopeStyle(resolvedBranding, "rounded-2xl"),
       }}
     >
       <div className="mx-auto max-w-6xl">

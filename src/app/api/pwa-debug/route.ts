@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { EFFECTIVE_API_BASE_URL } from 'constants/api';
+import { EFFECTIVE_API_BASE_URL, isEffectiveClientApiMode } from 'constants/api';
 import { getBrandingConfigWithSource } from '@/services/ui/branding.service';
 import { ManifestService } from '@/services/ui/manifest.service';
 
@@ -16,6 +16,7 @@ export async function GET() {
       environment: {
         nodeEnv: process.env.NODE_ENV || 'unknown',
         isClientMode: process.env.NEXT_PUBLIC_IS_CLIENT === 'true',
+        isEffectiveClientApiMode,
         effectiveApiBaseUrl: EFFECTIVE_API_BASE_URL
       },
       branding: {

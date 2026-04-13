@@ -333,7 +333,6 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
           isQuickBooking: false,
         };
 
-        console.log(`=== Creating booking for leg ${i + 1} (shippingLineId: ${leg.shippingLineId}) ===`);
         const result = await createBooking(payload, leg.shippingLineId);
         const bookingId = result?.data || result?.id;
 
@@ -343,7 +342,6 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
           return false;
         }
 
-        console.log(`✓ Leg ${i + 1} booking created:`, bookingId);
         bookingIds.push(bookingId);
 
         const paymentId = await getBookingPaymentId(bookingId, leg.shippingLineId);
@@ -353,7 +351,6 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
           return false;
         }
         bookingPaymentIds.push(paymentId);
-        console.log(`✓ Leg ${i + 1} payment ID:`, paymentId);
       }
 
       if (bookingIds.length === 0) {
@@ -369,7 +366,6 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
         combinedGrandTotal += legTotal;
       }
 
-      console.log('Combined grand total (PHP):', combinedGrandTotal);
 
       const amountInCents = Math.round(combinedGrandTotal * 100);
       if (amountInCents <= 0) {
@@ -388,7 +384,6 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
 
       let checkoutUrl: string | undefined;
 
-      console.log(`=== Creating checkout (method: ${effectiveMethod}) ===`);
 
       if (effectiveMethod === 'card') {
         const mayaRequest = {
@@ -491,8 +486,6 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
         checkoutUrl = intentResponse.data.redirectUrl;
       }
 
-      console.log('=== Redirecting to payment gateway ===');
-      console.log('Checkout URL:', checkoutUrl);
       window.location.href = checkoutUrl;
       return true;
 

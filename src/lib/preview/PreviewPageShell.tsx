@@ -42,9 +42,12 @@ export function PreviewPageShell<TPayload extends { config?: PreviewGeneralConfi
   usePreviewScrollToSection();
 
   if (!payload) {
+    // Standalone visit (no parent iframe sending data) — show a hint instead
+    // of a permanent "Loading..." spinner.
+    const isStandalone = typeof window !== "undefined" && window.parent === window;
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EEF8FC] text-slate-500 text-sm">
-        Loading preview...
+      <div className="flex min-h-screen items-center justify-center bg-[var(--surface-alt)] text-slate-500 text-sm">
+        {isStandalone ? "Open this preview from the TMS editor." : "Loading preview..."}
       </div>
     );
   }

@@ -12,6 +12,7 @@ import { ForgotPasswordModal } from "@/components/auth/ForgotPassword";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
 import { buildReturnUrlParam, resolvePostAuthPath, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
+import { FALLBACK_CSS_PRIMARY } from "@/lib/theme-css-fallbacks";
 
 const STEP_KEY = "login-step";
 const TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -28,7 +29,7 @@ export function LoginVerifyForm({ mode = "default" }: LoginVerifyFormProps) {
   const returnUrlParam = buildReturnUrlParam(safeReturnUrl);
   const branding = useBranding();
   const theme = useThemeSettings();
-  const primaryColor = theme?.primaryColor || theme?.primary || "oklch(34.38% 0.118 262.34)";
+  const primaryColor = theme?.primaryColor || theme?.primary || FALLBACK_CSS_PRIMARY;
 
   const { signIn } = useAuth();
 

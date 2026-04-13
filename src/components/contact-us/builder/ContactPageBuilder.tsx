@@ -7,6 +7,10 @@ import { getReadableTextColor } from '@/lib/color-utils';
 import { normalizeContactBuilderContent, type ContactBuilderSectionConfig } from '@/lib/contact-builder';
 import { cn } from '@/lib/utils';
 import { AnimatedSection } from '@/components/whitelabel/AnimatedSection';
+import { createBuilderTheme } from '@/components/landing/builder/theme';
+import { useThemeSettings as useThemeSettingsHook } from '@/hooks/theme-settings';
+import { useBranding as useBrandingHook } from '@/hooks/branding';
+import { brandRadiusScopeStyle } from '@/lib/branding/brand-radius';
 
 // Hero variants
 import HeroDefault from './templates/hero/HeroDefault';
@@ -37,11 +41,19 @@ export default function ContactPageBuilder({
   themeSettings,
   branding,
 }: ContactPageBuilderProps) {
-  const primaryColor = themeSettings?.primaryColor || themeSettings?.primary || '#0052CC';
-  const secondaryColor = themeSettings?.secondaryColor || themeSettings?.secondary || '#00A3E0';
-  const accentColor = themeSettings?.accent || '#FF6B35';
-  const surfaceColor = themeSettings?.surface || '#FFFFFF';
-  const surfaceAltColor = themeSettings?.surfaceAlt || '#EEF8FC';
+  const contextThemeSettings = useThemeSettingsHook();
+  const contextBranding = useBrandingHook();
+  const resolvedThemeSettings = themeSettings ?? contextThemeSettings ?? null;
+  const resolvedBranding = branding ?? contextBranding ?? null;
+  const builderTheme = createBuilderTheme((resolvedBranding ?? {}) as IBrandingConfig);
+
+  const primaryColor =
+    resolvedThemeSettings?.primaryColor || resolvedThemeSettings?.primary || builderTheme.primary;
+  const secondaryColor =
+    resolvedThemeSettings?.secondaryColor || resolvedThemeSettings?.secondary || builderTheme.secondary;
+  const accentColor = resolvedThemeSettings?.accent || builderTheme.accent;
+  const surfaceColor = resolvedThemeSettings?.surface || builderTheme.surface;
+  const surfaceAltColor = resolvedThemeSettings?.surfaceAlt || builderTheme.surfaceAlt;
 
   const textOnSurface = getReadableTextColor(surfaceColor);
   const textOnSurfaceAlt = getReadableTextColor(surfaceAltColor);
@@ -72,7 +84,7 @@ export default function ContactPageBuilder({
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const sectionAnimationsRaw = branding?.colors?.sectionAnimations;
+  const sectionAnimationsRaw = resolvedBranding?.colors?.sectionAnimations;
   let sectionAnimations: Record<string, string> = {};
   if (sectionAnimationsRaw) {
     if (typeof sectionAnimationsRaw === 'string') {
@@ -266,7 +278,10 @@ export default function ContactPageBuilder({
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] space-y-8 px-4 py-8 md:px-6 md:py-12">
+    <div
+      className="wl-brand-radius-scope mx-auto w-full max-w-[1400px] space-y-8 px-4 py-8 md:px-6 md:py-12"
+      style={brandRadiusScopeStyle(resolvedBranding)}
+    >
       <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
       {enabledSections.map((sectionConfig) => renderSection(sectionConfig))}
     </div>

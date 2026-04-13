@@ -32,12 +32,17 @@ export const useLandingBuilder = (initialConfig: LandingBuilderContent | null = 
   useEffect(() => {
     if (initialConfig) {
       setConfig(initialConfig);
-    } else {
-      // Restore from cache on client mount (not in useState to avoid hydration mismatch)
-      const cached = getCachedLandingBuilderConfig();
-      if (cached) {
-        setConfig(cached);
+      try {
+        localStorage.setItem(LANDING_BUILDER_CACHE_KEY, JSON.stringify(initialConfig));
+      } catch (e) {
+        console.error("Failed to cache landing builder:", e);
       }
+      return;
+    }
+
+    const cached = getCachedLandingBuilderConfig();
+    if (cached) {
+      setConfig(cached);
     }
 
     getLandingBuilderContent()

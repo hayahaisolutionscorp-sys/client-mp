@@ -11,21 +11,32 @@ interface PopularRoutesProps {
   routesOverride?: PreviewRouteRecommendation[] | null;
 }
 
+const DEFAULT_SHIPPING_LINE_ID = 3;
+
+function mapRouteOverrides(
+  override: PreviewRouteRecommendation[],
+  shippingLineId: number
+): IThumbnail[] {
+  return override.map((dest) => ({
+    id: 0,
+    shippingLineId,
+    label: dest.route,
+    filename: dest.image_url,
+    location: dest.route,
+    imageOrder: dest.display_order ?? 0,
+  }));
+}
+
 export default function PopularRoutes({ routesOverride }: PopularRoutesProps = {}) {
-  const shippingLineId = 3; // Default to Ayahay
-  const [routeImages, setRouteImages] = useState<IThumbnail[]>([]);
-  const [loading, setLoading] = useState(!routesOverride);
+  const shippingLineId = DEFAULT_SHIPPING_LINE_ID;
+  const [routeImages, setRouteImages] = useState<IThumbnail[]>(() =>
+    routesOverride != null ? mapRouteOverrides(routesOverride, shippingLineId) : []
+  );
+  const [loading, setLoading] = useState(() => routesOverride == null);
 
   useEffect(() => {
-    if (routesOverride) {
-      setRouteImages(routesOverride.map((dest) => ({
-        id: 0,
-        shippingLineId,
-        label: dest.route,
-        filename: dest.image_url,
-        location: dest.route,
-        imageOrder: dest.display_order ?? 0,
-      })));
+    if (routesOverride != null) {
+      setRouteImages(mapRouteOverrides(routesOverride, shippingLineId));
       setLoading(false);
       return;
     }

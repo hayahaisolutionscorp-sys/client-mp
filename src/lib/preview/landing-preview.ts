@@ -20,6 +20,9 @@ export interface PreviewGeneralConfig {
     surface?: string;
     surfaceAlt?: string;
   } | null;
+  corner_radius_class?: string | null;
+  card_surface_class?: string | null;
+  load_classes?: Record<string, any> | null;
   slogan?: string | null;
   motto?: string | null;
   tagline?: string | null;

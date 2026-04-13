@@ -8,7 +8,6 @@ import Link from "next/link";
 
 
 
-import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
 import { useFooter } from "@/hooks/footer";
 import { useContactUs } from "@/hooks/contact-us";
@@ -19,7 +18,6 @@ interface FooterProps {
 }
 
 const Footer = ({ showSubscribeBanner = true }: FooterProps) => {
-  const themeSettings = useThemeSettings();
   const branding = useBranding();
   const footerSection = useFooter();
   const contactInfo = useContactUs();
@@ -45,8 +43,7 @@ const Footer = ({ showSubscribeBanner = true }: FooterProps) => {
           </div>
         )}
         <footer
-          className="bg-[#13357B] text-white py-10 px-6 sm:px-10 lg:pt-48"
-          style={{ backgroundColor: themeSettings?.primaryColor }}
+          className="bg-primary py-10 px-6 text-primary-foreground sm:px-10 lg:pt-48"
         >
         {/* Main content area */}
         <div className="flex flex-col lg:flex-row lg:justify-between gap-8">

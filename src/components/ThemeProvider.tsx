@@ -3,6 +3,9 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { IThemeSettings, IBrandingConfig } from "@/models";
 import { IDestination } from "@/services/ui/destinations.service";
+import { getReadableTextColor, hexToHsl, toRgbCssValue } from "@/lib/color-utils";
+import { deriveThemeFromBranding } from "@/lib/derive-theme-from-branding";
+import { getBrandRadiusCssLength, resolveBrandCornerRadiusClass } from "@/lib/branding/brand-radius";
 
 interface ThemeContextType {
   themeSettings: IThemeSettings | null;
@@ -31,7 +34,9 @@ interface ThemeProviderProps {
 }
 
 export default function ThemeProvider({ children, initialTheme, initialBranding, initialDestinations }: ThemeProviderProps) {
-  const [themeSettings, setThemeSettings] = useState<IThemeSettings | null>(initialTheme || null);
+  const [themeSettings, setThemeSettings] = useState<IThemeSettings | null>(
+    () => initialTheme ?? deriveThemeFromBranding(initialBranding ?? null)
+  );
   const [branding, setBranding] = useState<IBrandingConfig | null>(initialBranding || null);
   const [destinations, setDestinations] = useState<IDestination[] | null>(initialDestinations || null);
 
@@ -53,7 +58,7 @@ export default function ThemeProvider({ children, initialTheme, initialBranding,
 
     const shared = `
       ${selector} {
-        border-radius: 0.9rem;
+        border-radius: var(--wl-br, 0.9rem);
         transition:
           transform 220ms ease,
           box-shadow 220ms ease,
@@ -173,6 +178,41 @@ export default function ThemeProvider({ children, initialTheme, initialBranding,
       setDestinations(initialDestinations);
     }
   }, [initialDestinations]);
+
+  // Resolved theme: explicit settings win; else branding-derived (matches SSR layout + avoids gaps on navigation).
+  const resolvedTheme = useMemo(
+    () => themeSettings ?? deriveThemeFromBranding(branding),
+    [themeSettings, branding]
+  );
+
+  // Keep :root CSS variables aligned with resolved theme (same tokens as app/layout.tsx head block).
+  useEffect(() => {
+    if (typeof document === "undefined" || !resolvedTheme) return;
+    const root = document.documentElement;
+    const surface = resolvedTheme.surface || "#FFFFFF";
+    const surfaceAlt = resolvedTheme.surfaceAlt || "#EEF8FC";
+    const textOnSurface = getReadableTextColor(surface);
+    const textOnSurfaceAlt = getReadableTextColor(surfaceAlt);
+    const mutedOnSurface = textOnSurface === "#f8fafc" ? "#cbd5e1" : "#64748b";
+
+    root.style.setProperty("--primary", hexToHsl(resolvedTheme.primary));
+    root.style.setProperty("--secondary", hexToHsl(resolvedTheme.secondary));
+    root.style.setProperty("--accent", hexToHsl(resolvedTheme.accent));
+    root.style.setProperty("--surface", surface);
+    root.style.setProperty("--surface-alt", surfaceAlt);
+    root.style.setProperty("--text-on-surface", textOnSurface);
+    root.style.setProperty("--text-on-surface-alt", textOnSurfaceAlt);
+    root.style.setProperty("--muted-on-surface", mutedOnSurface);
+    root.style.setProperty("--text-default-rgb", toRgbCssValue(textOnSurface));
+  }, [resolvedTheme]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const length = getBrandRadiusCssLength(resolveBrandCornerRadiusClass(branding));
+    root.style.setProperty("--wl-br", length);
+    root.setAttribute("data-wl-br-active", "true");
+  }, [branding]);
 
   const contextValue = useMemo(() => ({
     themeSettings, setThemeSettings,

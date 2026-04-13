@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { BrandingLogo } from "@/components/BrandingLogo";
 import UserDropdown from "@/components/UserDropdown";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import { useAuth } from "@/contexts/AuthContexts";
@@ -40,7 +40,7 @@ export default function HeaderFloating({
 
   return (
     <>
-      <div className="fixed top-6 left-0 right-0 z-50 w-full px-4 sm:px-6 lg:px-10">
+      <div className="fixed top-6 left-0 right-0 z-[200] w-full px-4 sm:px-6 lg:px-10">
         <header 
             className="flex items-center justify-between gap-4 rounded-2xl border border-white/20 px-6 py-4 shadow-lg backdrop-blur-md transition-all w-full max-w-7xl mx-auto"
             style={{ backgroundColor: `${theme.surface}B3` }} // ~70% opacity
@@ -49,19 +49,13 @@ export default function HeaderFloating({
         >
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            {logoSrc ? (
-              <Image
-                alt="Company Logo"
-                src={logoSrc}
-                width={150}
-                height={150}
-                className="h-[40px] w-auto object-contain transition-all duration-300"
-              />
-            ) : (
-              <span className="text-xl font-semibold capitalize whitespace-nowrap" style={{ color: theme.text, fontFamily: 'var(--font-title)' }}>
-                {branding?.brand_name || "Ayahay"}
-              </span>
-            )}
+            <BrandingLogo
+              logoSrc={logoSrc}
+              brandName={branding?.brand_name}
+              imageClassName="h-[40px] w-auto object-contain transition-all duration-300"
+              textClassName="text-xl font-semibold capitalize whitespace-nowrap"
+              textStyle={{ color: theme.text, fontFamily: "var(--font-title)" }}
+            />
           </Link>
 
           {/* Desktop Nav */}
@@ -135,7 +129,7 @@ export default function HeaderFloating({
 
       {/* Mobile menu overlay */}
       <div
-        className={`fixed inset-0 z-40 transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-[150] transition-opacity duration-300 lg:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         style={{ backgroundColor: theme.surface }}
       >
         {/* Close button */}

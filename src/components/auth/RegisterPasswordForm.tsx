@@ -12,6 +12,7 @@ import { PasswordStrengthTracker } from "@/components/auth/PasswordStrengthTrack
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
 import { buildReturnUrlParam, resolvePostAuthPath, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
+import { FALLBACK_CSS_PRIMARY } from "@/lib/theme-css-fallbacks";
 
 const REGISTER_STEP_KEY = 'register-step';
 const REGISTER_TTL_MS = 30 * 60 * 1000; // 30 minutes
@@ -24,7 +25,7 @@ export function RegisterPasswordForm() {
   const returnUrlParam = buildReturnUrlParam(safeReturnUrl);
   const branding = useBranding();
   const theme = useThemeSettings();
-  const primaryColor = theme?.primaryColor || theme?.primary || 'oklch(34.38% 0.118 262.34)';
+  const primaryColor = theme?.primaryColor || theme?.primary || FALLBACK_CSS_PRIMARY;
 
   const { register } = useAuth();
 

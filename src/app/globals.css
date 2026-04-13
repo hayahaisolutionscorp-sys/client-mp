@@ -131,3 +131,17 @@
     scrollbar-width: none;
   }
 }
+
+/*
+ * Whitelabel global corner radius (TMS general.corner_radius_class).
+ * Set --wl-br on :root (layout + ThemeProvider) so portals/dialogs under body inherit it.
+ * Match rounded-* and bare `rounded` (Tailwind); keep rounded-full for pills/circles.
+ */
+:root {
+  --wl-br: 1rem;
+}
+
+html[data-wl-br-active] :is([class*="rounded-"], [class~="rounded"]):not([class*="rounded-full"]),
+.wl-brand-radius-scope :is([class*="rounded-"], [class~="rounded"]):not([class*="rounded-full"]) {
+  border-radius: var(--wl-br) !important;
+}

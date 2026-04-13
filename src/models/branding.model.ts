@@ -26,6 +26,9 @@ export interface IBrandingConfig {
     fontFamilyTitle?: string;
     font_family?: string; // from API
     font_family_title?: string; // from API
+    corner_radius_class?: string | null;
+    card_surface_class?: string | null;
+    load_classes?: Record<string, any> | null;
     colors: IBrandingColors;
     logo: IBrandingLogo;
     slogan: string | null;

@@ -6,6 +6,10 @@ import { getReadableTextColor } from '@/lib/color-utils';
 import { normalizeFaqBuilderContent, type FaqBuilderSectionConfig } from '@/lib/faq-builder';
 import { cn } from '@/lib/utils';
 import { AnimatedSection } from '@/components/whitelabel/AnimatedSection';
+import { createBuilderTheme } from '@/components/landing/builder/theme';
+import { useThemeSettings as useThemeSettingsHook } from '@/hooks/theme-settings';
+import { useBranding as useBrandingHook } from '@/hooks/branding';
+import { brandRadiusScopeStyle } from '@/lib/branding/brand-radius';
 
 // Hero variants
 import HeroDefault from './templates/hero/HeroDefault';
@@ -36,6 +40,12 @@ export default function FAQPageBuilder({
   themeSettings,
   branding,
 }: FAQPageBuilderProps) {
+  const contextThemeSettings = useThemeSettingsHook();
+  const contextBranding = useBrandingHook();
+  const resolvedThemeSettings = themeSettings ?? contextThemeSettings ?? null;
+  const resolvedBranding = branding ?? contextBranding ?? null;
+  const builderTheme = createBuilderTheme((resolvedBranding ?? {}) as IBrandingConfig);
+
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,7 +64,7 @@ export default function FAQPageBuilder({
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const sectionAnimationsRaw = branding?.colors?.sectionAnimations;
+  const sectionAnimationsRaw = resolvedBranding?.colors?.sectionAnimations;
   let sectionAnimations: Record<string, string> = {};
   if (sectionAnimationsRaw) {
     if (typeof sectionAnimationsRaw === 'string') {
@@ -150,9 +160,11 @@ export default function FAQPageBuilder({
     .filter(([id]) => id.startsWith('faq_'))
     .map(([id, anim]) => getAnimationCSSForSection(id, anim))
     .join("\n");
-  const primaryColor = themeSettings?.primaryColor || themeSettings?.primary || '#0052CC';
-  const secondaryColor = themeSettings?.secondaryColor || themeSettings?.secondary || '#00A3E0';
-  const surfaceColor = themeSettings?.surface || '#FFFFFF';
+  const primaryColor =
+    resolvedThemeSettings?.primaryColor || resolvedThemeSettings?.primary || builderTheme.primary;
+  const secondaryColor =
+    resolvedThemeSettings?.secondaryColor || resolvedThemeSettings?.secondary || builderTheme.secondary;
+  const surfaceColor = resolvedThemeSettings?.surface || builderTheme.surface;
 
   const textOnSurface = getReadableTextColor(surfaceColor);
   const mutedOnSurface = textOnSurface === '#f8fafc' ? '#cbd5e1' : '#64748b';
@@ -260,7 +272,10 @@ export default function FAQPageBuilder({
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#EEF8FC]">
+    <div
+      className="wl-brand-radius-scope min-h-screen flex flex-col bg-[var(--surface-alt)]"
+      style={brandRadiusScopeStyle(resolvedBranding)}
+    >
       <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
       <main className="flex-grow pt-25 md:pt-10">
         <div className="space-y-8">
