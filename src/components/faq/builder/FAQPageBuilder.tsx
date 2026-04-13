@@ -219,7 +219,7 @@ export default function FAQPageBuilder({
         switch (variant) {
           case 'accordion':
             sectionContent = (
-              <FAQListAccordion key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+              <FAQListAccordion key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} textOnPrimary={textOnPrimary} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
           case 'cards':

@@ -1,8 +1,7 @@
 import type { WhyChooseTemplateProps } from "../../types";
 
 export default function WhyChooseDefault({ section, reasons, theme }: WhyChooseTemplateProps) {
-  const items = reasons.slice(0, 3);
-  if (items.length === 0) return null;
+  if (reasons.length === 0) return null;
 
   return (
     <section id="WhyChooseUs" className="px-6 py-16" style={{ background: theme.surface }}>
@@ -16,8 +15,8 @@ export default function WhyChooseDefault({ section, reasons, theme }: WhyChooseT
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {items.map((reason) => (
+        <div className="mt-8 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {reasons.map((reason) => (
             <div
               key={reason.id}
               className="rounded-[26px] border p-6"

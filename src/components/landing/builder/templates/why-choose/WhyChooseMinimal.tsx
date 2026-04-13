@@ -1,8 +1,7 @@
 import type { WhyChooseTemplateProps } from "../../types";
 
 export default function WhyChooseMinimal({ section, reasons, theme }: WhyChooseTemplateProps) {
-  const items = reasons.slice(0, 4); // Optimal for this layout
-  if (items.length === 0) return null;
+  if (reasons.length === 0) return null;
 
   return (
     <section id="WhyChooseUs" className="px-6 py-20 lg:py-32 overflow-hidden" style={{ backgroundColor: theme.surface }}>
@@ -21,7 +20,7 @@ export default function WhyChooseMinimal({ section, reasons, theme }: WhyChooseT
  
           {/* Dynamic List Column */}
           <div className="lg:w-2/3 space-y-12">
-            {items.map((reason, index) => (
+            {reasons.map((reason, index) => (
               <div 
                 key={reason.id} 
                 className="group flex flex-col sm:flex-row gap-8 items-start sm:items-center p-8 rounded-[40px] transition-all duration-500 hover:shadow-xl hover:-translate-x-1"

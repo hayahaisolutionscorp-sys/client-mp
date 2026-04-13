@@ -55,6 +55,8 @@ export default function FAQListCards({
               style={{ borderColor: isOpen ? primaryColor : '#e2e8f0' }}
             >
               <button
+                type="button"
+                data-template-ignore="true"
                 onClick={() => toggleItem(faq.id)}
                 className="flex w-full flex-col items-start gap-3 px-6 py-5 text-left"
               >

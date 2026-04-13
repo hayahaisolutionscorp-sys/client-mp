@@ -8,9 +8,16 @@ export const CORE_API_URL = trimTrailingSlash(process.env.NEXT_PUBLIC_API_URL ||
 // If NEXT_PUBLIC_IS_CLIENT is omitted but a client API base URL is provided,
 // default to client mode to avoid silently falling back to core API endpoints.
 const hasClientApiBase = Boolean(process.env.NEXT_PUBLIC_API_BASE_URL);
+const isDevEnvironment =
+  typeof process !== 'undefined' && process.env.NODE_ENV === 'development';
+/** Tenant marketplace in dev: use client-api for whitelabel data (matches .env.example with TENANT_ID). */
+const isDevTenantClientApi =
+  isDevEnvironment &&
+  Boolean(process.env.NEXT_PUBLIC_TENANT_ID) &&
+  process.env.NEXT_PUBLIC_IS_CLIENT !== 'false';
 /** Same boolean as choosing CLIENT_API_BASE_URL for BASE_URL (tenant client-api vs core). */
 export const isEffectiveClientApiMode =
-  IS_CLIENT || (!clientModeFlag && hasClientApiBase);
+  IS_CLIENT || (!clientModeFlag && hasClientApiBase) || isDevTenantClientApi;
 const BASE_URL = isEffectiveClientApiMode ? CLIENT_API_BASE_URL : CORE_API_URL;
 
 const WHITELABEL_DEBUG = process.env.NEXT_PUBLIC_WHITELABEL_DEBUG === 'true';

@@ -71,7 +71,7 @@ export default function WhyChooseConcierge({
 
           {/* Stats */}
           <div className="flex gap-12 flex-wrap">
-            {reasons.slice(0, 3).map((reason, i) => (
+            {reasons.map((reason, i) => (
               <motion.div
                 key={reason.id || i}
                 custom={i}
@@ -107,7 +107,7 @@ export default function WhyChooseConcierge({
 
         {/* Right: Reason cards */}
         <div className="space-y-4">
-          {reasons.slice(0, 4).map((reason, i) => (
+          {reasons.map((reason, i) => (
             <motion.div
               key={reason.id || i}
               custom={i}

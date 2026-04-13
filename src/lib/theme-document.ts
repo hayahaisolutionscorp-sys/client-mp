@@ -80,6 +80,8 @@ export function applyFullThemeToDocument(theme: IThemeSettings): void {
   const surfaceAlt = theme.surfaceAlt || "#EEF8FC";
   const textOnSurface = getReadableTextColor(surface);
   const textOnSurfaceAlt = getReadableTextColor(surfaceAlt);
+  const primaryForContrast = theme.primaryColor || theme.primary || "#004C70";
+  const textOnPrimary = getReadableTextColor(primaryForContrast);
   const mutedOnSurface = textOnSurface === "#f8fafc" ? "#cbd5e1" : "#64748b";
 
   root.style.setProperty("--primary", hexToHsl(theme.primary));
@@ -89,6 +91,7 @@ export function applyFullThemeToDocument(theme: IThemeSettings): void {
   root.style.setProperty("--surface-alt", surfaceAlt);
   root.style.setProperty("--text-on-surface", textOnSurface);
   root.style.setProperty("--text-on-surface-alt", textOnSurfaceAlt);
+  root.style.setProperty("--text-on-primary", textOnPrimary);
   root.style.setProperty("--muted-on-surface", mutedOnSurface);
   root.style.setProperty("--text-default-rgb", toRgbCssValue(textOnSurface));
   applyThemeTypographyToRoot(theme);

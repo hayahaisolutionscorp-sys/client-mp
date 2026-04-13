@@ -55,6 +55,8 @@ export default function FAQListCompact({
               style={{ borderLeftColor: primaryColor }}
             >
               <button
+                type="button"
+                data-template-ignore="true"
                 onClick={() => toggleItem(faq.id)}
                 className="flex w-full items-center justify-between px-5 py-3 text-left hover:bg-slate-50"
               >

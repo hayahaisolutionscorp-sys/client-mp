@@ -70,6 +70,7 @@ export default async function RootLayout({
   const accentHsl = hexToHsl(themeSettings.accent);
   const textOnSurface = getReadableTextColor(themeSettings.surface);
   const textOnSurfaceAlt = getReadableTextColor(themeSettings.surfaceAlt);
+  const textOnPrimary = getReadableTextColor(themeSettings.primaryColor || themeSettings.primary);
   const mutedOnSurface = textOnSurface === '#f8fafc' ? '#cbd5e1' : '#64748b';
 
 
@@ -92,6 +93,7 @@ export default async function RootLayout({
               --surface-alt: ${themeSettings.surfaceAlt};
               --text-on-surface: ${textOnSurface};
               --text-on-surface-alt: ${textOnSurfaceAlt};
+              --text-on-primary: ${textOnPrimary};
               --muted-on-surface: ${mutedOnSurface};
               --text-default-rgb: ${toRgbCssValue(textOnSurface)};
               --font-body: "${themeSettings.fontStyle}", sans-serif;
