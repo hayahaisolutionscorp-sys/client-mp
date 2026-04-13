@@ -296,6 +296,28 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           tripAssignments: { tripId: string; cabinId?: number | null; discountType?: string }[];
         }[] = [];
 
+        const allTrips = [...(prepareBookingData.departure || []), ...(prepareBookingData.return || [])];
+        if (!allTrips.length) return;
+
+        const departureCabinIds = (searchParams.get('departureCabinId') || '').split('|');
+        const returnCabinIds = (searchParams.get('returnCabinId') || '').split('|');
+        const tripCabinMap = new Map<string, number>();
+        (prepareBookingData.departure || []).forEach((trip, index) => {
+          const id = Number(departureCabinIds[index] || departureCabinIds[0]);
+          if (id) tripCabinMap.set(trip.id, id);
+        });
+        (prepareBookingData.return || []).forEach((trip, index) => {
+          const id = Number(returnCabinIds[index] || returnCabinIds[0]);
+          if (id) tripCabinMap.set(trip.id, id);
+        });
+
+        // 1. Passenger Mapping
+        let passengers: {
+          index: number;
+          passengerType: string;
+          tripAssignments: { tripId: string; cabinId?: number | null; discountType?: string }[];
+        }[] = [];
+
         if (passengerDetails) {
           const allPass = [passengerDetails.passenger, ...passengerDetails.companions];
           passengers = allPass.map((passenger, index) => ({
@@ -307,7 +329,25 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
               discountType: (passenger?.discountType || 'ADULT').toUpperCase(),
             })),
           }));
+          passengers = allPass.map((passenger, index) => ({
+            index,
+            passengerType: passenger?.discountType || 'Adult',
+            tripAssignments: allTrips.map((trip) => ({
+              tripId: trip.id,
+              cabinId: tripCabinMap.get(trip.id) ?? null,
+              discountType: (passenger?.discountType || 'ADULT').toUpperCase(),
+            })),
+          }));
         } else if (rawData.bookingTrips?.[0]?.bookingTripPassengers) {
+          passengers = rawData.bookingTrips[0].bookingTripPassengers.map((passenger: any, index: number) => ({
+            index,
+            passengerType: passenger?.discountType || 'Adult',
+            tripAssignments: allTrips.map((trip) => ({
+              tripId: trip.id,
+              cabinId: tripCabinMap.get(trip.id) ?? null,
+              discountType: (passenger?.discountType || 'ADULT').toUpperCase(),
+            })),
+          }));
           passengers = rawData.bookingTrips[0].bookingTripPassengers.map((passenger: any, index: number) => ({
             index,
             passengerType: passenger?.discountType || 'Adult',
@@ -328,8 +368,27 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           tripAssignments: { tripId: string }[];
         }[] = [];
 
+        // 2. Vehicle + cargo mapping
+        const cargos: {
+          index: number;
+          cargoType: 'rolling' | 'loose';
+          cargoClassCode?: string;
+          quantity?: number;
+          tripAssignments: { tripId: string }[];
+        }[] = [];
+
         const vehicleDetails = rawData.vehicleDepartureDetails || (rawData.bookingTrips?.[0]?.bookingTripVehicles?.map((v: any) => v.vehicle));
         if (vehicleDetails) {
+          vehicleDetails.forEach((vehicle: any, index: number) => {
+            const cargoClassCode = String(vehicle.vehicleTypeId || vehicle.vehicleType?.id || '').trim();
+            if (!cargoClassCode) return;
+
+            cargos.push({
+              index,
+              cargoType: 'rolling',
+              cargoClassCode,
+              tripAssignments: allTrips.map((trip) => ({ tripId: trip.id })),
+            });
           vehicleDetails.forEach((vehicle: any, index: number) => {
             const cargoClassCode = String(vehicle.vehicleTypeId || vehicle.vehicleType?.id || '').trim();
             if (!cargoClassCode) return;
@@ -362,7 +421,25 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
           passengers,
           cargos,
         };
+          cargoDetails.forEach((cargo: any, index: number) => {
+            cargos.push({
+              index: cargos.length + index,
+              cargoType: 'loose',
+              cargoClassCode: cargo.cargo_class || undefined,
+              quantity: Number(cargo.quantity || 1),
+              tripAssignments: allTrips.map((trip) => ({ tripId: trip.id })),
+            });
+          });
+        }
 
+        const pricingRequest = {
+          routeCode: allTrips[0].route_code,
+          tripIds: allTrips.map((trip) => trip.id),
+          passengers,
+          cargos,
+        };
+
+        const pricing = await calculatePricing(pricingRequest, undefined, shippingLineId);
         const pricing = await calculatePricing(pricingRequest, undefined, shippingLineId);
         setPricingData(pricing.data);
 
@@ -383,6 +460,46 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
     if (!booking) return;
 
     const rawData = booking as any;
+    const fallbackCache = fetchItem<any>('booking-response') || fetchItem<any>('booking-json') || {};
+
+    const passengerDetails = rawData.passengerDetails || fallbackCache.passengerDetails;
+    const contactDetails = rawData.contactDetails || fallbackCache.contactDetails;
+    const bookingState = rawData.bookingState || fallbackCache.bookingState || {};
+
+    const departureCabinIds = (searchParams.get('departureCabinId') || '').split('|');
+    const returnCabinIds = (searchParams.get('returnCabinId') || '').split('|');
+    const departureCabinNames = (searchParams.get('departureCabinName') || '').split('|');
+    const returnCabinNames = (searchParams.get('returnCabinName') || '').split('|');
+
+    const getCabinSelection = (tripData: any, index: number, tripType: 'departure' | 'return') => {
+      const routeCode = tripData?.route_code;
+      const routeBased = routeCode ? bookingState.route?.[routeCode] : undefined;
+      const routeName =
+        typeof routeBased === 'object'
+          ? routeBased.cabinName
+          : routeBased;
+      const routeId =
+        typeof routeBased === 'object' && routeBased.cabinId
+          ? Number(routeBased.cabinId)
+          : null;
+
+      const ids = tripType === 'departure' ? departureCabinIds : returnCabinIds;
+      const names = tripType === 'departure' ? departureCabinNames : returnCabinNames;
+      const queryCabinId = Number(ids[index] || ids[0]);
+      const queryCabinName = names[index] || names[0] || '';
+
+      return {
+        cabinId: routeId || (Number.isFinite(queryCabinId) && queryCabinId > 0 ? queryCabinId : null),
+        cabinName: routeName || queryCabinName || bookingState.cabin_type_name || '',
+      };
+    };
+
+    if (!passengerDetails || !contactDetails) {
+      console.error('Missing required booking data', {
+        hasPassengerDetails: Boolean(passengerDetails),
+        hasContactDetails: Boolean(contactDetails),
+        hasBookingState: Boolean(bookingState && Object.keys(bookingState).length > 0),
+      });
     const fallbackCache = fetchItem<any>('booking-response') || fetchItem<any>('booking-json') || {};
 
     const passengerDetails = rawData.passengerDetails || fallbackCache.passengerDetails;
@@ -457,7 +574,13 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
         if (!tripDataArray) return;
 
         tripDataArray.forEach((tripData, index) => {
+        tripDataArray.forEach((tripData, index) => {
           const tripId = tripData.id;
+          const isReturnTrip = (prepareBookingData?.return || []).some((trip) => trip.id === tripId);
+          const selection = getCabinSelection(tripData, index, isReturnTrip ? 'return' : 'departure');
+
+          let cabinId: number | null = selection.cabinId;
+          let cabinName = selection.cabinName;
           const isReturnTrip = (prepareBookingData?.return || []).some((trip) => trip.id === tripId);
           const selection = getCabinSelection(tripData, index, isReturnTrip ? 'return' : 'departure');
 
@@ -528,8 +651,10 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
       'paymongo-checkout': 'PayMongo',
     };
     const resolvedPaymentMethod = 'ONLINE';    
+    const resolvedPaymentMethod = 'ONLINE';    
     const resolvedEpaymentMethod = epaymentMethodForDB[effectiveMethod] ?? 'PayMongo';
     const tempTransactionRef = `PENDING-${Date.now()}-${Math.random().toString(36).slice(2, 9).toUpperCase()}`;
+    const bookingSource = typeof window !== 'undefined' ? window.location.origin : 'unknown';
     const bookingSource = typeof window !== 'undefined' ? window.location.origin : 'unknown';
 
     const vehicles = (rawData.vehicleDepartureDetails || []).map((v: any) => {
@@ -553,6 +678,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
     });
 
     const payload = {
+      bookingSource: bookingSource,
       bookingSource: bookingSource,
       bookingType: allTripIds.length > 1 ? 'Round Trip' : 'Single',
       trips: tripsPayload,
@@ -600,6 +726,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
         typeof pricingData?.grandTotal === 'number'
           ? pricingData.grandTotal
           : (pricingData?.trips?.reduce((sum, trip) => sum + (trip.grandTotal || 0), 0) || 0);
+      console.log('Grand total (PHP):', grandTotal);
       
       // Convert grand total to cents for PayMongo
       const amountInCents = Math.round(grandTotal * 100);
@@ -655,7 +782,7 @@ export default function PaymentConfirmationDetails({ departureTripId, returnTrip
         }
         checkoutUrl = mayaResponse.data.checkoutUrl;
       } else if (effectiveMethod === 'paymongo-checkout') {
-        // Only PayMongo enabled â†’ use checkout session (user picks method on PayMongo's page)
+        // Only PayMongo enabled → use checkout session (user picks method on PayMongo's page)
         const amountInCentsCalc = Math.round(grandTotal * 100);
         const checkoutRequest = {
           bookingPaymentId,

@@ -108,8 +108,12 @@ export async function getAvailableTrips(
           const segCabins = actualSegment.cabins || seg.cabins || [];
           const availableCabins: any[] = segCabins
             .map((c: any) => {
-              const cabinTypeName = c.cabin_type_name?.toUpperCase();
-              const adultFare = segRatesMap.get(cabinTypeName);
+              const lookupKey =
+                (c.code || c.cabin_type_code || c.cabin_type_name || '')
+                  .toString()
+                  .trim()
+                  .toUpperCase();
+              const adultFare = segRatesMap.get(lookupKey);
 
               if (adultFare === undefined) return null;
 
