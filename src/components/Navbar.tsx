@@ -74,7 +74,7 @@ const Navbar = ({
     <>
       <nav
         aria-label="Main navigation"
-        className={`w-full h-auto top-0 z-[50] ${position} ${backgroundColor} transition-all duration-300`}
+        className={`w-full h-auto top-0 z-50 ${position} ${backgroundColor} transition-all duration-300`}
       >
         <div className="px-4 sm:px-6 lg:px-10">
           <div className="flex items-center justify-between h-[80px] relative">

@@ -159,7 +159,7 @@ export default function BuilderLandingHeader({
   return (
     <>
       <header 
-        className="w-full border-b border-black/5 backdrop-blur"
+        className="w-full border-b border-black/5 backdrop-blur z-50"
         style={{ backgroundColor: `${theme.surface}F2` }} // ~95% opacity
       >
         <div className="flex items-center justify-between gap-6 px-4 sm:px-6 lg:px-10 py-5">
