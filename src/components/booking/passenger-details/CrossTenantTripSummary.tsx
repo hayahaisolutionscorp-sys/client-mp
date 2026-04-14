@@ -22,6 +22,7 @@ import { VehicleInformationFormHandle } from '@/components/VehicleInformationFor
 import { Button } from '@/components/ui/Button';
 import { IPrepareBookingData } from '@/models/booking/prepare-booking.model';
 import { PricingResponse } from '@/types/booking/pricing';
+import { getTripSedanFitCapacity } from '@/services/shipping-line/trip.service';
 
 export interface CrossTenantLeg {
   shippingLineId: string;
@@ -77,10 +78,28 @@ export default function CrossTenantTripSummary({ legs, departureCabinName, depar
     return legs.map(() => null);
   });
   const [legPricingLoading, setLegPricingLoading] = useState<boolean[]>(legs.map(() => false));
+  const [liveVehicleCapacities, setLiveVehicleCapacities] = useState<Record<string, number>>({});
 
-  const allDepartureTrips = legs.flatMap(leg => leg.trips);
-  const allReturnTrips = legs.flatMap(leg => leg.returnTrips || []);
-  const firstLegTrip = legs[0]?.trips?.[0];
+  const applyLiveCapacity = useCallback((trips: ITrip[]) => {
+    return trips.map((trip) => {
+      const liveCapacity = liveVehicleCapacities[String(trip.id)];
+      if (typeof liveCapacity !== 'number') return trip;
+      return {
+        ...trip,
+        availableVehicleCapacity: liveCapacity,
+        remainingVehicleCapacity: {
+          ...(trip.remainingVehicleCapacity || {}),
+          sedanFit: liveCapacity
+        }
+      };
+    });
+  }, [liveVehicleCapacities]);
+
+  const allDepartureTrips = applyLiveCapacity(legs.flatMap(leg => leg.trips));
+  const allReturnTrips = applyLiveCapacity(legs.flatMap(leg => leg.returnTrips || []));
+  const firstLegTrip = allDepartureTrips?.[0];
+  const firstLegVehicleSlots = firstLegTrip?.availableVehicleCapacity ?? 0;
+  const canAddVehicle = firstLegVehicleSlots > vehicleDepartureDetails.length;
 
   const handleTriggerAddVehicle = () => vehicleFormRef.current?.addVehicle();
   const handleTriggerAddCargo = () => cargoFormRef.current?.addCargo();
@@ -186,6 +205,48 @@ export default function CrossTenantTripSummary({ legs, departureCabinName, depar
     return () => { timers.forEach(t => { if (t) clearTimeout(t); }); };
   }, [legs, passengerDetails, vehicleDepartureDetails, cargoDetails]);
 
+  useEffect(() => {
+    let isCancelled = false;
+
+    const tripsToSync = [...legs.flatMap(leg => leg.trips), ...legs.flatMap(leg => leg.returnTrips || [])];
+    const tripIds = Array.from(new Set(tripsToSync.map((trip) => String(trip.id)).filter(Boolean)));
+
+    if (!tripIds.length) {
+      setLiveVehicleCapacities({});
+      return;
+    }
+
+    const syncLiveCapacities = async () => {
+      const results = await Promise.all(
+        tripIds.map(async (tripId) => {
+          const capacity = await getTripSedanFitCapacity(tripId);
+          return { tripId, capacity };
+        })
+      );
+
+      if (isCancelled) return;
+
+      const nextCapacities: Record<string, number> = {};
+      results.forEach(({ tripId, capacity }) => {
+        if (typeof capacity === 'number') {
+          nextCapacities[tripId] = capacity;
+        }
+      });
+
+      setLiveVehicleCapacities(nextCapacities);
+    };
+
+    void syncLiveCapacities();
+    const intervalId = window.setInterval(() => {
+      void syncLiveCapacities();
+    }, 30000);
+
+    return () => {
+      isCancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [legs]);
+
   return (
     <>
       <div className="px-2 w-full md:w-auto">
@@ -230,7 +291,7 @@ export default function CrossTenantTripSummary({ legs, departureCabinName, depar
           key="vehicle-form"
           ref={vehicleFormRef}
           rateTableId={firstLegTrip?.rateTableId ?? 0}
-          vehicleSlots={firstLegTrip?.availableVehicleCapacity ?? 0}
+          vehicleSlots={firstLegVehicleSlots}
           passengerDetails={passengerDetails ? passengerDetails : undefined}
           initialVehicles={vehicleDepartureDetails}
           shippingLineId={legs[0]?.shippingLineId}
@@ -267,6 +328,8 @@ export default function CrossTenantTripSummary({ legs, departureCabinName, depar
             variant="outline"
             className="border-2 w-full sm:w-auto"
             onClick={handleTriggerAddVehicle}
+            disabled={!canAddVehicle}
+            title={!canAddVehicle ? 'No vehicle slots available to add more vehicles.' : undefined}
             style={{ borderColor: themeSettings?.accent || '#23abff', color: themeSettings?.accent || '#23abff' }}
           >
             <FiPlus className="w-4 h-4" />
@@ -282,6 +345,15 @@ export default function CrossTenantTripSummary({ legs, departureCabinName, depar
             <FiPlus className="w-4 h-4" />
             Add Cargo
           </Button>
+        </div>
+
+        <div className="text-sm text-customText mt-2 md:text-right">
+          Live vehicle slots:{' '}
+          <span className={`font-semibold ${canAddVehicle ? 'text-green-600' : 'text-red-600'}`}>
+            {firstLegVehicleSlots}
+          </span>
+          {' '}
+          {!canAddVehicle && <span className="text-red-600">(All slots currently used)</span>}
         </div>
 
         <div className="text-sm text-customText leading-relaxed my-6 md:text-base">

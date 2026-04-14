@@ -28,6 +28,7 @@ interface VehicleTypes {
   vehicleTypeDescription: string;
   vehicleFare: number | 0;
   cargo_class?: string;
+  weight_limit?: number;
 }
 
 export interface VehicleInformationFormHandle {
@@ -97,7 +98,18 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
   );
 
   const handleAddVehicle = () => {
-    const totalPassengers = combinedPassengerData.length;
+    const passengerCountFromQuery = Number.parseInt(searchParams.get('passengerCount') || '1', 10);
+    const totalPassengers = Math.max(combinedPassengerData.length, passengerCountFromQuery || 1);
+
+    if (vehicleSlots > 0 && vehicles.length >= vehicleSlots) {
+      setAlertModal({
+        isOpen: true,
+        title: 'Vehicle Slot Limit Reached',
+        description: `Only ${vehicleSlots} vehicle slot(s) are currently available for this trip.`
+      });
+      return;
+    }
+
     if (vehicles.length >= totalPassengers) {
       setAlertModal({
         isOpen: true,
@@ -117,7 +129,9 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
         plateNumber: '',
         modelBody: '',
         driverName: '',
-        driverId: 0
+        driverId: 0,
+        weight: undefined,
+        weight_limit: undefined
       }
     ]);
   };
@@ -137,7 +151,8 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
     vehicleTypeId: number,
     vehicleTypeDescription: string,
     driverId: number,
-    cargo_class?: string
+    cargo_class?: string,
+    weight_limit?: number
   ) => {
     // Update the vehicle in the vehicles array
     const updatedVehicles = vehicles.map((vehicle) =>
@@ -148,7 +163,8 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
           vehicleTypeId: vehicleTypeId,
           vehicleTypeDescription: vehicleTypeDescription,
           driverId: driverId,
-          cargo_class: cargo_class
+          cargo_class: cargo_class,
+          weight_limit: weight_limit
         }
         : vehicle
     );
@@ -188,6 +204,7 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
           vehicleTypeDescription: '',
           vehicleFare: 0,
           cargo_class: undefined,
+          weight_limit: (vc as any).weight_limit
         })));
     } else {
       getVehicleTypes(shippingLineId).then((vehicleTypesData) => {
@@ -198,7 +215,8 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
             vehicleTypeName: vt.name,
             vehicleTypeDescription: vt.description,
             vehicleFare: 0,
-            cargo_class: (vt as any).cargo_class
+            cargo_class: (vt as any).cargo_class,
+            weight_limit: (vt as any).weight_limit
           }))
           .sort((a: VehicleTypes, b: VehicleTypes) => a.vehicleTypeName.localeCompare(b.vehicleTypeName)));
       }).catch(() => setVehicleTypes([]));
@@ -217,6 +235,7 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
           vehicleTypeDescription: '',
           vehicleFare: 0,
           cargo_class: undefined,
+          weight_limit: (vc as any).weight_limit
         })));
     } else if (leg2ShippingLineId) {
       getVehicleTypes(leg2ShippingLineId).then((data) => {
@@ -227,7 +246,8 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
             vehicleTypeName: vt.name,
             vehicleTypeDescription: vt.description,
             vehicleFare: 0,
-            cargo_class: (vt as any).cargo_class
+            cargo_class: (vt as any).cargo_class,
+            weight_limit: (vt as any).weight_limit
           }))
           .sort((a: VehicleTypes, b: VehicleTypes) => a.vehicleTypeName.localeCompare(b.vehicleTypeName)));
       }).catch(() => setLeg2VehicleTypes([]));
@@ -258,7 +278,9 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
         plateNumber: '',
         modelBody: '',
         driverName: '',
-        driverId: 0
+        driverId: 0,
+        weight: undefined,
+        weight_limit: undefined
       }));
       updateVehicles(newVehicles);
     }
@@ -276,14 +298,16 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
           plateNumber: '',
           modelBody: '',
           driverName: '',
-          driverId: 0
+          driverId: 0,
+          weight: undefined,
+          weight_limit: undefined
         }
       ]);
     }
   }, [cargoRequired, updateVehicles, vehicles.length]); // Add cargoRequired to dependencies
 
   // Update the early return condition
-  if (!cargoRequired && (!vehicleSlots || vehicleSlots === 0)) {
+  if (!cargoRequired && vehicleSlots === 0 && vehicles.length === 0) {
     return null;
   }
 
@@ -392,7 +416,8 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
                     selectedVehicleType?.vehicleTypeId || 0,
                     selectedVehicleType?.vehicleTypeDescription || '',
                     vehicle.driverId,
-                    selectedVehicleType?.cargo_class
+                    selectedVehicleType?.cargo_class,
+                    selectedVehicleType?.weight_limit
                   );
                 }}
               >
@@ -432,7 +457,8 @@ const VehicleInformationForm: ForwardRefRenderFunction<VehicleInformationFormHan
                           leg2ModelBody: value,
                           leg2VehicleTypeId: selected?.vehicleTypeId || 0,
                           leg2VehicleTypeDescription: selected?.vehicleTypeDescription || '',
-                          leg2CargoClass: selected?.cargo_class
+                          leg2CargoClass: selected?.cargo_class,
+                          leg2Weight_limit: selected?.weight_limit
                         }
                         : v
                     );

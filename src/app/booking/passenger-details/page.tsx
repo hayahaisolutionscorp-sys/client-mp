@@ -29,7 +29,7 @@ export default async function PassengerDetails(props: PageProps) {
 
   const cleanTripId = (id: string | undefined) => {
     if (!id) return undefined;
-    return id.replace(/^(direct-|connecting-)/, '');
+    return id.replace(/^(direct-|connecting-|return-)/, '');
   };
 
   const departureTripId = cleanTripId(searchParams.departureTripId);

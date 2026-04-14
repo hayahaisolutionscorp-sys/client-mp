@@ -295,6 +295,12 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
 
         const allVehicleTripAssignments = allLegTripIds.map(id => ({ tripId: id }));
 
+        const parseOptionalNumber = (value: unknown): number | undefined => {
+          if (value === null || value === undefined || value === '') return undefined;
+          const parsed = Number(value);
+          return Number.isFinite(parsed) ? parsed : undefined;
+        };
+
         const vehicles = (rawData.vehicleDepartureDetails || []).map((v: any) => ({
           plateNumber: v.plateNumber || v.plateNo || '',
           make: v.make || '',
@@ -304,10 +310,10 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
           usesPendingModel: !v.vehicleModelId,
           driverId: (v.driverId != null && v.driverId !== '') ? String(v.driverId) : null,
           cargoClassCode: v.cargo_class || v.cargoClassCode || '',
-          length: v.length || 0,
-          width: v.width || 0,
-          height: v.height || 0,
-          weight: v.weight || 0,
+          length: parseOptionalNumber(v.length) ?? 0,
+          width: parseOptionalNumber(v.width) ?? 0,
+          height: parseOptionalNumber(v.height) ?? 0,
+          weight: parseOptionalNumber(v.weight) ?? parseOptionalNumber(v.weight_limit) ?? 0,
           tripAssignments: allVehicleTripAssignments,
         }));
 

@@ -24,6 +24,7 @@ import { ITrip } from '@/models';
 import { VehicleInformationFormHandle } from '@/components/VehicleInformationForm';
 import { Button } from '@/components/ui/Button';
 import { IPrepareBookingData } from '@/models/booking/prepare-booking.model';
+import { getTripSedanFitCapacity } from '@/services/shipping-line/trip.service';
 
 interface Props {
   departureTripId?: string;
@@ -83,8 +84,27 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
 
   const [pricingData, setPricingData] = useState<any>(() => getCachedData()?.pricingData || null);
   const [isPricingLoading, setIsPricingLoading] = useState(false);
+  const [liveVehicleCapacities, setLiveVehicleCapacities] = useState<Record<string, number>>({});
 
-  const departureTrip = departureTrips[0];
+  const applyLiveCapacity = useCallback((trips: ITrip[]) => {
+    return trips.map((trip) => {
+      const liveCapacity = liveVehicleCapacities[String(trip.id)];
+      if (typeof liveCapacity !== 'number') return trip;
+      return {
+        ...trip,
+        availableVehicleCapacity: liveCapacity,
+        remainingVehicleCapacity: {
+          ...(trip.remainingVehicleCapacity || {}),
+          sedanFit: liveCapacity
+        }
+      };
+    });
+  }, [liveVehicleCapacities]);
+
+  const departureTripsWithLive = applyLiveCapacity(departureTrips);
+  const returnTripsWithLive = applyLiveCapacity(returnTrips);
+  const departureVehicleSlots = departureTripsWithLive?.[0]?.availableVehicleCapacity ?? 0;
+  const canAddVehicle = departureVehicleSlots > vehicleDepartureDetails.length;
 
   const handleTriggerAddVehicle = () => vehicleFormRef.current?.addVehicle();
   const handleTriggerAddCargo = () => cargoFormRef.current?.addCargo();
@@ -136,6 +156,48 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
   useEffect(() => {
     if (!initialDepartureTrips && !initialReturnTrips) fetchTrips();
   }, [fetchTrips, initialDepartureTrips, initialReturnTrips]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const tripsToSync = [...departureTrips, ...returnTrips];
+    const tripIds = Array.from(new Set(tripsToSync.map((trip) => String(trip.id)).filter(Boolean)));
+
+    if (!tripIds.length) {
+      setLiveVehicleCapacities({});
+      return;
+    }
+
+    const syncLiveCapacities = async () => {
+      const results = await Promise.all(
+        tripIds.map(async (tripId) => {
+          const capacity = await getTripSedanFitCapacity(tripId);
+          return { tripId, capacity };
+        })
+      );
+
+      if (isCancelled) return;
+
+      const nextCapacities: Record<string, number> = {};
+      results.forEach(({ tripId, capacity }) => {
+        if (typeof capacity === 'number') {
+          nextCapacities[tripId] = capacity;
+        }
+      });
+
+      setLiveVehicleCapacities(nextCapacities);
+    };
+
+    void syncLiveCapacities();
+    const intervalId = window.setInterval(() => {
+      void syncLiveCapacities();
+    }, 30000);
+
+    return () => {
+      isCancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [departureTrips, returnTrips]);
 
   useEffect(() => {
     const fetchPricing = async () => {
@@ -239,7 +301,7 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
           />
         </div>
 
-        <PassengerTripCard departureTrips={departureTrips} returnTrips={returnTrips} />
+        <PassengerTripCard departureTrips={departureTripsWithLive} returnTrips={returnTripsWithLive} />
 
         {/* Forms */}
         <PassengerDetailsForm
@@ -257,8 +319,8 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
         <VehicleInformationForm
           key="vehicle-form"
           ref={vehicleFormRef}
-          rateTableId={departureTrips?.[0]?.rateTableId ?? 0}
-          vehicleSlots={departureTrips?.[0]?.availableVehicleCapacity ?? 0}
+          rateTableId={departureTripsWithLive?.[0]?.rateTableId ?? 0}
+          vehicleSlots={departureVehicleSlots}
           passengerDetails={passengerDetails ? passengerDetails : undefined}
           initialVehicles={vehicleDepartureDetails}
           shippingLineId={shippingLineId}
@@ -290,6 +352,8 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
             variant="outline"
             className="border-2 w-full sm:w-auto"
             onClick={handleTriggerAddVehicle}
+            disabled={!canAddVehicle}
+            title={!canAddVehicle ? 'No vehicle slots available to add more vehicles.' : undefined}
             style={{ borderColor: themeSettings?.accent || '#23abff', color: themeSettings?.accent || '#23abff' }}
           >
             <FiPlus className="w-4 h-4" />
@@ -305,6 +369,15 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
             <FiPlus className="w-4 h-4" />
             Add Cargo
           </Button>
+        </div>
+
+        <div className="text-sm text-customText mt-2 md:text-right">
+          Live vehicle slots:{' '}
+          <span className={`font-semibold ${canAddVehicle ? 'text-green-600' : 'text-red-600'}`}>
+            {departureVehicleSlots}
+          </span>
+          {' '}
+          {!canAddVehicle && <span className="text-red-600">(All slots currently used)</span>}
         </div>
 
         <div className="text-sm text-customText leading-relaxed my-6 md:text-base">
@@ -331,8 +404,8 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
       {/* Right Column (Fare Summary) */}
       <div className="px-2 mt-6 md:mt-[65px] w-full md:w-auto">
         <FareSummary
-          departureTrips={departureTrips}
-          returnTrips={returnTrips}
+          departureTrips={departureTripsWithLive}
+          returnTrips={returnTripsWithLive}
           passengerDetails={passengerDetails ? passengerDetails : undefined}
           contactDetails={contactDetails ? contactDetails : undefined}
           vehicleDepartureDetails={vehicleDepartureDetails || undefined}

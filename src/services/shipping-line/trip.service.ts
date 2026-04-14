@@ -1,5 +1,6 @@
-import { TRIP_API, CORE_API_URL } from 'constants/api';
+import { TRIP_API, CORE_API_URL, CARGO_PLANNING_API } from 'constants/api';
 import { toPhilippinesTime } from 'helpers/date.helpers';
+import axios from '@/services/core/axios';
 
 import { getAllCabinTypes } from './cabin-type.service';
 import { getAllShippingLinesServer } from './shipping-line.service';
@@ -316,4 +317,41 @@ export interface Filters {
 }
 
 type TripCache = { [tripId: number]: ITrip };
+
+interface SedanFitCapacityApiResponse {
+  data?: {
+    totals?: {
+      totalRemainingSedanCount?: number;
+    };
+  };
+}
+
+const TRIP_ID_PREFIX_REGEX = /^(direct-|connecting-|return-)/i;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export async function getTripSedanFitCapacity(
+  tripId: number | string
+): Promise<number | undefined> {
+  try {
+    const rawTripId = String(tripId).trim();
+    const normalizedTripId = rawTripId.replace(TRIP_ID_PREFIX_REGEX, '');
+
+    // Capacity endpoint expects a UUID trip ID.
+    if (!UUID_REGEX.test(normalizedTripId)) {
+      return undefined;
+    }
+
+    const response = await axios.get<SedanFitCapacityApiResponse>(
+      `${CARGO_PLANNING_API}/trips/${normalizedTripId}/capacity/sedan-fit`
+    );
+
+    const total = response.data?.data?.totals?.totalRemainingSedanCount;
+    return typeof total === 'number' ? total : undefined;
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Failed to fetch sedan-fit capacity for trip:', tripId, error);
+    }
+    return undefined;
+  }
+}
 
