@@ -10,6 +10,62 @@ interface SSEMessageEvent {
     reason?: string;
 }
 
+function cleanCode(value: unknown): string {
+    return String(value ?? '').trim();
+}
+
+function toFiniteNumber(value: unknown): number | null {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+    }
+
+    if (typeof value === 'string' && value.trim().length > 0) {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    return null;
+}
+
+function buildAdultRateMap(passengerRates: any[]): Map<string, number> {
+    const ratesMap = new Map<string, number>();
+
+    passengerRates.forEach((rate: any) => {
+        const passengerTypeCode = cleanCode(rate.passenger_type_code);
+        if (passengerTypeCode && passengerTypeCode !== 'ADULT') {
+            return;
+        }
+
+        const accomCode = cleanCode(rate.accom_code);
+        if (!accomCode) {
+            return;
+        }
+
+        const amount = toFiniteNumber(rate.amount);
+        if (amount === null) {
+            return;
+        }
+
+        const current = ratesMap.get(accomCode);
+        if (current === undefined || amount < current) {
+            ratesMap.set(accomCode, amount);
+        }
+    });
+
+    return ratesMap;
+}
+
+function getVehicleCapacityTotal(remainingVehicles: Record<string, unknown>): number {
+    const explicitTotal = toFiniteNumber(remainingVehicles.total);
+    if (explicitTotal !== null) {
+        return Math.max(0, explicitTotal);
+    }
+
+    return Object.values(remainingVehicles).reduce<number>((sum, value) => {
+        return sum + (toFiniteNumber(value) ?? 0);
+    }, 0);
+}
+
 /**
  * Connects to the API V2 trips SSE endpoint and collects all trips into a single array.
  */
@@ -40,7 +96,6 @@ export async function fetchTripsViaSSE(
         }
 
         if (searchQuery.passengerCount !== undefined) params.append('passenger_count', searchQuery.passengerCount.toString());
-        if (searchQuery.vehicleCount !== undefined) params.append('vehicle_count', searchQuery.vehicleCount.toString());
         if (searchQuery.departureDate) {
             const formattedDate = toPhilippinesTime(searchQuery.departureDate, 'YYYY-MM-DD');
             if (formattedDate) params.append('departure_date', formattedDate);
@@ -161,33 +216,37 @@ function mapSSEToITrip(rawTrips: any[]): ITrip[] {
             const passengerRates = actualSegment.passenger_rates || seg.passenger_rates || [];
             const rateSnapshotId = actualSegment.rate_table_id || seg.rate_table_id || 0;
 
-            // Create a map of cabin type code to adult rate amount for this specific segment/route
-            // Similar to how client API trip.service.ts does it locally
-            const segRatesMap = new Map<string, number>();
-            if (Array.isArray(passengerRates)) {
-                passengerRates.forEach((rate: any) => {
-                    if (rate.passenger_type_code === 'ADULT' && rate.accom_code) {
-                        segRatesMap.set(rate.accom_code.toUpperCase(), parseFloat(rate.amount));
-                    }
-                });
-            }
+            const segRatesMap = Array.isArray(passengerRates)
+                ? buildAdultRateMap(passengerRates)
+                : new Map<string, number>();
 
             const availableCabins: any[] = segCabins
                 .map((c: any) => {
-                    const cabinTypeName = c.cabin_type_name?.toUpperCase() || c.cabin_type_code?.toUpperCase();
+                    const cabinCode = cleanCode(c.code);
+                    if (!cabinCode) return null;
+
                     // First check segRatesMap, if not found then fallback to c.adultFare
-                    let adultFare = segRatesMap.get(cabinTypeName);
+                    let adultFare = segRatesMap.get(cabinCode);
                     if (adultFare === undefined) adultFare = c.adultFare;
 
                     if (adultFare === undefined || adultFare === null) return null;
 
                     const segCabinCapacities = actualSegment.cabin_capacities || seg.cabin_capacities || t.cabin_capacities || {};
                     const segRemainingPassengers = actualSegment.remaining_capacities?.passengers || seg.remaining_capacities?.passengers || t.remaining_capacities?.passengers || {};
-                    const cabinCapInfo = segCabinCapacities[c.name] || segCabinCapacities[c.cabin_type_name] || {};
+                    const cabinCapInfo =
+                        segCabinCapacities[cabinCode] ||
+                        segCabinCapacities[c.code] ||
+                        segCabinCapacities[c.name] ||
+                        {};
 
                     const sseAvailableCap = typeof cabinCapInfo === 'number' 
                         ? cabinCapInfo 
-                        : (cabinCapInfo.remaining ?? segRemainingPassengers[c.name] ?? segRemainingPassengers[c.cabin_type_name] ?? c.remaining_capacity ?? c.max_passenger_capacity);
+                        : (cabinCapInfo.remaining
+                            ?? segRemainingPassengers[cabinCode]
+                            ?? segRemainingPassengers[c.code]
+                            ?? segRemainingPassengers[c.name]
+                            ?? c.remaining_capacity
+                            ?? c.max_passenger_capacity);
                     
                     const sseTotalCap = cabinCapInfo.max ?? c.capacity ?? c.max_passenger_capacity;
 
@@ -198,17 +257,10 @@ function mapSSEToITrip(rawTrips: any[]): ITrip[] {
                             id: c.id,
                             shipId: c.ship_id || actualSegment.ship_id || seg.ship_id,
                             cabinTypeId: c.cabin_type_id,
-                            cabinType: {
-                                id: c.cabin_type_id,
-                                shippingLineId: 0,
-                                name: c.cabin_type_name || c.name,
-                                description: c.cabin_type_description
-                            },
-                            name: c.name,
-                            recommendedPassengerCapacity: c.max_passenger_capacity,
-                            cabin_type_name: c.cabin_type_name,
-                            cabin_type_description: c.cabin_type_description
+                            name: c.name || cabinCode,
+                            recommendedPassengerCapacity: c.max_passenger_capacity
                         },
+                        cabinCode,
                         availablePassengerCapacity: sseAvailableCap,
                         passengerCapacity: sseTotalCap,
                         adultFare: adultFare
@@ -217,7 +269,7 @@ function mapSSEToITrip(rawTrips: any[]): ITrip[] {
                 .filter((c: any) => c !== null); // Filter out cabins without rates
 
             const remainingVehicles = actualSegment.remaining_capacities?.vehicles || seg.remaining_capacities?.vehicles || {};
-            const totalVehicleCapacity = Object.values(remainingVehicles).reduce((sum: number, val: any) => sum + (val as number || 0), 0);
+            const totalVehicleCapacity = getVehicleCapacityTotal(remainingVehicles);
 
             return {
                 id: seg.id || actualSegment.id,

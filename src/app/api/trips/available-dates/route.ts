@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
     const origin_code = searchParams.get('origin_code');
     const destination_code = searchParams.get('destination_code');
     const limit = searchParams.get('limit') || '5';
-    const vehicle_count = searchParams.get('vehicle_count') || '0';
+
+    const parsedLimit = Number.parseInt(limit, 10);
 
     if (!origin_code || !destination_code) {
       return NextResponse.json(
@@ -21,8 +22,7 @@ export async function GET(request: NextRequest) {
     const backendParams = new URLSearchParams({
       origin_code,
       destination_code,
-      limit,
-      vehicle_count,
+      limit: String(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 5),
     });
 
     const response = await fetch(`${API_BASE_URL}/public/trips/available-dates?${backendParams.toString()}`, {

@@ -22,6 +22,7 @@ import {
 } from "constants/default";
 import { getPorts, getDestinationPortsByOrigin } from "@/services";
 import { isEffectiveClientApiMode } from 'constants/api';
+import { toCanonicalDate } from 'helpers/date.helpers';
 
 const SearchBox: React.FC = () => {
   const router = useRouter();
@@ -128,24 +129,13 @@ const SearchBox: React.FC = () => {
     }
 
     try {
-      // Get the dates in correct format for filtering
-      const departureDateForFilter = departureDate ?
-        new Date(departureDate.getTime() - departureDate.getTimezoneOffset() * 60000).toISOString() : undefined;
+      const departureDateParam = toCanonicalDate(departureDate);
+      const returnDateParam = toCanonicalDate(returnDate);
 
-      const returnDateForFilter = returnDate ?
-        new Date(returnDate.getTime() - returnDate.getTimezoneOffset() * 60000).toISOString() : undefined;
-
-      // Prepare search values, ensuring number fields are converted to strings
-      // Prepare search values, ensuring number fields are converted to strings
-      const toNoonISO = (d: Date) => {
-        const noon = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
-        return noon.toISOString();
-      };
-
-      const searchValues: any = {
+      const searchValues: Record<string, string | undefined> = {
         bookingType: bookingType?.replace("Trip", "").trim() ?? undefined,
-        departure_date: departureDate ? toNoonISO(departureDate) : undefined,
-        returnDate: bookingType?.toLowerCase() === "round trip" ? (returnDate ? toNoonISO(returnDate) : undefined) : undefined,
+        departure_date: departureDateParam ?? undefined,
+        return_date: bookingType?.toLowerCase() === "round trip" ? (returnDateParam ?? undefined) : undefined,
         passenger_count: passengerCount !== undefined ? passengerCount.toString() : undefined,
         vehicle_count: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
         sort: "departureDate",

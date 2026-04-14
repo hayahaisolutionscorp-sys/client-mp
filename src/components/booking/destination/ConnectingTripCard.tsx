@@ -325,6 +325,7 @@ export default function ConnectingTripCard({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {segment.availableCabins.map((cabinData) => {
                                         const cabin = cabinData.cabin;
+                                        const cabinLabel = cabin?.name || cabinData.cabinCode || 'N/A';
                                         const isCabinSelected = segmentSelection?.cabinId === cabinData.cabinId;
 
                                         return (
@@ -346,7 +347,7 @@ export default function ConnectingTripCard({
                                             >
                                                 <div className="flex justify-between items-start mb-4">
                                                     <h4 className="text-lg font-semibold text-gray-900">
-                                                        {cabin?.cabinType?.name || 'N/A'}
+                                                        {cabinLabel}
                                                     </h4>
                                                     <div className="flex items-center space-x-2 text-sm">
                                                         <MdEventSeat
@@ -384,7 +385,7 @@ export default function ConnectingTripCard({
                                                                         segment.id,
                                                                         cabinData.cabinId,
                                                                         cabinData.cabin?.cabinTypeId || 0,
-                                                                        cabin?.cabinType?.name || 'N/A',
+                                                                        cabinLabel,
                                                                         cabinData.adultFare,
                                                                         trip.departureDateIso
                                                                     );

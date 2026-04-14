@@ -25,6 +25,7 @@ import {
 import { IPort } from '@/models';
 import { getPorts, getDestinationPortsByOrigin } from '@/services';
 import { useBranding } from '@/hooks/branding';
+import { toCanonicalDate, toPhilippinesTime } from 'helpers/date.helpers';
 
 interface SearchHeaderProps {
   isScroll?: boolean;
@@ -163,7 +164,10 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
       setDepartureDate(new Date(depDateParam!));
     }
 
-    const retDateParam = searchParams.get('filterSpecificReturnDate') || searchParams.get('returnDate');
+    const retDateParam =
+      searchParams.get('filterSpecificReturnDate') ||
+      searchParams.get('return_date') ||
+      searchParams.get('returnDate');
     if (isValidDate(retDateParam)) {
       setReturnDate(new Date(retDateParam!));
     } else if (isValidDate(depDateParam)) {
@@ -232,18 +236,28 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
 
     try {
       // Prepare search values
-      const toNoonISO = (d: Date) => {
-        const noon = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
-        return noon.toISOString();
+      const toApiDate = (date: Date) => {
+        const canonicalDate = toCanonicalDate(date);
+        if (canonicalDate) return canonicalDate;
+
+        const philippineDate = toPhilippinesTime(date.toISOString(), 'YYYY-MM-DD');
+        if (philippineDate) return philippineDate;
+
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
       };
 
       const searchValues = {
         bookingType: bookingType?.replace('Trip', '').trim() ?? undefined,
         origin_code: selectedOriginPort?.code ?? undefined,
         destination_code: selectedDestinationPort?.code ?? undefined,
-        departure_date: departureDate ? toNoonISO(departureDate) : undefined,
+        departure_date: departureDate ? toApiDate(departureDate) : undefined,
+        return_date:
+          bookingType?.toLowerCase() === 'round trip' ? (returnDate ? toApiDate(returnDate) : undefined) : undefined,
         returnDate:
-          bookingType?.toLowerCase() === 'round trip' ? (returnDate ? toNoonISO(returnDate) : undefined) : undefined,
+          bookingType?.toLowerCase() === 'round trip' ? (returnDate ? toApiDate(returnDate) : undefined) : undefined,
         passenger_count: passengerCount !== undefined ? passengerCount.toString() : undefined,
         vehicle_count: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
         sort: 'departureDate',

@@ -503,6 +503,7 @@ export default function TripCards({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {trip.availableCabins.map((cabinData) => {
                     const cabin = cabinData.cabin;
+                    const cabinLabel = cabin?.name || cabinData.cabinCode || 'N/A';
                     const isCabinSelected =
                       selectedCabin?.cabinId === cabinData.cabinId && selectedCabin.tripId === trip.id;
 
@@ -522,7 +523,7 @@ export default function TripCards({
                         }
                       >
                         <div className="flex justify-between items-start mb-4">
-                          <h4 className="text-lg font-semibold text-gray-900">{cabin?.cabin_type_name || cabin?.cabinType?.name || 'N/A'}</h4>
+                          <h4 className="text-lg font-semibold text-gray-900">{cabinLabel}</h4>
                           <div className="flex items-center space-x-2 text-sm">
                             <MdEventSeat
                               className="w-4 h-4"
@@ -559,7 +560,7 @@ export default function TripCards({
                                     trip.id,
                                     cabinData.cabinId,
                                     cabinData.cabin?.cabinTypeId || 0,
-                                    cabin?.cabin_type_name || cabin?.cabinType?.name || 'N/A',
+                                    cabinLabel,
                                     cabinData.adultFare,
                                     trip.departureDateIso
                                   );

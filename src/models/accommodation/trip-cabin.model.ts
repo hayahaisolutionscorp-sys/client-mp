@@ -22,6 +22,7 @@ export interface ITripCabin {
   tripId: number;
   trip?: ITrip;
   cabinId: number;
+  cabinCode?: string;
   cabin?: ICabin;
   seatPlanId?: number;
   seatPlan?: ISeatPlan;

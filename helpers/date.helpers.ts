@@ -32,6 +32,36 @@ export function toPhilippinesTime(dateIso: string, format: string): string {
   return dayjs(dateIso).tz('Asia/Shanghai').format(format);
 }
 
+export function toCanonicalDate(value: string | Date | null | undefined): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    // Keep already canonical dates untouched.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return trimmed;
+    }
+
+    if (!dayjs(trimmed).isValid()) {
+      return null;
+    }
+
+    return dayjs(trimmed).tz('Asia/Shanghai').format('YYYY-MM-DD');
+  }
+
+  if (!dayjs(value).isValid()) {
+    return null;
+  }
+
+  return dayjs(value).tz('Asia/Shanghai').format('YYYY-MM-DD');
+}
+
 export function getDefaultDOB(): string {
   const today = new Date();
   today.setFullYear(today.getFullYear() - 40); // Subtract 40 years

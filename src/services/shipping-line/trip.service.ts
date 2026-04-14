@@ -13,6 +13,62 @@ import { IPort, ITrip, ICabinType, IShippingLine } from '@/models';
 import tripsData from '@/data/trips.json';
 import portsData from '@/data/ports.json';
 
+function cleanCode(value: unknown): string {
+  return String(value ?? '').trim();
+}
+
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
+function buildAdultRateMap(passengerRates: any[]): Map<string, number> {
+  const ratesMap = new Map<string, number>();
+
+  passengerRates.forEach((rate: any) => {
+    const passengerTypeCode = cleanCode(rate.passenger_type_code);
+    if (passengerTypeCode && passengerTypeCode !== 'ADULT') {
+      return;
+    }
+
+    const accomCode = cleanCode(rate.accom_code);
+    if (!accomCode) {
+      return;
+    }
+
+    const amount = toFiniteNumber(rate.amount);
+    if (amount === null) {
+      return;
+    }
+
+    const current = ratesMap.get(accomCode);
+    if (current === undefined || amount < current) {
+      ratesMap.set(accomCode, amount);
+    }
+  });
+
+  return ratesMap;
+}
+
+function getVehicleCapacityTotal(remainingVehicles: Record<string, unknown>): number {
+  const explicitTotal = toFiniteNumber(remainingVehicles.total);
+  if (explicitTotal !== null) {
+    return Math.max(0, explicitTotal);
+  }
+
+  return Object.values(remainingVehicles).reduce<number>((sum, value) => {
+    return sum + (toFiniteNumber(value) ?? 0);
+  }, 0);
+}
+
 export async function getTripsDestinationByPortId(portId: number): Promise<IPort[]> {
   await new Promise(resolve => setTimeout(resolve, 100));
   // Return all other ports as potential destinations
@@ -36,7 +92,6 @@ export async function getAvailableTrips(
     if (searchQuery.origin_code) params.append('origin_code', searchQuery.origin_code);
     if (searchQuery.destination_code) params.append('destination_code', searchQuery.destination_code);
     if (searchQuery.passengerCount !== undefined) params.append('passenger_count', searchQuery.passengerCount.toString());
-    if (searchQuery.vehicleCount !== undefined) params.append('vehicle_count', searchQuery.vehicleCount.toString());
     if (searchQuery.commodity_id) params.append('commodity_id', searchQuery.commodity_id);
     if (searchQuery.shippingLineIds) params.append('shippingLineIds', searchQuery.shippingLineIds);
     if (searchQuery.departureDate) {
@@ -84,47 +139,46 @@ export async function getAvailableTrips(
             // Connecting trip segments carry rates directly
             const passengerRates = actualSegment.passenger_rates || seg.passenger_rates || [];
             rateSnapshotId = actualSegment.rate_table_id || seg.rate_table_id || 0;
-            if (Array.isArray(passengerRates)) {
-              passengerRates.forEach((rate: any) => {
-                if (rate.passenger_type_code === 'ADULT' && rate.accom_code) {
-                  segRatesMap.set(rate.accom_code.toUpperCase(), parseFloat(rate.amount));
-                }
-              });
-            }
+            segRatesMap = Array.isArray(passengerRates)
+              ? buildAdultRateMap(passengerRates)
+              : new Map<string, number>();
           } else {
             // Direct trips look up rates from the top-level allRates map by route code
             const routeCode = `${actualSegment.source_port_code}-${actualSegment.destination_port_code}`;
             const routeRates = allRates[routeCode] || {};
             const passengerRates = routeRates.passenger_rates || [];
             rateSnapshotId = routeRates.snapshot?.id ? parseInt(routeRates.snapshot.id, 10) : 0;
-            if (Array.isArray(passengerRates)) {
-              passengerRates.forEach((rate: any) => {
-                if (rate.passenger_type_code === 'ADULT' && rate.accom_code) {
-                  segRatesMap.set(rate.accom_code.toUpperCase(), parseFloat(rate.amount));
-                }
-              });
-            }
+            segRatesMap = Array.isArray(passengerRates)
+              ? buildAdultRateMap(passengerRates)
+              : new Map<string, number>();
           }
 
           const segCabins = actualSegment.cabins || seg.cabins || [];
           const availableCabins: any[] = segCabins
             .map((c: any) => {
-              const lookupKey =
-                (c.code || c.cabin_type_code || c.cabin_type_name || '')
-                  .toString()
-                  .trim()
-                  .toUpperCase();
-              const adultFare = segRatesMap.get(lookupKey);
+              const cabinCode = cleanCode(c.code);
+              if (!cabinCode) return null;
+
+              const adultFare = segRatesMap.get(cabinCode);
 
               if (adultFare === undefined) return null;
 
               const segCabinCapacities = actualSegment.cabin_capacities || seg.cabin_capacities || {};
               const segRemainingPassengers = actualSegment.remaining_capacities?.passengers || seg.remaining_capacities?.passengers || {};
-              const cabinInfo = segCabinCapacities[c.name] || segCabinCapacities[c.cabin_type_name] || {};
+              const cabinInfo =
+                segCabinCapacities[cabinCode] ||
+                segCabinCapacities[c.code] ||
+                segCabinCapacities[c.name] ||
+                {};
 
               const availableCap = typeof cabinInfo === 'number' 
                 ? cabinInfo 
-                : (cabinInfo.remaining ?? segRemainingPassengers[c.name] ?? segRemainingPassengers[c.cabin_type_name] ?? c.remaining_capacity ?? c.max_passenger_capacity);
+                : (cabinInfo.remaining
+                  ?? segRemainingPassengers[cabinCode]
+                  ?? segRemainingPassengers[c.code]
+                  ?? segRemainingPassengers[c.name]
+                  ?? c.remaining_capacity
+                  ?? c.max_passenger_capacity);
               
               const totalCap = cabinInfo.max ?? c.capacity ?? c.max_passenger_capacity;
 
@@ -135,17 +189,10 @@ export async function getAvailableTrips(
                   id: c.id,
                   shipId: actualSegment.ship_id || seg.ship_id,
                   cabinTypeId: c.cabin_type_id,
-                  cabinType: {
-                    id: c.cabin_type_id,
-                    shippingLineId: 0,
-                    name: c.cabin_type_name || c.name,
-                    description: c.cabin_type_description
-                  },
-                  name: c.name,
-                  recommendedPassengerCapacity: c.max_passenger_capacity,
-                  cabin_type_name: c.cabin_type_name,
-                  cabin_type_description: c.cabin_type_description
+                  name: c.name || cabinCode,
+                  recommendedPassengerCapacity: c.max_passenger_capacity
                 },
+                cabinCode,
                 availablePassengerCapacity: availableCap,
                 passengerCapacity: totalCap,
                 adultFare: adultFare
@@ -154,7 +201,7 @@ export async function getAvailableTrips(
             .filter((c: any) => c !== null);
 
           const remainingVehicles = actualSegment.remaining_capacities?.vehicles || seg.remaining_capacities?.vehicles || {};
-          const totalVehicleCapacity = Object.values(remainingVehicles).reduce((sum: number, val: any) => sum + (val || 0), 0);
+          const totalVehicleCapacity = getVehicleCapacityTotal(remainingVehicles);
 
           return {
             id: seg.id || actualSegment.id,

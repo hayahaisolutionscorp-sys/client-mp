@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { FiChevronLeft, FiChevronRight, FiLoader } from "react-icons/fi";
 import { Button } from "@/components/ui/Button";
 
-import { toPhilippinesTime } from "helpers/date.helpers";
+import { toCanonicalDate, toPhilippinesTime } from "helpers/date.helpers";
 import { DATE_PRIMARY_DEFAULT_FORMAT, DAY_DEFAULT_FORMAT } from "constants/default";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { hexToRgb } from "helpers/theme.helpers";
@@ -24,10 +24,10 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
   useEffect(() => {
     const queryKey = label === "Departure"
       ? ["filterSpecificDepartureDate", "departure_date", "departureDate"]
-      : ["filterSpecificReturnDate", "returnDate"];
+      : ["filterSpecificReturnDate", "return_date", "returnDate"];
 
     const dateFromParams = queryKey.reduce<string | null>((acc, key) => acc || searchParams.get(key), null);
-    const paramsDate = dateFromParams ? new Date(dateFromParams).toISOString() : null;
+    const paramsDate = toCanonicalDate(dateFromParams);
     setSelectedDate(paramsDate);
 
     // Ensure selected date is the first in the window
@@ -100,12 +100,15 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
 
   // Handle date selection and unselection
   const handleDateClick = (date: string) => {
-    const localDate = new Date(date);
-    localDate.setHours(12, 0, 0, 0);
-    const isoString = localDate.toISOString();
+    const canonicalDate = toCanonicalDate(date);
+    if (!canonicalDate) {
+      return;
+    }
+
+    const selectedDateValue = new Date(canonicalDate);
 
     // Update state immediately for visual feedback
-    setSelectedDate(isoString);
+    setSelectedDate(canonicalDate);
 
     const queryParams = new URLSearchParams(window.location.search);
     const isDeparture = label === "Departure";
@@ -115,24 +118,26 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
     // Get current departure and return dates
     const currentDeparture = queryParams.get(departureKey);
     const currentReturn = queryParams.get(returnKey);
+    const currentDepartureDate = currentDeparture ? new Date(currentDeparture) : null;
+    const currentReturnDate = currentReturn ? new Date(currentReturn) : null;
 
     if (isDeparture) {
-      queryParams.set(departureKey, isoString);
+      queryParams.set(departureKey, canonicalDate);
       // If return date exists and is before the new departure date, adjust it
-      if (currentReturn && new Date(currentReturn) < localDate) {
-        queryParams.set(returnKey, isoString);
+      if (currentReturnDate && currentReturnDate < selectedDateValue) {
+        queryParams.set(returnKey, canonicalDate);
       }
     } else {
       // This is return date selection
-      queryParams.set(returnKey, isoString);
+      queryParams.set(returnKey, canonicalDate);
       // If departure date exists and is after the new return date, adjust it
-      if (currentDeparture && new Date(currentDeparture) > localDate) {
-        queryParams.set(departureKey, isoString);
+      if (currentDepartureDate && currentDepartureDate > selectedDateValue) {
+        queryParams.set(departureKey, canonicalDate);
       }
     }
 
     if (onDateChange) {
-      onDateChange(isoString);
+      onDateChange(canonicalDate);
     }
 
     router.push(`/booking/destination?${queryParams.toString()}`);
@@ -165,13 +170,10 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
       ) : (
         <div className="flex items-center justify-between w-full overflow-x-hidden no-scrollbar hide-scrollbar">
           {uniqueDates.map((item, index) => {
-            const itemDate = new Date(item.date);
-            itemDate.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
-            const itemISOString = itemDate.toISOString();
+            const itemCanonicalDate = toCanonicalDate(item.date);
 
             // Compare ISO strings for highlighting
-            const isSelected = selectedDate &&
-              new Date(selectedDate).toDateString() === new Date(itemISOString).toDateString();
+            const isSelected = selectedDate && itemCanonicalDate && selectedDate === itemCanonicalDate;
 
             return (
               <Fragment key={index}>

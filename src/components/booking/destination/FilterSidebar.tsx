@@ -5,7 +5,12 @@ import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { useTrips } from '@/context/TripsContext';
-import { ICabinType, IShippingLine } from '@/models';
+import { IShippingLine } from '@/models';
+
+type CabinFilterItem = {
+  id: number;
+  name: string;
+};
 
 interface FilterSidebarProps {
   isModal?: boolean;
@@ -17,25 +22,31 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
   const searchParams = useSearchParams();
   const { departureTrips, returnTrips } = useTrips();
 
-  const [checkedCabinTypes, setCheckedCabinTypes] = useState<Set<number>>(new Set());
+  const [checkedCabins, setCheckedCabins] = useState<Set<number>>(new Set());
   const [checkedShippingLines, setCheckedShippingLines] = useState<Set<number>>(new Set());
 
   const filters = useMemo(() => {
     const allTrips = [...departureTrips, ...returnTrips];
 
-    // Extract unique cabin types
-    const cabinTypeMap = new Map<number, ICabinType>();
+    // Extract unique cabins
+    const cabinMap = new Map<number, CabinFilterItem>();
     allTrips.forEach(trip => {
       trip.availableCabins?.forEach(ac => {
-        if (ac.cabin?.cabinType) {
-          cabinTypeMap.set(ac.cabin.cabinType.id, ac.cabin.cabinType);
+        if (ac.cabinId) {
+          cabinMap.set(ac.cabinId, {
+            id: ac.cabinId,
+            name: ac.cabin?.name || ac.cabinCode || `Cabin ${ac.cabinId}`,
+          });
         }
       });
       // Also check segments for cabins
       trip.segments?.forEach(seg => {
         seg.availableCabins?.forEach(ac => {
-          if (ac.cabin?.cabinType) {
-            cabinTypeMap.set(ac.cabin.cabinType.id, ac.cabin.cabinType);
+          if (ac.cabinId) {
+            cabinMap.set(ac.cabinId, {
+              id: ac.cabinId,
+              name: ac.cabin?.name || ac.cabinCode || `Cabin ${ac.cabinId}`,
+            });
           }
         });
       });
@@ -55,33 +66,39 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
     });
 
     return {
-      cabinTypes: Array.from(cabinTypeMap.values()),
+      cabins: Array.from(cabinMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
       shippingLines: Array.from(shippingLineMap.values()).filter(line => !line.name.toLowerCase().includes('ayahay'))
     };
   }, [departureTrips, returnTrips]);
 
   // Sync state with query parameters
   useEffect(() => {
-    const selectedCabinTypes = searchParams.get('cabinTypes')?.split(',').map(Number) || [];
+    const selectedCabins =
+      searchParams
+        .get('cabinIds')
+        ?.split(',')
+        .map(Number)
+        .filter((id) => Number.isFinite(id)) || [];
     const selectedShippingLineIds = searchParams.get('shippingLineIds')?.split(',').map(Number) || [];
 
-    setCheckedCabinTypes(new Set(selectedCabinTypes));
+    setCheckedCabins(new Set(selectedCabins));
     setCheckedShippingLines(new Set(selectedShippingLineIds));
   }, [searchParams]);
 
   const resetFilters = () => {
-    setCheckedCabinTypes(new Set());
+    setCheckedCabins(new Set());
     setCheckedShippingLines(new Set());
 
     const queryParams = new URLSearchParams(searchParams.toString());
+    queryParams.delete('cabinIds');
     queryParams.delete('cabinTypes');
     queryParams.delete('shippingLineIds');
     queryParams.delete('filterDepartureDateTime');
     router.push(`/booking/destination?${queryParams.toString()}`);
   };
 
-  const handleCabinTypeChange = (id: number) => {
-    setCheckedCabinTypes((prev) => {
+  const handleCabinChange = (id: number) => {
+    setCheckedCabins((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -113,14 +130,15 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
   };
 
   const handleApplyFilters = () => {
-    const selectedCabinTypeIds = Array.from(checkedCabinTypes);
+    const selectedCabinIds = Array.from(checkedCabins);
     const selectedShippingLineIds = Array.from(checkedShippingLines);
 
     const queryParams = new URLSearchParams(searchParams.toString());
 
-    if (selectedCabinTypeIds.length > 0) {
-      queryParams.set('cabinTypes', selectedCabinTypeIds.join(','));
+    if (selectedCabinIds.length > 0) {
+      queryParams.set('cabinIds', selectedCabinIds.join(','));
     } else {
+      queryParams.delete('cabinIds');
       queryParams.delete('cabinTypes');
     }
 
@@ -161,25 +179,25 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
 
       <div className="px-6 py-4 space-y-6">
         {/* Accommodation Section */}
-        {filters.cabinTypes.length > 0 && (
+        {filters.cabins.length > 0 && (
           <div>
             <h4 className="font-bold text-base text-gray-800 mb-3">Accommodation</h4>
             <div className="space-y-3">
-              {filters.cabinTypes.map((cabinType) => (
-                <div key={cabinType.id} className="flex items-center space-x-2">
+              {filters.cabins.map((cabin) => (
+                <div key={cabin.id} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={`${isModal ? 'modal-' : ''}${cabinType.name}`}
-                    checked={checkedCabinTypes.has(cabinType.id)}
-                    onChange={() => handleCabinTypeChange(cabinType.id)}
+                    id={`${isModal ? 'modal-' : ''}${cabin.id}`}
+                    checked={checkedCabins.has(cabin.id)}
+                    onChange={() => handleCabinChange(cabin.id)}
                     className="h-4 w-4 rounded border-gray-300 text-customBlue focus:ring-customBlue"
                     style={{ colorScheme: 'light' }}
                   />
                   <label
-                    htmlFor={`${isModal ? 'modal-' : ''}${cabinType.name}`}
+                    htmlFor={`${isModal ? 'modal-' : ''}${cabin.id}`}
                     className="text-sm font-medium text-gray-700"
                   >
-                    {cabinType.name}
+                    {cabin.name}
                   </label>
                 </div>
               ))}
@@ -187,7 +205,7 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
           </div>
         )}
 
-        {filters.cabinTypes.length > 0 && filters.shippingLines.length > 0 && (
+        {filters.cabins.length > 0 && filters.shippingLines.length > 0 && (
           <div className="border-t border-gray-200" />
         )}
 

@@ -15,6 +15,7 @@ import { SelectedTrip } from '@/types/trip/selected-trip';
 import { PaginatedRequest } from '@/types/common/pagination';
 import { ITrip } from '@/models';
 import { useTrips } from '@/context/TripsContext';
+import { toCanonicalDate } from 'helpers/date.helpers';
 
 export default function TripsSelector() {
   const router = useRouter();
@@ -28,10 +29,10 @@ export default function TripsSelector() {
   const [selectedDepartureCabin, setSelectedDepartureCabin] = useState<SelectedTrip | null>(null);
   const [selectedReturnCabin, setSelectedReturnCabin] = useState<SelectedTrip | null>(null);
   const [selectedDepartureDate, setSelectedDepartureDate] = useState<string | null>(
-    searchParams.get('filterSpecificDepartureDate')
+    toCanonicalDate(searchParams.get('filterSpecificDepartureDate') || searchParams.get('departure_date') || searchParams.get('departureDate'))
   );
   const [selectedReturnDate, setSelectedReturnDate] = useState<string | null>(
-    searchParams.get('filterSpecificReturnDate')
+    toCanonicalDate(searchParams.get('filterSpecificReturnDate') || searchParams.get('return_date') || searchParams.get('returnDate'))
   );
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -47,22 +48,14 @@ export default function TripsSelector() {
   };
 
   useEffect(() => {
-    // Update selected dates when search parameters change.
-    // Normalize to noon local time so the UTC date never crosses midnight into the previous day
-    // (e.g. PH midnight → UTC March 25, but noon PH → UTC March 26, matching the trip date).
-    const normalizeToNoon = (dateStr: string | null): string | null => {
-      if (!dateStr) return null;
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      d.setHours(12, 0, 0, 0);
-      return d.toISOString();
-    };
-
     const departureDate = searchParams.get('filterSpecificDepartureDate') || searchParams.get('departure_date') || searchParams.get('departureDate');
-    const returnDate = searchParams.get('filterSpecificReturnDate') || searchParams.get('returnDate');
+    const returnDate =
+      searchParams.get('filterSpecificReturnDate') ||
+      searchParams.get('return_date') ||
+      searchParams.get('returnDate');
 
-    setSelectedDepartureDate(normalizeToNoon(departureDate));
-    setSelectedReturnDate(normalizeToNoon(returnDate));
+    setSelectedDepartureDate(toCanonicalDate(departureDate));
+    setSelectedReturnDate(toCanonicalDate(returnDate));
   }, [searchParams]);
 
   const fetchTrips = useCallback(async () => {
@@ -88,7 +81,6 @@ export default function TripsSelector() {
         passengerCount: searchParams.get('passenger_count') ? parseInt(searchParams.get('passenger_count')!, 10) : 1,
         vehicleCount: searchParams.get('vehicle_count') ? parseInt(searchParams.get('vehicle_count')!, 10) : 0,
         cabinIds: searchParams.get('cabinIds') ?? undefined,
-        cabinTypes: searchParams.get('cabinTypes') ?? undefined,
         shippingLineIds: searchParams.get('shippingLineIds') ?? undefined,
         sort: searchParams.get('sort') ?? 'departureDate',
         filterSpecificDate:
@@ -108,7 +100,7 @@ export default function TripsSelector() {
       setDepartureTripsState(depTrips);
       setDepartureTrips(depTrips);
 
-      if (searchParams.get('returnDate')) {
+      if (searchParams.get('return_date') || searchParams.get('returnDate')) {
         // Swap origin/dest for return trip
         searchQuery.destination_code = searchParams.get('origin_code') ?? undefined;
         searchQuery.origin_code = searchParams.get('destination_code') ?? undefined;
@@ -118,10 +110,17 @@ export default function TripsSelector() {
         searchQuery.destination_municipality = searchParams.get('origin_municipality') ?? undefined;
         searchQuery.destPortId = searchParams.get('srcPortId') ? parseInt(searchParams.get('srcPortId')!, 10) : 0;
         searchQuery.srcPortId = searchParams.get('destPortId') ? parseInt(searchParams.get('destPortId')!, 10) : 0;
-        searchQuery.departureDate = searchParams.get('filterSpecificReturnDate') ?? searchParams.get('returnDate') ?? '';
+        searchQuery.departureDate =
+          searchParams.get('filterSpecificReturnDate') ??
+          searchParams.get('return_date') ??
+          searchParams.get('returnDate') ??
+          '';
         searchQuery.sort = searchParams.get('sortReturn') ?? 'departureDate';
         searchQuery.filterSpecificDate =
-          searchParams.get('filterSpecificReturnDate') ?? searchParams.get('returnDate') ?? undefined;
+          searchParams.get('filterSpecificReturnDate') ??
+          searchParams.get('return_date') ??
+          searchParams.get('returnDate') ??
+          undefined;
 
         const cleanedSearchReturnQuery = cleanSearchQuery(searchQuery);
 
@@ -230,13 +229,13 @@ export default function TripsSelector() {
             selectedDate={selectedDepartureDate}
             trips={departureTrips}
             bookingType="Depart"
-            firstSelectedCabin={searchParams.get('returnDate') ? selectedReturnCabin : null}
+            firstSelectedCabin={searchParams.get('return_date') || searchParams.get('returnDate') ? selectedReturnCabin : null}
             onCabinSelect={(selected) => setSelectedDepartureCabin(selected)}
           />
         )}
 
         {/* Return Trips */}
-        {searchParams.get('returnDate') && (
+        {(searchParams.get('return_date') || searchParams.get('returnDate')) && (
           <div className="mt-6 sm:mt-9 space-y-2 sm:space-y-4" id="return-results">
             <hr className="mb-6 sm:mb-8 border-gray-300" />
             <DateNavigation label="Return" onDateChange={handleReturnDateChange} />
@@ -277,11 +276,11 @@ export default function TripsSelector() {
         )}
 
         {/* Proceed Button - Fixed at bottom on mobile */}
-        {selectedDepartureCabin && (!searchParams.get('returnDate') || selectedReturnCabin) && (
+        {selectedDepartureCabin && (!(searchParams.get('return_date') || searchParams.get('returnDate')) || selectedReturnCabin) && (
           <div className="fixed bottom-0 left-0 right-0 shadow-lg bg-white px-4 py-6 z-20 min-h-[100px] flex flex-col lg:min-h-0 lg:flex-row lg:justify-between lg:items-center lg:bg-transparent lg:static lg:shadow-none lg:p-0 lg:mt-6">
             {/* Left Side - Text (Visible only on lg) */}
             <div className="text-xs sm:text-sm text-gray-600 hidden lg:block">
-              {searchParams.get('returnDate') ? 'Round trip selected' : 'One-way trip selected'}
+              {searchParams.get('return_date') || searchParams.get('returnDate') ? 'Round trip selected' : 'One-way trip selected'}
             </div>
 
             {/* Right Side - Button */}

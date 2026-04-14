@@ -8,6 +8,7 @@ import { IPort } from "@/models";
 import dynamic from "next/dynamic";
 import type { IRoute } from "@/models/shipping-line/route.model";
 import { isEffectiveClientApiMode } from "constants/api";
+import { toCanonicalDate } from "helpers/date.helpers";
 
 const TripSearchWidget = dynamic(
     () => import("@oltek/hayahai-sdk/react").then((mod) => mod.TripSearchWidget),
@@ -67,10 +68,11 @@ export default function SearchBoxWrapper({
 
     const handleTripSelect = (trip: TripData) => {
         // Use pre-computed local date from widget to avoid UTC day shift
-        const depDate = trip.departureDateLocal
+        const departureDateInput = trip.departureDateLocal
             || (trip.departureTime
                 ? new Date(trip.departureTime).toLocaleDateString("en-CA")
                 : new Date().toLocaleDateString("en-CA"));
+        const depDate = toCanonicalDate(departureDateInput) || departureDateInput;
 
         const originCode = portNameToCode.get(trip.srcPort.toLowerCase());
         const destCode = portNameToCode.get(trip.destPort.toLowerCase());

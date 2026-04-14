@@ -3,16 +3,38 @@ import { resolveApiBaseUrl } from '../_utils/resolveApiBaseUrl';
 
 const API_BASE_URL = resolveApiBaseUrl();
 
+function normalizeDateParam(value: string | null): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  const y = parsed.getFullYear();
+  const m = String(parsed.getMonth() + 1).padStart(2, '0');
+  const d = String(parsed.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const origin_code = searchParams.get('origin_code');
     const destination_code = searchParams.get('destination_code');
-    const departure_date = searchParams.get('departure_date');
+    const departure_date = normalizeDateParam(searchParams.get('departure_date'));
     const passenger_count = searchParams.get('passenger_count') || '1';
-    const vehicle_count = searchParams.get('vehicle_count') || '0';
     const sort = searchParams.get('sort') || 'departureDate';
     const page = searchParams.get('page') || '1';
+
+    const parsedPassengerCount = Number.parseInt(passenger_count, 10);
+    const parsedPage = Number.parseInt(page, 10);
 
     if (!origin_code || !destination_code || !departure_date) {
       return NextResponse.json(
@@ -26,10 +48,9 @@ export async function GET(request: NextRequest) {
       origin_code,
       destination_code,
       departure_date,
-      passenger_count: String(parseInt(passenger_count, 10)),
-      vehicle_count: String(parseInt(vehicle_count, 10)),
+      passenger_count: String(Number.isFinite(parsedPassengerCount) && parsedPassengerCount > 0 ? parsedPassengerCount : 1),
       sort,
-      page: String(parseInt(page, 10))
+      page: String(Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1)
     });
 
     const response = await fetch(`${API_BASE_URL}/public/trips?${backendParams.toString()}`, {
