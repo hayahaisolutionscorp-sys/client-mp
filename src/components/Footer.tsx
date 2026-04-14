@@ -36,14 +36,14 @@ const Footer = ({ showSubscribeBanner = true }: FooterProps) => {
 
   return (
     <>
-      <div className={`w-full relative ${showSubscribeBanner ? "lg:pt-56" : ""}`} id="Resources">
+      <div className="w-full relative" id="Resources">
         {showSubscribeBanner && (
-          <div className="flex items-center justify-center w-full">
+          <div className="flex items-center justify-center w-full lg:h-56">
             <SubscribeBanner />
           </div>
         )}
         <footer
-          className="bg-primary py-10 px-6 text-primary-foreground sm:px-10 lg:pt-48"
+          className={`bg-primary py-10 px-6 text-primary-foreground sm:px-10 ${showSubscribeBanner ? "lg:pt-48" : ""}`}
         >
         {/* Main content area */}
         <div className="flex flex-col lg:flex-row lg:justify-between gap-8">

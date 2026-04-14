@@ -6,6 +6,7 @@ export interface ILoginPage {
   id: string;
   page_type: string;
   title: string;
+  description: string;
   content: LoginBuilderContent | null;
   show_in_footer: boolean;
   slug: string;
@@ -17,6 +18,7 @@ const FALLBACK_LOGIN_PAGE: ILoginPage = {
   id: "login-fallback",
   page_type: "login",
   title: "Sign In",
+  description: "Continue using your email address or social login.",
   content: DEFAULT_LOGIN_BUILDER_CONTENT,
   show_in_footer: false,
   slug: "login",

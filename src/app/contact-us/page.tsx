@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { ContactPageContent } from '@/components/contact-us/ContactPageContent';
 import ContactPageBuilder from '@/components/contact-us/builder/ContactPageBuilder';
 import OrganizationSchema from '@/components/seo/OrganizationSchema';
@@ -6,6 +7,7 @@ import { getThemeSettings } from '@/services/ui/theme-settings.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
 import { getPageMetadata } from '@/services/content/seo.service';
 import { Metadata } from 'next';
+import PageSkeleton from '@/components/ui/PageSkeleton';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('contact-us');
@@ -29,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ContactUs() {
+async function ContactUsContent() {
   const [themeSettings, branding, contactPage, contactSections, contactInfo] = await Promise.all([
     getThemeSettings(),
     getBrandingConfig(),
@@ -68,3 +70,12 @@ export default async function ContactUs() {
     </>
   );
 }
+
+export default function ContactUs() {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <ContactUsContent />
+    </Suspense>
+  );
+}
+
