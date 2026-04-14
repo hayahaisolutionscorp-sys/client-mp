@@ -201,9 +201,7 @@ export function LoginPageBuilder({
   const heroDescription =
     step === "verify"
       ? "Complete your sign in to access your account."
-      : builderConfig.description ||
-        loginPage?.description ||
-        (heroVariant === "readable"
+      : (heroVariant === "readable"
         ? "Sign in with larger, clearer content to continue your account journey."
         : heroVariant === "minimal"
         ? "Use your email to continue."
