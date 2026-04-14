@@ -73,7 +73,7 @@ export default function LayoutWrapper({
     headerVariant === 'professional-slate';
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col bg-white">
       {shouldRenderChrome && useBuilderLandingHeader ? (
         <BuilderLandingHeader
           variant={headerVariant}
@@ -84,7 +84,7 @@ export default function LayoutWrapper({
       {shouldRenderChrome && !useBuilderLandingHeader ? (
         <Navbar showLandingNav initialHeaderSection={initialHeaderSection} />
       ) : null}
-      <main className={cn("wl-brand-radius-scope", mainOffsetClass)}>{children}</main>
+      <main className={cn("wl-brand-radius-scope flex-1", mainOffsetClass)}>{children}</main>
       {shouldRenderChrome && !isProfilePage && footerVariant === 'centered' ? <FooterCentered theme={theme} /> : null}
       {shouldRenderChrome && !isProfilePage && footerVariant === 'premium' ? <FooterPremium theme={theme} /> : null}
       {shouldRenderChrome && !isProfilePage && footerVariant === 'default-no-banner' ? (
@@ -96,6 +96,6 @@ export default function LayoutWrapper({
       <ProactiveRefreshScheduler />
       {mounted && <SessionExpiredModal />}
       {mounted && !isPreviewRoute && <ChatWidget tenantId={parseInt(process.env.NEXT_PUBLIC_TENANT_ID || "1", 10)} />}
-    </>
+    </div>
   );
 }

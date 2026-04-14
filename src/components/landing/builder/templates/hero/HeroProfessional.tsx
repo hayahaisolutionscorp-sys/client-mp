@@ -54,7 +54,7 @@ export default function HeroProfessional({
     fetchData();
   }, [heroSectionOverride, headerSectionOverride]);
 
-  if (loading) return null;
+  if (loading) return <div className="h-[720px] bg-[var(--surface-alt)] animate-pulse rounded-[36px] mx-4 mt-4" />;
 
   const title = heroSection?.title || `Sail better with ${branding?.brand_name || "Ayahay"}`;
   const subtitle = heroSection?.subtitle || "A better marketplace for ferry passengers.";

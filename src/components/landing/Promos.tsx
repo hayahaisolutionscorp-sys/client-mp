@@ -48,10 +48,10 @@ export default function Promos({ promosOverride }: PromosProps = {}) {
 
   const promoImagesPromise = useMemo(() => Promise.resolve(promos), [promos]);
 
-  if (loading) return <CarouselSkeleton />;
+  if (loading) return <div className="relative w-full overflow-hidden mt-40 min-h-[500px]"><CarouselSkeleton /></div>;
 
   return (
-    <div id="Promos" className="relative w-full overflow-hidden mt-40">
+    <div id="Promos" className="relative w-full overflow-hidden mt-40 min-h-[500px]">
       <div className="container max-w-7xl mx-auto pt-40 sm:pt-10 md:pt-15 lg:pt-20">
         <div className="text-center">
           <h2 className="font-bold text-customText text-2xl sm:text-3xl lg:text-4xl">Travel Promotions & Updates</h2>

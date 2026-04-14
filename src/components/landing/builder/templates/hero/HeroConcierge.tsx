@@ -67,7 +67,7 @@ export default function HeroConcierge({
     fetchData();
   }, [heroSectionOverride, headerSectionOverride, portsOverride]);
 
-  if (loading) return null;
+  if (loading) return <div className="h-[680px] md:h-[780px] bg-[var(--surface-alt)] animate-pulse rounded-none" />;
 
   let captionBackground;
   if (heroSection?.bg_type?.toLowerCase() === "youtube") {

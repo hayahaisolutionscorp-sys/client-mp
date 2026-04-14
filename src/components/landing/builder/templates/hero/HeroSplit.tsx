@@ -64,7 +64,7 @@ export default function HeroSplit({
     fetchData();
   }, [heroSectionOverride, headerSectionOverride, portsOverride]);
 
-  if (loading) return null;
+  if (loading) return <div className="h-[650px] bg-[var(--surface-alt)] animate-pulse rounded-[32px] mx-4 mt-4" />;
 
   return (
     <header id="Book" className="relative bg-[var(--surface-alt)]">

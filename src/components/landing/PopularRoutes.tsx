@@ -56,10 +56,10 @@ export default function PopularRoutes({ routesOverride }: PopularRoutesProps = {
 
   const imagesPromise = useMemo(() => Promise.resolve(routeImages), [routeImages]);
 
-  if (loading) return <RoutesPhotoGridSkeleton />;
+  if (loading) return <div className="container max-w-7xl mx-auto mt-16 sm:px-8 lg:px-10 pb-5 min-h-[400px]"><RoutesPhotoGridSkeleton /></div>;
 
   return (
-    <div id="Routes" className="container max-w-7xl mx-auto px-6 mt-16 sm:px-8 lg:px-10 pb-5">
+    <div id="Routes" className="container max-w-7xl mx-auto px-6 mt-16 sm:px-8 lg:px-10 pb-5 min-h-[400px]">
       <h2 className="font-bold text-customText text-2xl sm:text-3xl lg:text-4xl text-left">
         Most Popular Routes Recommended For You
       </h2>
