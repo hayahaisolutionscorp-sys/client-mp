@@ -71,7 +71,7 @@ export default function HeroCards({
     fetchData();
   }, [heroSectionOverride, headerSectionOverride, portsOverride]);
 
-  if (loading) return null;
+  if (loading) return <div className="h-[650px] bg-[var(--surface-alt)] animate-pulse rounded-[32px] mx-4 mt-4" />;
 
   let captionBackground;
   if (heroSection?.bg_type?.toLowerCase() === "youtube") {

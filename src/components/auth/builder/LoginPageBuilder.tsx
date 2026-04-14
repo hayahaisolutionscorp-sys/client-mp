@@ -190,7 +190,7 @@ export function LoginPageBuilder({
   const heroTitle =
     step === "verify"
       ? "Enter your password"
-        : loginPage?.title ||
+      : loginPage?.title ||
         (heroVariant === "readable"
           ? "Welcome back to your account"
           : heroVariant === "split"
@@ -201,13 +201,15 @@ export function LoginPageBuilder({
   const heroDescription =
     step === "verify"
       ? "Complete your sign in to access your account."
-      : heroVariant === "readable"
+      : builderConfig.description ||
+        loginPage?.description ||
+        (heroVariant === "readable"
         ? "Sign in with larger, clearer content to continue your account journey."
         : heroVariant === "minimal"
         ? "Use your email to continue."
         : heroVariant === "split"
           ? "A cleaner sign-in flow built around fast account access."
-          : "Continue using your email address or social login.";
+          : "Continue using your email address or social login.");
   const footerCopy = footerSection?.variant === "inline"
     ? "By continuing, you agree to Terms and Privacy Policy."
     : footerSection?.variant === "minimal" || footerSection?.variant === "compact"
@@ -230,8 +232,8 @@ export function LoginPageBuilder({
 
   const renderSidebar = (embedded = false) => {
     if (!hasSidebar) return null;
-    if (embedded) return <AuthSidebar variant={sidebarToneVariant as any} embedded tone={layoutVariant === "split-left" ? "editorial" : "brand"} />;
-    return <AuthSidebar variant={sidebarToneVariant as any} tone={layoutVariant === "split-left" ? "editorial" : "brand"} />;
+    if (embedded) return <AuthSidebar variant={sidebarToneVariant as any} embedded tone={layoutVariant === "split-left" ? "editorial" : "brand"} loginPage={loginPage} />;
+    return <AuthSidebar variant={sidebarToneVariant as any} tone={layoutVariant === "split-left" ? "editorial" : "brand"} loginPage={loginPage} />;
   };
 
   const loginHeroAnim = sectionAnimations["login_hero"];

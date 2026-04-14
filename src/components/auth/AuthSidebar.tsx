@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useBranding } from "@/hooks/branding"
 import { useTheme } from "@/components/ThemeProvider"
 import { useThemeSettings } from "@/hooks/theme-settings"
+import type { ILoginPage } from "@/services/content/login.service"
 import {
   FALLBACK_CSS_ACCENT,
   FALLBACK_CSS_PRIMARY,
@@ -19,9 +20,10 @@ interface AuthSidebarProps {
   variant?: AuthSidebarVariant;
   embedded?: boolean;
   tone?: "default" | "brand" | "editorial";
+  loginPage?: ILoginPage | null;
 }
 
-export function AuthSidebar({ variant = "default", embedded = false, tone = "brand" }: AuthSidebarProps) {
+export function AuthSidebar({ variant = "default", embedded = false, tone = "brand", loginPage }: AuthSidebarProps) {
   const { destinations } = useTheme();
   const theme = useThemeSettings();
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -62,6 +64,8 @@ export function AuthSidebar({ variant = "default", embedded = false, tone = "bra
     return () => clearInterval(timer)
   }, [slides.length])
 
+  const sidebarSlogan = (loginPage?.content as any)?.description || loginPage?.description || slogan;
+
   return (
     <div
       className={
@@ -84,7 +88,7 @@ export function AuthSidebar({ variant = "default", embedded = false, tone = "bra
               {slides[currentSlide]?.title || "Ayahay"}
             </div>
             <h2 className="max-w-sm text-3xl font-bold leading-tight">Sign in with a cleaner, more focused flow.</h2>
-            <p className="max-w-md text-sm text-white/80">{slogan}</p>
+            <p className="max-w-md text-sm text-white/80">{sidebarSlogan}</p>
           </div>
           <div className="space-y-3 text-sm text-white/85">
             <p>Fast access to bookings, account settings, and trip history.</p>
@@ -114,7 +118,7 @@ export function AuthSidebar({ variant = "default", embedded = false, tone = "bra
               Trusted by travelers
             </div>
             <blockquote className="max-w-sm text-3xl font-semibold leading-tight">
-              "{slogan}"
+              "{sidebarSlogan}"
             </blockquote>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
               <p className="text-sm text-white/70">Smooth sign in, faster booking access, and a cleaner premium experience.</p>
@@ -143,8 +147,8 @@ export function AuthSidebar({ variant = "default", embedded = false, tone = "bra
           </div>
           <div className="relative flex h-full flex-col items-center justify-center p-6 text-center text-white">
             <h2 className="mb-2 text-2xl font-bold">{slides[currentSlide]?.title}</h2>
-            <p className="mb-6 text-3xl font-bold">Quick, Easy Booking & Reach Your Destination with Ease</p>
-            <p className="text-xl">{slogan}</p>
+            <p className="mb-6 text-3xl font-bold">{loginPage?.title || "Quick, Easy Booking & Reach Your Destination with Ease"}</p>
+            <p className="text-xl">{sidebarSlogan}</p>
             <div className="mt-8 flex gap-2">
               {slides.map((_, index) => (
                 <button

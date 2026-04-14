@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Metadata } from 'next';
 import AboutPageBuilder from '@/components/about-us/builder/AboutPageBuilder';
 import { AboutPageContent } from '@/components/about-us/AboutPageContent';
@@ -7,6 +7,7 @@ import { getAboutPage, getAboutUsSection, getCoreValues } from '@/services/conte
 import { getPageMetadata } from '@/services/content/seo.service';
 import { getBrandingConfig } from '@/services/ui/branding.service';
 import { getThemeSettings } from '@/services/ui/theme-settings.service';
+import PageSkeleton from '@/components/ui/PageSkeleton';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageMetadata('about-us');
@@ -32,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function AboutPage() {
+async function AboutPageContentWrapper() {
   const [aboutPage, hero, welcome, story, expertise, coreValues, themeSettings, branding] =
     await Promise.all([
       getAboutPage(),
@@ -79,3 +80,12 @@ export default async function AboutPage() {
     </>
   );
 }
+
+export default function AboutPage() {
+  return (
+    <Suspense fallback={<PageSkeleton />}>
+      <AboutPageContentWrapper />
+    </Suspense>
+  );
+}
+
