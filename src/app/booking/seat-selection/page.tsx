@@ -1,7 +1,4 @@
 import { redirect } from 'next/navigation';
-import { Suspense } from 'react';
-import SeatSelectionContent from '@/components/booking/seat-selection/SeatSelectionContent';
-import LoadingScreen from '@/components/ui/LoadingScreen';
 
 interface PageProps {
   searchParams?: Promise<{
@@ -20,15 +17,10 @@ export default async function SeatSelectionPage(props: PageProps) {
     redirect('/booking/destination');
   }
 
-  return (
-    <Suspense fallback={<LoadingScreen />}>
-      <SeatSelectionContent
-        departureTripId={searchParams.departureTripId}
-        returnTripId={searchParams.returnTripId}
-        commodityId={searchParams.commodityId}
-        departureCabinId={searchParams.departureCabinId}
-        returnCabinId={searchParams.returnCabinId}
-      />
-    </Suspense>
-  );
+  const nextParams = new URLSearchParams();
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (value) nextParams.set(key, value);
+  });
+  const qs = nextParams.toString();
+  redirect(qs ? `/booking/passenger-details?${qs}` : '/booking/passenger-details');
 }

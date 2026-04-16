@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect, useMemo, type FC } from 'react';
+import { useState, useEffect, useMemo, useRef, type FC } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { FiChevronDown, FiChevronUp, FiLoader } from 'react-icons/fi';
 import { AlertTriangle, Armchair, CheckCircle2 } from 'lucide-react';
 import { SeatPickerDialog } from '@/components/booking/seat-selection/SeatPickerDialog';
 import type { SeatPickerDialogTrip, SeatPickerDialogPassenger } from '@/components/booking/seat-selection/SeatPickerDialog';
-import type { AssignmentsMap } from '@/components/booking/seat-selection/seat-picker.types';
-import type { SeatLabelsMap } from '@/components/booking/seat-selection/SeatPicker';
+import type { AssignmentsMap, SeatLabelsMap } from '@/components/booking/seat-selection/seat-picker.types';
+import { autoAssignSeats } from '@/components/booking/seat-selection/auto-assign';
 import { FaCheckCircle } from 'react-icons/fa';
 import { v4 as uuidv4 } from 'uuid';
 import { cacheItem } from 'helpers/cache.helpers';
@@ -26,6 +26,7 @@ import { ITrip, IBooking } from '@/models';
 import { startPaymentForBooking } from '@/services';
 import { useAuth } from '@/contexts/AuthContexts';
 import { PricingResponse } from '@/types/booking/pricing';
+import { useToast } from '@/hooks/use-toast';
 
 interface PassengerDetails {
   passenger: PassengerData;
@@ -132,8 +133,129 @@ const FareSummary: FC<FareSummaryProps> = ({
   const router = useRouter();
   const themeSettings = useThemeSettings();
   const { currentUser } = useAuth();
+  const { warn: toastWarn } = useToast();
+  const autoAssignBootstrapKeyRef = useRef<string | null>(null);
+  const autoAssignBootstrapPendingRef = useRef(false);
 
   const returnCabinName = searchParams.get('returnCabinName');
+  const departureTripId = departureTrips?.[0]?.id ? String(departureTrips[0].id) : '';
+  const returnTripId = returnTrips?.[0]?.id ? String(returnTrips[0].id) : '';
+
+  const hasSeatmap = useMemo(
+    () => Boolean(departureTrips?.some((trip) => trip.seatSelection) || returnTrips?.some((trip) => trip.seatSelection)),
+    [departureTrips, returnTrips],
+  );
+
+  const dialogPassengers = useMemo<SeatPickerDialogPassenger[]>(
+    () =>
+      passengerDetails
+        ? [passengerDetails.passenger, ...(passengerDetails.companions ?? [])].map((passenger, index) => ({
+            key: `p-${index}`,
+            firstName: passenger.firstname ?? '',
+            lastName: passenger.lastname ?? '',
+            discountType: passenger.discountType ?? 'Adult',
+          }))
+        : [],
+    [passengerDetails],
+  );
+
+  const dialogTrips = useMemo<SeatPickerDialogTrip[]>(() => {
+    const trips: SeatPickerDialogTrip[] = [];
+    if (departureTripId && departureCabinId) {
+      trips.push({
+        tripId: departureTripId,
+        label: 'Departure',
+        cabinId: Number(departureCabinId),
+      });
+    }
+    if (returnTripId && returnCabinId) {
+      trips.push({
+        tripId: returnTripId,
+        label: 'Return',
+        cabinId: Number(returnCabinId),
+      });
+    }
+    return trips;
+  }, [departureTripId, returnTripId, departureCabinId, returnCabinId]);
+
+  const hasSelectedSeats = useMemo(
+    () =>
+      Object.keys(selectedSeatAssignments).length > 0 &&
+      Object.values(selectedSeatAssignments).some((tripMap) => Object.keys(tripMap).length > 0),
+    [selectedSeatAssignments],
+  );
+
+  const autoAssignBootstrapKey = useMemo(() => {
+    if (!hasSeatmap || dialogTrips.length === 0 || dialogPassengers.length === 0) return '';
+    const tripKey = dialogTrips.map((trip) => `${trip.tripId}:${trip.cabinId}`).join('|');
+    const passengerKey = dialogPassengers.map((passenger) => passenger.key).join('|');
+    return `${tripKey}::${dialogPassengers.length}::${passengerKey}`;
+  }, [dialogPassengers, dialogTrips, hasSeatmap]);
+
+  useEffect(() => {
+    if (!pathname.includes('/booking/passenger-details')) return;
+    if (!hasSeatmap) return;
+    if (!currentUser) return;
+    if (dialogTrips.length === 0 || dialogPassengers.length === 0) return;
+    if (hasSelectedSeats) return;
+    if (!autoAssignBootstrapKey) return;
+    if (autoAssignBootstrapPendingRef.current) return;
+    if (autoAssignBootstrapKeyRef.current === autoAssignBootstrapKey) return;
+
+    autoAssignBootstrapKeyRef.current = autoAssignBootstrapKey;
+    autoAssignBootstrapPendingRef.current = true;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const result = await autoAssignSeats({
+          trips: dialogTrips.map((trip) => ({ tripId: trip.tripId, cabinId: trip.cabinId })),
+          passengers: dialogPassengers.map((passenger) => ({
+            key: passenger.key,
+            discountType: passenger.discountType,
+          })),
+          currentAssignments: selectedSeatAssignments,
+          currentLabels: selectedSeatLabels,
+          releaseExisting: false,
+        });
+
+        if (cancelled) return;
+
+        const hasAssignedSeats = Object.values(result.assignments).some(
+          (tripMap) => Object.keys(tripMap).length > 0,
+        );
+        if (hasAssignedSeats) {
+          setSelectedSeatAssignments(result.assignments);
+          setSelectedSeatLabels(result.labels);
+        }
+
+        if (result.unassigned.length > 0) {
+          toastWarn(
+            `${result.unassigned.length} seat ${result.unassigned.length === 1 ? 'assignment is' : 'assignments are'} still unavailable. Assigned seats were kept.`,
+          );
+        }
+      } catch {
+        autoAssignBootstrapKeyRef.current = null;
+      } finally {
+        autoAssignBootstrapPendingRef.current = false;
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    pathname,
+    hasSeatmap,
+    currentUser,
+    dialogTrips,
+    dialogPassengers,
+    hasSelectedSeats,
+    autoAssignBootstrapKey,
+    selectedSeatAssignments,
+    selectedSeatLabels,
+    toastWarn,
+  ]);
 
   useEffect(() => {
     const mainPassengerValid = !!(
@@ -286,11 +408,12 @@ const FareSummary: FC<FareSummaryProps> = ({
       if (departureCabinId) queryParams.append('departureCabinId', departureCabinId);
       if (returnCabinId) queryParams.append('returnCabinId', returnCabinId);
 
-      // Cache seat assignments if the user picked seats via the dialog
-      if (Object.keys(selectedSeatAssignments).length > 0) {
-        cacheItem('seat-assignments', selectedSeatAssignments, 900);
-        cacheItem('seat-assignment-labels', selectedSeatLabels, 900);
-      }
+      // Always refresh seat caches to avoid stale assignments leaking into checkout
+      const hasSelectedSeatsForCache = Object.values(selectedSeatAssignments).some(
+        (tripMap) => Object.keys(tripMap).length > 0,
+      );
+      cacheItem('seat-assignments', hasSelectedSeatsForCache ? selectedSeatAssignments : {}, 900);
+      cacheItem('seat-assignment-labels', hasSelectedSeatsForCache ? selectedSeatLabels : {}, 900);
 
       router.push(`/booking/payment-confirmation?${queryParams.toString()}`);
     }
@@ -975,7 +1098,6 @@ const handlePayment = async () => {
         )}
 
         {(() => {
-          const hasSeatmap = departureTrips?.some(t => t.seatSelection) || returnTrips?.some(t => t.seatSelection);
           return hasSeatmap && Object.keys(selectedSeatAssignments).length > 0 ? (
             <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
@@ -1011,33 +1133,11 @@ const handlePayment = async () => {
       {pathname.includes('/booking/passenger-details') && (
         <>
           {(() => {
-            const hasSeatmap = departureTrips?.some(t => t.seatSelection) || returnTrips?.some(t => t.seatSelection);
             if (!hasSeatmap) return null;
-
-            // Build passengers list for dialog from current form state
-            const dialogPassengers: SeatPickerDialogPassenger[] = passengerDetails
-              ? [passengerDetails.passenger, ...(passengerDetails.companions ?? [])].map((p, i) => ({
-                  key: `p-${i}`,
-                  firstName: p.firstname ?? '',
-                  lastName: p.lastname ?? '',
-                  discountType: p.discountType ?? 'Adult',
-                }))
-              : [];
-
-            // Build trips list for dialog
-            const dialogTrips: SeatPickerDialogTrip[] = [];
-            const departureTripId = departureTrips?.[0]?.id ?? '';
-            const returnTripId = returnTrips?.[0]?.id ?? '';
-            if (departureTripId && departureCabinId) {
-              dialogTrips.push({ tripId: String(departureTripId), label: 'Departure', cabinId: Number(departureCabinId) });
-            }
-            if (returnTripId && returnCabinId) {
-              dialogTrips.push({ tripId: String(returnTripId), label: 'Return', cabinId: Number(returnCabinId) });
-            }
 
             // First selected seat label for display (primary passenger, departure trip)
             const firstLabel = selectedSeatLabels['p-0']?.[departureTripId];
-            const hasSeatSelected = Object.keys(selectedSeatAssignments).length > 0 && Object.values(selectedSeatAssignments).some(tm => Object.keys(tm).length > 0);
+            const hasSeatSelected = hasSelectedSeats;
 
             return (
               <>
@@ -1086,11 +1186,6 @@ const handlePayment = async () => {
                     onConfirm={(assignments, labels) => {
                       setSelectedSeatAssignments(assignments);
                       setSelectedSeatLabels(labels);
-                      setSeatDialogOpen(false);
-                    }}
-                    onSkip={() => {
-                      setSelectedSeatAssignments({});
-                      setSelectedSeatLabels({});
                       setSeatDialogOpen(false);
                     }}
                   />

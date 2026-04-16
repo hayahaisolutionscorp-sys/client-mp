@@ -753,6 +753,9 @@ export default function PaymentConfirmationDetails({
         checkoutUrl = intentResponse.data.redirectUrl;
       }
 
+      invalidateItem('seat-assignments');
+      invalidateItem('seat-assignment-labels');
+      setSeatLabels({});
       window.location.href = checkoutUrl;
       return true;
     } catch (error: any) {

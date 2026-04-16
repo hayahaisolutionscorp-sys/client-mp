@@ -1,4 +1,4 @@
-const PWD_DISCOUNT_TYPES = new Set(['PWD', 'Senior', 'Senior Citizen']);
+const PWD_DISCOUNT_TYPES = new Set(['pwd', 'senior', 'senior citizen']);
 
 const BOOKABLE_TYPES = new Set([
   'seat',
@@ -11,7 +11,7 @@ const BOOKABLE_TYPES = new Set([
 
 export function isPwdSenior(discountType: string | null | undefined): boolean {
   if (!discountType) return false;
-  return PWD_DISCOUNT_TYPES.has(discountType);
+  return PWD_DISCOUNT_TYPES.has(discountType.trim().toLowerCase());
 }
 
 export function isBookable(cellType: string): boolean {

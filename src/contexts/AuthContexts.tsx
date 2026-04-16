@@ -185,8 +185,8 @@ export default function AuthContextProvider({
 
             showNotification('success', `Welcome to ${themeBranding?.brand_name || 'Ayahay'}! Registration successful!`);
 
-            // Load profile in background â€” caller will redirect immediately
-            loadProfile();
+            // Await profile load so currentUser is set before caller redirects
+            await loadProfile();
 
             return 'success';
         } catch (error: any) {
@@ -200,8 +200,8 @@ export default function AuthContextProvider({
         try {
             await AuthService.login({ email, password });
             showNotification('success', `Welcome back to ${themeBranding?.brand_name || 'Ayahay'}!`);
-            // Load profile in background â€” caller will redirect immediately
-            loadProfile();
+            // Await profile load so currentUser is set before caller redirects
+            await loadProfile();
             return 'success';
         } catch (error: any) {
             console.error('Login error:', error);

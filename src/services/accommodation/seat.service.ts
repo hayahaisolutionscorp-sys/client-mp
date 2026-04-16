@@ -45,7 +45,13 @@ export async function getDeckLayout(deckId: number): Promise<DeckLayout | null> 
       amount: Number(r.amount),
       color: r.color,
     })),
-    merged: (raw.merged ?? []).map((m: any) => ({
+    merged: (
+      Array.isArray(raw.merged)
+        ? raw.merged
+        : Array.isArray(raw.merged_regions)
+          ? raw.merged_regions
+          : []
+    ).map((m: any) => ({
       startRow: m.start_row ?? m.startRow,
       startCol: m.start_col ?? m.startCol,
       endRow: m.end_row ?? m.endRow,
@@ -58,7 +64,7 @@ export async function getDeckLayout(deckId: number): Promise<DeckLayout | null> 
 
 export async function getTripSeats(tripId: string, cabinDeckId: number): Promise<TripSeat[]> {
   const { data } = await axiosInstance.get(`${BASE}/trips/${tripId}/seats`, {
-    params: { cabinDeckId },
+    params: { cabin_deck_id: cabinDeckId },
   });
   return (data.data as any[]).map((s) => ({
     id: s.id,

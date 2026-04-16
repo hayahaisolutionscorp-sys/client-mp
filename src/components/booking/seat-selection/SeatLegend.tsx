@@ -24,10 +24,8 @@ export function SeatLegend({ rates, showPwd }: SeatLegendProps) {
       <span className="flex items-center gap-1 text-[11px] text-zinc-500">
         <BunkSwatch />
         <span>
-          <span className="font-medium">↑ Upper</span>
-          {' / '}
-          <span className="font-medium">↓ Lower</span>
-          {' bunk'}
+          <span className="font-medium">Bunk slots:</span>
+          {' Upper / Lower'}
         </span>
       </span>
 
@@ -74,16 +72,8 @@ function LegendItem({
 /** Mini bunk swatch showing upper/lower split */
 function BunkSwatch() {
   return (
-    <span
-      className="inline-flex flex-col rounded border border-zinc-400 overflow-hidden bg-zinc-600 shrink-0"
-      style={{ width: 18, height: 22, gap: 2 }}
-    >
-      <span className="flex-1 bg-zinc-50 flex items-center justify-center">
-        <span className="text-[6px] text-zinc-400">↑</span>
-      </span>
-      <span className="flex-1 bg-zinc-100 flex items-center justify-center">
-        <span className="text-[6px] text-zinc-400">↓</span>
-      </span>
-    </span>
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5 shrink-0 text-zinc-500" aria-hidden>
+      <path d="M1 2v21h2v-2h18v2h2V7c0-2.21-1.79-4-4-4h-9v5H3V2m3.5 0A2.5 2.5 0 0 0 4 4.5A2.5 2.5 0 0 0 6.5 7A2.5 2.5 0 0 0 9 4.5A2.5 2.5 0 0 0 6.5 2M3 11h18v2.56c-.59-.35-1.27-.56-2-.56h-9v5H3m3.5-6A2.5 2.5 0 0 0 4 14.5A2.5 2.5 0 0 0 6.5 17A2.5 2.5 0 0 0 9 14.5A2.5 2.5 0 0 0 6.5 12" />
+    </svg>
   );
 }

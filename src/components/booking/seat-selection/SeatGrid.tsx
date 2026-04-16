@@ -1,13 +1,13 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Armchair, BedDouble, Accessibility } from 'lucide-react';
 import type { DeckLayout, LayoutCell, LayoutRate, TripSeat } from './seat-picker.types';
 import { isBookable, getStatusColor } from './seat-picker.utils';
 
-const CELL_W = 48;
-const BUNK_H = 64; // uniform row height — regular cells fill it, bunk cells use full height
+const CELL_SIZE = 56; // square cells, matches CreateVesselMap/SeatMapBuilder
 const GAP    = 3;
+const WL_RADIUS_LOCK_STYLE = { '--wl-br': '0.375rem' } as CSSProperties;
 
 interface SeatGridProps {
   layout: DeckLayout;
@@ -110,37 +110,281 @@ function StructuralIcon({ type, className }: { type: string; className?: string 
   }
 }
 
-/** Upper bunk SVG — bed elevated, legs visible below */
-function UpperBunkSvg() {
+function BunkBedIcon({ className }: { className?: string }) {
   return (
-    <svg width="16" height="12" viewBox="0 0 18 14" fill="none" className="shrink-0 opacity-80">
-      {/* mattress */}
-      <rect x="1" y="1" width="16" height="6" rx="1" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.2"/>
-      {/* pillow */}
-      <rect x="2.5" y="2" width="4" height="3.5" rx="0.5" fill="currentColor" fillOpacity="0.45"/>
-      {/* legs hanging down */}
-      <line x1="2.5" y1="7" x2="2.5" y2="13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="15.5" y1="7" x2="15.5" y2="13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-      {/* crossbar */}
-      <line x1="2.5" y1="10.5" x2="15.5" y2="10.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeOpacity="0.5"/>
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M1 2v21h2v-2h18v2h2V7c0-2.21-1.79-4-4-4h-9v5H3V2m3.5 0A2.5 2.5 0 0 0 4 4.5A2.5 2.5 0 0 0 6.5 7A2.5 2.5 0 0 0 9 4.5A2.5 2.5 0 0 0 6.5 2M3 11h18v2.56c-.59-.35-1.27-.56-2-.56h-9v5H3m3.5-6A2.5 2.5 0 0 0 4 14.5A2.5 2.5 0 0 0 6.5 17A2.5 2.5 0 0 0 9 14.5A2.5 2.5 0 0 0 6.5 12" />
     </svg>
   );
 }
 
-/** Lower bunk SVG — bed at ground level, floor line below */
-function LowerBunkSvg() {
+
+// ── Double-Deck Cell with Badge + Hover Popover ───────────────────────────────
+
+interface DoubleDeckCellProps {
+  cell: LayoutCell;
+  upperSeat: TripSeat | null;
+  lowerSeat: TripSeat | null;
+  upperAssigned: boolean;
+  lowerAssigned: boolean;
+  focusedPassengerIsPwd: boolean;
+  onSeatClick: (seat: TripSeat) => void;
+  rates: LayoutRate[];
+  cellId: string;
+  popoverId: string;
+  activePopoverId: string | null;
+  setActivePopoverId: (value: string | null | ((prev: string | null) => string | null)) => void;
+}
+
+function DoubleDeckCell({
+  cell,
+  upperSeat,
+  lowerSeat,
+  upperAssigned,
+  lowerAssigned,
+  focusedPassengerIsPwd,
+  onSeatClick,
+  rates,
+  cellId,
+  popoverId,
+  activePopoverId,
+  setActivePopoverId,
+}: DoubleDeckCellProps) {
+  const popoverOpen = activePopoverId === popoverId;
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const upperStatus = upperSeat?.status ?? 'none';
+  const lowerStatus = lowerSeat?.status ?? 'none';
+
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+
+  const openPopover = () => {
+    clearCloseTimer();
+    setActivePopoverId(popoverId);
+  };
+
+  const scheduleClose = () => {
+    clearCloseTimer();
+    closeTimerRef.current = setTimeout(
+      () => setActivePopoverId((prev) => (prev === popoverId ? null : prev)),
+      120,
+    );
+  };
+
+  useEffect(() => {
+    if (!popoverOpen) return;
+
+    const onPointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target || !wrapRef.current?.contains(target)) {
+        setActivePopoverId((prev) => (prev === popoverId ? null : prev));
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setActivePopoverId((prev) => (prev === popoverId ? null : prev));
+    };
+
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('touchstart', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('touchstart', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [popoverOpen, popoverId, setActivePopoverId]);
+
+  useEffect(
+    () => () => {
+      clearCloseTimer();
+    },
+    [],
+  );
+
+  // Combined visual state — same logic as TMS TmsBunkCell
+  let visualState: 'selected' | 'both-available' | 'both-booked' | 'partial-held' | 'partial' = 'both-available';
+  let overlayPosition: 'top' | 'bottom' | null = null;
+
+  if (upperAssigned || lowerAssigned) {
+    visualState = 'selected';
+  } else if (['booked', 'blocked'].includes(upperStatus) && ['booked', 'blocked'].includes(lowerStatus)) {
+    visualState = 'both-booked';
+  } else if (upperStatus === 'held' || lowerStatus === 'held') {
+    visualState = 'partial-held';
+  } else if (upperStatus === 'available' && ['booked', 'blocked'].includes(lowerStatus)) {
+    visualState = 'partial'; overlayPosition = 'bottom';
+  } else if (['booked', 'blocked'].includes(upperStatus) && lowerStatus === 'available') {
+    visualState = 'partial'; overlayPosition = 'top';
+  }
+
+  const stateColors: Record<string, { bg: string; border: string; badgeBg: string }> = {
+    'both-available': { bg: 'bg-[#E6F1FB]', border: 'border-[#185FA5]', badgeBg: '#185FA5' },
+    'both-booked':    { bg: 'bg-[#D3D1C7]', border: 'border-[#5F5E5A]', badgeBg: '#5F5E5A' },
+    'partial':        { bg: 'bg-[#E6F1FB]', border: 'border-[#185FA5]', badgeBg: '#185FA5' },
+    'partial-held':   { bg: 'bg-amber-50',  border: 'border-amber-300',  badgeBg: '#B45309' },
+    'selected':       { bg: 'bg-[#378ADD]', border: 'border-[#0C447C]',  badgeBg: '#0C447C' },
+  };
+
+  const dc = stateColors[visualState];
+  const rateColor = getRateColor(cell.upperRateId, rates) ?? getRateColor(cell.lowerRateId, rates) ?? getRateColor(cell.rateId, rates);
+
   return (
-    <svg width="16" height="12" viewBox="0 0 18 14" fill="none" className="shrink-0 opacity-80">
-      {/* short legs */}
-      <line x1="2.5" y1="1" x2="2.5" y2="5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="15.5" y1="1" x2="15.5" y2="5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-      {/* mattress */}
-      <rect x="1" y="5" width="16" height="6" rx="1" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.2"/>
-      {/* pillow */}
-      <rect x="2.5" y="6" width="4" height="3.5" rx="0.5" fill="currentColor" fillOpacity="0.45"/>
-      {/* floor line */}
-      <line x1="0" y1="13" x2="18" y2="13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeOpacity="0.4"/>
-    </svg>
+    <div ref={wrapRef} className="relative w-full h-full">
+      <button
+        type="button"
+        onClick={() => {
+          clearCloseTimer();
+          setActivePopoverId((prev) => (prev === popoverId ? null : popoverId));
+        }}
+        onPointerEnter={openPopover}
+        onPointerLeave={scheduleClose}
+        onFocus={openPopover}
+        onBlur={scheduleClose}
+        disabled={visualState === 'both-booked'}
+        className={`w-full h-full rounded-md border flex flex-col items-stretch overflow-hidden relative transition-opacity ${
+          visualState === 'both-booked' ? 'cursor-not-allowed' : 'cursor-pointer'
+        } ${dc.bg} ${dc.border}`}
+        title={`Bunk ${cellId}`}
+      >
+        {/* Rate strip — flush top, same as regular cells */}
+        {rateColor && (
+          <span className="w-full shrink-0 block" style={{ height: 4, backgroundColor: rateColor }} />
+        )}
+        {/* Partial overlay */}
+        {overlayPosition && (
+          <div
+            className="absolute left-0 right-0 pointer-events-none"
+            style={{
+              height: '50%',
+              top: overlayPosition === 'top' ? 0 : 'auto',
+              bottom: overlayPosition === 'bottom' ? 0 : 'auto',
+              backgroundColor: '#D3D1C7',
+              opacity: 0.55,
+              borderRadius: overlayPosition === 'top' ? '6px 6px 0 0' : '0 0 6px 6px',
+            }}
+          />
+        )}
+        {/* 2× badge */}
+        <span
+          className="absolute top-1 right-1 text-[7px] font-bold px-1 py-0.5 rounded text-white leading-tight z-10"
+          style={{ backgroundColor: dc.badgeBg }}
+        >
+          2×
+        </span>
+        {/* Centered content */}
+        <span className="flex-1 flex flex-col items-center justify-center gap-1 relative z-10">
+          <BunkBedIcon className="h-3.5 w-3.5 shrink-0 opacity-80" />
+          <span className="text-[11px] font-semibold leading-none">{cellId}</span>
+        </span>
+      </button>
+
+      {/* Popover */}
+      {popoverOpen && (
+        <div
+          className="absolute bottom-[calc(100%-2px)] left-1/2 -translate-x-1/2 w-44 bg-white border border-zinc-300 rounded-lg shadow-lg p-2 z-50"
+          onPointerEnter={openPopover}
+          onPointerLeave={scheduleClose}
+        >
+          {/* Hover bridge to prevent premature close while moving from bunk to popover */}
+          <div
+            aria-hidden
+            className="absolute left-1/2 -translate-x-1/2 top-full h-4 w-44 bg-transparent"
+          />
+          <div
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0"
+            style={{
+              borderLeft: '6px solid transparent',
+              borderRight: '6px solid transparent',
+              borderTop: '6px solid #d4d4d8',
+            }}
+          />
+          <div className="text-[9px] font-semibold text-zinc-600 px-1.5 pb-1.5 border-b border-zinc-200 mb-1 uppercase tracking-wide">
+            {visualState === 'both-booked' ? `Bunk ${cellId} — fully booked` : `Bunk ${cellId} — select slot`}
+          </div>
+
+          {/* Upper slot row */}
+          <div
+            role="button"
+            onClick={() => {
+              if (upperSeat && upperStatus === 'available' && !focusedPassengerIsPwd) {
+                onSeatClick(upperSeat);
+                setActivePopoverId((prev) => (prev === popoverId ? null : prev));
+              }
+            }}
+            className={`grid grid-cols-[8px_minmax(0,1fr)_auto_auto] items-center gap-2 px-1.5 py-1 rounded text-[11px] mb-0.5 transition-colors ${
+              upperAssigned ? 'bg-[#E6F1FB]' :
+              upperStatus === 'available' && !focusedPassengerIsPwd ? 'hover:bg-zinc-100 cursor-pointer' :
+              'opacity-50 cursor-not-allowed'
+            }`}
+          >
+            <div
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{
+                backgroundColor: upperAssigned ? '#185FA5' : upperStatus === 'available' ? '#1D9E75' : upperStatus === 'held' ? '#BA7517' : '#888780',
+              }}
+            />
+            <span className={`font-medium whitespace-nowrap ${upperAssigned || (upperStatus === 'available' && !focusedPassengerIsPwd) ? 'text-zinc-800' : 'text-zinc-500'}`}>
+              Upper
+            </span>
+            <span className="text-[10px] font-mono text-zinc-600 whitespace-nowrap">{upperSeat?.cell_id ?? '—'}</span>
+            {upperAssigned ? (
+              <span className="text-[11px] font-bold text-[#185FA5] whitespace-nowrap">✓</span>
+            ) : focusedPassengerIsPwd && upperStatus === 'available' ? (
+              <span className="text-[9px] text-zinc-500 whitespace-nowrap">ineligible</span>
+            ) : upperStatus === 'held' ? (
+              <span className="text-[9px] text-amber-700 whitespace-nowrap">reserved</span>
+            ) : ['booked', 'blocked'].includes(upperStatus) ? (
+              <span className="text-[9px] text-zinc-500 whitespace-nowrap">taken</span>
+            ) : (
+              <span className="text-[12px] text-zinc-400 whitespace-nowrap">›</span>
+            )}
+          </div>
+
+          {/* Lower slot row */}
+          <div
+            role="button"
+            onClick={() => {
+              if (lowerSeat && lowerStatus === 'available') {
+                onSeatClick(lowerSeat);
+                setActivePopoverId((prev) => (prev === popoverId ? null : prev));
+              }
+            }}
+            className={`grid grid-cols-[8px_minmax(0,1fr)_auto_auto] items-center gap-2 px-1.5 py-1 rounded text-[11px] transition-colors ${
+              lowerAssigned ? 'bg-[#E6F1FB]' :
+              lowerStatus === 'available' ? 'hover:bg-zinc-100 cursor-pointer' :
+              'opacity-50 cursor-not-allowed'
+            }`}
+          >
+            <div
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{
+                backgroundColor: lowerAssigned ? '#185FA5' : lowerStatus === 'available' ? '#1D9E75' : lowerStatus === 'held' ? '#BA7517' : '#888780',
+              }}
+            />
+            <span className={`font-medium whitespace-nowrap ${lowerAssigned || lowerStatus === 'available' ? 'text-zinc-800' : 'text-zinc-500'}`}>
+              Lower
+            </span>
+            <span className="text-[10px] font-mono text-zinc-600 whitespace-nowrap">{lowerSeat?.cell_id ?? '—'}</span>
+            {lowerAssigned ? (
+              <span className="text-[11px] font-bold text-[#185FA5] whitespace-nowrap">✓</span>
+            ) : lowerStatus === 'held' ? (
+              <span className="text-[9px] text-amber-700 whitespace-nowrap">reserved</span>
+            ) : ['booked', 'blocked'].includes(lowerStatus) ? (
+              <span className="text-[9px] text-zinc-500 whitespace-nowrap">taken</span>
+            ) : (
+              <span className="text-[12px] text-zinc-400 whitespace-nowrap">›</span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -152,6 +396,7 @@ export function SeatGrid({
   onSeatClick,
 }: SeatGridProps) {
   const { rows, cols, cells, rates, merged } = layout;
+  const [activePopoverId, setActivePopoverId] = useState<string | null>(null);
 
   const inventoryByCellId = useMemo(() => {
     const map = new Map<string, TripSeat>();
@@ -166,11 +411,11 @@ export function SeatGrid({
   }, [cells]);
 
   return (
-    <div className="p-3 select-none">
+    <div className="p-3 select-none" style={WL_RADIUS_LOCK_STYLE}>
       {/* Column headers */}
       <div
         className="inline-grid mb-1"
-        style={{ gap: GAP, gridTemplateColumns: `22px repeat(${cols}, ${CELL_W}px)` }}
+        style={{ gap: GAP, gridTemplateColumns: `22px repeat(${cols}, ${CELL_SIZE}px)` }}
       >
         <div />
         {Array.from({ length: cols }, (_, c) => (
@@ -187,20 +432,20 @@ export function SeatGrid({
             <div
               key={r}
               className="flex items-center justify-center text-[10px] font-medium text-zinc-400"
-              style={{ width: 22, height: BUNK_H }}
+              style={{ width: 22, height: CELL_SIZE }}
             >
               {String.fromCharCode(65 + r)}
             </div>
           ))}
         </div>
 
-        {/* Grid — uniform BUNK_H rows so double-deck cells never clip */}
+        {/* Grid — square cells with overflow:visible for popovers */}
         <div
-          className="inline-grid"
+          className="inline-grid overflow-visible"
           style={{
             gap: GAP,
-            gridTemplateColumns: `repeat(${cols}, ${CELL_W}px)`,
-            gridAutoRows: `${BUNK_H}px`,
+            gridTemplateColumns: `repeat(${cols}, ${CELL_SIZE}px)`,
+            gridAutoRows: `${CELL_SIZE}px`,
           }}
         >
           {Array.from({ length: rows }, (_, r) =>
@@ -244,13 +489,22 @@ export function SeatGrid({
                 return (
                   <div
                     key={key}
-                    className={`rounded border flex flex-col items-center justify-center text-center gap-0.5 ${DECOR[cell.type] ?? 'bg-zinc-100 border-zinc-200 text-zinc-400'}`}
+                    className={`rounded-md border flex flex-col items-center justify-center text-center gap-0.5 ${DECOR[cell.type] ?? 'bg-zinc-100 border-zinc-200 text-zinc-400'}`}
                     style={gridStyle}
                     title={mergedTitle ?? cell.type}
                   >
                     {hasStructIcon && icon}
                     {label && (
-                      <span className="text-[8px] font-semibold leading-none tracking-wide uppercase px-0.5">
+                      <span
+                        className="text-[8px] font-semibold tracking-wide uppercase px-1 leading-tight text-center w-full"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          wordBreak: 'break-word',
+                        }}
+                      >
                         {label}
                       </span>
                     )}
@@ -258,71 +512,30 @@ export function SeatGrid({
                 );
               }
 
-              // ── Double-deck bunk ─────────────────────────────────────────────
+              // ── Double-deck bunk — badge + hover popover ─────────────────────
               if (cell.type === 'double-deck') {
                 const upperSeat = cell.upperId ? inventoryByCellId.get(cell.upperId) : null;
                 const lowerSeat = cell.lowerId ? inventoryByCellId.get(cell.lowerId) : null;
                 const upperAssigned = upperSeat ? assignedSeatIds.has(upperSeat.id) : false;
                 const lowerAssigned = lowerSeat ? assignedSeatIds.has(lowerSeat.id) : false;
-                // Fallback: if per-half rate not set, use cell-level rateId for both
-                const upperRateColor = getRateColor(cell.upperRateId, rates) ?? getRateColor(cell.rateId, rates);
-                const lowerRateColor = getRateColor(cell.lowerRateId, rates) ?? getRateColor(cell.rateId, rates);
-                const upperLabel = upperSeat?.cell_id ?? cell.upperId ?? '—';
-                const lowerLabel = lowerSeat?.cell_id ?? cell.lowerId ?? '—';
+                const ddCellId = cell.cellId ?? cell.upperId?.replace(/-U$/, '') ?? '—';
 
                 return (
-                  <div
-                    key={key}
-                    className="flex flex-col rounded border border-zinc-400 overflow-hidden bg-zinc-600"
-                    style={{ ...gridStyle, gap: 1 }}
-                  >
-                    {/* ↑ Upper bunk */}
-                    <button
-                      type="button"
-                      disabled={
-                        !upperSeat ||
-                        upperSeat.status === 'booked' ||
-                        upperSeat.status === 'blocked' ||
-                        upperSeat.status === 'held'
-                      }
-                      onClick={() => upperSeat && onSeatClick(upperSeat)}
-                      className={`relative flex-1 min-h-0 flex flex-col items-stretch overflow-hidden transition-colors rounded-t ${
-                        upperSeat
-                          ? getStatusColor(upperSeat.status, 'bed-upper', upperAssigned, false)
-                          : 'bg-zinc-100 border border-zinc-200 text-zinc-400'
-                      }`}
-                      title={`Upper bunk: ${upperLabel}`}
-                    >
-                      <RateStrip color={upperRateColor} height={3} />
-                      <span className="flex-1 flex flex-col items-center justify-center gap-0 px-0.5">
-                        <UpperBunkSvg />
-                        <span className="text-[9px] font-semibold leading-none">{upperLabel}</span>
-                      </span>
-                    </button>
-
-                    {/* ↓ Lower bunk */}
-                    <button
-                      type="button"
-                      disabled={
-                        !lowerSeat ||
-                        lowerSeat.status === 'booked' ||
-                        lowerSeat.status === 'blocked' ||
-                        lowerSeat.status === 'held'
-                      }
-                      onClick={() => lowerSeat && onSeatClick(lowerSeat)}
-                      className={`relative flex-1 min-h-0 flex flex-col items-stretch overflow-hidden transition-colors rounded-b ${
-                        lowerSeat
-                          ? getStatusColor(lowerSeat.status, 'bed-lower', lowerAssigned, focusedPassengerIsPwd)
-                          : 'bg-zinc-100 border border-zinc-200 text-zinc-400'
-                      }`}
-                      title={`Lower bunk: ${lowerLabel}`}
-                    >
-                      <RateStrip color={lowerRateColor} height={3} />
-                      <span className="flex-1 flex flex-col items-center justify-center gap-0 px-0.5">
-                        <LowerBunkSvg />
-                        <span className="text-[9px] font-semibold leading-none">{lowerLabel}</span>
-                      </span>
-                    </button>
+                  <div key={key} style={{ ...gridStyle, position: 'relative', overflow: 'visible' }}>
+                    <DoubleDeckCell
+                      cell={cell}
+                      upperSeat={upperSeat ?? null}
+                      lowerSeat={lowerSeat ?? null}
+                      upperAssigned={upperAssigned}
+                      lowerAssigned={lowerAssigned}
+                      focusedPassengerIsPwd={focusedPassengerIsPwd}
+                      onSeatClick={onSeatClick}
+                      rates={rates}
+                      cellId={ddCellId}
+                      popoverId={`bunk-${r}-${c}`}
+                      activePopoverId={activePopoverId}
+                      setActivePopoverId={setActivePopoverId}
+                    />
                   </div>
                 );
               }
@@ -339,7 +552,7 @@ export function SeatGrid({
                   type="button"
                   disabled={!inventorySeat || !isClickable}
                   onClick={() => inventorySeat && isClickable && onSeatClick(inventorySeat)}
-                  className={`rounded flex flex-col items-stretch overflow-hidden transition-colors border ${
+                  className={`rounded-md flex flex-col items-stretch overflow-hidden transition-colors border ${
                     inventorySeat
                       ? getStatusColor(inventorySeat.status, cell.type, isAssigned, focusedPassengerIsPwd)
                       : 'bg-zinc-50 text-zinc-300 cursor-not-allowed border-zinc-200'

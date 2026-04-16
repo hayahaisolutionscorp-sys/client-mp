@@ -11,6 +11,13 @@ interface TripDetailsProps {
   seatLabels?: Record<string, Record<string, string>>;
 }
 
+function isUuid(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+  );
+}
+
 export default function TripDetails({ booking, seatLabels }: TripDetailsProps) {
   const themeSettings = useThemeSettings();
 
@@ -27,9 +34,11 @@ export default function TripDetails({ booking, seatLabels }: TripDetailsProps) {
         </div>
         <div className="pl-7 space-y-3">
           {passengers.map((passenger, index) => {
-            const seatCellId = (tripId ? seatLabels?.[`p-${index}`]?.[tripId] : undefined)
+            const seatCandidateRaw: unknown = (tripId ? seatLabels?.[`p-${index}`]?.[tripId] : undefined)
               ?? (passenger as any).seatCellId
               ?? null;
+            const seatCandidate = typeof seatCandidateRaw === 'string' ? seatCandidateRaw.trim() : '';
+            const seatCellId = seatCandidate.length > 0 && !isUuid(seatCandidate) ? seatCandidate : null;
             return (
               <div key={index} className="text-customText">
                 <div className="flex items-center gap-2 flex-wrap">

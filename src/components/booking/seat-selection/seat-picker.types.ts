@@ -73,3 +73,6 @@ export interface SeatAssignment {
 
 // assignments[passengerKey][tripId] = seatInventoryId
 export type AssignmentsMap = Record<string, Record<string, string>>;
+
+// labels[passengerKey][tripId] = cell_id label
+export type SeatLabelsMap = Record<string, Record<string, string>>;

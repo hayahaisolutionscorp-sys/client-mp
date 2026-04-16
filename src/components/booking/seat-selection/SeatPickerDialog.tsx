@@ -15,12 +15,13 @@ import type {
   AssignmentsMap,
   CabinDeck,
   DeckLayout,
+  SeatLabelsMap,
   TripSeat,
 } from './seat-picker.types';
 import { isPwdSenior } from './seat-picker.utils';
 import { SeatGrid } from './SeatGrid';
 import { SeatLegend } from './SeatLegend';
-import type { SeatLabelsMap } from './SeatPicker';
+import { autoAssignSeats } from './auto-assign';
 
 export interface SeatPickerDialogTrip {
   tripId: string;
@@ -42,7 +43,6 @@ interface SeatPickerDialogProps {
   passengers: SeatPickerDialogPassenger[];
   initialAssignments?: AssignmentsMap;
   onConfirm: (assignments: AssignmentsMap, labels: SeatLabelsMap) => void;
-  onSkip: () => void;
 }
 
 const ZOOM_STEPS = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3] as const;
@@ -56,6 +56,15 @@ function formatCountdown(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+function DeckStackIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} aria-hidden>
+      <path d="M12 5 4 9l8 4 8-4-8-4Z" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="m4 13 8 4 8-4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function SeatPickerDialog({
   open,
   onClose,
@@ -63,7 +72,6 @@ export function SeatPickerDialog({
   passengers,
   initialAssignments = {},
   onConfirm,
-  onSkip,
 }: SeatPickerDialogProps) {
   const { error: toastError, warn: toastWarn } = useToast();
 
@@ -226,7 +234,8 @@ export function SeatPickerDialog({
       setAssignments((prev) => {
         const updated = { ...prev };
         if (updated[passengerKey]) {
-          const { [tripId]: _, ...rest } = updated[passengerKey];
+          const rest = { ...updated[passengerKey] };
+          delete rest[tripId];
           updated[passengerKey] = rest;
         }
         return updated;
@@ -244,8 +253,9 @@ export function SeatPickerDialog({
     // Hold new seat
     try {
       await holdSeats(tripId, [seat.id], activeDeckId);
-    } catch (err: any) {
-      if (err.message === 'SEAT_CONFLICT') {
+    } catch (err: unknown) {
+      const isSeatConflict = err instanceof Error && err.message === 'SEAT_CONFLICT';
+      if (isSeatConflict) {
         toastError('This seat was just reserved by another passenger.');
         fetchSeats();
       } else {
@@ -271,14 +281,29 @@ export function SeatPickerDialog({
   // ── Skip ───────────────────────────────────────────────────────────────────
   async function handleSkip() {
     setIsSkipping(true);
-    const allSeatIds = Object.values(assignments).flatMap((tm) => Object.values(tm));
-    if (allSeatIds.length > 0) {
-      for (const trip of trips) {
-        await releaseSeats(trip.tripId, allSeatIds).catch(() => {});
+    try {
+      const result = await autoAssignSeats({
+        trips: trips.map((trip) => ({ tripId: trip.tripId, cabinId: trip.cabinId })),
+        passengers: passengers.map((passenger) => ({
+          key: passenger.key,
+          discountType: passenger.discountType,
+        })),
+        currentAssignments: assignments,
+        releaseExisting: true,
+      });
+
+      if (result.unassigned.length > 0) {
+        toastWarn(
+          `${result.unassigned.length} seat ${result.unassigned.length === 1 ? 'assignment is' : 'assignments are'} still unavailable. Assigned seats were kept.`,
+        );
       }
+
+      onConfirm(result.assignments, result.labels);
+    } catch {
+      toastError('Auto-assign failed. Please try again.');
+    } finally {
+      setIsSkipping(false);
     }
-    setAssignments({});
-    onSkip();
   }
 
   // ── Confirm ────────────────────────────────────────────────────────────────
@@ -312,7 +337,7 @@ export function SeatPickerDialog({
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="p-0 max-w-[96vw] md:max-w-[1200px] lg:max-w-[1400px] xl:max-w-[1500px] w-full h-[92dvh] flex flex-col overflow-hidden gap-0 [&>button.absolute]:hidden">
+      <DialogContent className="z-[1001] p-0 max-w-[96vw] md:max-w-[1200px] lg:max-w-[1400px] xl:max-w-[1500px] w-full h-[92dvh] flex flex-col overflow-hidden gap-0 [&>button.absolute]:hidden">
         <DialogTitle className="sr-only">Select Your Seats</DialogTitle>
 
         {/* ── Header ───────────────────────────────────────────────────────── */}
@@ -498,6 +523,8 @@ export function SeatPickerDialog({
 
             {/* Deck tabs + zoom */}
             <div className="flex items-center gap-2 px-4 py-2 border-b border-zinc-200 bg-white shrink-0">
+              <DeckStackIcon className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+              <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-[.06em] mr-1">Deck</span>
               <div className="flex gap-1 flex-1 overflow-x-auto">
                 {activeDecks.map((deck) => (
                   <button
@@ -513,10 +540,15 @@ export function SeatPickerDialog({
                     {deck.name}
                   </button>
                 ))}
+                {activeDecks.length === 0 && (
+                  <span className="text-[11px] text-amber-700">
+                    No active seatmap for this cabin. Seat selection is unavailable.
+                  </span>
+                )}
               </div>
 
               {layout && (
-                <div className="flex items-center gap-1 shrink-0 ml-2">
+                <div className="flex items-center gap-1 shrink-0 ml-2 pl-2 border-l border-zinc-200">
                   <button
                     type="button"
                     onClick={() => setZoomIdx((z) => Math.max(0, z - 1))}
@@ -567,7 +599,11 @@ export function SeatPickerDialog({
             <div className="flex-1 min-h-0 overflow-auto">
               {!layout && (
                 <div className="flex items-center justify-center h-full text-[13px] text-zinc-400">
-                  {activeDeckId ? 'Loading layout…' : 'Select a deck to view seats'}
+                  {activeDeckId
+                    ? 'Loading layout…'
+                    : activeDecks.length === 0
+                      ? 'No active seatmap for this cabin. You can continue and seats will be auto-assigned.'
+                      : 'Select a deck to view seats'}
                 </div>
               )}
               {layout && seats.length === 0 && !seatsLoading && (
@@ -599,19 +635,9 @@ export function SeatPickerDialog({
           className="flex items-center justify-between px-4 border-t border-zinc-200 bg-white shrink-0"
           style={{ height: 52 }}
         >
-          <div className="flex flex-col">
-            <button
-              type="button"
-              onClick={handleSkip}
-              disabled={isSkipping}
-              className="px-4 py-2 text-[12px] font-medium text-zinc-600 border border-zinc-300 rounded-lg hover:bg-zinc-50 disabled:opacity-50 transition-colors"
-            >
-              {isSkipping ? 'Releasing…' : 'Skip — Auto-assign'}
-            </button>
-            <span className="mt-1 text-[10px] text-zinc-400">
-              Seats are not saved until you confirm. Closing releases holds.
-            </span>
-          </div>
+          <span className="text-[10px] text-zinc-400">
+            Seats are not saved until you confirm. Closing releases holds.
+          </span>
 
           <span className="text-[11px] text-zinc-400">
             <span className="font-semibold text-zinc-700">{assignedCount}</span>
@@ -620,13 +646,24 @@ export function SeatPickerDialog({
             {' assigned'}
           </span>
 
-          <button
-            type="button"
-            onClick={handleConfirm}
-            className="px-4 py-2 text-[12px] font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Confirm Seats
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSkip}
+              disabled={isSkipping}
+              className="px-4 py-2 text-[12px] font-medium text-zinc-600 border border-zinc-300 rounded-lg hover:bg-zinc-50 disabled:opacity-50 transition-colors"
+            >
+              {isSkipping ? 'Auto-assigning…' : 'Skip — Auto-assign'}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleConfirm}
+              className="px-4 py-2 text-[12px] font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Confirm Seats
+            </button>
+          </div>
         </div>
 
       </DialogContent>
