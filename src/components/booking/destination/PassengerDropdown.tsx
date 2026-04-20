@@ -75,7 +75,7 @@ const PassengerDropdown = ({ value = DEFAULT_NUM_PASSENGERS, onChange }: Passeng
 
       {/* Dropdown content */}
       {isOpen && (
-        <div className="absolute left-0 top-full z-[140] mt-2 w-full rounded-md border bg-white p-4 shadow-sm">
+        <div className="absolute left-0 top-full z-[1100] mt-2 w-full rounded-md border bg-white p-4 shadow-sm">
           <div className="flex flex-col space-y-4">
             {/* Passenger */}
             <div className="flex items-center justify-between">

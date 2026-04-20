@@ -54,10 +54,15 @@ export default function DependentForm({
     useEffect(() => {
         getPassengerTypes().then(types => {
             if (types) {
-                setPassengerTypes(types);
+                // Deduplicate by name to ensure unique values in the Select dropdown
+                const uniqueTypes = Array.from(
+                    new Map(types.map(item => [item.name, item])).values()
+                );
+                setPassengerTypes(uniqueTypes);
+                
                 // Also trigger auto-detection if birthday exists
                 if (formData.birthday) {
-                    autoSelectByBirthday(formData.birthday, types);
+                    autoSelectByBirthday(formData.birthday, uniqueTypes);
                 }
             }
         });
@@ -459,7 +464,7 @@ export default function DependentForm({
                         >
                             <SelectTrigger><SelectValue placeholder={passengerTypes.length === 0 ? 'Loading...' : 'Select type'} /></SelectTrigger>
                             <SelectContent>
-                                {passengerTypes.map(t => {
+                                {passengerTypes.map((t, index) => {
                                     const noMax = t.age_max === null || t.age_max >= 999;
                                     const hint = t.age_min !== null && noMax
                                         ? `${t.age_min}+ yrs`
@@ -467,7 +472,7 @@ export default function DependentForm({
                                             ? `${t.age_min}–${t.age_max} yrs`
                                             : null;
                                     return (
-                                        <SelectItem key={t.id} value={t.name}>
+                                        <SelectItem key={`${t.id}-${index}`} value={t.name}>
                                             {t.name}
                                             {hint && <span className="text-xs text-slate-400 ml-1">({hint})</span>}
                                         </SelectItem>

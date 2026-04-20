@@ -165,7 +165,7 @@ export default function VehicleTab({ userId }: VehicleTabProps) {
 
             {/* Vehicle Form Modal */}
             {showForm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
                     <Card className="w-full max-w-2xl">
                         <CardContent className="p-0">
                             <VehicleForm
@@ -180,7 +180,7 @@ export default function VehicleTab({ userId }: VehicleTabProps) {
 
             {/* Verification Modal */}
             {showVerificationModal && vehicleToVerify && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
                     <Card className="w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar">
                         <CardContent className="p-0">
                             <VehicleVerificationForm
@@ -198,7 +198,7 @@ export default function VehicleTab({ userId }: VehicleTabProps) {
 
             {/* Delete Confirmation Modal */}
             {vehicleToDelete && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
                     <Card className="w-full max-w-sm">
                         <CardHeader className="text-center">
                             <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">

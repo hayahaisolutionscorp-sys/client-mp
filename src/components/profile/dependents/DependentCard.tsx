@@ -331,7 +331,7 @@ export default function DependentCard({
 
             {/* Modals */}
             {showEditForm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
                     <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar">
                         <CardContent className="p-0">
                             <DependentForm
@@ -347,7 +347,7 @@ export default function DependentCard({
             )}
 
             {showDeleteDialog && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
                     <Card className="w-full max-w-md">
                         <CardHeader>
                             <CardTitle className="text-destructive">Delete Dependent?</CardTitle>

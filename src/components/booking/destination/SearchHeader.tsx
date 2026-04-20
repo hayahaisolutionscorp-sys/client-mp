@@ -333,7 +333,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
 
       {/* Expanded Search Form */}
       {isExpanded && (
-        <div className="fixed inset-0 z-[450] flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-3 sm:p-4 md:p-6 w-full h-full max-w-full max-h-full overflow-auto">
             <div className="text-xl mb-6 border-b pt-2 pb-4">Search Filters</div>
             <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full items-center">
