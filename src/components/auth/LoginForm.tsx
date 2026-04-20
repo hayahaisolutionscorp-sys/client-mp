@@ -14,12 +14,13 @@ import { isEffectiveClientApiMode } from "constants/api";
 import { FALLBACK_CSS_PRIMARY } from "@/lib/theme-css-fallbacks";
 
 const STEP_KEY = 'login-step';
+const STEP_TTL_MS = 5 * 60 * 1000;
 
 interface LoginFormProps {
-  mode?: "default" | "immersive" | "canvas";
+  mode?: 'default' | 'immersive' | 'canvas';
 }
 
-export function LoginForm({ mode = "default" }: LoginFormProps) {
+export function LoginForm({ mode = 'default' }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get('returnUrl');
@@ -32,7 +33,7 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
   const { clearSession, signInWithGoogle, signInWithFacebook, signInWithHayahai } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [emailValidation, setEmailValidation] = useState<{
     isValid: boolean;
     exists: boolean | null;
@@ -42,13 +43,32 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
 
   useEffect(() => {
     clearSession();
-    sessionStorage.removeItem(STEP_KEY);
   }, [clearSession]);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(STEP_KEY);
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw);
+      const storedEmail = parsed?.email;
+      const ts = parsed?.ts;
+
+      if (!storedEmail || !ts || Date.now() - ts > STEP_TTL_MS) {
+        sessionStorage.removeItem(STEP_KEY);
+        return;
+      }
+
+      setEmail(storedEmail);
+    } catch {
+      sessionStorage.removeItem(STEP_KEY);
+    }
+  }, []);
 
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmailValid = emailRegex.test(email);
-    setEmailValidation(prev => ({ ...prev, isValid: isEmailValid }));
+    setEmailValidation((prev) => ({ ...prev, isValid: isEmailValid }));
 
     if (isEmailValid) {
       router.prefetch('/login/verify');
@@ -108,12 +128,12 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
   return (
     <div className="w-full max-w-md space-y-6">
       <h1 className="sr-only">Login</h1>
-      {mode === "default" ? (
+      {mode === 'default' ? (
         <>
           <div className="flex justify-center">
             <Image
-              src={branding?.logo.dark || branding?.logo.light || "/assets/icons/Ayahay_blue_vertical.svg"}
-              alt={`${branding?.brand_name || "Hayahai"} Logo`}
+              src={branding?.logo.dark || branding?.logo.light || '/assets/icons/Ayahay_blue_vertical.svg'}
+              alt={`${branding?.brand_name || 'Hayahai'} Logo`}
               width={210}
               height={210}
               className="h-15 w-15"
@@ -140,7 +160,7 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
           />
           {email && !emailValidation.isValid && (
             <div className="flex items-center gap-1 text-xs mt-1">
-              <span className="text-red-500">âœ— Invalid email format</span>
+              <span className="text-red-500">Invalid email format</span>
             </div>
           )}
         </div>
@@ -150,7 +170,7 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
           style={{ backgroundColor: primaryColor }}
           disabled={!emailValidation.isValid || isNavigating}
         >
-          {isNavigating ? "Please wait..." : "Continue"}
+          {isNavigating ? 'Please wait...' : 'Continue'}
         </Button>
       </form>
 
@@ -195,11 +215,11 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
       </div>
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link 
-            href={`/register${returnUrlParam}`} 
+          Don&apos;t have an account?{' '}
+          <Link
+            href={`/register${returnUrlParam}`}
             onMouseEnter={() => router.prefetch(`/register${returnUrlParam}`)}
-            className="hover:underline" 
+            className="hover:underline"
             style={{ color: primaryColor }}
           >
             Register now
@@ -207,11 +227,11 @@ export function LoginForm({ mode = "default" }: LoginFormProps) {
         </p>
       </div>
       <p className="text-center text-sm text-muted-foreground">
-        By signing in, you agree to our{" "}
+        By signing in, you agree to our{' '}
         <Link href="/terms" className="hover:underline" style={{ color: primaryColor }}>
           Terms of Use
-        </Link>{" "}
-        and{" "}
+        </Link>{' '}
+        and{' '}
         <Link href="/privacy" className="hover:underline" style={{ color: primaryColor }}>
           Privacy Policy
         </Link>

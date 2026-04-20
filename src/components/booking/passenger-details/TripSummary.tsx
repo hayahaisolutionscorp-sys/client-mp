@@ -95,7 +95,10 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
         availableVehicleCapacity: liveCapacity,
         remainingVehicleCapacity: {
           ...(trip.remainingVehicleCapacity || {}),
-          sedanFit: liveCapacity
+          sedanFit: {
+            remaining: liveCapacity,
+            max: trip.remainingVehicleCapacity?.sedanFit?.max ?? liveCapacity
+          }
         }
       };
     });

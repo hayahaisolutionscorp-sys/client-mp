@@ -89,7 +89,10 @@ export default function CrossTenantTripSummary({ legs, departureCabinName, depar
         availableVehicleCapacity: liveCapacity,
         remainingVehicleCapacity: {
           ...(trip.remainingVehicleCapacity || {}),
-          sedanFit: liveCapacity
+          sedanFit: {
+            remaining: liveCapacity,
+            max: trip.remainingVehicleCapacity?.sedanFit?.max ?? liveCapacity
+          }
         }
       };
     });

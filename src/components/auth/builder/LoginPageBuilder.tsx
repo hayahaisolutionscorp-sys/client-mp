@@ -161,7 +161,6 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
   const formSection = builderConfig.sections.find((section) => section.section_key === 'form');
   const sidebarSection = builderConfig.sections.find((section) => section.section_key === 'sidebar');
   const heroSection = builderConfig.sections.find((section) => section.section_key === 'hero');
-  const footerSection = builderConfig.sections.find((section) => section.section_key === 'footer');
   const layoutVariant = builderConfig.page_variant || builderConfig.layout_variant || 'split-right';
   const layout = getLoginPageLayout(layoutVariant);
   const heroVariant = heroSection?.variant || 'default';
@@ -204,17 +203,13 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
           : heroVariant === 'split'
             ? 'A cleaner sign-in flow built around fast account access.'
             : 'Continue using your email address or social login.';
-  const footerCopy =
-    footerSection?.variant === 'inline'
-      ? 'By continuing, you agree to Terms and Privacy Policy.'
-      : footerSection?.variant === 'minimal' || footerSection?.variant === 'compact'
-        ? 'By signing in, you agree to our Terms and Privacy Policy.'
-        : 'By signing in, you agree to our Terms of Use and Privacy Policy.';
 
   const sidebarToneVariant =
     sidebarVariant === 'minimal' ? 'image' : sidebarVariant === 'clean' ? 'gradient' : sidebarVariant;
 
   const formMode = layout.formMode;
+  const backHref = step === 'verify' ? '/login' : '/';
+  const backLabel = step === 'verify' ? 'Back to email' : 'Back to homepage';
   const renderForm = () => {
     if (step === 'verify') {
       return <LoginVerifyForm mode={formMode} />;
@@ -309,12 +304,12 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
 
         <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col">
           <Link
-            href="/"
+            href={backHref}
             className="mb-6 inline-flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
             style={{ color: primaryColor }}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to homepage
+            {backLabel}
           </Link>
 
           <div className="grid flex-1 items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
@@ -435,12 +430,6 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
                   >
                     {renderForm()}
                   </AnimatedSection>
-
-                  {footerSection?.enabled !== false ? (
-                    <p className="text-center text-xs md:text-sm" style={{ color: textOnSurfaceAlt }}>
-                      {footerCopy}
-                    </p>
-                  ) : null}
                 </div>
               </div>
             </section>
@@ -474,12 +463,12 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
 
         <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col">
           <Link
-            href="/"
+            href={backHref}
             className="mb-6 inline-flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
             style={{ color: primaryColor }}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to homepage
+            {backLabel}
           </Link>
 
           <div className={cn('flex flex-1 items-center justify-center', brandRadiusClass)}>
@@ -559,12 +548,6 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
                     {renderForm()}
                   </AnimatedSection>
                 </div>
-
-                {footerSection?.enabled !== false ? (
-                  <p className="text-center text-xs md:text-sm" style={{ color: textOnSurfaceAlt }}>
-                    {footerCopy}
-                  </p>
-                ) : null}
               </div>
             </section>
           </div>
@@ -587,12 +570,12 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
     >
       <div className="mx-auto max-w-6xl">
         <Link
-          href="/"
+          href={backHref}
           className="mb-6 inline-flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-80"
           style={{ color: primaryColor }}
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to homepage
+          {backLabel}
         </Link>
 
         <div
@@ -640,23 +623,6 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
             >
               {renderForm()}
             </AnimatedSection>
-
-            {footerSection?.enabled !== false ? (
-              <p
-                className={cn(
-                  'text-center',
-                  footerSection?.variant === 'minimal' || footerSection?.variant === 'compact'
-                    ? 'text-[11px] md:text-xs'
-                    : footerSection?.variant === 'inline'
-                      ? 'text-[11px] md:text-[11px]'
-                      : 'text-xs md:text-sm',
-                  isLeftLayout && 'text-white/70'
-                )}
-                style={{ color: isLeftLayout ? 'rgba(255,255,255,0.7)' : textOnSurfaceAlt }}
-              >
-                {footerCopy}
-              </p>
-            ) : null}
           </section>
 
           {layoutVariant === 'split-right' ? renderSidebar() : null}

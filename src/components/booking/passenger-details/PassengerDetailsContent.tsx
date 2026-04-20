@@ -192,6 +192,22 @@ async function renderCrossTenant({
 function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId: number = 0): ITrip {
   const vehicleCapacities = summary.ship.vehicle_capacities;
   const tripCabinPrices = summary.cabinPrices || {};
+  const remainingVehicleCapacity = vehicleCapacities
+    ? Object.fromEntries(
+      Array.from(
+        new Set([
+          ...Object.keys(vehicleCapacities.remaining || {}),
+          ...Object.keys(vehicleCapacities.max || {})
+        ])
+      ).map((key) => [
+        key,
+        {
+          remaining: vehicleCapacities.remaining?.[key] ?? 0,
+          max: vehicleCapacities.max?.[key] ?? (vehicleCapacities.remaining?.[key] ?? 0)
+        }
+      ])
+    )
+    : null;
 
   const availableVehicleCapacity = vehicleCapacities
     ? Object.values(vehicleCapacities.remaining || {}).reduce((a, b) => a + b, 0)
@@ -215,7 +231,7 @@ function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId: number = 0)
     departureDateIso: summary.scheduled_departure,
     seatSelection: summary.ship?.has_seatmap ?? false,
     availableVehicleCapacity,
-    remainingVehicleCapacity: vehicleCapacities?.remaining,
+    remainingVehicleCapacity,
     vehicleCapacity,
     bookingStartDateIso: '',
     bookingCutOffDateIso: '',
