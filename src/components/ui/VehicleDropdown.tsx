@@ -73,7 +73,7 @@ const VehicleDropdown: React.FC<VehicleDropdownProps> = ({ value = DEFAULT_NUM_V
 
       {/* Dropdown content */}
       {isOpen && (
-        <div className="absolute z-[11] mt-2 p-4 w-full bg-white border rounded-md shadow-sm">
+        <div className="absolute z-[1100] mt-2 p-4 w-full bg-white border rounded-md shadow-sm">
           <div className="flex flex-col space-y-4">
             {/* Vehicles */}
             <div className="flex items-center justify-between">

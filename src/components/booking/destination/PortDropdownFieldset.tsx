@@ -140,7 +140,7 @@ const PortDropdownFieldset = ({
         </button>
 
         {isOpen && !disabled && (
-          <div className="absolute left-0 top-full z-[160] mt-2 w-full bg-white border rounded-md shadow-lg">
+          <div className="absolute left-0 top-full z-[1100] mt-2 w-full bg-white border rounded-md shadow-lg">
             <div className="p-2 relative">
               <input
                 ref={searchInputRef}

@@ -182,7 +182,7 @@ export default function DependentTab({ userId }: DependentComponentProps) {
 
             {/* Modal for Adding New Dependent */}
             {showAddForm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
                     <Card className="no-scrollbar w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                         <CardContent className="p-0">
                             <DependentForm
@@ -197,7 +197,7 @@ export default function DependentTab({ userId }: DependentComponentProps) {
             )}
 
             {showAddSuccessPrompt && lastAddedDependent && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
                     <Card className="w-full max-w-md">
                         <CardHeader className="text-center">
                             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -227,7 +227,7 @@ export default function DependentTab({ userId }: DependentComponentProps) {
             )}
 
             {showUpdateSuccessPrompt && lastUpdatedDependent && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
                     <Card className="w-full max-w-md">
                         <CardHeader className="text-center">
                             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -249,7 +249,7 @@ export default function DependentTab({ userId }: DependentComponentProps) {
 
             {/* Verification Modal for Dependents */}
             {showVerificationModal && dependentToVerify && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4">
                     <Card className="w-full max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar">
                         <CardContent className="p-0">
                             <ProfileVerificationForm

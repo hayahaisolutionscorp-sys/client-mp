@@ -71,7 +71,7 @@ export default function PhotoGrid({ images }: { images: Promise<IThumbnail[]> })
       {/* Modal with improved mobile handling */}
       {modalImage && (
         <div
-          className="fixed inset-0 bg-black/90 flex justify-center items-center z-50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/90 flex justify-center items-center z-[1000] p-4 backdrop-blur-sm"
           onClick={closeModal}
         >
           <div className="relative max-w-[90vw] max-h-[90vh] rounded-lg overflow-hidden">

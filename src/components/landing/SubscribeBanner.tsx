@@ -11,7 +11,7 @@ const SubscribeBanner = () => {
   return (
     <div
       className="flex flex-col relative bg-[#AADCFB] rounded-lg shadow-md w-full h-auto max-w-6xl mx-auto px-6
-      md:flex-row md:justify-between md:h-[278px] sm:px-28 lg:absolute lg:z-12 lg:mb-26 lg:max-w-[85%] lg:px-10"
+      md:flex-row md:justify-between md:h-[278px] sm:px-28 lg:relative lg:z-10 lg:max-w-[85%] lg:px-10 overflow-hidden"
       style={{ backgroundColor: themeSettings?.secondaryColor }}
     >
       <div className="flex flex-col items-center w-full md:w-auto md:items-start justify-center text-center md:text-left py-6">

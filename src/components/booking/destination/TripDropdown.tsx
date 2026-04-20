@@ -62,7 +62,7 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-[140] mt-2 w-full text-sm bg-white border rounded-md shadow-sm">
+        <div className="absolute left-0 top-full z-[1100] mt-2 w-full text-sm bg-white border rounded-md shadow-sm">
           <ul className="py-1">
             <li
               onClick={() => handleSelection("Single Trip")}
