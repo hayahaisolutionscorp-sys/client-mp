@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FaCar, FaShip, FaCheckCircle, FaTruck, FaMotorcycle } from 'react-icons/fa';
 import { IoMdPin } from 'react-icons/io';
 import { TbPointFilled } from 'react-icons/tb';
@@ -30,7 +30,6 @@ import { SelectedTrip } from '@/types/trip/selected-trip';
 import { ITrip } from '@/models';
 import ConnectingTripCard from './ConnectingTripCard';
 import { getTripStatusInfo } from 'helpers/trip.helpers';
-import { getTripSedanFitCapacity } from '@/services/shipping-line/trip.service';
 
 interface TripCardProps {
   trips: ITrip[];
@@ -41,9 +40,12 @@ interface TripCardProps {
 }
 
 const getVehicleCapacityDisplay = (trip: ITrip) => {
-  const capacities = trip.remainingVehicleCapacity || {};
-  const totalSlots = Object.values(capacities).reduce((sum, val) => sum + (val || 0), 0);
-  return { count: totalSlots, icon: FaCar };
+  const breakdown = trip.remainingVehicleCapacity || {};
+  const fourWheel = breakdown['4w'];
+  const count = fourWheel != null
+    ? fourWheel.remaining
+    : Math.min(...Object.values(breakdown).map(v => v.remaining), Infinity) || 0;
+  return { count: isFinite(count) ? count : 0, icon: FaCar };
 };
 
 export default function TripCards({
@@ -57,7 +59,6 @@ export default function TripCards({
   const [selectedCabin, setSelectedCabin] = useState<SelectedTrip | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [liveVehicleCapacities, setLiveVehicleCapacities] = useState<Record<string, number>>({});
   const themeSettings = useThemeSettings();
 
 
@@ -219,53 +220,6 @@ export default function TripCards({
     return tripDatePH === selectedDatePH;
   });
 
-  useEffect(() => {
-    let isCancelled = false;
-
-    const tripIds = Array.from(
-      new Set(
-        filteredTrips
-          .map((trip) => trip.id)
-          .filter((tripId) => tripId !== null && tripId !== undefined)
-          .map((tripId) => String(tripId))
-      )
-    );
-
-    if (!tripIds.length) {
-      setLiveVehicleCapacities({});
-      return;
-    }
-
-    const syncCapacities = async () => {
-      const results = await Promise.all(
-        tripIds.map(async (tripId) => {
-          const capacity = await getTripSedanFitCapacity(tripId);
-          return { tripId, capacity };
-        })
-      );
-
-      if (isCancelled) return;
-
-      const nextCapacities: Record<string, number> = {};
-      results.forEach(({ tripId, capacity }) => {
-        if (typeof capacity === 'number') {
-          nextCapacities[tripId] = capacity;
-        }
-      });
-
-      setLiveVehicleCapacities(nextCapacities);
-    };
-
-    void syncCapacities();
-    const intervalId = window.setInterval(() => {
-      void syncCapacities();
-    }, 30000);
-
-    return () => {
-      isCancelled = true;
-      window.clearInterval(intervalId);
-    };
-  }, [trips, selectedDate]);
 
   // Filter based on selected cabin (keep existing logic)
   const displayedTrips = selectedCabin
@@ -307,29 +261,16 @@ export default function TripCards({
       </Dialog>
 
       {displayedTrips.map((trip) => {
-        const tripIdKey = String(trip.id);
-        const liveVehicleCount = liveVehicleCapacities[tripIdKey];
         const isTripSelected = selectedCabin?.tripId === trip.id;
         const isTripExpanded = isExpanded === trip.id;
-        const { count: fallbackVehicleCount, icon: VehicleIcon } = getVehicleCapacityDisplay(trip);
-        const vehicleCount = typeof liveVehicleCount === 'number' ? liveVehicleCount : fallbackVehicleCount;
-        const tripWithLiveCapacity = typeof liveVehicleCount === 'number'
-          ? {
-            ...trip,
-            availableVehicleCapacity: liveVehicleCount,
-            remainingVehicleCapacity: {
-              ...(trip.remainingVehicleCapacity || {}),
-              sedanFit: liveVehicleCount
-            }
-          }
-          : trip;
-        const statusInfo = getTripStatusInfo(tripWithLiveCapacity);
+        const { count: vehicleCount, icon: VehicleIcon } = getVehicleCapacityDisplay(trip);
+        const statusInfo = getTripStatusInfo(trip);
 
-        if (tripWithLiveCapacity.type === 'connecting') {
+        if (trip.type === 'connecting') {
           return (
             <ConnectingTripCard
-              key={tripWithLiveCapacity.id}
-              trip={tripWithLiveCapacity}
+              key={trip.id}
+              trip={trip}
               isSelected={isTripSelected}
               isExpanded={isTripExpanded || false} // isExpanded is number|string|null. Check if matches.
               selectedCabin={selectedCabin}

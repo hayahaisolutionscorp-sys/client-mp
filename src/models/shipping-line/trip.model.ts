@@ -33,7 +33,7 @@ export interface ITrip {
   departureDateIso: string;
   seatSelection: boolean;
   availableVehicleCapacity: number;
-  remainingVehicleCapacity?: Record<string, number>;
+  remainingVehicleCapacity?: Record<string, { remaining: number; max: number }> | null;
   vehicleCapacity: number;
   bookingStartDateIso: string;
   bookingCutOffDateIso: string;
@@ -67,7 +67,7 @@ export interface ITripSegment {
   referenceNo: string;
   availableCabins: ITripCabin[];
   availableVehicleCapacity: number;
-  remainingVehicleCapacity?: Record<string, number>;
+  remainingVehicleCapacity?: Record<string, { remaining: number; max: number }> | null;
   vehicleCapacity: number;
   bookingStartDateIso: string;
   bookingCutOffDateIso: string;

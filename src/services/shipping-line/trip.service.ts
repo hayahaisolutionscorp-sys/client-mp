@@ -58,15 +58,15 @@ function buildAdultRateMap(passengerRates: any[]): Map<string, number> {
   return ratesMap;
 }
 
-function getVehicleCapacityTotal(remainingVehicles: Record<string, unknown>): number {
-  const explicitTotal = toFiniteNumber(remainingVehicles.total);
-  if (explicitTotal !== null) {
-    return Math.max(0, explicitTotal);
-  }
-
-  return Object.values(remainingVehicles).reduce<number>((sum, value) => {
-    return sum + (toFiniteNumber(value) ?? 0);
-  }, 0);
+function getVehicleCapacityTotal(
+  breakdown: Record<string, { remaining: number; max: number }> | null,
+): number {
+  if (!breakdown) return 0;
+  const fourWheel = breakdown['4w'];
+  if (fourWheel != null) return Math.max(0, fourWheel.remaining);
+  const values = Object.values(breakdown);
+  if (values.length === 0) return 0;
+  return Math.max(0, Math.min(...values.map(v => v.remaining)));
 }
 
 export async function getTripsDestinationByPortId(portId: number): Promise<IPort[]> {
@@ -159,28 +159,9 @@ export async function getAvailableTrips(
               const cabinCode = cleanCode(c.code);
               if (!cabinCode) return null;
 
-              const adultFare = segRatesMap.get(cabinCode);
-
-              if (adultFare === undefined) return null;
-
-              const segCabinCapacities = actualSegment.cabin_capacities || seg.cabin_capacities || {};
-              const segRemainingPassengers = actualSegment.remaining_capacities?.passengers || seg.remaining_capacities?.passengers || {};
-              const cabinInfo =
-                segCabinCapacities[cabinCode] ||
-                segCabinCapacities[c.code] ||
-                segCabinCapacities[c.name] ||
-                {};
-
-              const availableCap = typeof cabinInfo === 'number' 
-                ? cabinInfo 
-                : (cabinInfo.remaining
-                  ?? segRemainingPassengers[cabinCode]
-                  ?? segRemainingPassengers[c.code]
-                  ?? segRemainingPassengers[c.name]
-                  ?? c.remaining_capacity
-                  ?? c.max_passenger_capacity);
-              
-              const totalCap = cabinInfo.max ?? c.capacity ?? c.max_passenger_capacity;
+              // Prefer fare from rate snapshot; fall back to what the API already embedded
+              const adultFare = segRatesMap.get(cabinCode) ?? c.adult_fare ?? c.adultFare;
+              if (adultFare == null) return null;
 
               return {
                 tripId: t.id,
@@ -190,18 +171,21 @@ export async function getAvailableTrips(
                   shipId: actualSegment.ship_id || seg.ship_id,
                   cabinTypeId: c.cabin_type_id,
                   name: c.name || cabinCode,
-                  recommendedPassengerCapacity: c.max_passenger_capacity
+                  recommendedPassengerCapacity: c.max_passenger_capacity,
+                  cabin_type_name: c.cabin_type_name,
+                  cabin_type_description: c.cabin_type_description,
+                  cabin_type_code: c.code,
                 },
                 cabinCode,
-                availablePassengerCapacity: availableCap,
-                passengerCapacity: totalCap,
-                adultFare: adultFare
+                availablePassengerCapacity: c.remaining_capacity ?? c.max_passenger_capacity ?? 0,
+                passengerCapacity: c.max_passenger_capacity ?? 0,
+                adultFare,
               };
             })
             .filter((c: any) => c !== null);
 
-          const remainingVehicles = actualSegment.remaining_capacities?.vehicles || seg.remaining_capacities?.vehicles || {};
-          const totalVehicleCapacity = getVehicleCapacityTotal(remainingVehicles);
+          const breakdown = seg.vehicle_capacity_breakdown ?? actualSegment.vehicle_capacity_breakdown ?? null;
+          const totalVehicleCapacity = getVehicleCapacityTotal(breakdown);
 
           return {
             id: seg.id || actualSegment.id,
@@ -219,7 +203,7 @@ export async function getAvailableTrips(
             referenceNo: actualSegment.reference_number || seg.reference_number || '',
             availableCabins: availableCabins,
             availableVehicleCapacity: totalVehicleCapacity,
-            remainingVehicleCapacity: remainingVehicles,
+            remainingVehicleCapacity: breakdown,
             vehicleCapacity: totalVehicleCapacity,
             bookingStartDateIso: actualSegment.booking_start_date || seg.booking_start_date,
             bookingCutOffDateIso: actualSegment.booking_cut_off_date || seg.booking_cut_off_date,
