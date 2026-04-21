@@ -16,28 +16,38 @@ import HeroOverlay from './templates/hero/HeroOverlay';
 import HeroCards from './templates/hero/HeroCards';
 import HeroCentered from './templates/hero/HeroCentered';
 import HeroConcierge from './templates/hero/HeroConcierge';
+import HeroGlassmorphicAbout from './templates/hero/HeroGlassmorphicAbout';
 import WelcomeDefault from './templates/welcome/WelcomeDefault';
 import WelcomeSpotlight from './templates/welcome/WelcomeSpotlight';
 import WelcomeHighlight from './templates/welcome/WelcomeHighlight';
 import WelcomeQuote from './templates/welcome/WelcomeQuote';
 import WelcomeSideAccent from './templates/welcome/WelcomeSideAccent';
+import WelcomeGlassmorphic from './templates/welcome/WelcomeGlassmorphic';
 import OurStoryDefault from './templates/our-story/OurStoryDefault';
 import OurStoryTimeline from './templates/our-story/OurStoryTimeline';
 import OurStoryMilestone from './templates/our-story/OurStoryMilestone';
 import OurStoryNarrative from './templates/our-story/OurStoryNarrative';
 import OurStoryJourney from './templates/our-story/OurStoryJourney';
 import OurStoryConcierge from './templates/our-story/OurStoryConcierge';
+import OurStoryGlassmorphic from './templates/our-story/OurStoryGlassmorphic';
 import OurExpertiseDefault from './templates/our-expertise/OurExpertiseDefault';
 import OurExpertiseChecklist from './templates/our-expertise/OurExpertiseChecklist';
 import OurExpertiseGrid from './templates/our-expertise/OurExpertiseGrid';
 import OurExpertiseShowcase from './templates/our-expertise/OurExpertiseShowcase';
 import OurExpertiseBadges from './templates/our-expertise/OurExpertiseBadges';
+import OurExpertiseGlassmorphic from './templates/our-expertise/OurExpertiseGlassmorphic';
 import CoreValuesDefault from './templates/core-values/CoreValuesDefault';
 import CoreValuesPillars from './templates/core-values/CoreValuesPillars';
 import CoreValuesIconGrid from './templates/core-values/CoreValuesIconGrid';
 import CoreValuesTimeline from './templates/core-values/CoreValuesTimeline';
 import CoreValuesAccordion from './templates/core-values/CoreValuesAccordion';
 import CoreValuesCompact from './templates/core-values/CoreValuesCompact';
+import CoreValuesGlassmorphic from './templates/core-values/CoreValuesGlassmorphic';
+import HeroBoardingPassAbout from './templates/hero/HeroBoardingPassAbout';
+import WelcomeBoardingPass from './templates/welcome/WelcomeBoardingPass';
+import OurStoryBoardingPass from './templates/our-story/OurStoryBoardingPass';
+import OurExpertiseBoardingPass from './templates/our-expertise/OurExpertiseBoardingPass';
+import CoreValuesBoardingPass from './templates/core-values/CoreValuesBoardingPass';
 import CTASection from './CTASection';
 import { useThemeSettings as useThemeSettingsHook } from '@/hooks/theme-settings';
 import { useBranding as useBrandingHook } from '@/hooks/branding';
@@ -320,6 +330,30 @@ export default function AboutPageBuilder({
                   />
                 );
               }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <HeroGlassmorphicAbout
+                    key={section.id}
+                    hero={hero ?? null}
+                    aboutPageTitle={aboutPage?.title || 'About Us'}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <HeroBoardingPassAbout
+                    key={section.id}
+                    hero={hero ?? null}
+                    aboutPageTitle={aboutPage?.title || 'About Us'}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                  />
+                );
+              }
               else {
                 sectionContent = (
                   <HeroDefault
@@ -374,6 +408,30 @@ export default function AboutPageBuilder({
               else if (section.variant === 'side-accent') {
                 sectionContent = (
                   <WelcomeSideAccent
+                    key={section.id}
+                    content={welcome ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <WelcomeGlassmorphic
+                    key={section.id}
+                    content={welcome ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <WelcomeBoardingPass
                     key={section.id}
                     content={welcome ?? null}
                     primaryColor={primaryColor}
@@ -460,6 +518,30 @@ export default function AboutPageBuilder({
                   />
                 );
               }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <OurStoryGlassmorphic
+                    key={section.id}
+                    content={ourStory ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <OurStoryBoardingPass
+                    key={section.id}
+                    content={ourStory ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
               else {
                 sectionContent = (
                   <OurStoryDefault
@@ -518,6 +600,30 @@ export default function AboutPageBuilder({
               else if (section.variant === 'badges') {
                 sectionContent = (
                   <OurExpertiseBadges
+                    key={section.id}
+                    content={ourExpertise ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <OurExpertiseGlassmorphic
+                    key={section.id}
+                    content={ourExpertise ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <OurExpertiseBoardingPass
                     key={section.id}
                     content={ourExpertise ?? null}
                     primaryColor={primaryColor}
@@ -606,6 +712,32 @@ export default function AboutPageBuilder({
                     textColor={textOnSurface}
                     surfaceColor={surfaceColor}
                     mutedColor={mutedOnSurface}
+                  />
+                );
+              }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <CoreValuesGlassmorphic
+                    key={section.id}
+                    coreValues={coreValues}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    surfaceColor={surfaceColor}
+                    surfaceAltColor={surfaceAltColor}
+                    textOnSurfaceAlt={textOnSurfaceAlt}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <CoreValuesBoardingPass
+                    key={section.id}
+                    coreValues={coreValues}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    surfaceColor={surfaceColor}
+                    surfaceAltColor={surfaceAltColor}
+                    textOnSurfaceAlt={textOnSurfaceAlt}
                   />
                 );
               }

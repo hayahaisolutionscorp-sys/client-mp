@@ -5,13 +5,15 @@ import { Skeleton } from "@/components/ui/Skeleton";
 interface ScheduleTableProps {
   schedule: ScheduleItemType[];
   loading: boolean;
-  tableVariant?: "default" | "striped" | "comfortable" | "high-contrast";
+  tableVariant?: "default" | "striped" | "comfortable" | "high-contrast" | "glassmorphic" | "boarding-pass";
 }
 
 const ScheduleTable = ({ schedule, loading, tableVariant = "default" }: ScheduleTableProps) => {
   const isStriped = tableVariant === "striped";
   const isComfortable = tableVariant === "comfortable";
   const isHighContrast = tableVariant === "high-contrast";
+  const isGlass = tableVariant === "glassmorphic";
+  const isBoardingPass = tableVariant === "boarding-pass";
 
   if (loading) {
     return (
@@ -50,20 +52,25 @@ const ScheduleTable = ({ schedule, loading, tableVariant = "default" }: Schedule
   return (
     <div
       className={`mt-6 rounded-md border overflow-hidden mx-2 ${
-        isHighContrast ? "border-slate-400 shadow-sm" : ""
+        isBoardingPass ? "border-none shadow-none mt-0 mx-0 bg-transparent" : isGlass ? "border-transparent shadow-none mt-0 mx-0" : isHighContrast ? "border-slate-400 shadow-sm" : ""
       }`}
     >
       {/* Header - Desktop */}
       <div
-        className={`hidden sm:grid grid-cols-4 text-base font-medium ${
-          isComfortable ? "p-5" : "p-4"
+        className={`hidden sm:grid grid-cols-4 font-medium ${
+          isBoardingPass ? "p-4 text-[10px] uppercase tracking-[0.25em] font-black font-mono" : isComfortable || isGlass ? "p-5 text-base" : "p-4 text-base"
         } ${
-          isHighContrast
+          isBoardingPass
+            ? "bg-transparent border-b-2 border-dashed text-slate-700"
+          : isGlass
+            ? "bg-white/40 border-b border-white/50 text-slate-800 backdrop-blur-md"
+          : isHighContrast
             ? "bg-slate-800 text-white"
             : isStriped
               ? "bg-slate-200 text-slate-700"
               : "bg-slate-100 text-slate-600"
         }`}
+        style={isBoardingPass ? { borderColor: 'rgba(15,23,42,0.2)' } : undefined}
       >
         <div>Date & Time</div>
         <div>Route</div>
@@ -71,7 +78,7 @@ const ScheduleTable = ({ schedule, loading, tableVariant = "default" }: Schedule
         <div className="text-right">Fare</div>
       </div>
 
-      <div className="divide-y">
+      <div className={isBoardingPass ? "" : isGlass ? "divide-y divide-white/40" : "divide-y"}>
         {schedule.length > 0 ? (
           schedule.map((item, index) => (
             <ScheduleItem

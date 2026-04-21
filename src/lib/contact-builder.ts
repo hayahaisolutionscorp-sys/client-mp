@@ -22,8 +22,8 @@ export const CONTACT_SECTION_LABELS: Record<ContactSectionKey, string> = {
 };
 
 export const CONTACT_VARIANTS: Record<ContactSectionKey, string[]> = {
-  hero: ["default", "minimal", "centered", "gradient", "split"],
-  contact_form: ["default", "side-by-side", "minimal", "floating", "premium"],
+  hero: ["default", "minimal", "centered", "gradient", "split", "glassmorphic", "boarding-pass"],
+  contact_form: ["default", "side-by-side", "minimal", "floating", "premium", "glassmorphic", "boarding-pass"],
 };
 
 const CONTACT_SECTION_DEFINITIONS = CONTACT_SECTION_KEYS.map((sectionKey) => ({
@@ -55,6 +55,14 @@ const CONTACT_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
   "maritime-elite": {
     hero: { enabled: true, variant: "split" },
     contact_form: { enabled: true, variant: "premium" },
+  },
+  glassmorphic: {
+    hero: { enabled: true, variant: "glassmorphic" },
+    contact_form: { enabled: true, variant: "glassmorphic" },
+  },
+  "boarding-pass": {
+    hero: { enabled: true, variant: "boarding-pass" },
+    contact_form: { enabled: true, variant: "boarding-pass" },
   },
 };
 

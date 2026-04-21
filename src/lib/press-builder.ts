@@ -22,8 +22,8 @@ export const PRESS_SECTION_LABELS: Record<PressSectionKey, string> = {
 };
 
 export const PRESS_VARIANTS: Record<PressSectionKey, string[]> = {
-  hero: ["default", "centered", "minimal"],
-  press_list: ["default", "cards", "minimal", "compact"],
+  hero: ["default", "centered", "minimal", "glassmorphic", "boarding-pass"],
+  press_list: ["default", "cards", "minimal", "compact", "glassmorphic", "boarding-pass"],
 };
 
 const PRESS_SECTION_DEFINITIONS = PRESS_SECTION_KEYS.map((sectionKey) => ({
@@ -55,6 +55,14 @@ const PRESS_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
   "maritime-elite": {
     hero: { enabled: true, variant: "centered" },
     press_list: { enabled: true, variant: "cards" },
+  },
+  glassmorphic: {
+    hero: { enabled: true, variant: "glassmorphic" },
+    press_list: { enabled: true, variant: "glassmorphic" },
+  },
+  "boarding-pass": {
+    hero: { enabled: true, variant: "boarding-pass" },
+    press_list: { enabled: true, variant: "boarding-pass" },
   },
 };
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 import { Calendar, FileText } from "lucide-react";
 
@@ -256,6 +257,98 @@ export function PressPageContent({
                     </div>
                   </section>
                 );
+              } else if (heroVariant === "boarding-pass") {
+                const d = new Date();
+                const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                const day = String(d.getDate()).padStart(2, '0');
+                const yr = d.getFullYear();
+                sectionContent = (
+                  <section className="relative w-full">
+                    <div className="relative rounded-2xl border-2 overflow-hidden shadow-[0_20px_40px_-20px_rgba(15,23,42,0.2)]" style={{ backgroundColor: '#FFFDF7', borderColor: 'rgba(15,23,42,0.14)' }}>
+                      <div className="flex items-center justify-between px-5 py-3 sm:px-7 border-b-2 border-dashed" style={{ borderColor: 'rgba(15,23,42,0.18)' }}>
+                        <span className="font-mono text-[10px] font-black uppercase tracking-[0.3em] opacity-70" style={{ color: textOnSurface }}>
+                          ◉ Newsroom · {month} {day}
+                        </span>
+                        <span className="hidden sm:inline-block font-mono text-[9px] uppercase tracking-[0.25em] font-black px-2 py-1 border-2 rotate-[-3deg]" style={{ borderColor: primaryColor, color: primaryColor }}>
+                          ★ Issue · {yr}
+                        </span>
+                      </div>
+                      <div className="px-6 py-10 sm:px-10 sm:py-14 flex flex-col gap-4">
+                        <span className="self-start inline-block font-mono text-[10px] uppercase tracking-[0.3em] font-black px-3 py-1 border-2" style={{ borderColor: primaryColor, color: primaryColor }}>
+                          Press &amp; Updates
+                        </span>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-[1.05] tracking-tight" style={{ color: textOnSurface, fontFamily: 'var(--font-title)' }}>
+                          {hero?.title || pressPage?.title || "Press Releases"}
+                        </h1>
+                        <p className="max-w-2xl text-base sm:text-lg leading-relaxed" style={{ color: mutedOnSurface }}>
+                          {hero?.description || `Stay updated with the latest news and announcements from ${branding?.brand_name || "our team"}.`}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between px-5 py-3 sm:px-7 border-t-2 border-dashed" style={{ borderColor: 'rgba(15,23,42,0.18)' }}>
+                        <div className="flex gap-[2px] items-end h-4 overflow-hidden flex-1 opacity-75 mr-3">
+                          {Array.from({ length: 40 }).map((_, i) => (
+                            <span key={i} className="block" style={{ backgroundColor: textOnSurface, width: (i % 6 === 0 ? 3 : i % 3 === 0 ? 2 : 1) + 'px', height: '100%', opacity: i % 5 === 0 ? 0.85 : 0.6 }} />
+                          ))}
+                        </div>
+                        <span className="font-mono text-[10px] tracking-[0.2em] opacity-50 whitespace-nowrap" style={{ color: textOnSurface }}>
+                          PRS-{yr.toString().slice(-2)}
+                        </span>
+                      </div>
+                    </div>
+                  </section>
+                );
+              } else if (heroVariant === "glassmorphic") {
+                sectionContent = (
+                  <section className="relative overflow-hidden rounded-[3rem] p-8 md:p-16 text-center shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)]">
+                    {/* Background Media */}
+                    <div className="absolute inset-0 -z-10">
+                        {hero?.bg_url ? (
+                            <Image 
+                                src={hero.bg_url}
+                                alt={hero.bg_alt || ''}
+                                fill
+                                className="object-cover scale-105"
+                            />
+                        ) : null}
+                        
+                        {/* Soft, vibrant gradients injected over the media */}
+                        <div 
+                        className="absolute inset-0 bg-gradient-to-tr mix-blend-multiply opacity-80"
+                        style={{ backgroundImage: `linear-gradient(to top right, ${primaryColor}, transparent, rgba(0,0,0,0.6))` }} 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-[var(--surface)] mix-blend-overlay opacity-60" />
+
+                        {/* Decorative Orbs */}
+                        <div 
+                            className="absolute -right-20 -top-20 h-96 w-96 rounded-full blur-[120px] opacity-[0.2]"
+                            style={{ backgroundColor: primaryColor }}
+                        />
+                        <div 
+                            className="absolute -left-20 -bottom-20 h-80 w-80 rounded-full blur-[100px] opacity-[0.1]"
+                            style={{ backgroundColor: '#ffffff' }}
+                        />
+                    </div>
+                    
+                    <div className="absolute inset-0 bg-black/30 backdrop-blur-3xl" />
+                    
+                    <div className="relative z-10 mx-auto max-w-4xl">
+                        <div className="mx-auto rounded-[2.5rem] border border-white/20 bg-white/10 px-8 py-10 backdrop-blur-xl shadow-xl sm:px-12 md:py-14 text-center">
+                            <p 
+                                className="mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] text-white backdrop-blur-md border border-white/20 shadow-sm"
+                                style={{ backgroundColor: `${primaryColor}40` }}
+                            >
+                                Latest News
+                            </p>
+                            <h1 className="text-4xl font-extrabold tracking-tight text-white drop-shadow-md md:text-5xl lg:text-7xl">
+                                {hero?.title || pressPage?.title || "Press Releases"}
+                            </h1>
+                            <p className="mx-auto mt-6 max-w-2xl text-lg font-medium text-white/90 drop-shadow-sm md:text-xl">
+                                {hero?.description || `Stay updated with the latest news and announcements from ${branding?.brand_name || "our team"}.`}
+                            </p>
+                        </div>
+                    </div>
+                  </section>
+                );
               } else {
                 sectionContent = (
                   <section
@@ -365,6 +458,131 @@ export function PressPageContent({
                         ))}
                       </div>
                     )}
+                  </section>
+                );
+              } else if (pressListVariant === "boarding-pass") {
+                sectionContent = (
+                  <section className="w-full">
+                    <div className="mb-6 flex items-center gap-3">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.3em] font-black px-3 py-1 border-2" style={{ borderColor: primaryColor, color: primaryColor }}>
+                        ★ Dispatch Log
+                      </span>
+                      <span className="flex-1 h-[2px] border-t-2 border-dashed" style={{ borderColor: 'rgba(15,23,42,0.2)' }} />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.25em] opacity-50" style={{ color: textOnSurface }}>
+                        {String(orderedPress.length).padStart(2, '0')} · Entries
+                      </span>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-6" style={{ color: textOnSurface, fontFamily: 'var(--font-title)' }}>
+                      {pressListSection?.title || "News & Updates"}
+                    </h2>
+                    {orderedPress.length === 0 ? (
+                      <div className="rounded-xl border-2 border-dashed p-10 text-center" style={{ borderColor: 'rgba(15,23,42,0.2)' }}>
+                        <p className="font-mono text-sm uppercase tracking-[0.2em] opacity-60" style={{ color: mutedOnSurface }}>
+                          ··· No entries published yet ···
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {orderedPress.map((item, index) => (
+                          <Link
+                            key={item.id}
+                            href={`/press/${item.slug || item.id}`}
+                            className="group relative rounded-xl border-2 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_16px_30px_-15px_rgba(15,23,42,0.25)]"
+                            style={{ backgroundColor: '#FFFDF7', borderColor: 'rgba(15,23,42,0.14)' }}
+                          >
+                            <div className="flex items-center justify-between px-4 py-2 border-b-2 border-dashed" style={{ borderColor: 'rgba(15,23,42,0.18)' }}>
+                              <span className="font-mono text-[9px] uppercase tracking-[0.25em] font-black opacity-70" style={{ color: textOnSurface }}>
+                                N·{String(index + 1).padStart(3, '0')}
+                              </span>
+                              <span className="font-mono text-[9px] uppercase tracking-[0.2em] opacity-50" style={{ color: textOnSurface }}>
+                                {formatPublishDate(item.publish_date)}
+                              </span>
+                            </div>
+                            <div className="p-5 flex flex-col gap-3">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4" style={{ color: primaryColor }} />
+                                <span className="font-mono text-[10px] uppercase tracking-[0.25em] font-black" style={{ color: primaryColor }}>Dispatch</span>
+                              </div>
+                              <h3 className="text-lg font-black tracking-tight leading-snug line-clamp-2" style={{ color: textOnSurface }}>
+                                {item.title}
+                              </h3>
+                              {item.content && (
+                                <p className="text-sm leading-relaxed line-clamp-2 opacity-70" style={{ color: textOnSurface }}>
+                                  {item.content}
+                                </p>
+                              )}
+                              <div className="mt-1 pt-3 border-t-2 border-dashed flex items-center justify-between" style={{ borderColor: 'rgba(15,23,42,0.18)' }}>
+                                <span className="font-mono text-[10px] uppercase tracking-[0.25em] font-black opacity-60" style={{ color: textOnSurface }}>
+                                  Read More
+                                </span>
+                                <span className="font-mono text-xs font-black" style={{ color: primaryColor }}>→</span>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                );
+              } else if (pressListVariant === "glassmorphic") {
+                sectionContent = (
+                  <section className="relative px-2 py-8 w-full overflow-hidden">
+                    <div 
+                        className="absolute right-1/4 top-1/2 -z-10 h-[400px] w-[500px] -translate-y-1/2 rounded-[100%] blur-[130px] opacity-[0.1]"
+                        style={{ backgroundColor: primaryColor }}
+                    />
+                    <div className="mx-auto max-w-6xl">
+                        <div className="mb-10 text-center">
+                            <p
+                                className="mb-4 inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] backdrop-blur-md border shadow-sm"
+                                style={{ backgroundColor: `${primaryColor}15`, borderColor: `${primaryColor}25`, color: primaryColor }}
+                            >
+                                Articles
+                            </p>
+                            <h2 className="mt-2 text-3xl md:text-5xl font-extrabold tracking-tight" style={{ color: textOnSurface }}>
+                                {pressListSection?.title || "News & Updates"}
+                            </h2>
+                        </div>
+                        {orderedPress.length === 0 ? (
+                            <div className="rounded-[2.5rem] border border-white/40 bg-white/40 p-12 text-center backdrop-blur-xl shadow-sm">
+                                <p className="text-lg font-medium" style={{ color: mutedOnSurface }}>No published news items yet.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                {orderedPress.map((item) => (
+                                    <Link
+                                        key={item.id}
+                                        href={`/press/${item.slug || item.id}`}
+                                        className="relative overflow-hidden flex flex-col justify-between rounded-[2rem] border border-white/40 p-8 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group"
+                                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.45)' }}
+                                    >
+                                        <div 
+                                            className="absolute inset-0 opacity-0 group-hover:opacity-[0.04] transition-opacity duration-300" 
+                                            style={{ background: `linear-gradient(135deg, transparent, ${primaryColor})` }} 
+                                        />
+                                        <div className="relative z-10">
+                                            <div 
+                                                className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl shadow-inner border border-white/50 backdrop-blur-md"
+                                                style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
+                                            >
+                                                <FileText className="h-6 w-6 drop-shadow-sm" />
+                                            </div>
+                                            <h3 className="mb-3 text-2xl font-bold tracking-tight line-clamp-2" style={{ color: textOnSurfaceAlt }}>{item.title}</h3>
+                                            <div className="mb-4 flex items-center text-sm font-medium" style={{ color: mutedOnSurface }}>
+                                                <Calendar className="mr-2 h-4 w-4" />
+                                                {formatPublishDate(item.publish_date)}
+                                            </div>
+                                        </div>
+                                        <div className="relative z-10 mt-auto pt-6">
+                                            <Button variant="default" className="w-full rounded-2xl py-6 font-bold tracking-wide" style={{ backgroundColor: primaryColor, color: getReadableTextColor(primaryColor) }}>
+                                                Read More
+                                            </Button>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                   </section>
                 );
               } else {

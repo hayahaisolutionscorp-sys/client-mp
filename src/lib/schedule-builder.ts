@@ -46,6 +46,16 @@ export const SCHEDULE_VARIANTS: Record<ScheduleSectionKey, ScheduleBuilderVarian
       label: "Readable",
       description: "Larger and clearer heading hierarchy.",
     },
+    {
+      value: "glassmorphic",
+      label: "Glassmorphic",
+      description: "Glass header suspended over backdrop.",
+    },
+    {
+      value: "boarding-pass",
+      label: "Boarding Pass",
+      description: "Ticket-stub header with perforated edge and monospace details.",
+    },
   ],
   date_picker: [
     {
@@ -68,6 +78,16 @@ export const SCHEDULE_VARIANTS: Record<ScheduleSectionKey, ScheduleBuilderVarian
       label: "Outlined",
       description: "Crisp bordered picker for clearer separation.",
     },
+    {
+      value: "glassmorphic",
+      label: "Glassmorphic",
+      description: "Frosted glass calendar selector.",
+    },
+    {
+      value: "boarding-pass",
+      label: "Boarding Pass",
+      description: "Calendar rendered as ticket-stub picker with dashed rail.",
+    },
   ],
   fare_table: [
     {
@@ -89,6 +109,16 @@ export const SCHEDULE_VARIANTS: Record<ScheduleSectionKey, ScheduleBuilderVarian
       value: "high-contrast",
       label: "High Contrast",
       description: "Stronger contrast for quick legibility.",
+    },
+    {
+      value: "glassmorphic",
+      label: "Glassmorphic",
+      description: "Fare cells rendered in glass panes.",
+    },
+    {
+      value: "boarding-pass",
+      label: "Boarding Pass",
+      description: "Each fare row styled like a stacked boarding-pass ticket.",
     },
   ],
 };

@@ -11,9 +11,10 @@ import { DATE_PRIMARY_DEFAULT_FORMAT, DAY_DEFAULT_FORMAT } from "constants/defau
 interface DateSelectionProps {
   onDateChange?: (date: string | null) => void;
   accentColor?: string;
+  variant?: string;
 }
 
-const DateSelection: FC<DateSelectionProps> = ({ onDateChange, accentColor = '#23abff' }) => {
+const DateSelection: FC<DateSelectionProps> = ({ onDateChange, accentColor = '#23abff', variant = 'default' }) => {
 
   const [windowStart, setWindowStart] = useState(0);
   const [uniqueDates, setUniqueDates] = useState<{ date: string; day: string; iso: string }[]>([]);
@@ -91,12 +92,15 @@ const DateSelection: FC<DateSelectionProps> = ({ onDateChange, accentColor = '#2
     setSelectedDate(iso);
   };
 
+  const isGlass = variant === 'glassmorphic';
+  const isBoardingPass = variant === 'boarding-pass';
+
   return (
-    <div className="flex items-center bg-white p-2 mb-5 border rounded-lg shadow-md w-full overflow-hidden lg:mt-6">
-      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handlePrevious} disabled={windowStart === 0} aria-label="Previous dates">
+    <div className={`flex items-center p-2 w-full overflow-hidden ${isBoardingPass ? "bg-transparent border-none" : `border rounded-lg ${isGlass ? "bg-transparent border-none shadow-none md:mt-2" : "bg-white mb-5 shadow-md lg:mt-6"}`}`}>
+      <button className={`p-1 sm:px-2 hover:text-gray-900 transition-colors ${isBoardingPass ? "rounded-md border-2 border-dashed bg-white" : isGlass ? "bg-white/50 rounded-full text-slate-800 shadow-sm" : "text-gray-500 bg-white"}`} style={isBoardingPass ? { borderColor: 'rgba(15,23,42,0.2)' } : undefined} onClick={handlePrevious} disabled={windowStart === 0} aria-label="Previous dates">
         <FiChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
-      <div className="h-[60px] sm:h-[76px] w-[1px] bg-gray-300 mx-1 sm:mx-2"></div>
+      <div className={`h-[60px] sm:h-[76px] w-[1px] mx-1 sm:mx-2 ${isBoardingPass ? "border-l-2 border-dashed w-0 h-[60px] sm:h-[76px]" : isGlass ? "bg-white/30" : "bg-gray-300"}`} style={isBoardingPass ? { borderColor: 'rgba(15,23,42,0.2)' } : undefined}></div>
       {loading ? (
         <div className="flex justify-center items-center w-full">
           <FiLoader className="animate-spin text-2xl sm:text-4xl" style={{ color: accentColor }} />
@@ -111,20 +115,30 @@ const DateSelection: FC<DateSelectionProps> = ({ onDateChange, accentColor = '#2
                 <Button
                   variant={null}
                   onClick={() => handleDateClick(item.iso)}
-                  className={`flex flex-col items-center justify-center w-full h-full ${isSelected ? "border-b-4 border-[var(--border-color)]" : ""}`}
-                  style={{ "--border-color": accentColor } as React.CSSProperties}
+                  className={`flex flex-col items-center justify-center w-full h-full transition-all duration-300 ${
+                    isBoardingPass
+                      ? `rounded-md border-2 ${isSelected ? "text-white font-mono" : "border-dashed hover:-translate-y-[1px]"} py-2`
+                      : `rounded-2xl ${isSelected && !isGlass ? "border-b-4 border-[var(--border-color)]" : isSelected && isGlass ? "bg-white/60 shadow-inner" : isGlass ? "hover:bg-white/30 text-slate-700" : ""}`
+                  }`}
+                  style={isBoardingPass
+                    ? {
+                        borderColor: isSelected ? accentColor : 'rgba(15,23,42,0.2)',
+                        backgroundColor: isSelected ? accentColor : 'transparent',
+                        color: isSelected ? '#fff' : undefined,
+                      }
+                    : ({ "--border-color": accentColor, color: isSelected && isGlass ? accentColor : undefined } as React.CSSProperties)}
                 >
-                  <span className="text-sm sm:text-base font-medium">{item.day}</span>
-                  <span className="text-xs sm:text-sm font-bold">{item.date}</span>
+                  <span className={`${isBoardingPass ? "font-mono text-[10px] uppercase tracking-[0.2em] font-black" : "text-sm sm:text-base font-medium"}`}>{item.day}</span>
+                  <span className={`${isBoardingPass ? "font-mono text-sm font-black mt-0.5" : "text-xs sm:text-sm font-bold"}`}>{item.date}</span>
                 </Button>
-                {index !== uniqueDates.length - 1 && <div className="h-[60px] sm:h-[76px] w-[1px] bg-gray-300 mx-1 sm:mx-2"></div>}
+                {index !== uniqueDates.length - 1 && <div className={`${isBoardingPass ? "border-l-2 border-dashed w-0 h-[60px] sm:h-[76px] mx-1 sm:mx-2" : `h-[60px] sm:h-[76px] w-[1px] mx-1 sm:mx-2 ${isGlass ? "bg-white/30" : "bg-gray-300"}`}`} style={isBoardingPass ? { borderColor: 'rgba(15,23,42,0.2)' } : undefined}></div>}
               </Fragment>
             );
           })}
         </div>
       )}
-      <div className="h-[60px] sm:h-[76px] w-[1px] bg-gray-300 mx-1 sm:mx-2"></div>
-      <button className="p-1 sm:px-2 text-gray-500 bg-white hover:text-gray-700" onClick={handleNext} disabled={uniqueDates.length < windowSize} aria-label="Next dates">
+      <div className={`${isBoardingPass ? "border-l-2 border-dashed w-0 h-[60px] sm:h-[76px] mx-1 sm:mx-2" : `h-[60px] sm:h-[76px] w-[1px] mx-1 sm:mx-2 ${isGlass ? "bg-white/30" : "bg-gray-300"}`}`} style={isBoardingPass ? { borderColor: 'rgba(15,23,42,0.2)' } : undefined}></div>
+      <button className={`p-1 sm:px-2 hover:text-gray-900 transition-colors ${isBoardingPass ? "rounded-md border-2 border-dashed bg-white" : isGlass ? "bg-white/50 rounded-full text-slate-800 shadow-sm" : "text-gray-500 bg-white"}`} style={isBoardingPass ? { borderColor: 'rgba(15,23,42,0.2)' } : undefined} onClick={handleNext} disabled={uniqueDates.length < windowSize} aria-label="Next dates">
         <FiChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
     </div>

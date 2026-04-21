@@ -25,11 +25,11 @@ export const ABOUT_SECTION_LABELS: Record<AboutSectionKey, string> = {
 };
 
 export const ABOUT_VARIANTS: Record<AboutSectionKey, string[]> = {
-  hero: ["default", "split", "minimal", "overlay", "cards", "centered", "panorama"],
-  welcome: ["default", "spotlight", "highlight", "quote", "side-accent", "glass"],
-  our_story: ["default", "timeline", "milestone", "narrative", "journey", "chronicle"],
-  our_expertise: ["default", "checklist", "grid", "showcase", "badges", "feature-cards"],
-  core_values: ["default", "pillars", "icon-grid", "timeline", "accordion", "compact", "showcase"],
+  hero: ["default", "split", "minimal", "overlay", "cards", "centered", "panorama", "glassmorphic", "boarding-pass"],
+  welcome: ["default", "spotlight", "highlight", "quote", "side-accent", "glass", "glassmorphic", "boarding-pass"],
+  our_story: ["default", "timeline", "milestone", "narrative", "journey", "chronicle", "glassmorphic", "boarding-pass"],
+  our_expertise: ["default", "checklist", "grid", "showcase", "badges", "feature-cards", "glassmorphic", "boarding-pass"],
+  core_values: ["default", "pillars", "icon-grid", "timeline", "accordion", "compact", "showcase", "glassmorphic", "boarding-pass"],
 };
 
 const ABOUT_SECTION_DEFINITIONS = ABOUT_SECTION_KEYS.map((sectionKey) => ({
@@ -76,6 +76,20 @@ const ABOUT_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
     our_story: { enabled: true, variant: "journey" },
     our_expertise: { enabled: true, variant: "showcase" },
     core_values: { enabled: true, variant: "pillars" },
+  },
+  glassmorphic: {
+    hero: { enabled: true, variant: "glassmorphic" },
+    welcome: { enabled: true, variant: "glassmorphic" },
+    our_story: { enabled: true, variant: "glassmorphic" },
+    our_expertise: { enabled: true, variant: "glassmorphic" },
+    core_values: { enabled: true, variant: "glassmorphic" },
+  },
+  "boarding-pass": {
+    hero: { enabled: true, variant: "boarding-pass" },
+    welcome: { enabled: true, variant: "boarding-pass" },
+    our_story: { enabled: true, variant: "boarding-pass" },
+    our_expertise: { enabled: true, variant: "boarding-pass" },
+    core_values: { enabled: true, variant: "boarding-pass" },
   },
 };
 

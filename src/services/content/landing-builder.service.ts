@@ -20,7 +20,7 @@ export async function getLandingBuilderContent(): Promise<LandingBuilderContent 
     const response = await fetchWithTimeout(`${SEO_API}/home`, {
       ...(isBrowser
         ? { cache: "no-store" as RequestCache }
-        : { next: { tags: ["landing-builder"], revalidate: 3600 } }),
+        : { next: { tags: ["landing-builder"], revalidate: 0 } }),
       timeoutMs: 12_000,
     });
 

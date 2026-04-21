@@ -12,6 +12,8 @@ import { useBranding } from "@/hooks/branding";
 import { useHeaders } from "@/hooks/headers";
 import type { IThemeSettings } from "@/models";
 import HeaderFloating from "./templates/header/HeaderFloating";
+import HeaderGlassmorphic from "./templates/header/HeaderGlassmorphic";
+import HeaderBoardingPass from "./templates/header/HeaderBoardingPass";
 import {
   getFilteredLandingNavItems,
   scrollToLandingTarget,
@@ -55,6 +57,26 @@ export default function BuilderLandingHeader({
   if (variant === "floating") {
     return (
       <HeaderFloating
+        navItems={navItems}
+        scrollToElement={scrollToElement}
+        theme={theme}
+      />
+    );
+  }
+
+  if (variant === "glassmorphic") {
+    return (
+      <HeaderGlassmorphic
+        navItems={navItems}
+        scrollToElement={scrollToElement}
+        theme={theme}
+      />
+    );
+  }
+
+  if (variant === "boarding-pass") {
+    return (
+      <HeaderBoardingPass
         navItems={navItems}
         scrollToElement={scrollToElement}
         theme={theme}

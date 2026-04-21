@@ -19,6 +19,8 @@ import HeroCentered from './templates/hero/HeroCentered';
 import HeroGradient from './templates/hero/HeroGradient';
 import HeroSplit from './templates/hero/HeroSplit';
 import HeroConcierge from './templates/hero/HeroConcierge';
+import HeroGlassmorphicContact from './templates/hero/HeroGlassmorphicContact';
+import HeroBoardingPassContact from './templates/hero/HeroBoardingPassContact';
 
 // Contact Form variants
 import ContactFormDefault from './templates/contact-form/ContactFormDefault';
@@ -26,6 +28,8 @@ import ContactFormSideBySide from './templates/contact-form/ContactFormSideBySid
 import ContactFormMinimal from './templates/contact-form/ContactFormMinimal';
 import ContactFormFloating from './templates/contact-form/ContactFormFloating';
 import ContactFormPremium from './templates/contact-form/ContactFormPremium';
+import ContactFormGlassmorphic from './templates/contact-form/ContactFormGlassmorphic';
+import ContactFormBoardingPass from './templates/contact-form/ContactFormBoardingPass';
 
 interface ContactPageBuilderProps {
   contactPage: IContactPage;
@@ -217,6 +221,16 @@ export default function ContactPageBuilder({
               <HeroConcierge key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
+          case 'glassmorphic':
+            sectionContent = (
+              <HeroGlassmorphicContact key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
+            );
+            break;
+          case 'boarding-pass':
+            sectionContent = (
+              <HeroBoardingPassContact key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
+            );
+            break;
           case 'default':
           default:
             sectionContent = (
@@ -246,6 +260,16 @@ export default function ContactPageBuilder({
           case 'premium':
             sectionContent = (
               <ContactFormPremium key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} textOnPrimary={textOnPrimary} />
+            );
+            break;
+          case 'glassmorphic':
+            sectionContent = (
+              <ContactFormGlassmorphic key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+            );
+            break;
+          case 'boarding-pass':
+            sectionContent = (
+              <ContactFormBoardingPass key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
           case 'default':

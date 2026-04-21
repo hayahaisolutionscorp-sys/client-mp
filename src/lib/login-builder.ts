@@ -12,7 +12,7 @@ import { normalizeLandingTemplatePreset } from "./landing-builder";
 export const LOGIN_SECTION_KEYS = ["hero", "form", "sidebar", "footer"] as const;
 
 export type LoginSectionKey = (typeof LOGIN_SECTION_KEYS)[number];
-export type LoginPageVariant = "split-right" | "split-left" | "rounded-canvas" | "brand-immersive";
+export type LoginPageVariant = "split-right" | "split-left" | "rounded-canvas" | "brand-immersive" | "glassmorphic-blur" | "boarding-pass";
 export type LoginLayoutVariant = LoginPageVariant;
 
 export interface LoginPageLayoutConfig {
@@ -61,6 +61,16 @@ export const LOGIN_LAYOUT_VARIANTS: { value: LoginLayoutVariant; label: string; 
     label: "Brand Immersive",
     description: "Full-bleed branded composition with a cinematic login stage.",
   },
+  {
+    value: "glassmorphic-blur",
+    label: "Glassmorphic Blur",
+    description: "Floating glass card over a softly blurred vibrant background.",
+  },
+  {
+    value: "boarding-pass",
+    label: "Boarding Pass",
+    description: "Mobile-first ticket-stub card with perforated rails and monospace details.",
+  },
 ];
 
 export const LOGIN_PAGE_LAYOUTS: Record<LoginPageVariant, LoginPageLayoutConfig> = {
@@ -94,13 +104,27 @@ export const LOGIN_PAGE_LAYOUTS: Record<LoginPageVariant, LoginPageLayoutConfig>
     sidebarVariant: "gradient",
     formMode: "immersive",
   },
+  "glassmorphic-blur": {
+    label: "Glassmorphic Blur",
+    description: "Floating glass card over a softly blurred vibrant background.",
+    shell: "canvas",
+    sidebarVariant: "gradient",
+    formMode: "canvas",
+  },
+  "boarding-pass": {
+    label: "Boarding Pass",
+    description: "Mobile-first ticket-stub card with perforated rails and monospace details.",
+    shell: "canvas",
+    sidebarVariant: "testimonial",
+    formMode: "canvas",
+  },
 };
 
 export const LOGIN_VARIANTS: Record<LoginSectionKey, string[]> = {
-  hero: ["default", "minimal", "split", "editorial", "modern", "readable"],
-  form: ["default", "rounded", "compact", "elevated", "simple", "spacious"],
-  sidebar: ["default", "image", "testimonial", "gradient", "minimal", "clean"],
-  footer: ["default", "minimal", "compact", "inline"],
+  hero: ["default", "minimal", "split", "editorial", "modern", "readable", "glassmorphic", "boarding-pass"],
+  form: ["default", "rounded", "compact", "elevated", "simple", "spacious", "glassmorphic", "boarding-pass"],
+  sidebar: ["default", "image", "testimonial", "gradient", "minimal", "clean", "glassmorphic", "boarding-pass"],
+  footer: ["default", "minimal", "compact", "inline", "glassmorphic", "boarding-pass"],
 };
 
 const LOGIN_SECTION_DEFINITIONS = LOGIN_SECTION_KEYS.map((sectionKey) => ({
@@ -145,6 +169,20 @@ const LOGIN_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<string, LoginPresetDefaults
     sidebar: { enabled: true, variant: "gradient" },
     footer: { enabled: true, variant: "minimal" },
   },
+  glassmorphic: {
+    page_variant: "glassmorphic-blur",
+    hero: { enabled: true, variant: "glassmorphic" },
+    form: { enabled: true, variant: "glassmorphic" },
+    sidebar: { enabled: true, variant: "glassmorphic" },
+    footer: { enabled: true, variant: "glassmorphic" },
+  },
+  "boarding-pass": {
+    page_variant: "boarding-pass",
+    hero: { enabled: true, variant: "boarding-pass" },
+    form: { enabled: true, variant: "boarding-pass" },
+    sidebar: { enabled: true, variant: "boarding-pass" },
+    footer: { enabled: true, variant: "boarding-pass" },
+  },
 };
 
 function normalizeLoginPageVariant(value: unknown): LoginPageVariant {
@@ -153,7 +191,9 @@ function normalizeLoginPageVariant(value: unknown): LoginPageVariant {
     value === "split-left" ||
     value === "split-right" ||
     value === "rounded-canvas" ||
-    value === "brand-immersive"
+    value === "brand-immersive" ||
+    value === "glassmorphic-blur" ||
+    value === "boarding-pass"
   ) {
     return value;
   }

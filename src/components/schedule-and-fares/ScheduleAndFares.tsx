@@ -16,8 +16,8 @@ interface ScheduleAndFaresProps {
   destPortId?: number;
   themeColor?: string;
   accentColor?: string;
-  datePickerVariant?: "default" | "minimal" | "simple" | "outlined";
-  tableVariant?: "default" | "striped" | "comfortable" | "high-contrast";
+  datePickerVariant?: "default" | "minimal" | "simple" | "outlined" | "glassmorphic" | "boarding-pass";
+  tableVariant?: "default" | "striped" | "comfortable" | "high-contrast" | "glassmorphic" | "boarding-pass";
 }
 
 const ScheduleAndFares = ({
@@ -36,6 +36,8 @@ const ScheduleAndFares = ({
   const [error, setError] = useState<string | null>(null);
   const pickerMinimal = datePickerVariant === "minimal" || datePickerVariant === "simple";
   const pickerOutlined = datePickerVariant === "outlined";
+  const isGlassmorphic = datePickerVariant === "glassmorphic";
+  const isPickerBoardingPass = datePickerVariant === "boarding-pass";
 
   useEffect(() => {
     const fetchAllShips = async () => {
@@ -109,15 +111,19 @@ const ScheduleAndFares = ({
     <div className="space-y-6">
       <div
         className={
-          pickerOutlined
+          isPickerBoardingPass
+            ? "px-3 py-3 rounded-xl border-2 border-dashed bg-[rgba(250,247,240,0.6)]"
+            : isGlassmorphic
+            ? "px-3 py-3 rounded-[2rem] border border-white/40 bg-white/40 shadow-xl backdrop-blur-xl relative z-10"
+            : pickerOutlined
             ? "px-3 py-3 rounded-lg border-2 border-slate-300 bg-white shadow-sm"
             : pickerMinimal
               ? "px-2 py-2 rounded-md border border-slate-200 bg-slate-50/70"
               : "px-2"
         }
-        style={{ '--primary-color': themeColor } as React.CSSProperties}
+        style={isPickerBoardingPass ? { borderColor: 'rgba(15,23,42,0.2)', '--primary-color': themeColor } as React.CSSProperties : { '--primary-color': themeColor } as React.CSSProperties}
       >
-        <DateSelection onDateChange={setSelectedDate} accentColor={accentColor} />
+        <DateSelection onDateChange={setSelectedDate} accentColor={accentColor} variant={datePickerVariant} />
       </div>
 
       {error && (
@@ -126,7 +132,13 @@ const ScheduleAndFares = ({
         </div>
       )}
 
-      <div className={tableVariant === "striped" ? "rounded-lg border border-slate-200 overflow-hidden" : ""}>
+      <div className={
+          tableVariant === "glassmorphic" ? "rounded-[2rem] border border-white/40 bg-white/40 backdrop-blur-xl shadow-xl overflow-hidden relative z-10"
+          : tableVariant === "boarding-pass" ? "rounded-xl border-2 border-dashed overflow-hidden bg-[rgba(250,247,240,0.4)]"
+          : tableVariant === "striped" ? "rounded-lg border border-slate-200 overflow-hidden" : ""
+      }
+      style={tableVariant === "boarding-pass" ? { borderColor: 'rgba(15,23,42,0.2)' } : undefined}
+      >
         <ScheduleTable schedule={schedule} loading={loading} tableVariant={tableVariant} />
       </div>
     </div>

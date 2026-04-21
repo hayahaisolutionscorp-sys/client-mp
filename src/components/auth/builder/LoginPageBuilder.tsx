@@ -168,8 +168,10 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
   const sidebarVariant = sidebarSection?.variant || 'default';
   const hasSidebar = sidebarSection?.enabled !== false;
   const isLeftLayout = layoutVariant === 'split-left';
-  const isRoundedCanvas = layout.shell === 'canvas';
+  const isRoundedCanvas = layout.shell === 'canvas' && layoutVariant !== 'glassmorphic-blur';
   const isBrandImmersive = layout.shell === 'immersive';
+  const isGlassmorphicBlur = layoutVariant === 'glassmorphic-blur';
+  const isBoardingPass = layoutVariant === 'boarding-pass';
   const heroTextColor = isLeftLayout ? '#f8fafc' : textOnSurface;
   const heroMutedColor = isLeftLayout ? 'rgba(248,250,252,0.74)' : textOnSurfaceAlt;
   const brandName = resolvedBranding?.brand_name || 'Ayahay';
@@ -433,6 +435,301 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
                 </div>
               </div>
             </section>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (isBoardingPass) {
+    const d = new Date();
+    const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+    const day = String(d.getDate()).padStart(2, '0');
+    const yr = d.getFullYear();
+    return (
+      <main
+        className={cn('wl-brand-radius-scope relative min-h-screen overflow-hidden px-3 py-6 md:px-6 md:py-10 flex items-center justify-center')}
+        style={{
+          backgroundColor: '#FAF7F0',
+          fontFamily: bodyFontStack,
+          ['--font-body' as string]: bodyFontStack,
+          ['--font-title' as string]: titleFontStack,
+          ...brandRadiusScopeStyle(resolvedBranding, 'rounded-2xl'),
+        }}
+      >
+        <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(15,23,42,0.4) 1px, transparent 0)', backgroundSize: '14px 14px' }}
+        />
+
+        <div className="relative z-10 w-full max-w-md">
+          <Link
+            href="/"
+            className="mb-4 inline-flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-[0.25em] transition-colors hover:opacity-80"
+            style={{ color: primaryColor }}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to homepage
+          </Link>
+
+          <div
+            className="relative rounded-2xl border-2 overflow-hidden shadow-[0_20px_40px_-20px_rgba(15,23,42,0.25),0_8px_20px_-8px_rgba(15,23,42,0.15)]"
+            style={{ backgroundColor: '#FFFDF7', borderColor: 'rgba(15,23,42,0.14)' }}
+          >
+            <div
+              className="flex items-center justify-between px-5 py-3 border-b-2 border-dashed"
+              style={{ borderColor: 'rgba(15,23,42,0.18)' }}
+            >
+              <div className="flex items-center gap-2">
+                <Image
+                  src={resolvedBranding?.logo?.dark || resolvedBranding?.logo?.light || '/assets/icons/Ayahay_blue_vertical.svg'}
+                  alt={`${brandName} Logo`}
+                  width={20}
+                  height={20}
+                  className="h-5 w-5 object-contain"
+                />
+                <span className="font-mono text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: textOnSurface }}>
+                  {brandName}
+                </span>
+              </div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] opacity-60" style={{ color: textOnSurface }}>
+                {month} {day} · {yr}
+              </span>
+            </div>
+
+            <div className="px-5 py-6 sm:px-7 sm:py-8">
+              <AnimatedSection
+                id="section-login_hero"
+                className={cn(
+                  'text-center mb-6 flex flex-col items-center gap-3',
+                  loginHeroAnim && loginHeroAnim !== 'none' && `anim-section-login_hero`,
+                  activeSectionId === 'login_hero' && 'ring-4 ring-primary ring-offset-4 ring-opacity-50 rounded-lg relative z-50'
+                )}
+              >
+                <span
+                  className="inline-block font-mono text-[10px] uppercase tracking-[0.3em] font-black px-3 py-1 border-2"
+                  style={{ borderColor: primaryColor, color: primaryColor }}
+                >
+                  {step === 'verify' ? '✦ Verify' : '✦ Boarding'}
+                </span>
+                <h1
+                  className="text-2xl sm:text-3xl font-black tracking-tight leading-tight"
+                  style={{ ...heroFontStyle, color: textOnSurface }}
+                >
+                  {heroTitle}
+                </h1>
+                {heroSection?.enabled !== false && (
+                  <p className="text-sm leading-relaxed opacity-75" style={{ color: textOnSurface }}>
+                    {heroDescription}
+                  </p>
+                )}
+              </AnimatedSection>
+
+              <div className="flex items-center gap-2 my-4">
+                <span className="flex-1 h-[2px] border-t-2 border-dashed" style={{ borderColor: 'rgba(15,23,42,0.2)' }} />
+                <span className="font-mono text-[9px] uppercase tracking-[0.3em] opacity-50" style={{ color: textOnSurface }}>
+                  Credentials
+                </span>
+                <span className="flex-1 h-[2px] border-t-2 border-dashed" style={{ borderColor: 'rgba(15,23,42,0.2)' }} />
+              </div>
+
+              <AnimatedSection
+                id="section-login_form"
+                className={cn(
+                  'boarding-pass-login-form',
+                  loginFormAnim && loginFormAnim !== 'none' && `anim-section-login_form`,
+                  activeSectionId === 'login_form' && 'ring-4 ring-primary ring-offset-4 ring-opacity-50 relative z-50 rounded-md'
+                )}
+              >
+                {renderForm()}
+              </AnimatedSection>
+
+              {footerSection?.enabled !== false && (
+                <p className="mt-5 text-center font-mono text-[10px] uppercase tracking-[0.2em] opacity-60" style={{ color: textOnSurface }}>
+                  {footerCopy}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between px-5 py-3 border-t-2 border-dashed" style={{ borderColor: 'rgba(15,23,42,0.18)' }}>
+              <div className="flex gap-[2px] items-end h-4 overflow-hidden flex-1 opacity-75 mr-3">
+                {Array.from({ length: 40 }).map((_, i) => (
+                  <span key={i} className="block" style={{ backgroundColor: textOnSurface, width: (i % 6 === 0 ? 3 : i % 3 === 0 ? 2 : 1) + 'px', height: '100%', opacity: i % 5 === 0 ? 0.85 : 0.6 }} />
+                ))}
+              </div>
+              <span className="font-mono text-[10px] tracking-[0.2em] opacity-50 whitespace-nowrap" style={{ color: textOnSurface }}>
+                {step === 'verify' ? 'VRF' : 'LGN'}-{yr.toString().slice(-2)}
+              </span>
+            </div>
+          </div>
+
+          <p className="mt-5 text-center font-mono text-[10px] uppercase tracking-[0.3em] opacity-40" style={{ color: textOnSurface }}>
+            Tear along dashed line · Present at gate
+          </p>
+        </div>
+
+        <style jsx global>{`
+          .boarding-pass-login-form input,
+          .boarding-pass-login-form select,
+          .boarding-pass-login-form textarea {
+            border-radius: 10px !important;
+            border: 2px dashed rgba(15, 23, 42, 0.22) !important;
+            background: rgba(250, 247, 240, 0.5) !important;
+            padding: 10px 12px !important;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+            font-size: 14px !important;
+          }
+          .boarding-pass-login-form input:focus,
+          .boarding-pass-login-form select:focus,
+          .boarding-pass-login-form textarea:focus {
+            border-style: solid !important;
+            border-color: ${primaryColor} !important;
+            outline: none !important;
+            box-shadow: 0 0 0 3px ${primaryColor}22 !important;
+          }
+          .boarding-pass-login-form label {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.22em !important;
+            font-size: 10px !important;
+            font-weight: 900 !important;
+            opacity: 0.7;
+          }
+          .boarding-pass-login-form button[type="submit"] {
+            border-radius: 10px !important;
+            border: 2px solid ${primaryColor} !important;
+            background: ${primaryColor} !important;
+            color: #fff !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.25em !important;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+            font-weight: 900 !important;
+            font-size: 12px !important;
+            padding: 12px 18px !important;
+            box-shadow: 0 4px 0 rgba(15, 23, 42, 0.18) !important;
+            transition: transform 0.12s ease, box-shadow 0.12s ease !important;
+          }
+          .boarding-pass-login-form button[type="submit"]:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 0 rgba(15, 23, 42, 0.18) !important;
+          }
+          .boarding-pass-login-form button[type="submit"]:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(15, 23, 42, 0.18) !important;
+          }
+        `}</style>
+      </main>
+    );
+  }
+
+  if (isGlassmorphicBlur) {
+    return (
+      <main
+        className={cn('wl-brand-radius-scope relative min-h-screen overflow-hidden px-4 py-8 md:px-6 md:py-12 flex items-center justify-center')}
+        style={{
+          backgroundColor: surfaceAltColor,
+          fontFamily: bodyFontStack,
+          ['--font-body' as string]: bodyFontStack,
+          ['--font-title' as string]: titleFontStack,
+          ...brandRadiusScopeStyle(resolvedBranding, 'rounded-3xl')
+        }}
+      >
+        <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
+        {/* Soft, vibrant gradients injected over the media */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-tr from-customPrimary/80 via-transparent to-black/30 mix-blend-multiply" style={{ backgroundColor: primaryColor }}/>
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/40 via-transparent to-customPrimary/40 mix-blend-overlay" />
+        
+        {/* Decorative Orbs */}
+        <div 
+           className="absolute -right-20 -top-20 h-96 w-96 rounded-full blur-[120px] opacity-[0.2]"
+           style={{ backgroundColor: primaryColor }}
+        />
+        <div 
+           className="absolute -left-20 -bottom-20 h-80 w-80 rounded-full blur-[100px] opacity-[0.1]"
+           style={{ backgroundColor: '#ffffff' }}
+        />
+        
+        {/* Glass Card Container */}
+        <div className="relative z-10 w-full max-w-5xl rounded-[2.5rem] border border-white/20 bg-white/10 p-6 md:p-10 backdrop-blur-xl shadow-[0_24px_80px_rgba(0,0,0,0.3)]">
+          <Link
+            href="/"
+            className="mb-8 inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:opacity-80 text-white"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to homepage
+          </Link>
+          
+          <div className="grid lg:grid-cols-[1fr_0.8fr] gap-8 lg:gap-12 items-center">
+            {/* Left Content */}
+            <div className="flex flex-col text-white">
+              <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] backdrop-blur-sm shadow-inner w-max">
+                <span className="size-2 rounded-full bg-white shadow-[0_0_8px_white]" />
+                {brandName}
+              </div>
+              
+              <AnimatedSection
+                id="section-login_hero"
+                className={cn(
+                  'space-y-4 lg:pr-8',
+                  loginHeroAnim && loginHeroAnim !== 'none' && `anim-section-login_hero`,
+                      activeSectionId === 'login_hero' &&
+                        'ring-4 ring-primary ring-offset-4 ring-opacity-50 relative z-50 bg-white/10 rounded-lg p-3 -m-3'
+                )}
+              >
+                <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl drop-shadow-md" style={heroFontStyle}>
+                  {heroTitle}
+                </h1>
+                {heroSection?.enabled !== false && (
+                  <p className="max-w-lg text-lg text-white/90 drop-shadow-sm font-medium">
+                    {heroDescription}
+                  </p>
+                )}
+                {brandTagline ? (
+                  <p className="max-w-xl text-base text-white/80">
+                    {brandTagline}
+                  </p>
+                ) : null}
+              </AnimatedSection>
+            </div>
+            
+            {/* Right Form */}
+            <div className="flex flex-col">
+              <AnimatedSection
+                id="section-login_form"
+                className={cn(
+                  'w-full max-w-md mx-auto xl:mr-0 rounded-[2rem] border border-white/30 bg-white/60 p-6 md:p-8 backdrop-blur-3xl shadow-2xl transition-all duration-500',
+                  loginFormAnim && loginFormAnim !== 'none' && `anim-section-login_form`,
+                      activeSectionId === 'login_form' &&
+                        'ring-4 ring-primary ring-offset-4 ring-opacity-50 relative z-50'
+                )}
+                style={{ color: textOnSurface }}
+              >
+                {/* Form header inside card */}
+                <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
+                  <h2 className="text-xl font-bold" style={{ color: textOnSurface }}>{step === 'verify' ? 'Secure Access' : 'Sign In'}</h2>
+                  <Image
+                      src={
+                        resolvedBranding?.logo?.dark ||
+                        resolvedBranding?.logo?.light ||
+                        '/assets/icons/Ayahay_blue_vertical.svg'
+                      }
+                      alt={`${brandName} Logo`}
+                      width={28}
+                      height={28}
+                      className="h-7 w-7 object-contain opacity-80"
+                    />
+                </div>
+                
+                {renderForm()}
+                
+                {footerSection?.enabled !== false && (
+                  <p className="mt-6 text-center text-xs font-medium opacity-70" style={{ color: textOnSurfaceAlt }}>
+                    {footerCopy}
+                  </p>
+                )}
+              </AnimatedSection>
+            </div>
           </div>
         </div>
       </main>

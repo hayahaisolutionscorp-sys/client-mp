@@ -86,6 +86,30 @@ export const LANDING_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
     footer: { enabled: true, variant: "default" },
     floating_cta: { enabled: true, variant: "modern-dark" },
   },
+  glassmorphic: {
+    header: { enabled: true, variant: "glassmorphic" },
+    hero: { enabled: true, variant: "glassmorphic" },
+    booking: { enabled: true, variant: "glassmorphic-overlay" },
+    promotions: { enabled: true, variant: "glassmorphic" },
+    routes: { enabled: true, variant: "glassmorphic" },
+    why_choose: { enabled: true, variant: "glassmorphic" },
+    get_to_know: { enabled: true, variant: "glassmorphic" },
+    partners: { enabled: true, variant: "glassmorphic" },
+    footer: { enabled: true, variant: "glassmorphic" },
+    floating_cta: { enabled: true, variant: "glassmorphic" },
+  },
+  "boarding-pass": {
+    header: { enabled: true, variant: "boarding-pass" },
+    hero: { enabled: true, variant: "boarding-pass" },
+    booking: { enabled: true, variant: "boarding-pass" },
+    promotions: { enabled: true, variant: "boarding-pass" },
+    routes: { enabled: true, variant: "boarding-pass" },
+    why_choose: { enabled: true, variant: "boarding-pass" },
+    get_to_know: { enabled: true, variant: "boarding-pass" },
+    partners: { enabled: true, variant: "boarding-pass" },
+    footer: { enabled: true, variant: "boarding-pass" },
+    floating_cta: { enabled: true, variant: "boarding-pass" },
+  },
 };
 
 export const LANDING_TEMPLATE_PRESETS: LandingTemplatePresetOption[] = [
@@ -133,6 +157,28 @@ export const LANDING_TEMPLATE_PRESETS: LandingTemplatePresetOption[] = [
       surfaceClass: "bg-white",
     },
   },
+  {
+    key: "glassmorphic",
+    label: "Glassmorphic Elegance",
+    description: "Modern luxury with translucent panels, soft edges, and vibrant depths.",
+    tokens: {
+      fontFamily: "Outfit",
+      fontFamilyTitle: "Outfit",
+      radiusClass: "rounded-3xl",
+      surfaceClass: "bg-slate-50",
+    },
+  },
+  {
+    key: "boarding-pass",
+    label: "Boarding Pass",
+    description: "Mobile-first ticket-stub aesthetic: perforated edges, monospace details, stamps and dashed rails.",
+    tokens: {
+      fontFamily: "Inter",
+      fontFamilyTitle: "Space Grotesk",
+      radiusClass: "rounded-2xl",
+      surfaceClass: "bg-[#FAF7F0]",
+    },
+  },
 ];
 
 export const LANDING_SECTION_LABELS: Record<LandingSectionKey, string> = {
@@ -149,14 +195,14 @@ export const LANDING_SECTION_LABELS: Record<LandingSectionKey, string> = {
 };
 
 export const LANDING_VARIANT_KEYS: Record<LandingSectionKey, string[]> = {
-  header: ["default", "centered", "floating", "professional-slate"],
-  hero: ["default", "split", "minimal", "cards", "professional-editorial"],
-  booking: ["default", "overlay", "banner", "card", "compact-dark", "professional-card"],
-  promotions: ["default", "grid", "banner", "professional-banner"],
-  routes: ["default", "carousel", "cards", "list", "professional-wall"],
-  why_choose: ["default", "steps", "grid", "minimal", "professional-stack"],
-  get_to_know: ["default", "timeline", "modern", "center", "professional-panel"],
-  partners: ["default", "strip", "marquee", "grid-premium", "professional-rail"],
-  footer: ["default", "default-no-banner", "centered", "premium", "professional-anchored"],
-  floating_cta: ["default", "modern-dark", "minimal-light", "professional-pill"],
+  header: ["default", "centered", "floating", "professional-slate", "glassmorphic", "boarding-pass"],
+  hero: ["default", "split", "minimal", "cards", "professional-editorial", "glassmorphic", "boarding-pass"],
+  booking: ["default", "overlay", "banner", "card", "compact-dark", "professional-card", "glassmorphic", "glassmorphic-overlay", "boarding-pass"],
+  promotions: ["default", "grid", "banner", "professional-banner", "glassmorphic", "boarding-pass"],
+  routes: ["default", "carousel", "cards", "list", "professional-wall", "glassmorphic", "boarding-pass"],
+  why_choose: ["default", "steps", "grid", "minimal", "professional-stack", "glassmorphic", "boarding-pass"],
+  get_to_know: ["default", "timeline", "modern", "center", "professional-panel", "glassmorphic", "boarding-pass"],
+  partners: ["default", "strip", "marquee", "grid-premium", "professional-rail", "glassmorphic", "boarding-pass"],
+  footer: ["default", "default-no-banner", "centered", "premium", "professional-anchored", "glassmorphic", "boarding-pass"],
+  floating_cta: ["default", "modern-dark", "minimal-light", "professional-pill", "glassmorphic", "boarding-pass"],
 };

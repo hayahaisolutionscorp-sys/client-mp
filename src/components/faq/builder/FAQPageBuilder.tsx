@@ -17,6 +17,8 @@ import HeroMinimal from './templates/hero/HeroMinimal';
 import HeroCentered from './templates/hero/HeroCentered';
 import HeroGradient from './templates/hero/HeroGradient';
 import HeroCompact from './templates/hero/HeroCompact';
+import HeroGlassmorphicFaq from './templates/hero/HeroGlassmorphicFaq';
+import HeroBoardingPassFaq from './templates/hero/HeroBoardingPassFaq';
 
 // FAQ List variants
 import FAQListDefault from './templates/faq-list/FAQListDefault';
@@ -24,6 +26,8 @@ import FAQListAccordion from './templates/faq-list/FAQListAccordion';
 import FAQListCards from './templates/faq-list/FAQListCards';
 import FAQListCompact from './templates/faq-list/FAQListCompact';
 import FAQListMinimal from './templates/faq-list/FAQListMinimal';
+import FAQListGlassmorphic from './templates/faq-list/FAQListGlassmorphic';
+import FAQListBoardingPass from './templates/faq-list/FAQListBoardingPass';
 
 interface FAQPageBuilderProps {
   faqPageContent: unknown | null;
@@ -206,6 +210,16 @@ export default function FAQPageBuilder({
               <HeroCompact key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
+          case 'glassmorphic':
+            sectionContent = (
+              <HeroGlassmorphicFaq key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+            );
+            break;
+          case 'boarding-pass':
+            sectionContent = (
+              <HeroBoardingPassFaq key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+            );
+            break;
           case 'default':
           default:
             sectionContent = (
@@ -235,6 +249,16 @@ export default function FAQPageBuilder({
           case 'minimal':
             sectionContent = (
               <FAQListMinimal key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
+            );
+            break;
+          case 'glassmorphic':
+            sectionContent = (
+              <FAQListGlassmorphic key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+            );
+            break;
+          case 'boarding-pass':
+            sectionContent = (
+              <FAQListBoardingPass key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
           case 'default':

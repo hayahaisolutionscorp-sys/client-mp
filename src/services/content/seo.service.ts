@@ -107,7 +107,7 @@ export async function getPageMetadata(pageKey: PageKey): Promise<SeoMetadata> {
         }
 
         const res = await fetch(`${SEO_API}/${resolvedKey}`, {
-            next: { tags: [resolvedKey], revalidate: 3600 },
+            next: { tags: [resolvedKey], revalidate: 0 },
         });
 
         if (res.ok) {
