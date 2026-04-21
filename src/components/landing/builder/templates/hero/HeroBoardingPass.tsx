@@ -110,7 +110,7 @@ export default function HeroBoardingPass({
         <Navbar forceHomeStyle={forceHomeNavbar} initialHeaderSection={headerSection} />
       ) : null}
 
-      <div className="relative z-10 container mx-auto w-full max-w-[min(96vw,1400px)] px-3 sm:px-6 lg:px-10 pt-20 sm:pt-28">
+      <div className="relative z-10 container mx-auto w-full max-w-[min(96vw,1400px)] lg:max-w-[min(70vw,860px)] 2xl:max-w-[min(96vw,1400px)] px-3 sm:px-6 lg:px-6 pt-20 sm:pt-28">
         {/* TICKET CARD */}
         <div
           className="relative rounded-2xl border-2 shadow-[0_20px_40px_-20px_rgba(15,23,42,0.25),0_8px_20px_-8px_rgba(15,23,42,0.15)]"
@@ -121,7 +121,7 @@ export default function HeroBoardingPass({
         >
           {/* Top stub */}
           <div className="flex items-stretch">
-            <div className="flex-1 px-4 py-3 sm:px-7 sm:py-5 lg:px-12 flex items-center justify-between gap-2 sm:gap-3">
+            <div className="flex-1 px-4 py-3 sm:px-7 sm:py-5 lg:px-7 lg:py-4 2xl:px-12 flex items-center justify-between gap-2 sm:gap-3">
               <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
                 <div
                   className="h-6 w-6 sm:h-7 sm:w-7 rounded-md grid place-items-center text-white text-[10px] font-black flex-shrink-0"
@@ -159,27 +159,27 @@ export default function HeroBoardingPass({
           </div>
 
           {/* Body */}
-          <div className="px-4 py-5 sm:px-7 sm:py-8 lg:px-12 lg:py-10">
+          <div className="px-4 py-5 sm:px-7 sm:py-8 lg:px-7 lg:py-6 2xl:px-12 2xl:py-10">
             <h1
-              className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black leading-[1.1] sm:leading-[1.05] tracking-tight text-slate-900 max-w-5xl"
+              className="text-xl sm:text-3xl md:text-4xl lg:text-[2.25rem] xl:text-5xl 2xl:text-7xl font-black leading-[1.1] sm:leading-[1.05] tracking-tight text-slate-900 max-w-5xl"
               style={{ fontFamily: "var(--font-title)" }}
             >
               {heroSection?.title || "Book your next voyage."}
             </h1>
             {heroSection?.subtitle ? (
-              <p className="mt-2 sm:mt-3 text-xs sm:text-base lg:text-lg text-slate-600 max-w-2xl leading-relaxed">
+              <p className="mt-2 sm:mt-3 text-xs sm:text-base lg:text-sm 2xl:text-lg text-slate-600 max-w-2xl leading-relaxed">
                 {heroSection.subtitle}
               </p>
             ) : null}
 
             {/* Route strip */}
             <div
-              className="mt-5 sm:mt-6 grid grid-cols-[1fr_auto_1fr] gap-1.5 sm:gap-2 items-center py-3 sm:py-4 px-3 sm:px-5 border-2 border-dashed rounded-xl"
+              className="mt-5 sm:mt-6 lg:mt-4 grid grid-cols-[1fr_auto_1fr] gap-1.5 sm:gap-2 items-center py-3 sm:py-4 lg:py-3 px-3 sm:px-5 lg:px-4 border-2 border-dashed rounded-xl"
               style={{ borderColor: "rgba(15,23,42,0.15)", backgroundColor: "rgba(250,247,240,0.5)" }}
             >
               <div className="min-w-0">
                 <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.25em] sm:tracking-[0.3em] opacity-50 mb-0.5 sm:mb-1">From</div>
-                <div className="font-black text-base sm:text-xl md:text-2xl tracking-tight text-slate-900 truncate">ANY</div>
+                <div className="font-black text-base sm:text-xl md:text-2xl lg:text-lg tracking-tight text-slate-900 truncate">ANY</div>
                 <div className="font-mono text-[9px] sm:text-[10px] opacity-60 mt-0.5 truncate">Origin Port</div>
               </div>
               <div className="px-1.5 sm:px-3 text-center">
@@ -188,7 +188,7 @@ export default function HeroBoardingPass({
               </div>
               <div className="text-right min-w-0">
                 <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.25em] sm:tracking-[0.3em] opacity-50 mb-0.5 sm:mb-1">To</div>
-                <div className="font-black text-base sm:text-xl md:text-2xl tracking-tight text-slate-900 truncate">YOU</div>
+                <div className="font-black text-base sm:text-xl md:text-2xl lg:text-lg tracking-tight text-slate-900 truncate">YOU</div>
                 <div className="font-mono text-[9px] sm:text-[10px] opacity-60 mt-0.5 truncate">Pick below</div>
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function HeroBoardingPass({
           </div>
 
           {/* Booking body — the stub */}
-          <div className="px-3 py-4 sm:px-6 sm:py-6 lg:px-12 lg:py-8">
+          <div className="px-3 py-4 sm:px-6 sm:py-6 lg:px-7 lg:py-5 2xl:px-12 2xl:py-8">
             <div className="flex items-center gap-2 mb-3">
               <span className="inline-block h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: "#10b981" }} />
               <span className="font-mono text-[10px] uppercase tracking-[0.25em] font-black opacity-70">
@@ -235,7 +235,7 @@ export default function HeroBoardingPass({
 
           {/* Barcode footer */}
           <div
-            className="flex items-center justify-between px-4 py-2.5 sm:px-7 sm:py-3 lg:px-12 border-t-2 border-dashed"
+            className="flex items-center justify-between px-4 py-2.5 sm:px-7 sm:py-3 lg:px-7 2xl:px-12 border-t-2 border-dashed"
             style={{ borderColor: "rgba(15,23,42,0.12)", backgroundColor: "rgba(250,247,240,0.6)" }}
           >
             <div className="flex gap-[2px] items-end h-6 overflow-hidden flex-1 opacity-80 mr-4">
