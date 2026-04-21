@@ -77,14 +77,14 @@ export default function BookingBoardingPass({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-      className="mx-auto w-full max-w-md lg:max-w-5xl xl:max-w-6xl"
+      className="mx-auto w-full max-w-md lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl"
     >
       <div
         className="relative rounded-2xl border-2 shadow-[0_20px_40px_-20px_rgba(15,23,42,0.3)]"
         style={{ backgroundColor: "#FFFDF7", borderColor: "rgba(15,23,42,0.14)" }}
       >
         {/* Header stub */}
-        <div className="flex items-center justify-between px-5 sm:px-7 lg:px-10 py-3.5 lg:py-5">
+        <div className="flex items-center justify-between px-4 sm:px-5 lg:px-6 py-2.5 lg:py-3">
           <div className="flex items-center gap-2">
             <span
               className="h-6 w-6 rounded grid place-items-center text-white text-[10px] font-black"
@@ -110,11 +110,11 @@ export default function BookingBoardingPass({
 
         {/* AI toggle */}
         {tripSearchEnabled && (
-          <div className="px-5 sm:px-7 lg:px-10 pt-4">
+          <div className="px-4 sm:px-5 lg:px-6 pt-3">
             <button
               type="button"
               onClick={() => setMode(mode === "form" ? "chat" : "form")}
-              className="w-full flex items-center justify-between gap-2 px-3 py-2 border-2 border-dashed font-mono text-[10px] uppercase tracking-[0.2em] font-black hover:bg-slate-50 transition"
+              className="w-full flex items-center justify-between gap-2 px-3 py-1.5 border-2 border-dashed font-mono text-[10px] uppercase tracking-[0.2em] font-black hover:bg-slate-50 transition"
               style={{ borderColor: theme.text + "33", color: theme.text }}
             >
               <span className="flex items-center gap-2">
@@ -130,7 +130,7 @@ export default function BookingBoardingPass({
         )}
 
         {/* Body: vertical stacked form */}
-        <div className="px-5 sm:px-7 lg:px-10 py-5 lg:py-7">
+        <div className="px-4 sm:px-5 lg:px-6 py-3 lg:py-4">
           {mode === "chat" && tripSearchEnabled ? (
             <div className="rounded-xl border-2 border-dashed overflow-hidden" style={{ borderColor: theme.text + "26" }}>
               <TripSearchWidget
@@ -165,7 +165,7 @@ export default function BookingBoardingPass({
         </div>
 
         {/* Footer barcode */}
-        <div className="px-5 sm:px-7 lg:px-10 py-3 flex items-center justify-between">
+        <div className="px-4 sm:px-5 lg:px-6 py-2 flex items-center justify-between">
           <div className="flex gap-[2px] items-end h-5 overflow-hidden flex-1 opacity-75 mr-3">
             {Array.from({ length: 36 }).map((_, i) => (
               <span
@@ -196,12 +196,28 @@ export default function BookingBoardingPass({
         width: 100% !important;
       }
       .boarding-pass-booking-form fieldset {
+        position: relative !important;
         border-radius: 10px !important;
         border: 2px dashed rgba(15, 23, 42, 0.2) !important;
         background: rgba(250, 247, 240, 0.5) !important;
-        padding: 10px 12px !important;
+        padding: 0 !important;
+        height: 52px !important;
         transition: all 0.2s ease !important;
         width: 100% !important;
+      }
+      .boarding-pass-booking-form fieldset > legend {
+        position: absolute !important;
+        top: -8px !important;
+        left: 12px !important;
+        margin: 0 !important;
+        padding: 0 6px !important;
+        background: #FFFDF7 !important;
+        z-index: 2 !important;
+      }
+      .boarding-pass-booking-form fieldset > div,
+      .boarding-pass-booking-form fieldset > button {
+        width: 100% !important;
+        height: 100% !important;
       }
       .boarding-pass-booking-form fieldset:focus-within {
         border-style: solid !important;
@@ -223,20 +239,31 @@ export default function BookingBoardingPass({
       }
       .boarding-pass-booking-form button.rounded-md {
         border-radius: 8px !important;
-        background: #FFFDF7 !important;
-        border: 2px dashed rgba(15, 23, 42, 0.2) !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
         font-family: ui-monospace, Menlo, monospace !important;
         font-weight: 700 !important;
         font-size: 11px !important;
         text-transform: uppercase !important;
         letter-spacing: 0.1em !important;
-        padding: 0 14px !important;
+        padding: 0 12px !important;
         color: rgba(15, 23, 42, 0.85) !important;
-        min-height: 38px !important;
+        min-height: 42px !important;
+        width: 100% !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+      }
+      .boarding-pass-booking-form button.rounded-md > span {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
       }
       .boarding-pass-booking-form button.rounded-md:hover {
-        border-style: solid !important;
-        background: white !important;
+        background: rgba(255, 253, 247, 0.6) !important;
       }
       .boarding-pass-booking-form button[variant="default"],
       .boarding-pass-booking-form button[data-booking-search-submit] {
@@ -245,10 +272,11 @@ export default function BookingBoardingPass({
         color: white !important;
         font-weight: 900 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.2em !important;
+        letter-spacing: 0.15em !important;
+        font-size: 12px !important;
         border: none !important;
-        height: 52px !important;
-        padding: 0 20px !important;
+        height: 44px !important;
+        padding: 0 16px !important;
         box-shadow: 0 4px 0 rgba(15, 23, 42, 0.15) !important;
         transition: all 0.15s ease !important;
       }

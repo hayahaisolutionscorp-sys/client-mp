@@ -110,7 +110,7 @@ export default function HeroBoardingPass({
         <Navbar forceHomeStyle={forceHomeNavbar} initialHeaderSection={headerSection} />
       ) : null}
 
-      <div className="relative z-10 container mx-auto w-full max-w-[min(96vw,1400px)] lg:max-w-[min(70vw,860px)] 2xl:max-w-[min(96vw,1400px)] px-3 sm:px-6 lg:px-6 pt-20 sm:pt-28">
+      <div className="relative z-10 container mx-auto w-full max-w-[min(96vw,1400px)] lg:max-w-[min(77vw,946px)] 2xl:max-w-[min(96vw,1400px)] px-3 sm:px-6 lg:px-6 pt-20 sm:pt-28">
         {/* TICKET CARD */}
         <div
           className="relative rounded-2xl border-2 shadow-[0_20px_40px_-20px_rgba(15,23,42,0.25),0_8px_20px_-8px_rgba(15,23,42,0.15)]"
@@ -172,26 +172,6 @@ export default function HeroBoardingPass({
               </p>
             ) : null}
 
-            {/* Route strip */}
-            <div
-              className="mt-5 sm:mt-6 lg:mt-4 grid grid-cols-[1fr_auto_1fr] gap-1.5 sm:gap-2 items-center py-3 sm:py-4 lg:py-3 px-3 sm:px-5 lg:px-4 border-2 border-dashed rounded-xl"
-              style={{ borderColor: "rgba(15,23,42,0.15)", backgroundColor: "rgba(250,247,240,0.5)" }}
-            >
-              <div className="min-w-0">
-                <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.25em] sm:tracking-[0.3em] opacity-50 mb-0.5 sm:mb-1">From</div>
-                <div className="font-black text-base sm:text-xl md:text-2xl lg:text-lg tracking-tight text-slate-900 truncate">ANY</div>
-                <div className="font-mono text-[9px] sm:text-[10px] opacity-60 mt-0.5 truncate">Origin Port</div>
-              </div>
-              <div className="px-1.5 sm:px-3 text-center">
-                <div className="font-mono text-[10px] opacity-40 tracking-widest">→</div>
-                <div className="hidden sm:block text-[9px] font-mono opacity-50 mt-0.5">{month} {day} · {yr}</div>
-              </div>
-              <div className="text-right min-w-0">
-                <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.25em] sm:tracking-[0.3em] opacity-50 mb-0.5 sm:mb-1">To</div>
-                <div className="font-black text-base sm:text-xl md:text-2xl lg:text-lg tracking-tight text-slate-900 truncate">YOU</div>
-                <div className="font-mono text-[9px] sm:text-[10px] opacity-60 mt-0.5 truncate">Pick below</div>
-              </div>
-            </div>
           </div>
 
           {/* Perforation 2 */}
@@ -212,13 +192,6 @@ export default function HeroBoardingPass({
 
           {/* Booking body — the stub */}
           <div className="px-3 py-4 sm:px-6 sm:py-6 lg:px-7 lg:py-5 2xl:px-12 2xl:py-8">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="inline-block h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: "#10b981" }} />
-              <span className="font-mono text-[10px] uppercase tracking-[0.25em] font-black opacity-70">
-                Ready to Search
-              </span>
-            </div>
-
             {bookingSlot ? (
               bookingSlot
             ) : showBookingSearch ? (

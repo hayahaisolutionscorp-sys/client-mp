@@ -9,6 +9,7 @@ import BuilderLandingHeader from '@/components/landing/builder/BuilderLandingHea
 import FooterCentered from '@/components/landing/builder/templates/footer/FooterCentered';
 import FooterPremium from '@/components/landing/builder/templates/footer/FooterPremium';
 import FooterGlassmorphic from '@/components/landing/builder/templates/footer/FooterGlassmorphic';
+import FooterBoardingPass from '@/components/landing/builder/templates/footer/FooterBoardingPass';
 import { useLandingBuilder } from '@/hooks/landing-builder';
 import { useBranding } from '@/hooks/branding';
 import { createBuilderTheme } from '@/components/landing/builder/theme';
@@ -62,7 +63,7 @@ export default function LayoutWrapper({
     fontTitle: builderTheme.fontFamilyTitle,
   };
   const mainOffsetClass = shouldRenderChrome
-    ? headerVariant === 'floating' || headerVariant === 'glassmorphic'
+    ? headerVariant === 'floating' || headerVariant === 'glassmorphic' || headerVariant === 'boarding-pass'
       ? 'pt-[120px]'
       : headerVariant === 'professional-slate'
         ? 'pt-4'
@@ -72,7 +73,8 @@ export default function LayoutWrapper({
     headerVariant === 'centered' ||
     headerVariant === 'floating' ||
     headerVariant === 'professional-slate' ||
-    headerVariant === 'glassmorphic';
+    headerVariant === 'glassmorphic' ||
+    headerVariant === 'boarding-pass';
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -90,10 +92,11 @@ export default function LayoutWrapper({
       {shouldRenderChrome && !isProfilePage && footerVariant === 'centered' ? <FooterCentered theme={theme} /> : null}
       {shouldRenderChrome && !isProfilePage && footerVariant === 'premium' ? <FooterPremium theme={theme} /> : null}
       {shouldRenderChrome && !isProfilePage && footerVariant === 'glassmorphic' ? <FooterGlassmorphic theme={theme} /> : null}
+      {shouldRenderChrome && !isProfilePage && footerVariant === 'boarding-pass' ? <FooterBoardingPass theme={theme} /> : null}
       {shouldRenderChrome && !isProfilePage && footerVariant === 'default-no-banner' ? (
         <Footer showSubscribeBanner={false} />
       ) : null}
-      {shouldRenderChrome && !isProfilePage && !['centered', 'premium', 'glassmorphic', 'default-no-banner'].includes(footerVariant) ? (
+      {shouldRenderChrome && !isProfilePage && !['centered', 'premium', 'glassmorphic', 'boarding-pass', 'default-no-banner'].includes(footerVariant) ? (
         <Footer />
       ) : null}
       <ProactiveRefreshScheduler />
