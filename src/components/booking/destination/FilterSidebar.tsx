@@ -22,34 +22,29 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
   const searchParams = useSearchParams();
   const { departureTrips, returnTrips } = useTrips();
 
-  const [checkedCabins, setCheckedCabins] = useState<Set<number>>(new Set());
+  const [checkedCabins, setCheckedCabins] = useState<Set<string>>(new Set());
   const [checkedShippingLines, setCheckedShippingLines] = useState<Set<number>>(new Set());
 
   const filters = useMemo(() => {
     const allTrips = [...departureTrips, ...returnTrips];
 
-    // Extract unique cabins
-    const cabinMap = new Map<number, CabinFilterItem>();
+    // Extract unique cabin types by name
+    const cabinTypeMap = new Map<string, CabinFilterItem>();
     allTrips.forEach(trip => {
-      trip.availableCabins?.forEach(ac => {
-        if (ac.cabinId) {
-          cabinMap.set(ac.cabinId, {
-            id: ac.cabinId,
-            name: ac.cabin?.name || ac.cabinCode || `Cabin ${ac.cabinId}`,
-          });
-        }
-      });
-      // Also check segments for cabins
-      trip.segments?.forEach(seg => {
-        seg.availableCabins?.forEach(ac => {
-          if (ac.cabinId) {
-            cabinMap.set(ac.cabinId, {
-              id: ac.cabinId,
-              name: ac.cabin?.name || ac.cabinCode || `Cabin ${ac.cabinId}`,
+      const processCabins = (cabins: any[]) => {
+        cabins?.forEach(ac => {
+          const name = ac.cabin?.cabin_type_name || ac.cabin?.name || ac.cabinCode;
+          if (name && !cabinTypeMap.has(name)) {
+            cabinTypeMap.set(name, {
+              id: ac.cabin?.cabinTypeId || ac.cabinTypeId || ac.cabinId || 0, // Keep an ID if possible, but we filter by name
+              name: name,
             });
           }
         });
-      });
+      };
+
+      processCabins(trip.availableCabins);
+      trip.segments?.forEach(seg => processCabins(seg.availableCabins));
     });
 
     // Extract unique shipping lines
@@ -66,7 +61,7 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
     });
 
     return {
-      cabins: Array.from(cabinMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
+      cabins: Array.from(cabinTypeMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
       shippingLines: Array.from(shippingLineMap.values()).filter(line => !line.name.toLowerCase().includes('ayahay'))
     };
   }, [departureTrips, returnTrips]);
@@ -75,10 +70,9 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
   useEffect(() => {
     const selectedCabins =
       searchParams
-        .get('cabinIds')
+        .get('cabinNames')
         ?.split(',')
-        .map(Number)
-        .filter((id) => Number.isFinite(id)) || [];
+        .filter(Boolean) || [];
     const selectedShippingLineIds = searchParams.get('shippingLineIds')?.split(',').map(Number) || [];
 
     setCheckedCabins(new Set(selectedCabins));
@@ -91,19 +85,21 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
 
     const queryParams = new URLSearchParams(searchParams.toString());
     queryParams.delete('cabinIds');
+    queryParams.delete('cabinTypeIds');
+    queryParams.delete('cabinNames');
     queryParams.delete('cabinTypes');
     queryParams.delete('shippingLineIds');
     queryParams.delete('filterDepartureDateTime');
     router.push(`/booking/destination?${queryParams.toString()}`);
   };
 
-  const handleCabinChange = (id: number) => {
+  const handleCabinChange = (name: string) => {
     setCheckedCabins((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
+      if (newSet.has(name)) {
+        newSet.delete(name);
       } else {
-        newSet.add(id);
+        newSet.add(name);
       }
       return newSet;
     });
@@ -130,14 +126,16 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
   };
 
   const handleApplyFilters = () => {
-    const selectedCabinIds = Array.from(checkedCabins);
+    const selectedCabinNames = Array.from(checkedCabins);
     const selectedShippingLineIds = Array.from(checkedShippingLines);
 
     const queryParams = new URLSearchParams(searchParams.toString());
 
-    if (selectedCabinIds.length > 0) {
-      queryParams.set('cabinIds', selectedCabinIds.join(','));
+    if (selectedCabinNames.length > 0) {
+      queryParams.set('cabinNames', selectedCabinNames.join(','));
     } else {
+      queryParams.delete('cabinNames');
+      queryParams.delete('cabinTypeIds');
       queryParams.delete('cabinIds');
       queryParams.delete('cabinTypes');
     }
@@ -187,14 +185,14 @@ export default function FilterSidebar({ isModal, onClose }: FilterSidebarProps) 
                 <div key={cabin.id} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={`${isModal ? 'modal-' : ''}${cabin.id}`}
-                    checked={checkedCabins.has(cabin.id)}
-                    onChange={() => handleCabinChange(cabin.id)}
+                    id={`${isModal ? 'modal-' : ''}${cabin.name}`}
+                    checked={checkedCabins.has(cabin.name)}
+                    onChange={() => handleCabinChange(cabin.name)}
                     className="h-4 w-4 rounded border-gray-300 text-customBlue focus:ring-customBlue"
                     style={{ colorScheme: 'light' }}
                   />
                   <label
-                    htmlFor={`${isModal ? 'modal-' : ''}${cabin.id}`}
+                    htmlFor={`${isModal ? 'modal-' : ''}${cabin.name}`}
                     className="text-sm font-medium text-gray-700"
                   >
                     {cabin.name}

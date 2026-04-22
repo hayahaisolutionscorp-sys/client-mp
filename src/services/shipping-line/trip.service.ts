@@ -232,7 +232,7 @@ export async function getAvailableTrips(
           srcPortName: t.origin_name,
           destPortId: 0,
           destPortName: t.destination_name,
-          lightLogoUrl: connectingLogo || lightLogo,
+          lightLogoUrl: connectingLogo || t.logo || lightLogo,
           departureDateIso: t.total_departure_time,
           arrivalTimeDateIso: t.total_arrival_time,
           status: t.status || firstSegment.status || 'pending',

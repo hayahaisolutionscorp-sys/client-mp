@@ -141,15 +141,6 @@ const DateNavigation: FC<{ label: string; onDateChange?: (date: string | null) =
     }
 
     router.push(`/booking/destination?${queryParams.toString()}`);
-
-    // Lead user to results
-    const anchorId = isDeparture ? "departure-results" : "return-results";
-    setTimeout(() => {
-      const element = document.getElementById(anchorId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 100);
   };
 
   return (

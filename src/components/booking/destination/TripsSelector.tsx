@@ -2,7 +2,7 @@
 
 import DateNavigation from '@/components/booking/destination/DateNavigation';
 import TripHeader from '@/components/booking/destination/TripHeader';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import TripCards from '@/components/booking/destination/TripCards';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FiLoader } from 'react-icons/fi';
@@ -38,6 +38,18 @@ export default function TripsSelector() {
 
 
   const themeSettings = useThemeSettings();
+
+  // 1. Define Fetch Parameters (these trigger a network request)
+  const fetchParamsKey = useMemo(() => {
+    const keys = [
+      'origin_code', 'destination_code',
+      'departure_date', 'departureDate', 'filterSpecificDepartureDate',
+      'return_date', 'returnDate', 'filterSpecificReturnDate',
+      'passenger_count', 'vehicle_count', 'commodity_id',
+      'srcPortId', 'destPortId', 'tripIds'
+    ];
+    return keys.map(k => `${k}=${searchParams.get(k)}`).join('&');
+  }, [searchParams]);
 
   const cleanSearchQuery = (searchQuery: SearchAvailableTrips): SearchAvailableTrips => {
     const cleaned: Partial<SearchAvailableTrips> = Object.fromEntries(
@@ -80,8 +92,6 @@ export default function TripsSelector() {
         departureDate: searchParams.get('filterSpecificDepartureDate') ?? searchParams.get('departure_date') ?? '',
         passengerCount: searchParams.get('passenger_count') ? parseInt(searchParams.get('passenger_count')!, 10) : 1,
         vehicleCount: searchParams.get('vehicle_count') ? parseInt(searchParams.get('vehicle_count')!, 10) : 0,
-        cabinIds: searchParams.get('cabinIds') ?? undefined,
-        shippingLineIds: searchParams.get('shippingLineIds') ?? undefined,
         sort: searchParams.get('sort') ?? 'departureDate',
         filterSpecificDate:
           searchParams.get('filterSpecificDepartureDate') ?? searchParams.get('departure_date') ?? undefined,
@@ -138,7 +148,67 @@ export default function TripsSelector() {
     } finally {
       setLoading(false);
     }
-  }, [searchParams, setDepartureTrips, setReturnTrips]);
+  }, [fetchParamsKey, setDepartureTrips, setReturnTrips]); // Only refetch when core params change
+
+  // 3. Client-side filtering logic
+  const filteredDepartureTrips = useMemo(() => {
+    const selectedCabinNames = searchParams.get('cabinNames')?.split(',').filter(Boolean) || [];
+    const selectedShippingLineIds = searchParams.get('shippingLineIds')?.split(',').map(Number) || [];
+
+    if (selectedCabinNames.length === 0 && selectedShippingLineIds.length === 0) return departureTrips;
+
+    return departureTrips.filter(trip => {
+      // Check cabin types across all segments
+      const tripCabinNames = new Set<string>();
+      trip.availableCabins?.forEach(ac => {
+        const name = ac.cabin?.cabin_type_name || ac.cabin?.name || ac.cabinCode;
+        if (name) tripCabinNames.add(name);
+      });
+      trip.segments?.forEach(seg => {
+        seg.availableCabins?.forEach(ac => {
+          const name = ac.cabin?.cabin_type_name || ac.cabin?.name || ac.cabinCode;
+          if (name) tripCabinNames.add(name);
+        });
+      });
+
+      const matchesCabin = selectedCabinNames.length === 0 ||
+        selectedCabinNames.some(name => tripCabinNames.has(name));
+
+      const matchesShippingLine = selectedShippingLineIds.length === 0 ||
+        selectedShippingLineIds.includes(trip.shippingLineId);
+
+      return matchesCabin && matchesShippingLine;
+    });
+  }, [departureTrips, searchParams]);
+
+  const filteredReturnTrips = useMemo(() => {
+    const selectedCabinNames = searchParams.get('cabinNames')?.split(',').filter(Boolean) || [];
+    const selectedShippingLineIds = searchParams.get('shippingLineIds')?.split(',').map(Number) || [];
+
+    if (selectedCabinNames.length === 0 && selectedShippingLineIds.length === 0) return returnTrips;
+
+    return returnTrips.filter(trip => {
+      const tripCabinNames = new Set<string>();
+      trip.availableCabins?.forEach(ac => {
+        const name = ac.cabin?.cabin_type_name || ac.cabin?.name || ac.cabinCode;
+        if (name) tripCabinNames.add(name);
+      });
+      trip.segments?.forEach(seg => {
+        seg.availableCabins?.forEach(ac => {
+          const name = ac.cabin?.cabin_type_name || ac.cabin?.name || ac.cabinCode;
+          if (name) tripCabinNames.add(name);
+        });
+      });
+
+      const matchesCabin = selectedCabinNames.length === 0 ||
+        selectedCabinNames.some(name => tripCabinNames.has(name));
+
+      const matchesShippingLine = selectedShippingLineIds.length === 0 ||
+        selectedShippingLineIds.includes(trip.shippingLineId);
+
+      return matchesCabin && matchesShippingLine;
+    });
+  }, [returnTrips, searchParams]);
 
   useEffect(() => {
     fetchTrips();
@@ -219,15 +289,15 @@ export default function TripsSelector() {
             {error}
           </div>
         )}
-        {!loading && departureTrips.length === 0 && (
+        {!loading && filteredDepartureTrips.length === 0 && (
           <div className="p-6 sm:p-8 bg-gray-50 border border-gray-200 rounded-lg text-center">
             <p className="text-sm sm:text-base text-gray-600">No trips available, Please choose another.</p>
           </div>
         )}
-        {!loading && departureTrips.length > 0 && (
+        {!loading && filteredDepartureTrips.length > 0 && (
           <TripCards
             selectedDate={selectedDepartureDate}
-            trips={departureTrips}
+            trips={filteredDepartureTrips}
             bookingType="Depart"
             firstSelectedCabin={searchParams.get('return_date') || searchParams.get('returnDate') ? selectedReturnCabin : null}
             onCabinSelect={(selected) => setSelectedDepartureCabin(selected)}
@@ -256,17 +326,17 @@ export default function TripsSelector() {
                 {error}
               </div>
             )}
-            {!loading && returnTrips.length === 0 && (
+            {!loading && filteredReturnTrips.length === 0 && (
               <div className="p-6 sm:p-8 bg-gray-50 border border-gray-200 rounded-lg text-center">
                 <p className="text-sm sm:text-base text-gray-600">
                   No return trips available for the selected criteria.
                 </p>
               </div>
             )}
-            {!loading && returnTrips.length > 0 && (
+            {!loading && filteredReturnTrips.length > 0 && (
               <TripCards
                 selectedDate={selectedReturnDate}
-                trips={returnTrips}
+                trips={filteredReturnTrips}
                 bookingType="Return"
                 firstSelectedCabin={selectedDepartureCabin}
                 onCabinSelect={(selected) => setSelectedReturnCabin(selected)}

@@ -414,7 +414,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
 
       <div className="flex-1 w-full z-[12] inset-0 flex items-center justify-center">
         <div className="bg-white w-full max-w-[1920px] mx-auto">
-          <div className="grid gap-3 grid-cols-3 w-full items-center">
+          <div className="grid gap-3 grid-cols-3 w-full items-stretch">
             <TripDropdown value={bookingType} onChange={setBookingType} />
             <PassengerDropdown value={passengerCount} onChange={setPassengerCount} />
             <VehicleDropdown value={vehicleCount} onChange={setVehicleCount} />
@@ -423,7 +423,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_auto_auto] mt-2 w-full items-start">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_auto_auto] mt-4 w-full items-start">
             <PortDropdownFieldset
               legendText="Origin Port"
               onPortSelect={handleOriginPortSelect}
