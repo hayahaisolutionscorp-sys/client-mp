@@ -1,5 +1,6 @@
 export interface CalculatePricingRequest {
     routeCode: string;
+    snapshotId?: string;
     tripIds: string[];
     passengers: {
         index: number;

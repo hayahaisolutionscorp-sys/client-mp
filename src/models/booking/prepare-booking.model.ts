@@ -56,6 +56,7 @@ export interface ITripSummary {
     destination_municipality?: string;
     destination_province?: string;
     route_code: string;
+    rate_snapshot_id?: string | null;
     cabinPrices?: Record<string, string>;
     vehicleClasses?: { code: string; display: string; vehicleTypeId?: number | null }[];
     cargoClasses?: { code: string; display: string }[];

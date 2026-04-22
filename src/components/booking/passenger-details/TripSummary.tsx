@@ -258,6 +258,7 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
 
       const pricingRequest = {
         routeCode: allTrips[0].route_code,
+        snapshotId: allTrips[0].rate_snapshot_id ?? undefined,
         tripIds: allTrips.map(t => t.id),
         passengers,
         cargos: [...vehicleCargos, ...looseCargos],
