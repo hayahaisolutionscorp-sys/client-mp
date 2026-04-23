@@ -412,44 +412,17 @@ export function SeatGrid({
 
   return (
     <div className="p-3 select-none" style={WL_RADIUS_LOCK_STYLE}>
-      {/* Column headers */}
+      {/* Grid — square cells with overflow:visible for popovers */}
       <div
-        className="inline-grid mb-1"
-        style={{ gap: GAP, gridTemplateColumns: `22px repeat(${cols}, ${CELL_SIZE}px)` }}
+        className="inline-grid overflow-visible"
+        style={{
+          gap: GAP,
+          gridTemplateColumns: `repeat(${cols}, ${CELL_SIZE}px)`,
+          gridAutoRows: `${CELL_SIZE}px`,
+        }}
       >
-        <div />
-        {Array.from({ length: cols }, (_, c) => (
-          <div key={c} className="text-center text-[10px] font-medium text-zinc-400">
-            {c + 1}
-          </div>
-        ))}
-      </div>
-
-      <div className="flex" style={{ gap: GAP }}>
-        {/* Row labels — height matches gridAutoRows */}
-        <div className="flex flex-col" style={{ gap: GAP }}>
-          {Array.from({ length: rows }, (_, r) => (
-            <div
-              key={r}
-              className="flex items-center justify-center text-[10px] font-medium text-zinc-400"
-              style={{ width: 22, height: CELL_SIZE }}
-            >
-              {String.fromCharCode(65 + r)}
-            </div>
-          ))}
-        </div>
-
-        {/* Grid — square cells with overflow:visible for popovers */}
-        <div
-          className="inline-grid overflow-visible"
-          style={{
-            gap: GAP,
-            gridTemplateColumns: `repeat(${cols}, ${CELL_SIZE}px)`,
-            gridAutoRows: `${CELL_SIZE}px`,
-          }}
-        >
-          {Array.from({ length: rows }, (_, r) =>
-            Array.from({ length: cols }, (_, c) => {
+        {Array.from({ length: rows }, (_, r) =>
+          Array.from({ length: cols }, (_, c) => {
               const region = getCellMergedRegion(r, c, merged);
               const mergeStart = getMergeStart(r, c, merged);
               if (region && !mergeStart) {
@@ -483,6 +456,7 @@ export function SeatGrid({
                   'emergency-exit': 'bg-red-50 border-red-300 text-red-600',
                 };
                 const mergedTitle = mergeStart?.title;
+                const mergedColor = mergeStart?.color;
                 const label = mergedTitle ?? cell.cellText ?? LABELS[cell.type] ?? '';
                 const icon = <StructuralIcon type={cell.type} className="h-4 w-4 shrink-0" />;
                 const hasStructIcon = ['stairs', 'restroom', 'door', 'emergency-exit', 'blocked'].includes(cell.type);
@@ -490,7 +464,16 @@ export function SeatGrid({
                   <div
                     key={key}
                     className={`rounded-md border flex flex-col items-center justify-center text-center gap-0.5 ${DECOR[cell.type] ?? 'bg-zinc-100 border-zinc-200 text-zinc-400'}`}
-                    style={gridStyle}
+                    style={{
+                      ...gridStyle,
+                      ...(mergedColor
+                        ? {
+                            backgroundColor: `${mergedColor}1A`,
+                            borderColor: mergedColor,
+                            color: mergedColor,
+                          }
+                        : {}),
+                    }}
                     title={mergedTitle ?? cell.type}
                   >
                     {hasStructIcon && icon}
@@ -569,7 +552,6 @@ export function SeatGrid({
               );
             }),
           ).flat()}
-        </div>
       </div>
     </div>
   );

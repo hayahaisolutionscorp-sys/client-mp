@@ -92,9 +92,16 @@ export function SeatPickerDialog({
   const [holdSecondsLeft, setHoldSecondsLeft] = useState<number | null>(null);
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const assignmentsRef = useRef<AssignmentsMap>(initialAssignments);
+  const confirmedRef = useRef(false);
 
   const activeTrip = trips[activeTripIndex];
   const zoom = ZOOM_STEPS[zoomIdx] ?? 1.0;
+
+  // Keep assignmentsRef in sync so timer/beforeunload always see current state
+  useEffect(() => {
+    assignmentsRef.current = assignments;
+  }, [assignments]);
 
   // ── Reset state when dialog opens ─────────────────────────────────────────
   useEffect(() => {
@@ -105,6 +112,8 @@ export function SeatPickerDialog({
       setSeats([]);
       setFocusedIdx(0);
       setAssignments(initialAssignments);
+      assignmentsRef.current = initialAssignments;
+      confirmedRef.current = false;
       setZoomIdx(DEFAULT_ZOOM_IDX);
       setHoldSecondsLeft(HOLD_SESSION_SECONDS);
     } else {
@@ -155,6 +164,34 @@ export function SeatPickerDialog({
     };
   }, [fetchSeats, open]);
 
+  // ── Release holds on hard page close / reload ────────────────────────────
+  useEffect(() => {
+    if (!open) return;
+    const handleUnload = () => {
+      if (confirmedRef.current) return;
+      const currentAssignments = assignmentsRef.current;
+      const seatsByTrip: Record<string, string[]> = {};
+      for (const [, tripMap] of Object.entries(currentAssignments)) {
+        for (const [tripId, seatId] of Object.entries(tripMap)) {
+          if (!seatsByTrip[tripId]) seatsByTrip[tripId] = [];
+          seatsByTrip[tripId]!.push(seatId);
+        }
+      }
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+      for (const [tripId, seatIds] of Object.entries(seatsByTrip)) {
+        if (seatIds.length === 0) continue;
+        // sendBeacon is the only reliable unload mechanism in modern browsers;
+        // sync XHR is blocked by Chrome 80+. Backend has a POST /seats/release alias.
+        navigator.sendBeacon(
+          `${apiBase}/public/trips/${tripId}/seats/release`,
+          new Blob([JSON.stringify({ seatIds })], { type: 'application/json' }),
+        );
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [open]);
+
   // ── Hold session timer — always starts at 15:00 on open ──────────────────
   useEffect(() => {
     if (!open) return;
@@ -167,11 +204,17 @@ export function SeatPickerDialog({
         if (next === 0) {
           if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
           toastError('Your seat hold time expired. Please reselect your seats.');
-          const allSeatIds = Object.values(assignments).flatMap((tm) => Object.values(tm));
-          if (allSeatIds.length > 0) {
-            for (const trip of trips) {
-              releaseSeats(trip.tripId, allSeatIds).catch(() => {});
+          // Use ref so we always release seats assigned up to this moment
+          const currentAssignments = assignmentsRef.current;
+          const seatsByTrip: Record<string, string[]> = {};
+          for (const [pKey, tripMap] of Object.entries(currentAssignments)) {
+            for (const [tripId, seatId] of Object.entries(tripMap)) {
+              if (!seatsByTrip[tripId]) seatsByTrip[tripId] = [];
+              seatsByTrip[tripId]!.push(seatId);
             }
+          }
+          for (const [tripId, seatIds] of Object.entries(seatsByTrip)) {
+            releaseSeats(tripId, seatIds).catch(() => {});
           }
           setAssignments({});
           fetchSeats();
@@ -184,15 +227,19 @@ export function SeatPickerDialog({
     return () => {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
-  }, [open, trips, assignments, fetchSeats, toastError]);
+  }, [open, fetchSeats, toastError]); // assignments intentionally excluded — use assignmentsRef
 
   async function handleClose() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    const allSeatIds = Object.values(assignments).flatMap((tm) => Object.values(tm));
-    if (allSeatIds.length > 0) {
-      for (const trip of trips) {
-        await releaseSeats(trip.tripId, allSeatIds).catch(() => {});
+    const seatsByTrip: Record<string, string[]> = {};
+    for (const [, tripMap] of Object.entries(assignments)) {
+      for (const [tripId, seatId] of Object.entries(tripMap)) {
+        if (!seatsByTrip[tripId]) seatsByTrip[tripId] = [];
+        seatsByTrip[tripId]!.push(seatId);
       }
+    }
+    for (const [tripId, seatIds] of Object.entries(seatsByTrip)) {
+      await releaseSeats(tripId, seatIds).catch(() => {});
     }
     setAssignments({});
     onClose();
@@ -298,6 +345,7 @@ export function SeatPickerDialog({
         );
       }
 
+      confirmedRef.current = true;
       onConfirm(result.assignments, result.labels);
     } catch {
       toastError('Auto-assign failed. Please try again.');
@@ -316,6 +364,7 @@ export function SeatPickerDialog({
         if (seat) labels[pKey][tId] = seat.cell_id;
       }
     }
+    confirmedRef.current = true;
     onConfirm(assignments, labels);
   }
 

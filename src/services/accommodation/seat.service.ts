@@ -58,6 +58,7 @@ export async function getDeckLayout(deckId: number): Promise<DeckLayout | null> 
       endCol: m.end_col ?? m.endCol,
       title: m.title,
       cellType: m.cell_type ?? m.cellType,
+      color: m.color ?? undefined,
     })),
   };
 }

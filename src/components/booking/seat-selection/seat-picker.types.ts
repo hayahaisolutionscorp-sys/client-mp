@@ -49,6 +49,7 @@ export interface MergedRegion {
   title?: string;
   cellType?: string;
   cell_type?: string;
+  color?: string;
 }
 
 export interface TripSeat {
