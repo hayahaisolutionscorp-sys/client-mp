@@ -382,7 +382,7 @@ export function SearchBoxFormContent({
                 origin_code: selectedOriginPort?.code ?? undefined,
                 destination_code: selectedDestinationPort?.code ?? undefined,
                 departure_date: departureDate ? departureDate.toISOString() : undefined,
-                returnDate: bookingType?.toLowerCase() === "round trip" ? (returnDate ? returnDate.toISOString() : undefined) : undefined,
+                return_date: bookingType?.toLowerCase() === "round trip" ? (returnDate ? returnDate.toISOString() : undefined) : undefined,
                 passenger_count: passengerCount !== undefined ? passengerCount.toString() : undefined,
                 vehicle_count: vehicleCount !== undefined ? vehicleCount.toString() : undefined,
                 sort: "departureDate",
@@ -404,7 +404,7 @@ export function SearchBoxFormContent({
 
     return (
         <>
-            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3 w-full h-auto items-start">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3 w-full h-auto items-start relative z-30">
                 <TripDropdown value={bookingType} onChange={setBookingType} />
                 <PassengerDropdown value={passengerCount} onChange={setPassengerCount} />
                 <VehicleDropdown value={vehicleCount} onChange={setVehicleCount} />
@@ -417,7 +417,7 @@ export function SearchBoxFormContent({
                 </div>
             </div>
 
-            <div className="w-full grid gap-3 mt-2 sm:gap-4 grid-cols-1 sm:grid-cols-[2fr_auto_2fr] lg:grid-cols-[1fr_auto_1fr_auto_auto]">
+            <div className="w-full grid gap-3 mt-2 sm:gap-4 grid-cols-1 sm:grid-cols-[2fr_auto_2fr] lg:grid-cols-[1fr_auto_1fr_auto_auto] relative z-20">
                 <PortDropdownFieldset
                     legendText="Origin Port"
                     onPortSelect={handleOriginPortSelect}
@@ -476,7 +476,7 @@ export function SearchBoxFormContent({
                 </div>
             </div>
 
-            <div className="w-full grid grid-cols-1 gap-4 mt-3 sm:mt-6 md:grid-cols-[2fr_auto] lg:hidden">
+            <div className="w-full grid grid-cols-1 gap-4 mt-3 sm:mt-6 md:grid-cols-[2fr_auto] lg:hidden relative z-10">
                 <div className="flex flex-col space-y-3 sm:gap-4 sm:space-y-0 sm:flex-row items-center justify-center ">
                     <DatePickerFieldset
                         legendText="Departure"

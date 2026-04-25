@@ -65,12 +65,12 @@ export default async function PassengerDetailsContent({
 
       const departurePromises = (response.data.departure || []).map(async (tripSummary) => {
         const ship = await getShip(tripSummary.ship.id);
-        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId);
+        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId, response.data.logo?.light);
       });
 
       const returnPromises = (response.data.return || []).map(async (tripSummary) => {
         const ship = await getShip(tripSummary.ship.id);
-        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId);
+        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId, response.data.logo?.light);
       });
 
       [initialDepartureTrips, initialReturnTrips] = await Promise.all([
@@ -153,11 +153,11 @@ async function renderCrossTenant({
       pbData = result.value.data;
       const depPromises = (result.value.data.departure || []).map(async (tripSummary) => {
         const ship = await getShip(tripSummary.ship.id);
-        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId);
+        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId, result.value.data.logo?.light);
       });
       const retPromises = (result.value.data.return || []).map(async (tripSummary) => {
         const ship = await getShip(tripSummary.ship.id);
-        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId);
+        return mapTripSummaryToTrip(tripSummary, ship?.shippingLineId, result.value.data.logo?.light);
       });
       [trips, returnTrips] = await Promise.all([
         Promise.all(depPromises),
@@ -189,7 +189,7 @@ async function renderCrossTenant({
   );
 }
 
-function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId: number = 0): ITrip {
+function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId?: number, logoUrl?: string): ITrip {
   const vehicleCapacities = summary.ship.vehicle_capacities;
   const tripCabinPrices = summary.cabinPrices || {};
   const remainingVehicleCapacity = vehicleCapacities
@@ -222,6 +222,7 @@ function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId: number = 0)
     referenceNo: '', // Not in summary
     shipId: summary.ship.id,
     shippingLineId: shippingLineId,
+    lightLogoUrl: logoUrl,
     srcPortId: 0, // Not in summary
     destPortId: 0, // Not in summary
     rateTableId: 0, // Not in summary

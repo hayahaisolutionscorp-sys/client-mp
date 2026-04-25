@@ -14,6 +14,8 @@ export interface IPrepareBookingData {
     accommodationCodes?: string[];
     bookingUiSettings?: Record<string, any>;
     snapshot_mismatch: boolean;
+    brand_name?: string;
+    logo?: { light?: string; dark?: string };
 }
 
 export interface IRoutePreference {

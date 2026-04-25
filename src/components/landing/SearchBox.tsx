@@ -226,7 +226,7 @@ const SearchBox: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3 w-full h-auto items-start">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3 w-full h-auto items-start relative z-30">
             <TripDropdown value={bookingType} onChange={setBookingType} />
             <PassengerDropdown value={passengerCount} onChange={setPassengerCount} />
             <VehicleDropdown value={vehicleCount} onChange={setVehicleCount} />
@@ -239,7 +239,7 @@ const SearchBox: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-full grid gap-3 mt-2 sm:gap-4 grid-cols-1 sm:grid-cols-[2fr_auto_2fr] lg:grid-cols-[1fr_auto_1fr_auto_auto]">
+          <div className="w-full grid gap-3 mt-2 sm:gap-4 grid-cols-1 sm:grid-cols-[2fr_auto_2fr] lg:grid-cols-[1fr_auto_1fr_auto_auto] relative z-20">
             <PortDropdownFieldset
               legendText="Origin Port"
               onPortSelect={handleOriginPortSelect}
@@ -289,7 +289,7 @@ const SearchBox: React.FC = () => {
               </Button>
             </div>
           </div>
-          <div className="w-full grid grid-cols-1 gap-4 mt-3 sm:mt-6 md:grid-cols-[2fr_auto] lg:hidden">
+          <div className="w-full grid grid-cols-1 gap-4 mt-3 sm:mt-6 md:grid-cols-[2fr_auto] lg:hidden relative z-10">
             <div className="flex flex-col space-y-3 sm:gap-4 sm:space-y-0 sm:flex-row items-center justify-center ">
               <DatePickerFieldset
                 legendText="Departure"

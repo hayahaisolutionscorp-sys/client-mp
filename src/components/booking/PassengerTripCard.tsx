@@ -127,9 +127,9 @@ export default function PassengerTripCard({ departureTrips, returnTrips, trips }
       </div>
 
       <div className="flex justify-center sm:hidden mb-4">
-        {shippingLines[trip.shippingLineId]?.logoFilename && (
+        {(trip.lightLogoUrl || shippingLines[trip.shippingLineId]?.logoFilename) && (
           <Image
-            src={shippingLines[trip.shippingLineId].logoFilename}
+            src={trip.lightLogoUrl || shippingLines[trip.shippingLineId].logoFilename!}
             alt="Shipping Company Logo"
             width={140}
             height={140}
@@ -140,9 +140,9 @@ export default function PassengerTripCard({ departureTrips, returnTrips, trips }
       <div className="flex items-center justify-between gap-2 sm:gap-4 mb-4 w-full">
         <div className="flex flex-col items-center flex-shrink-0 w-[30%] sm:w-auto">
           <div className="hidden sm:flex items-center justify-center mb-2">
-            {shippingLines[trip.shippingLineId]?.logoFilename && (
+            {(trip.lightLogoUrl || shippingLines[trip.shippingLineId]?.logoFilename) && (
               <Image
-                src={shippingLines[trip.shippingLineId].logoFilename}
+                src={trip.lightLogoUrl || shippingLines[trip.shippingLineId].logoFilename!}
                 alt="Shipping Company Logo"
                 width={160}
                 height={160}
@@ -175,9 +175,9 @@ export default function PassengerTripCard({ departureTrips, returnTrips, trips }
 
         <div className="flex flex-col items-center flex-shrink-0 w-[30%] sm:w-auto">
           <div className="hidden sm:flex items-center justify-center mb-2">
-            {shippingLines[trip.shippingLineId]?.logoFilename && (
+            {(trip.lightLogoUrl || shippingLines[trip.shippingLineId]?.logoFilename) && (
               <Image
-                src={shippingLines[trip.shippingLineId].logoFilename}
+                src={trip.lightLogoUrl || shippingLines[trip.shippingLineId].logoFilename!}
                 alt="Shipping Company Logo"
                 width={160}
                 height={160}
@@ -218,9 +218,9 @@ export default function PassengerTripCard({ departureTrips, returnTrips, trips }
       </div>
       <div className="flex flex-col sm:flex-row items-center mb-3 sm:mb-4 w-full gap-3 sm:gap-5">
         <div className="flex justify-center sm:justify-start w-full sm:w-auto mb-3 sm:mb-0">
-          {shippingLines[trip.shippingLineId]?.logoFilename && (
+          {(trip.lightLogoUrl || shippingLines[trip.shippingLineId]?.logoFilename) && (
             <Image
-              src={shippingLines[trip.shippingLineId].logoFilename}
+              src={trip.lightLogoUrl || shippingLines[trip.shippingLineId].logoFilename!}
               alt={`${title} Logo`}
               width={160}
               height={160}

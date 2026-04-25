@@ -46,7 +46,7 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
   }, []);
 
   return (
-    <div ref={dropdownRef} className="relative z-10 inline-block w-full h-[40px] overflow-visible text-left focus-within:z-[120]">
+    <div ref={dropdownRef} className={`relative inline-block w-full h-[40px] overflow-visible text-left focus-within:z-[120] ${isOpen ? "z-[100]" : "z-10"}`}>
       <button
         data-template-ignore="true"
         onClick={toggleDropdown}
