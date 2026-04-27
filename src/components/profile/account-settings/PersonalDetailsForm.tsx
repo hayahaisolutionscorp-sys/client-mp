@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { parseISO, isValid, differenceInYears } from "date-fns"
+import { parseISO, isValid, differenceInYears, format } from "date-fns"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
@@ -351,9 +351,9 @@ export default function PersonalDetailsForm({ passenger, email, onUpdate }: Pers
                                     const current = formData.birthdayIso ? parseISO(formData.birthdayIso) : undefined;
                                     const newDate = typeof dateAction === 'function' ? dateAction(current) : dateAction;
                                     if (newDate && isValid(newDate)) {
-                                        const iso = newDate.toISOString();
-                                        handleInputChange('birthdayIso', iso);
-                                        autoSelectByBirthday(iso);
+                                        const dateStr = format(newDate, "yyyy-MM-dd");
+                                        handleInputChange('birthdayIso', dateStr);
+                                        autoSelectByBirthday(dateStr);
                                     }
                                 }}
                                 validationErrors={{}}

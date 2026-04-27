@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select"
+import { format } from "date-fns";
 import { RegisterForm as IRegisterForm } from "@/models";
 import BirthDatePicker from "@/components/ui/BirthDatePicker";
 import CountryCodeSelector, { CountryData } from "@/components/ui/CountryCodeSelector";
@@ -118,7 +119,7 @@ export function RegisterForm() {
 
   const setBirthday: Dispatch<SetStateAction<Date | undefined>> = (value) => {
     if (value instanceof Date) {
-      setFormData(prev => ({ ...prev, birthday: value.toISOString() }));
+      setFormData(prev => ({ ...prev, birthday: format(value, "yyyy-MM-dd") }));
     }
   };
 

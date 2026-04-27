@@ -44,6 +44,14 @@ const BirthDatePicker = ({
   const [showMonthGrid, setShowMonthGrid] = React.useState(false);
   const [yearInput, setYearInput] = React.useState(String(viewingMonth.getFullYear()));
 
+  // Sync viewing month when date prop changes
+  React.useEffect(() => {
+    if (date && isValid(date)) {
+      setViewingMonth(date);
+      setYearInput(String(date.getFullYear()));
+    }
+  }, [date]);
+
   const displayDate = date && isValid(date) ? format(date, "yyyy-MM-dd") : "Select Date";
 
   const handleYearInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +60,12 @@ const BirthDatePicker = ({
     const parsed = parseInt(val, 10);
     if (!isNaN(parsed) && parsed >= minYear && parsed <= maxYear) {
       setViewingMonth(prev => setYear(prev, parsed));
+      if (date && isValid(date)) {
+        const newDate = setYear(date, parsed);
+        if (isValid(newDate)) {
+          setDate(newDate);
+        }
+      }
     }
   };
 
@@ -60,11 +74,24 @@ const BirthDatePicker = ({
     const clamped = isNaN(parsed) ? maxYear : Math.max(minYear, Math.min(maxYear, parsed));
     setYearInput(String(clamped));
     setViewingMonth(prev => setYear(prev, clamped));
+    if (date && isValid(date)) {
+      const newDate = setYear(date, clamped);
+      if (isValid(newDate)) {
+        setDate(newDate);
+      }
+    }
   };
 
   const handleMonthSelect = (monthIndex: number) => {
-    setViewingMonth(prev => startOfMonth(setMonth(prev, monthIndex)));
+    const newMonth = startOfMonth(setMonth(viewingMonth, monthIndex));
+    setViewingMonth(newMonth);
     setShowMonthGrid(false);
+    if (date && isValid(date)) {
+      const newDate = setMonth(date, monthIndex);
+      if (isValid(newDate)) {
+        setDate(newDate);
+      }
+    }
   };
 
   const navigateMonth = (delta: number) => {
@@ -85,10 +112,10 @@ const BirthDatePicker = ({
           aria-label="Select birthday"
           disabled={disabled}
           className={cn(
-            "flex h-10 w-full items-center justify-between !rounded-md border border-input bg-transparent px-3 py-2 text-sm text-black shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)]",
+            "flex h-10 w-full items-center justify-between !rounded-md border border-input bg-white px-3 py-2 text-sm text-black shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)]",
             (!date || !isValid(date)) ? "text-gray-500" : "text-black",
             validationErrors.birthday ? "border-red-500" : "",
-            disabled && "cursor-not-allowed bg-transparent opacity-50"
+            disabled && "cursor-not-allowed bg-white opacity-50"
           )}
           style={{ "--primary-color": primaryRgb } as React.CSSProperties}
         >

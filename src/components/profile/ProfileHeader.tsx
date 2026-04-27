@@ -70,7 +70,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                             ref={fileInputRef}
                             name="profile_picture"
                             onChange={onImageChange}
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/webp,image/svg+xml"
                             className="hidden"
                         />
                         <div

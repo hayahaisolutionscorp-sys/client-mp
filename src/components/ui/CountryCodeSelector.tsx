@@ -78,7 +78,7 @@ const CountryCodeSelector = ({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "h-10 w-[110px] justify-between !rounded-md border border-input bg-transparent px-3 py-2 font-normal text-base text-black shadow-none ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+            "h-10 w-[110px] justify-between !rounded-md border border-input bg-white px-3 py-2 font-normal text-base text-black shadow-none ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
             className
           )}
           style={

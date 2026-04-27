@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
-import { ImageIcon, Loader2, Camera, User, CheckCircle2, X, AlertCircle } from "lucide-react"
+import { ImageIcon, Loader2, Camera, User, CheckCircle2, X, AlertCircle, Calendar } from "lucide-react"
 import Image from "next/image"
 import { SecureImage } from "@/components/ui/SecureImage"
 import { useAuth } from "@/contexts/AuthContexts"
@@ -16,6 +16,8 @@ import CameraCapture from "@/components/profile/verification/CameraCapture"
 import { UploadService } from "@/services/upload.service"
 import { IVerification } from "@/models"
 import { useThemeSettings } from "@/hooks/theme-settings"
+import { parseISO, isValid as isValidDateFn } from "date-fns"
+import DatePicker from "@/components/ui/DatePicker"
 
 const steps = [
     { id: 1, title: "ID Information" },
@@ -61,7 +63,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
         governmentId: initialData?.id_type?.toLowerCase() || "",
         customIdType: initialData?.id_type && !idTypes.some(t => t.toLowerCase() === initialData.id_type.toLowerCase()) ? initialData.id_type : "",
         idNumber: initialData?.id_number || "",
-        documentCountry: initialData?.document_country || "Philippines",
+        documentCountry: initialData?.document_country || "PH",
         expiryDate: initialData?.expiry_date ? new Date(initialData.expiry_date).toISOString().split('T')[0] : "",
         idFront: null,
         idBack: null,
@@ -365,20 +367,23 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">Expiry Date</label>
-                            <Input
-                                type="date"
-                                value={formData.expiryDate}
-                                min={getTodayDate()}
-                                onChange={(e) => {
-                                    const newDate = e.target.value;
-                                    setFormData({ ...formData, expiryDate: newDate });
-                                    if (newDate && !isExpiryDateValid(newDate)) {
-                                        setExpiryDateError("ID expiry date must be in the future with a valid 4-digit year");
-                                    } else {
-                                        setExpiryDateError("");
+                            <DatePicker
+                                date={formData.expiryDate ? parseISO(formData.expiryDate) : undefined}
+                                setDate={(dateAction) => {
+                                    const current = formData.expiryDate ? parseISO(formData.expiryDate) : undefined;
+                                    const newDate = typeof dateAction === "function" ? dateAction(current) : dateAction;
+                                    if (newDate && isValidDateFn(newDate)) {
+                                        const dateStr = format(newDate, "yyyy-MM-dd");
+                                        setFormData({ ...formData, expiryDate: dateStr });
+                                        if (dateStr && !isExpiryDateValid(dateStr)) {
+                                            setExpiryDateError("ID expiry date must be in the future");
+                                        } else {
+                                            setExpiryDateError("");
+                                        }
                                     }
                                 }}
-                                className={expiryDateError ? "border-red-500" : ""}
+                                placeholder="Select Expiry Date"
+                                minDate={new Date()}
                             />
                             {expiryDateError && (
                                 <p className="text-xs text-red-600">{expiryDateError}</p>
@@ -425,7 +430,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                                     </div>
                                 )}
                                 <label className="absolute inset-0 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 bg-slate-900/40 transition-opacity">
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange('idFront', e)} />
+                                    <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" className="hidden" onChange={(e) => handleFileChange('idFront', e)} />
                                     <Button variant="outline" className="text-white border-white pointer-events-none">Change Photo</Button>
                                 </label>
                             </div>
@@ -444,7 +449,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                                     </div>
                                 )}
                                 <label className="absolute inset-0 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 bg-slate-900/40 transition-opacity">
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange('idBack', e)} />
+                                    <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" className="hidden" onChange={(e) => handleFileChange('idBack', e)} />
                                     <Button variant="outline" className="text-white border-white pointer-events-none">Change Photo</Button>
                                 </label>
                             </div>
@@ -569,7 +574,7 @@ export default function ProfileVerification({ onCancel, onSubmit, dependentId, d
                                     <div className="space-y-1">
                                         <p className="text-xs font-medium text-slate-500 uppercase tracking-tight">Expiry Date</p>
                                         <p className="text-sm font-semibold text-slate-900">
-                                            {formData.expiryDate ? new Date(formData.expiryDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+                                            {formData.expiryDate ? format(parseISO(formData.expiryDate), 'MMMM d, yyyy') : 'N/A'}
                                         </p>
                                     </div>
                                 </div>

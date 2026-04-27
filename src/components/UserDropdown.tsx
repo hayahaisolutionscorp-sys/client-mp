@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/DropdownMenu';
+import { cn } from '@/lib/utils';
 
 const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: boolean }) => {
   const router = useRouter();
@@ -25,7 +26,7 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
   }, []);
 
   if (!hasMounted || loading) {
-    return <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse border border-gray-100" />;
+    return <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse border border-gray-100" />;
   }
 
   /** Guest: desktop uses a plain link (not inside DropdownMenuTrigger — that opened an empty menu on lg). */
@@ -50,14 +51,20 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
               <button
                 type="button"
                 aria-label="Open account menu"
-                className="relative flex cursor-pointer items-center rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={cn(
+                  "relative flex h-10 w-10 items-center justify-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  shouldBeTransparent ? "hover:bg-white/10" : "hover:bg-slate-100/50"
+                )}
               >
                 <Image
                   src="/assets/icons/circle-user-round.svg"
                   alt=""
                   width={32}
                   height={32}
-                  className={`h-8 w-8 transition-all duration-200 ${shouldBeTransparent ? 'brightness-0 invert' : 'brightness-0'}`}
+                  className={cn(
+                    "h-6 w-6 transition-all duration-200",
+                    shouldBeTransparent ? "brightness-0 invert" : "brightness-0"
+                  )}
                 />
               </button>
             </DropdownMenuTrigger>
@@ -85,7 +92,10 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
         <button
           type="button"
           aria-label="Open account menu"
-          className="relative cursor-pointer rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={cn(
+            "relative flex h-10 w-10 items-center justify-center rounded-full transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            shouldBeTransparent ? "hover:bg-white/10" : "hover:bg-slate-100/50"
+          )}
         >
           {currentUser.passenger?.profilePictureUrl ? (
             <div
@@ -101,11 +111,12 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
             </div>
           ) : (
             <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full border-none text-sm font-bold shadow-sm transition-all duration-200 ${
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-full border-none text-xs font-bold shadow-sm transition-all duration-200",
                 shouldBeTransparent
-                  ? 'border border-white/40 bg-white/20 text-white backdrop-blur-sm hover:bg-white/30'
-                  : 'text-white'
-              }`}
+                  ? "border border-white/40 bg-white/20 text-white backdrop-blur-sm hover:bg-white/30"
+                  : "text-white"
+              )}
               style={{
                 backgroundColor: !shouldBeTransparent && themeSettings?.primaryColor ? themeSettings.primaryColor : undefined,
                 boxShadow: 'none',

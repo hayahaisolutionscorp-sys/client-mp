@@ -207,7 +207,7 @@ export default function VehicleVerificationForm({
                         <SecureImage src={preview} alt={label} fill className="object-cover rounded-lg" />
                         {/* Hover overlay — change photo */}
                         <label className="absolute inset-0 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 bg-slate-900/40 transition-opacity rounded-lg">
-                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, type)} />
+                            <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" className="hidden" onChange={(e) => handleFileChange(e, type)} />
                             <Button variant="outline" className="text-white border-white pointer-events-none text-xs h-8">
                                 <RefreshCw className="h-3 w-3 mr-1" /> Change Photo
                             </Button>
@@ -229,7 +229,7 @@ export default function VehicleVerificationForm({
                     <div className="relative flex flex-col items-center justify-center py-4 text-center">
                         <Upload className="h-6 w-6 mb-1 text-slate-400" />
                         <p className="text-xs font-semibold text-slate-600">Upload {label}</p>
-                        <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, type)} />
+                        <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, type)} />
                     </div>
                 )}
             </div>
@@ -314,7 +314,7 @@ export default function VehicleVerificationForm({
                                 <label className="absolute inset-0 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 bg-slate-900/50 transition-opacity">
                                     <input
                                         type="file"
-                                        accept="image/*"
+                                        accept="image/jpeg,image/png,image/webp,image/svg+xml"
                                         className="hidden"
                                         onChange={(e) => handleFileChange(e, activeStep.id)}
                                     />

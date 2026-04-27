@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContexts';
 import type { IBrandingConfig } from '@/models/branding.model';
 import type { HeaderNavigationConfig } from '@/lib/landing-nav';
 import { getFilteredLandingNavItems, scrollToLandingTarget } from '@/lib/landing-nav';
+import { cn } from '@/lib/utils';
 
 interface NavbarProps {
   forceHomeStyle?: boolean;
@@ -140,22 +141,23 @@ const Navbar = ({
             </div>
 
             {/* Mobile section - UserDropdown always visible; hamburger only for landing nav */}
-            <div className="lg:hidden relative z-50 flex items-center gap-4">
+            <div className="lg:hidden relative z-50 flex items-center gap-1 sm:gap-2">
               <NotificationDropdown shouldBeTransparent={shouldBeTransparent} mobile />
-              <div className="flex items-center">
-                <UserDropdown shouldBeTransparent={shouldBeTransparent} />
-              </div>
+              <UserDropdown shouldBeTransparent={shouldBeTransparent} />
               {shouldRenderLandingNav && (
                 <div
                   role="button"
                   tabIndex={0}
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   onKeyDown={(e) => e.key === 'Enter' && setIsMenuOpen(!isMenuOpen)}
-                  className="inline-flex items-center justify-center p-2 rounded-md focus:outline-none cursor-pointer"
+                  className={cn(
+                    "relative flex h-10 w-10 items-center justify-center rounded-full transition-all focus:outline-none cursor-pointer",
+                    shouldBeTransparent ? "hover:bg-white/10" : "hover:bg-slate-100/50"
+                  )}
                   style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
                   aria-label="Toggle menu"
                 >
-                  <div className="relative w-6 h-6">
+                  <div className="relative w-6 h-6 flex items-center justify-center">
                     <span
                       className={`absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? 'rotate-45 translate-y-0' : '-translate-y-2'
                         }`}

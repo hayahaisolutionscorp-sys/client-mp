@@ -8,8 +8,8 @@ import type { IAccountNotification, INotification } from '@/models';
 
 export interface NotificationPreview {
   id: string;
-  subject: string;
-  body: string;
+  title: string;
+  message: string;
   dateCreatedIso: string;
   isRead: boolean;
   tripId?: number;
@@ -25,16 +25,33 @@ function pickNotificationSource(item: IAccountNotification | INotification | any
   return item?.notification ?? item;
 }
 
-function normalizeNotification(item: IAccountNotification | INotification | any, index: number): NotificationPreview {
+export function normalizeNotification(item: IAccountNotification | INotification | any, index: number): NotificationPreview {
   const source = pickNotificationSource(item);
   const rawId = source?.id ?? item?.notificationId ?? item?.id ?? index + 1;
 
+  // Prioritize title/message (client-api structure) over subject/body (old structure)
+  const title = source?.title ?? source?.subject ?? 'Notification';
+  const message = source?.message ?? source?.body ?? '';
+  // Normalize the date to a standard ISO string with timezone indicator
+  let dateCreatedIso = source?.dateCreatedIso ?? source?.sent_at ?? source?.created_at ?? source?.createdAt ?? new Date().toISOString();
+  
+  if (typeof dateCreatedIso === 'string' && !dateCreatedIso.endsWith('Z') && !dateCreatedIso.includes('+')) {
+    // Convert "YYYY-MM-DD HH:mm:ss.SSSSSS" to ISO "YYYY-MM-DDTHH:mm:ss.SSSz"
+    // We truncate microseconds to 3 digits (milliseconds) for better browser compatibility
+    dateCreatedIso = dateCreatedIso.replace(' ', 'T');
+    const dotIndex = dateCreatedIso.indexOf('.');
+    if (dotIndex !== -1 && dateCreatedIso.length - dotIndex > 4) {
+      dateCreatedIso = dateCreatedIso.substring(0, dotIndex + 4);
+    }
+    dateCreatedIso += 'Z';
+  }
+
   return {
     id: String(rawId),
-    subject: typeof source?.subject === 'string' && source.subject.trim() ? source.subject : 'Notification',
-    body: typeof source?.body === 'string' ? source.body : '',
-    dateCreatedIso: typeof source?.dateCreatedIso === 'string' ? source.dateCreatedIso : new Date().toISOString(),
-    isRead: Boolean(item?.isRead ?? source?.isRead ?? false),
+    title: typeof title === 'string' && title.trim() ? title : 'Notification',
+    message: typeof message === 'string' ? message : '',
+    dateCreatedIso: String(dateCreatedIso),
+    isRead: Boolean(item?.isRead ?? source?.isRead ?? (source?.status === 'read')),
     tripId: typeof source?.tripId === 'number' ? source.tripId : undefined,
   };
 }

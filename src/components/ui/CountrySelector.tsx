@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { defaultCountries, parseCountry } from "react-international-phone";
 
 import { cn } from "@/lib/utils";
@@ -42,7 +42,7 @@ interface CountrySelectorProps {
 
 const CountrySelector = ({
   value: externalValue,
-  defaultValue = "",
+  defaultValue = "PH",
   onChange,
   placeholder = "Select country",
   className,
@@ -64,24 +64,26 @@ const CountrySelector = ({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant={null}
+        <button
+          type="button"
           role="combobox"
+          data-template-ignore="true"
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "h-10 w-full justify-between rounded-md border border-input bg-background px-3 py-2 font-normal text-customText text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+            "flex h-10 w-full items-center justify-between !bg-white rounded-full border border-slate-200 bg-white px-4 py-2 text-sm !text-black shadow-none focus:outline-none focus:ring-2 focus:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}
           style={{ "--primary-color": primaryColorRgb } as React.CSSProperties}
         >
-          <span className="truncate">
-            {value
-              ? countryOptions.find((n) => n.value === value)?.label
-              : placeholder}
+          <span className="truncate !text-black">
+            {(() => {
+              const selected = countryOptions.find((n) => n.value === value || n.label === value);
+              return selected ? selected.label : (value || placeholder);
+            })()}
           </span>
-          <ChevronsUpDown className="ml-1 h-4 w-4 shrink-0 opacity-100" style={{ color: `rgba(${primaryColorRgb}, 1)` }} />
-        </Button>
+          <ChevronDown className="h-4 w-4 shrink-0 opacity-100 text-slate-900" />
+        </button>
       </PopoverTrigger>
       <PopoverContent className="p-0" align="start">
         <Command>

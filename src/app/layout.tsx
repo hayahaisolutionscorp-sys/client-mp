@@ -2,6 +2,7 @@ import "./globals.css";
 
 import { generateMetadata } from "./metadata";
 import AuthContextProvider from "@/contexts/AuthContexts";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import LayoutWrapper from "./layoutWrapper";
 import BodyWrapper from '@/components/BodyWrapper';
 import ThemeProvider from '@/components/ThemeProvider';
@@ -119,21 +120,23 @@ export default async function RootLayout({
             initialUser={initialAuth.initialUser}
             hasSessionCookies={initialAuth.hasSessionCookies}
           >
-            <ThemeHydrator theme={themeSettings} isFallback={isFallbackBranding} />
-            <Suspense fallback={null}>
-              <BodyWrapper>
-                <NextTopLoader color={themeSettings.primary} height={3} showSpinner={false} />
-                <ToasterProvider />
-                <DevServiceWorkerReset />
-                <PwaInstallBanner />
-                <LayoutWrapper
-                  initialLandingBuilderConfig={landingBuilderConfig}
-                  initialHeaderSection={initialHeaderSection ?? null}
-                >
-                  {children}
-                </LayoutWrapper>
-              </BodyWrapper>
-            </Suspense>
+            <NotificationProvider>
+              <ThemeHydrator theme={themeSettings} isFallback={isFallbackBranding} />
+              <Suspense fallback={null}>
+                <BodyWrapper>
+                  <NextTopLoader color={themeSettings.primary} height={3} showSpinner={false} />
+                  <ToasterProvider />
+                  <DevServiceWorkerReset />
+                  <PwaInstallBanner />
+                  <LayoutWrapper
+                    initialLandingBuilderConfig={landingBuilderConfig}
+                    initialHeaderSection={initialHeaderSection ?? null}
+                  >
+                    {children}
+                  </LayoutWrapper>
+                </BodyWrapper>
+              </Suspense>
+            </NotificationProvider>
           </AuthContextProvider>
         </ThemeProvider>
       </body>

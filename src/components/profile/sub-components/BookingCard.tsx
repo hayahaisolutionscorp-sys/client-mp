@@ -52,9 +52,15 @@ export const BookingCard: React.FC<BookingCardProps> = ({ booking, primaryColor 
 
     const depRoute = getRouteChain(depTrips) || 'Route N/A';
     const firstTrip = depTrips[0]?.trip || retTrips[0]?.trip;
-    const departureDate = depTrips[0]?.trip?.departureDateIso
-        ? format(new Date(depTrips[0].trip.departureDateIso), "MMM d, yyyy • h:mm a")
-        : 'Date N/A';
+
+    let departureDate = 'Date N/A';
+    if (depTrips[0]?.trip?.departureDateIso) {
+        const dateIso = depTrips[0].trip.departureDateIso;
+        const utcDateStr = dateIso.endsWith('Z') || dateIso.includes('+')
+            ? dateIso
+            : `${dateIso.replace(' ', 'T')}Z`;
+        departureDate = format(new Date(utcDateStr), "MMM d, yyyy • h:mm a");
+    }
 
     return (
         <Card

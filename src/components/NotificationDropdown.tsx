@@ -19,6 +19,7 @@ import {
   markNotificationAsRead,
   type NotificationPreview,
 } from '@/services';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 interface NotificationDropdownProps {
   shouldBeTransparent?: boolean;
@@ -26,7 +27,14 @@ interface NotificationDropdownProps {
 }
 
 function formatNotificationDate(dateIso: string) {
-  const value = new Date(dateIso);
+  if (!dateIso) return '';
+
+  // Ensure the date is treated as UTC if it doesn't have a timezone indicator
+  const utcDateStr = dateIso.endsWith('Z') || dateIso.includes('+')
+    ? dateIso
+    : `${dateIso.replace(' ', 'T')}Z`;
+
+  const value = new Date(utcDateStr);
 
   if (Number.isNaN(value.getTime())) {
     return '';
@@ -43,10 +51,35 @@ function formatNotificationDate(dateIso: string) {
 export default function NotificationDropdown({ shouldBeTransparent = false, mobile = false }: NotificationDropdownProps) {
   const { currentUser } = useAuth();
   const [open, setOpen] = useState(false);
+  const { newNotifications, clearNewNotifications } = useNotifications();
   const [notifications, setNotifications] = useState<NotificationPreview[]>([]);
   const [loading, setLoading] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
   const [markingId, setMarkingId] = useState<string | null>(null);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // Sync real-time notifications from the context
+  useEffect(() => {
+    if (newNotifications.length > 0) {
+      setNotifications((prev) => {
+        // Avoid duplicates if a real-time notification was already fetched via polling
+        const existingIds = new Set(prev.map(n => n.id));
+        const filteredNew = newNotifications.filter(n => !existingIds.has(n.id));
+        return [...filteredNew, ...prev];
+      });
+    }
+  }, [newNotifications]);
+
+  // Clear new notification queue when dropdown is opened
+  useEffect(() => {
+    if (open && newNotifications.length > 0) {
+      clearNewNotifications();
+    }
+  }, [open, newNotifications.length, clearNewNotifications]);
 
   const loadNotifications = useCallback(async () => {
     setLoading(true);
@@ -132,8 +165,8 @@ export default function NotificationDropdown({ shouldBeTransparent = false, mobi
         href="/notifications"
         aria-label="Open notifications"
         className={cn(
-          'relative inline-flex h-8 w-8 items-center justify-center rounded-full transition-opacity hover:opacity-80 focus:outline-none',
-          shouldBeTransparent ? 'text-white' : 'text-current'
+          'relative flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-slate-100/50 focus:outline-none',
+          shouldBeTransparent ? 'text-white hover:bg-white/10' : 'text-current'
         )}
       >
         <Bell className="h-5 w-5" />
@@ -157,8 +190,8 @@ export default function NotificationDropdown({ shouldBeTransparent = false, mobi
           data-template-ignore="true"
           aria-label="Open notifications"
           className={cn(
-            'relative inline-flex h-8 w-8 items-center justify-center rounded-full transition-opacity hover:opacity-80 focus:outline-none',
-            shouldBeTransparent ? 'text-white' : 'text-current'
+            'relative flex h-10 w-10 items-center justify-center rounded-full transition-all hover:bg-slate-100/50 focus:outline-none',
+            shouldBeTransparent ? 'text-white hover:bg-white/10' : 'text-current'
           )}
         >
           <Bell className="h-5 w-5" />
@@ -229,10 +262,10 @@ export default function NotificationDropdown({ shouldBeTransparent = false, mobi
                           !notification.isRead && 'font-semibold'
                         )}
                       >
-                        {notification.subject}
+                        {notification.title}
                       </p>
-                      {notification.body ? (
-                        <p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">{notification.body}</p>
+                      {notification.message ? (
+                        <p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">{notification.message}</p>
                       ) : null}
                     </div>
                     {!notification.isRead && (
@@ -246,7 +279,7 @@ export default function NotificationDropdown({ shouldBeTransparent = false, mobi
                   </div>
                   {notification.dateCreatedIso ? (
                     <p className="mt-2 text-xs text-muted-foreground">
-                      {formatNotificationDate(notification.dateCreatedIso)}
+                      {hasMounted ? formatNotificationDate(notification.dateCreatedIso) : ''}
                     </p>
                   ) : null}
                 </div>

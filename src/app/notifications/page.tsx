@@ -14,7 +14,14 @@ import {
 import { cn } from '@/lib/utils';
 
 function formatNotificationDate(dateIso: string) {
-  const value = new Date(dateIso);
+  if (!dateIso) return '';
+  
+  // Ensure the date is treated as UTC if it doesn't have a timezone indicator
+  const utcDateStr = dateIso.endsWith('Z') || dateIso.includes('+') 
+    ? dateIso 
+    : `${dateIso.replace(' ', 'T')}Z`;
+    
+  const value = new Date(utcDateStr);
 
   if (Number.isNaN(value.getTime())) {
     return '';
@@ -38,6 +45,11 @@ export default function NotificationsPage() {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const loadNotifications = useCallback(async () => {
     setIsLoadingNotifications(true);
@@ -242,13 +254,15 @@ export default function NotificationsPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-4">
                         <h2 className={cn('text-base font-semibold text-slate-900', notification.isRead && 'font-medium')}>
-                          {notification.subject}
+                          {notification.title}
                         </h2>
-                        <span className="shrink-0 text-xs text-slate-500">{formatNotificationDate(notification.dateCreatedIso)}</span>
+                        <span className="shrink-0 text-xs text-slate-500">
+                          {hasMounted ? formatNotificationDate(notification.dateCreatedIso) : ''}
+                        </span>
                       </div>
-                      {notification.body ? (
+                      {notification.message ? (
                         <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-600">
-                          {notification.body}
+                          {notification.message}
                         </p>
                       ) : null}
                     </div>

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { X, Loader2 } from "lucide-react"
 import { IDependent, IPassengerType, CreateDependentDto } from "@/models"
 import BirthDatePicker from "../../ui/BirthDatePicker"
-import { parseISO, isValid, differenceInYears } from "date-fns"
+import { parseISO, isValid, differenceInYears, format } from "date-fns"
 import CountryCodeSelector, { CountryData } from "../../ui/CountryCodeSelector"
 import { defaultCountries, parseCountry } from "react-international-phone"
 import NationalitySelector from "../../ui/NationalitySelector"
@@ -398,9 +398,9 @@ export default function DependentForm({
                                     const current = formData.birthday ? parseISO(formData.birthday) : undefined;
                                     const newDate = typeof dateAction === 'function' ? dateAction(current) : dateAction;
                                     if (newDate && isValid(newDate)) {
-                                        const iso = newDate.toISOString();
-                                        handleChange('birthday', iso);
-                                        autoSelectByBirthday(iso);
+                                        const dateStr = format(newDate, "yyyy-MM-dd");
+                                        handleChange('birthday', dateStr);
+                                        autoSelectByBirthday(dateStr);
                                     }
                                 }}
                             validationErrors={{}}
