@@ -37,9 +37,6 @@ export default function RoutesBoardingPass({ routes, theme }: RoutesTemplateProp
 
         <ul className="flex flex-col gap-3">
           {items.map((route, i) => {
-            const parts = (route.route || "").split(/\s*(?:to|→|-|–)\s*/i);
-            const origin = parts[0] || route.route || "";
-            const destination = parts[1] || "";
             return (
               <li
                 key={route.id || i}
@@ -65,11 +62,11 @@ export default function RoutesBoardingPass({ routes, theme }: RoutesTemplateProp
                     </div>
                     <div className="flex items-baseline gap-3 flex-wrap">
                       <span className="font-black text-lg sm:text-2xl tracking-tight" style={{ color: theme.text }}>
-                        {portCode(origin)}
+                        ORIGIN
                       </span>
                       <span className="text-xl opacity-30">→</span>
                       <span className="font-black text-lg sm:text-2xl tracking-tight" style={{ color: theme.text }}>
-                        {portCode(destination) || "•••"}
+                        {portCode(route.route) || "•••"}
                       </span>
                       <span className="ml-2 text-sm opacity-60 truncate max-w-[50vw]" style={{ color: theme.text }}>
                         {route.route}

@@ -14,12 +14,14 @@ interface HeaderGlassmorphicProps {
   navItems: any[];
   scrollToElement: (id: string) => void;
   theme: IThemeSettings & { text: string; surfaceAlt: string };
+  useFloatingBehavior?: boolean;
 }
 
 export default function HeaderGlassmorphic({
   navItems,
   scrollToElement,
   theme,
+  useFloatingBehavior = true,
 }: HeaderGlassmorphicProps) {
   const branding = useBranding();
   const { currentUser } = useAuth();
@@ -39,8 +41,10 @@ export default function HeaderGlassmorphic({
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-[200] transition-all duration-500 px-4 sm:px-6 lg:px-10 py-4",
-          scrolled ? "py-3" : "py-6"
+          "z-[200] transition-all duration-500 px-4 sm:px-6 lg:px-10 py-4",
+          useFloatingBehavior ? "fixed left-0 right-0 top-0" : "relative",
+          useFloatingBehavior && (scrolled ? "py-3" : "py-6"),
+          !useFloatingBehavior && "py-4"
         )}
       >
         <div 

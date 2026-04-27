@@ -29,7 +29,7 @@ const Navbar = ({
 }: NavbarProps) => {
   const pathname = usePathname();
   const router = useRouter();
-  const [activeNav, setActiveNav] = useState('Book');
+  const [activeNav, setActiveNav] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const branding = useBranding() || initialBranding;
@@ -37,6 +37,23 @@ const Navbar = ({
   const { currentUser, logout } = useAuth();
 
   const filteredNavItems = useMemo(() => getFilteredLandingNavItems(headerSection), [headerSection]);
+
+  useEffect(() => {
+    const normalizePath = (value: string) => value.replace(/\/+$/, '') || '/';
+    const currentPath = normalizePath(pathname || '/');
+
+    if (currentPath === '/') {
+      setActiveNav('Book');
+      return;
+    }
+
+    const activeRouteItem = filteredNavItems.find((item) => {
+      if (item.trigger.toLowerCase() !== 'redirect' || !item.redirect_url) return false;
+      return normalizePath(item.redirect_url) === currentPath;
+    });
+
+    setActiveNav(activeRouteItem?.id || '');
+  }, [filteredNavItems, pathname]);
 
   // Handle scroll lock when menu is open
   useEffect(() => {
@@ -113,6 +130,7 @@ const Navbar = ({
                     <Link
                       key={item.id}
                       href={item.redirect_url}
+                      onClick={() => setActiveNav(item.id)}
                       className={`text-sm lg:text-md font-medium transition-all duration-300 ${activeNav === item.id
                         ? 'border-b-2 border-current'
                         : 'hover:border-b-2 border-transparent hover:border-current'
@@ -205,7 +223,10 @@ const Navbar = ({
                     <Link
                       key={item.id}
                       href={item.redirect_url}
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={() => {
+                        setActiveNav(item.id);
+                        setIsMenuOpen(false);
+                      }}
                       className={`block w-full text-left px-3 py-4 text-xl font-medium border-b border-gray-100 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'
                         } ${activeNav === item.id ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}
                     >

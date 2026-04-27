@@ -61,6 +61,16 @@ import FooterCentered from "./templates/footer/FooterCentered";
 import FooterPremium from "./templates/footer/FooterPremium";
 import FooterProfessional from "./templates/footer/FooterProfessional";
 import FooterGlassmorphic from "./templates/footer/FooterGlassmorphic";
+import {
+  BookingIslandPremium,
+  FooterIslandPremium,
+  GetToKnowIslandPremium,
+  HeroIslandPremium,
+  PartnersIslandPremium,
+  PromotionsIslandPremium,
+  RoutesIslandPremium,
+  WhyChooseIslandPremium,
+} from "./templates/island-premium/IslandPremiumLandingSections";
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { cn } from "@/lib/utils";
@@ -393,6 +403,16 @@ export default function LandingPageBuilder({
                   tripSearchEnabledOverride={true}
                 />
               );
+            } else if (section.variant === "island-premium") {
+              content = (
+                <HeroIslandPremium
+                  heroSection={heroSection as any}
+                  theme={theme}
+                  brandName={landingBranding?.brand_name}
+                  showNavbar={layout.showNavbarInHero}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
+                />
+              );
             } else if (section.variant === "concierge") {
               content = (
                 <HeroConcierge
@@ -491,11 +511,15 @@ export default function LandingPageBuilder({
               content = <BookingGlassmorphicOverlay theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             } else if (section.variant === "boarding-pass") {
               content = <BookingBoardingPass theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "island-premium") {
+              content = <BookingIslandPremium theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             }
             break;
           case "promotions":
             if (section.variant === "grid" || section.variant === "professional-banner") {
               content = <PromotionsGrid promos={(promotions as any) ?? []} theme={theme} />;
+            } else if (section.variant === "island-premium") {
+              content = <PromotionsIslandPremium promos={(promotions as any) ?? []} theme={theme} />;
             } else if (section.variant === "concierge-mosaic") {
               content = <PromotionsConcierge promos={(promotions as any) ?? []} theme={theme} />;
             } else if (section.variant === "banner") {
@@ -515,6 +539,8 @@ export default function LandingPageBuilder({
               content = <RoutesModernGrid routes={(routes as any) ?? []} theme={theme} />;
             } else if (section.variant === "list") {
               content = <RoutesMinimalList routes={(routes as any) ?? []} theme={theme} />;
+            } else if (section.variant === "island-premium") {
+              content = <RoutesIslandPremium routes={(routes as any) ?? []} theme={theme} />;
             } else if (section.variant === "editorial-grid" || section.variant === "concierge") {
               content = <RoutesEditorialGrid routes={(routes as any) ?? []} theme={theme} />;
             } else if (section.variant === "glassmorphic") {
@@ -532,6 +558,8 @@ export default function LandingPageBuilder({
               content = <WhyChooseGrid section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else if (section.variant === "minimal") {
               content = <WhyChooseMinimal section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            } else if (section.variant === "island-premium") {
+              content = <WhyChooseIslandPremium section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else if (section.variant === "concierge") {
               content = <WhyChooseConcierge section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else if (section.variant === "glassmorphic") {
@@ -545,6 +573,8 @@ export default function LandingPageBuilder({
           case "get_to_know":
             if (section.variant === "timeline" && getToKnowMain && getToKnowMission && getToKnowVision) {
               content = <GetToKnowTimeline main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+            } else if (section.variant === "island-premium" && getToKnowMain && getToKnowMission && getToKnowVision) {
+              content = <GetToKnowIslandPremium main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             } else if ((section.variant === "modern" || section.variant === "professional-panel") && getToKnowMain && getToKnowMission && getToKnowVision) {
               content = <GetToKnowModern main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             } else if (section.variant === "center" && getToKnowMain && getToKnowMission && getToKnowVision) {
@@ -562,6 +592,8 @@ export default function LandingPageBuilder({
               content = <PartnersStrip partners={(partners as any) ?? []} theme={theme} />;
             } else if (section.variant === "marquee") {
               content = <PartnersMarquee partners={(partners as any) ?? []} theme={theme} />;
+            } else if (section.variant === "island-premium") {
+              content = <PartnersIslandPremium partners={(partners as any) ?? []} theme={theme} />;
             } else if (section.variant === "grid-premium") {
               content = <PartnersGridPremium partners={(partners as any) ?? []} theme={theme} />;
             } else if (section.variant === "glassmorphic") {
@@ -601,6 +633,7 @@ export default function LandingPageBuilder({
           {layout.footerSection.variant === "centered" && <FooterCentered key={layout.footerSection.id} theme={theme} />}
           {layout.footerSection.variant === "premium" && <FooterPremium key={layout.footerSection.id} theme={theme} />}
           {layout.footerSection.variant === "professional-anchored" && <FooterProfessional key={layout.footerSection.id} theme={theme} />}
+          {layout.footerSection.variant === "island-premium" && <FooterIslandPremium key={layout.footerSection.id} theme={theme} brandName={landingBranding?.brand_name} />}
           {layout.footerSection.variant === "glassmorphic" && <FooterGlassmorphic key={layout.footerSection.id} theme={theme} />}
           {layout.footerSection.variant === "boarding-pass" && <FooterBoardingPass key={layout.footerSection.id} theme={theme} />}
           {layout.footerSection.variant === "default" && <Footer key={layout.footerSection.id} />}

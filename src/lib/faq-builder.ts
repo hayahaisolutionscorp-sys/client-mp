@@ -22,8 +22,8 @@ export const FAQ_SECTION_LABELS: Record<FaqSectionKey, string> = {
 };
 
 export const FAQ_VARIANTS: Record<FaqSectionKey, string[]> = {
-  hero: ["default", "minimal", "centered", "gradient", "compact", "glassmorphic", "boarding-pass"],
-  faq_list: ["default", "accordion", "cards", "compact", "minimal", "glassmorphic", "boarding-pass"],
+  hero: ["default", "minimal", "centered", "gradient", "compact", "glassmorphic", "boarding-pass", "island-premium"],
+  faq_list: ["default", "accordion", "cards", "compact", "minimal", "glassmorphic", "boarding-pass", "island-premium"],
 };
 
 const FAQ_SECTION_DEFINITIONS = FAQ_SECTION_KEYS.map((sectionKey) => ({
@@ -63,6 +63,10 @@ const FAQ_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
   "boarding-pass": {
     hero: { enabled: true, variant: "boarding-pass" },
     faq_list: { enabled: true, variant: "boarding-pass" },
+  },
+  "island-premium": {
+    hero: { enabled: true, variant: "island-premium" },
+    faq_list: { enabled: true, variant: "island-premium" },
   },
 };
 

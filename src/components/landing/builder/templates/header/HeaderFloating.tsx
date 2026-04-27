@@ -7,6 +7,7 @@ import UserDropdown from "@/components/UserDropdown";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import { useAuth } from "@/contexts/AuthContexts";
 import { useBranding } from "@/hooks/branding";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   id: string;
@@ -19,12 +20,14 @@ interface HeaderFloatingProps {
   navItems: NavItem[];
   scrollToElement: (id: string) => void;
   theme: any;
+  useFloatingBehavior?: boolean;
 }
 
 export default function HeaderFloating({
   navItems,
   scrollToElement,
   theme,
+  useFloatingBehavior = true,
 }: HeaderFloatingProps) {
   const branding = useBranding();
   const { currentUser } = useAuth();
@@ -40,7 +43,7 @@ export default function HeaderFloating({
 
   return (
     <>
-      <div className="fixed top-6 left-0 right-0 z-[200] w-full px-4 sm:px-6 lg:px-10">
+      <div className={cn("z-[200] w-full px-4 sm:px-6 lg:px-10", useFloatingBehavior ? "fixed left-0 right-0 top-6" : "relative pt-4")}>
         <header 
             className="flex items-center justify-between gap-4 rounded-2xl border border-white/20 px-6 py-4 shadow-lg backdrop-blur-md transition-all w-full max-w-7xl mx-auto"
             style={{ backgroundColor: `${theme.surface}B3` }} // ~70% opacity

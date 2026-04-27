@@ -22,8 +22,8 @@ export const CONTACT_SECTION_LABELS: Record<ContactSectionKey, string> = {
 };
 
 export const CONTACT_VARIANTS: Record<ContactSectionKey, string[]> = {
-  hero: ["default", "minimal", "centered", "gradient", "split", "glassmorphic", "boarding-pass"],
-  contact_form: ["default", "side-by-side", "minimal", "floating", "premium", "glassmorphic", "boarding-pass"],
+  hero: ["default", "minimal", "centered", "gradient", "split", "glassmorphic", "boarding-pass", "island-premium"],
+  contact_form: ["default", "side-by-side", "minimal", "floating", "premium", "glassmorphic", "boarding-pass", "island-premium"],
 };
 
 const CONTACT_SECTION_DEFINITIONS = CONTACT_SECTION_KEYS.map((sectionKey) => ({
@@ -63,6 +63,10 @@ const CONTACT_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
   "boarding-pass": {
     hero: { enabled: true, variant: "boarding-pass" },
     contact_form: { enabled: true, variant: "boarding-pass" },
+  },
+  "island-premium": {
+    hero: { enabled: true, variant: "island-premium" },
+    contact_form: { enabled: true, variant: "island-premium" },
   },
 };
 

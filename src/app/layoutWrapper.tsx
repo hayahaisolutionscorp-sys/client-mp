@@ -10,6 +10,7 @@ import FooterCentered from '@/components/landing/builder/templates/footer/Footer
 import FooterPremium from '@/components/landing/builder/templates/footer/FooterPremium';
 import FooterGlassmorphic from '@/components/landing/builder/templates/footer/FooterGlassmorphic';
 import FooterBoardingPass from '@/components/landing/builder/templates/footer/FooterBoardingPass';
+import { FooterIslandPremium } from '@/components/landing/builder/templates/island-premium/IslandPremiumLandingSections';
 import { useLandingBuilder } from '@/hooks/landing-builder';
 import { useBranding } from '@/hooks/branding';
 import { createBuilderTheme } from '@/components/landing/builder/theme';
@@ -52,6 +53,13 @@ export default function LayoutWrapper({
     pathname === '/booking/seat-selection';
   const isProfilePage = pathname === '/profile';
   const shouldRenderChrome = !hideLayout && pathname !== '/';
+  const isMarketingPage =
+    pathname === '/' ||
+    pathname === '/about-us' ||
+    pathname === '/contact-us' ||
+    pathname === '/faq' ||
+    pathname === '/press' ||
+    pathname === '/schedule-and-fares';
   const headerVariant =
     landingBuilder?.sections.find((section) => section.section_key === 'header')?.variant || 'default';
   const footerVariant =
@@ -62,25 +70,39 @@ export default function LayoutWrapper({
     fontStyle: builderTheme.fontFamily,
     fontTitle: builderTheme.fontFamilyTitle,
   };
-  const mainOffsetClass = shouldRenderChrome
-    ? headerVariant === 'floating' || headerVariant === 'glassmorphic' || headerVariant === 'boarding-pass'
-      ? 'pt-[120px]'
-      : headerVariant === 'professional-slate'
-        ? 'pt-4'
-        : ''
-    : '';
+  const isFloatingStyleVariant =
+    headerVariant === 'floating' ||
+    headerVariant === 'glassmorphic' ||
+    headerVariant === 'boarding-pass';
   const useBuilderLandingHeader =
     headerVariant === 'centered' ||
     headerVariant === 'floating' ||
     headerVariant === 'professional-slate' ||
     headerVariant === 'glassmorphic' ||
-    headerVariant === 'boarding-pass';
+    headerVariant === 'boarding-pass' ||
+    headerVariant === 'island-premium';
+  const useFloatingBehavior = isMarketingPage && isFloatingStyleVariant;
+  const mainOffsetClass =
+    shouldRenderChrome && useBuilderLandingHeader
+      ? useFloatingBehavior
+        ? 'pt-[120px]'
+        : headerVariant === 'professional-slate'
+          ? 'pt-4'
+          : ''
+      : '';
+  const destinationStickyTop =
+    shouldRenderChrome &&
+    useBuilderLandingHeader &&
+    useFloatingBehavior
+      ? '120px'
+      : '0px';
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {shouldRenderChrome && useBuilderLandingHeader ? (
         <BuilderLandingHeader
           variant={headerVariant}
+          useFloatingBehavior={useFloatingBehavior}
           theme={theme}
           headerSectionOverride={initialHeaderSection}
         />
@@ -88,15 +110,21 @@ export default function LayoutWrapper({
       {shouldRenderChrome && !useBuilderLandingHeader ? (
         <Navbar showLandingNav initialHeaderSection={initialHeaderSection} />
       ) : null}
-      <main className={cn("wl-brand-radius-scope flex-1", mainOffsetClass)}>{children}</main>
-      {shouldRenderChrome && !isProfilePage && footerVariant === 'centered' ? <FooterCentered theme={theme} /> : null}
-      {shouldRenderChrome && !isProfilePage && footerVariant === 'premium' ? <FooterPremium theme={theme} /> : null}
-      {shouldRenderChrome && !isProfilePage && footerVariant === 'glassmorphic' ? <FooterGlassmorphic theme={theme} /> : null}
-      {shouldRenderChrome && !isProfilePage && footerVariant === 'boarding-pass' ? <FooterBoardingPass theme={theme} /> : null}
-      {shouldRenderChrome && !isProfilePage && footerVariant === 'default-no-banner' ? (
+      <main
+        className={cn("wl-brand-radius-scope flex-1", mainOffsetClass)}
+        style={{ '--destination-sticky-top': destinationStickyTop } as React.CSSProperties}
+      >
+        {children}
+      </main>
+      {shouldRenderChrome && footerVariant === 'centered' ? <FooterCentered theme={theme} /> : null}
+      {shouldRenderChrome && footerVariant === 'premium' ? <FooterPremium theme={theme} /> : null}
+      {shouldRenderChrome && footerVariant === 'glassmorphic' ? <FooterGlassmorphic theme={theme} /> : null}
+      {shouldRenderChrome && footerVariant === 'boarding-pass' ? <FooterBoardingPass theme={theme} /> : null}
+      {shouldRenderChrome && footerVariant === 'island-premium' ? <FooterIslandPremium theme={theme} /> : null}
+      {shouldRenderChrome && footerVariant === 'default-no-banner' ? (
         <Footer showSubscribeBanner={false} />
       ) : null}
-      {shouldRenderChrome && !isProfilePage && !['centered', 'premium', 'glassmorphic', 'boarding-pass', 'default-no-banner'].includes(footerVariant) ? (
+      {shouldRenderChrome && !['centered', 'premium', 'glassmorphic', 'boarding-pass', 'island-premium', 'default-no-banner'].includes(footerVariant) ? (
         <Footer />
       ) : null}
       <ProactiveRefreshScheduler />

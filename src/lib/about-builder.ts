@@ -25,11 +25,11 @@ export const ABOUT_SECTION_LABELS: Record<AboutSectionKey, string> = {
 };
 
 export const ABOUT_VARIANTS: Record<AboutSectionKey, string[]> = {
-  hero: ["default", "split", "minimal", "overlay", "cards", "centered", "panorama", "glassmorphic", "boarding-pass"],
-  welcome: ["default", "spotlight", "highlight", "quote", "side-accent", "glass", "glassmorphic", "boarding-pass"],
-  our_story: ["default", "timeline", "milestone", "narrative", "journey", "chronicle", "glassmorphic", "boarding-pass"],
-  our_expertise: ["default", "checklist", "grid", "showcase", "badges", "feature-cards", "glassmorphic", "boarding-pass"],
-  core_values: ["default", "pillars", "icon-grid", "timeline", "accordion", "compact", "showcase", "glassmorphic", "boarding-pass"],
+  hero: ["default", "split", "minimal", "overlay", "cards", "centered", "panorama", "glassmorphic", "boarding-pass", "island-premium"],
+  welcome: ["default", "spotlight", "highlight", "quote", "side-accent", "glass", "glassmorphic", "boarding-pass", "island-premium"],
+  our_story: ["default", "timeline", "milestone", "narrative", "journey", "chronicle", "glassmorphic", "boarding-pass", "island-premium"],
+  our_expertise: ["default", "checklist", "grid", "showcase", "badges", "feature-cards", "glassmorphic", "boarding-pass", "island-premium"],
+  core_values: ["default", "pillars", "icon-grid", "timeline", "accordion", "compact", "showcase", "glassmorphic", "boarding-pass", "island-premium"],
 };
 
 const ABOUT_SECTION_DEFINITIONS = ABOUT_SECTION_KEYS.map((sectionKey) => ({
@@ -90,6 +90,13 @@ const ABOUT_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
     our_story: { enabled: true, variant: "boarding-pass" },
     our_expertise: { enabled: true, variant: "boarding-pass" },
     core_values: { enabled: true, variant: "boarding-pass" },
+  },
+  "island-premium": {
+    hero: { enabled: true, variant: "island-premium" },
+    welcome: { enabled: true, variant: "island-premium" },
+    our_story: { enabled: true, variant: "island-premium" },
+    our_expertise: { enabled: true, variant: "island-premium" },
+    core_values: { enabled: true, variant: "island-premium" },
   },
 };
 

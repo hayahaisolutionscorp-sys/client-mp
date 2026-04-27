@@ -14,12 +14,14 @@ interface HeaderBoardingPassProps {
   navItems: any[];
   scrollToElement: (id: string) => void;
   theme: IThemeSettings & { text: string; surfaceAlt: string };
+  useFloatingBehavior?: boolean;
 }
 
 export default function HeaderBoardingPass({
   navItems,
   scrollToElement,
   theme,
+  useFloatingBehavior = true,
 }: HeaderBoardingPassProps) {
   const branding = useBranding();
   const { currentUser } = useAuth();
@@ -52,8 +54,10 @@ export default function HeaderBoardingPass({
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-[200] transition-all duration-300 px-3 sm:px-4 lg:px-6",
-          scrolled ? "pt-2" : "pt-4"
+          "z-[200] transition-all duration-300 px-3 sm:px-4 lg:px-6",
+          useFloatingBehavior ? "fixed left-0 right-0 top-0" : "relative",
+          useFloatingBehavior && (scrolled ? "pt-2" : "pt-4"),
+          !useFloatingBehavior && "pt-4"
         )}
       >
         <div

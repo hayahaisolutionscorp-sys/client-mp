@@ -17,7 +17,7 @@ import { UploadService } from "@/services/upload.service"
 import { IVerification } from "@/models"
 import { useThemeSettings } from "@/hooks/theme-settings"
 import { parseISO, isValid as isValidDateFn } from "date-fns"
-import DatePicker from "@/components/ui/DatePicker"
+import DatePicker from "@/components/ui/Datepicker"
 
 const steps = [
     { id: 1, title: "ID Information" },

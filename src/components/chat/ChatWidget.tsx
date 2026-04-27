@@ -208,10 +208,17 @@ export default function ChatWidget({ agentId, threadId, tenantId = 1, builderCon
     };
     customClass = 'hayahai-minimal-light shadow-sm border border-gray-200';
   }
+  const widgetClassName = `hayahai-floating-cta ${customClass}`.trim();
 
   return (
     <div ref={wrapperRef}>
       <style>{`
+        /* Keep floating CTA above all app chrome */
+        .hayahai-floating-cta > button,
+        .hayahai-floating-cta > div {
+          z-index: 3000 !important;
+        }
+
         /* Modern Dark Layout & Design Overrides */
         .hayahai-modern-dark > div {
           border-radius: 12px !important;
@@ -346,7 +353,7 @@ export default function ChatWidget({ agentId, threadId, tenantId = 1, builderCon
         poweredByText="Powered by HayahAI"
         subtitle="Ask about trip schedules, ticket prices, or booking assistance."
         theme={widgetTheme}
-        className={customClass}
+        className={widgetClassName}
       />
     </div>
   );

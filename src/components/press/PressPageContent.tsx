@@ -48,6 +48,32 @@ function formatPublishDate(value: string | null) {
   });
 }
 
+function toPressExcerpt(content: unknown): string {
+  if (!content) return "";
+  if (typeof content === "string") return content;
+
+  const collectText = (node: unknown): string[] => {
+    if (!node || typeof node !== "object") return [];
+    const current = node as { text?: unknown; content?: unknown };
+    const texts: string[] = [];
+
+    if (typeof current.text === "string") {
+      texts.push(current.text);
+    }
+
+    if (Array.isArray(current.content)) {
+      current.content.forEach((child) => {
+        texts.push(...collectText(child));
+      });
+    }
+
+    return texts;
+  };
+
+  const text = collectText(content).join(" ").replace(/\s+/g, " ").trim();
+  return text;
+}
+
 export function PressPageContent({
   pressPage,
   sections,
@@ -235,6 +261,24 @@ export function PressPageContent({
                     </div>
                   </section>
                 );
+              } else if (heroVariant === "island-premium") {
+                sectionContent = (
+                  <section className="grid overflow-hidden rounded-[2rem] p-6 shadow-[0_24px_80px_-55px_rgba(8,47,73,0.45)] md:p-10 lg:grid-cols-[1fr_0.85fr]" style={{ backgroundColor: surfaceAltColor }}>
+                    <div className="flex flex-col justify-center">
+                      <h1 className="text-4xl font-semibold leading-tight md:text-5xl" style={{ color: textOnSurface }}>
+                        {hero?.title || pressPage?.title || "Press Releases"}
+                      </h1>
+                      <p className="mt-4 max-w-2xl text-sm leading-7" style={{ color: mutedOnSurface }}>
+                        {hero?.description || `Stay updated with the latest news and announcements from ${branding?.brand_name || "our team"}.`}
+                      </p>
+                    </div>
+                    {hero?.bg_url ? (
+                      <div className="relative mt-6 min-h-72 overflow-hidden rounded-[1.5rem] lg:mt-0">
+                        <Image src={hero.bg_url} alt={hero.bg_alt || hero?.title || ""} fill className="object-cover" />
+                      </div>
+                    ) : null}
+                  </section>
+                );
               } else if (heroVariant === "centered") {
                 sectionContent = (
                   <section
@@ -405,7 +449,38 @@ export function PressPageContent({
                               <span className="text-xs uppercase tracking-[0.18em]" style={{ color: mutedOnSurface }}>{formatPublishDate(item.publish_date)}</span>
                             </div>
                             <p className="text-sm" style={{ color: mutedOnSurface }}>
-                              {item.content || "Read the full update."}
+                              {toPressExcerpt(item.content) || "Read the full update."}
+                            </p>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                );
+              } else if (pressListVariant === "island-premium") {
+                sectionContent = (
+                  <section className="rounded-[2rem] p-5 shadow-[0_24px_80px_-55px_rgba(8,47,73,0.45)] md:p-8" style={{ backgroundColor: surfaceColor }}>
+                    <h2 className="text-3xl font-semibold" style={{ color: textOnSurface }}>
+                      {pressListSection?.title || "News & Updates"}
+                    </h2>
+                    {pressListSection?.description ? <p className="mt-3 max-w-3xl text-sm leading-7" style={{ color: mutedOnSurface }}>{pressListSection.description}</p> : null}
+                    {orderedPress.length === 0 ? (
+                      <div className="mt-8 rounded-[1.5rem] border border-dashed px-6 py-10 text-center text-sm" style={{ borderColor: `${primaryColor}40`, backgroundColor: surfaceAltColor, color: mutedOnSurface }}>
+                        No published news items yet.
+                      </div>
+                    ) : (
+                      <div className="mt-8 grid gap-4 md:grid-cols-2">
+                        {orderedPress.map((item) => (
+                          <Link
+                            key={item.id}
+                            href={`/press/${item.slug || item.id}`}
+                            className="rounded-[1.5rem] border p-5 transition-transform hover:-translate-y-1"
+                            style={{ borderColor: `${primaryColor}26`, backgroundColor: surfaceAltColor }}
+                          >
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: primaryColor }}>{formatPublishDate(item.publish_date)}</p>
+                            <h3 className="mt-3 text-xl font-semibold" style={{ color: textOnSurface }}>{item.title}</h3>
+                            <p className="mt-3 line-clamp-3 text-sm leading-6" style={{ color: mutedOnSurface }}>
+                              {toPressExcerpt(item.content) || "Read the full update."}
                             </p>
                           </Link>
                         ))}
@@ -506,9 +581,9 @@ export function PressPageContent({
                               <h3 className="text-lg font-black tracking-tight leading-snug line-clamp-2" style={{ color: textOnSurface }}>
                                 {item.title}
                               </h3>
-                              {item.content && (
+                              {toPressExcerpt(item.content) && (
                                 <p className="text-sm leading-relaxed line-clamp-2 opacity-70" style={{ color: textOnSurface }}>
-                                  {item.content}
+                                  {toPressExcerpt(item.content)}
                                 </p>
                               )}
                               <div className="mt-1 pt-3 border-t-2 border-dashed flex items-center justify-between" style={{ borderColor: 'rgba(15,23,42,0.18)' }}>

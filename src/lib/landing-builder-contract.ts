@@ -110,6 +110,18 @@ export const LANDING_TEMPLATE_PRESET_SECTION_DEFAULTS: Record<
     footer: { enabled: true, variant: "boarding-pass" },
     floating_cta: { enabled: true, variant: "boarding-pass" },
   },
+  "island-premium": {
+    header: { enabled: true, variant: "island-premium" },
+    hero: { enabled: true, variant: "island-premium" },
+    booking: { enabled: true, variant: "island-premium" },
+    promotions: { enabled: true, variant: "island-premium" },
+    routes: { enabled: true, variant: "island-premium" },
+    why_choose: { enabled: true, variant: "island-premium" },
+    get_to_know: { enabled: true, variant: "island-premium" },
+    partners: { enabled: true, variant: "island-premium" },
+    footer: { enabled: true, variant: "island-premium" },
+    floating_cta: { enabled: true, variant: "island-premium" },
+  },
 };
 
 export const LANDING_TEMPLATE_PRESETS: LandingTemplatePresetOption[] = [
@@ -179,6 +191,17 @@ export const LANDING_TEMPLATE_PRESETS: LandingTemplatePresetOption[] = [
       surfaceClass: "bg-[#FAF7F0]",
     },
   },
+  {
+    key: "island-premium",
+    label: "Island Premium",
+    description: "Warm coastal luxury with soft gradients, airy mobile-first cards, and polished travel details.",
+    tokens: {
+      fontFamily: "Outfit",
+      fontFamilyTitle: "Playfair Display",
+      radiusClass: "rounded-[2rem]",
+      surfaceClass: "bg-[#FFF8EC]",
+    },
+  },
 ];
 
 export const LANDING_SECTION_LABELS: Record<LandingSectionKey, string> = {
@@ -195,14 +218,14 @@ export const LANDING_SECTION_LABELS: Record<LandingSectionKey, string> = {
 };
 
 export const LANDING_VARIANT_KEYS: Record<LandingSectionKey, string[]> = {
-  header: ["default", "centered", "floating", "professional-slate", "glassmorphic", "boarding-pass"],
-  hero: ["default", "split", "minimal", "cards", "professional-editorial", "glassmorphic", "boarding-pass"],
-  booking: ["default", "overlay", "banner", "card", "compact-dark", "professional-card", "glassmorphic", "glassmorphic-overlay", "boarding-pass"],
-  promotions: ["default", "grid", "banner", "professional-banner", "glassmorphic", "boarding-pass"],
-  routes: ["default", "carousel", "cards", "list", "professional-wall", "glassmorphic", "boarding-pass"],
-  why_choose: ["default", "steps", "grid", "minimal", "professional-stack", "glassmorphic", "boarding-pass"],
-  get_to_know: ["default", "timeline", "modern", "center", "professional-panel", "glassmorphic", "boarding-pass"],
-  partners: ["default", "strip", "marquee", "grid-premium", "professional-rail", "glassmorphic", "boarding-pass"],
-  footer: ["default", "default-no-banner", "centered", "premium", "professional-anchored", "glassmorphic", "boarding-pass"],
-  floating_cta: ["default", "modern-dark", "minimal-light", "professional-pill", "glassmorphic", "boarding-pass"],
+  header: ["default", "centered", "floating", "professional-slate", "glassmorphic", "boarding-pass", "island-premium"],
+  hero: ["default", "split", "minimal", "cards", "professional-editorial", "glassmorphic", "boarding-pass", "island-premium"],
+  booking: ["default", "overlay", "banner", "card", "compact-dark", "professional-card", "glassmorphic", "glassmorphic-overlay", "boarding-pass", "island-premium"],
+  promotions: ["default", "grid", "banner", "professional-banner", "glassmorphic", "boarding-pass", "island-premium"],
+  routes: ["default", "carousel", "cards", "list", "professional-wall", "glassmorphic", "boarding-pass", "island-premium"],
+  why_choose: ["default", "steps", "grid", "minimal", "professional-stack", "glassmorphic", "boarding-pass", "island-premium"],
+  get_to_know: ["default", "timeline", "modern", "center", "professional-panel", "glassmorphic", "boarding-pass", "island-premium"],
+  partners: ["default", "strip", "marquee", "grid-premium", "professional-rail", "glassmorphic", "boarding-pass", "island-premium"],
+  footer: ["default", "default-no-banner", "centered", "premium", "professional-anchored", "glassmorphic", "boarding-pass", "island-premium"],
+  floating_cta: ["default", "modern-dark", "minimal-light", "professional-pill", "glassmorphic", "boarding-pass", "island-premium"],
 };

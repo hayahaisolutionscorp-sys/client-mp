@@ -161,6 +161,7 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
   const formSection = builderConfig.sections.find((section) => section.section_key === 'form');
   const sidebarSection = builderConfig.sections.find((section) => section.section_key === 'sidebar');
   const heroSection = builderConfig.sections.find((section) => section.section_key === 'hero');
+  const footerSection = builderConfig.sections.find((section) => section.section_key === 'footer');
   const layoutVariant = builderConfig.page_variant || builderConfig.layout_variant || 'split-right';
   const layout = getLoginPageLayout(layoutVariant);
   const heroVariant = heroSection?.variant || 'default';
@@ -172,10 +173,12 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
   const isBrandImmersive = layout.shell === 'immersive';
   const isGlassmorphicBlur = layoutVariant === 'glassmorphic-blur';
   const isBoardingPass = layoutVariant === 'boarding-pass';
+  const isIslandPremium = layoutVariant === 'island-premium';
   const heroTextColor = isLeftLayout ? '#f8fafc' : textOnSurface;
   const heroMutedColor = isLeftLayout ? 'rgba(248,250,252,0.74)' : textOnSurfaceAlt;
   const brandName = resolvedBranding?.brand_name || 'Ayahay';
   const brandTagline = resolvedBranding?.tagline || resolvedBranding?.slogan || '';
+  const footerCopy = `${brandName} account access`;
   const brandRadiusClass = resolveBrandCornerRadiusClass(resolvedBranding, 'rounded-2xl');
   const bodyFontStack = formatCssFontStack(theme.fontFamily);
   const titleFontStack = formatCssFontStack(theme.fontFamilyTitle, theme.fontFamily);
@@ -188,17 +191,21 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
     step === 'verify'
       ? 'Enter your password'
       : loginPage?.title ||
-        (heroVariant === 'readable'
+        (isIslandPremium
+          ? 'Welcome back to island travel'
+          : heroVariant === 'readable'
           ? 'Welcome back to your account'
           : heroVariant === 'split'
             ? 'Welcome back'
             : heroVariant === 'minimal'
               ? 'Sign in'
-              : 'Sign in to continue');
+            : 'Sign in to continue');
   const heroDescription =
     step === 'verify'
       ? 'Complete your sign in to access your account.'
-      : heroVariant === 'readable'
+      : isIslandPremium
+        ? 'Sign in to manage your coastal trips, saved passengers, and booking history.'
+        : heroVariant === 'readable'
         ? 'Sign in with larger, clearer content to continue your account journey.'
         : heroVariant === 'minimal'
           ? 'Use your email to continue.'
@@ -207,7 +214,11 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
             : 'Continue using your email address or social login.';
 
   const sidebarToneVariant =
-    sidebarVariant === 'minimal' ? 'image' : sidebarVariant === 'clean' ? 'gradient' : sidebarVariant;
+    sidebarVariant === 'minimal'
+      ? 'image'
+      : sidebarVariant === 'clean'
+        ? 'gradient'
+        : sidebarVariant;
 
   const formMode = layout.formMode;
   const backHref = step === 'verify' ? '/login' : '/';
@@ -736,6 +747,90 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
     );
   }
 
+  if (isIslandPremium) {
+    return (
+      <main
+        className="wl-brand-radius-scope relative min-h-screen overflow-hidden px-4 py-6 md:px-6 md:py-8"
+        style={{
+          background: `radial-gradient(circle at 18% 12%, ${secondaryColor}30 0, transparent 30%), radial-gradient(circle at 82% 16%, #fbbf2440 0, transparent 28%), linear-gradient(180deg, #fff8ec 0%, ${surfaceColor} 100%)`,
+          color: textOnSurfaceAlt,
+          fontFamily: bodyFontStack,
+          ['--font-body' as string]: bodyFontStack,
+          ['--font-title' as string]: titleFontStack,
+          ...brandRadiusScopeStyle(resolvedBranding, 'rounded-2xl')
+        }}
+      >
+        <style dangerouslySetInnerHTML={{ __html: fullAnimationCSS }} />
+        <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col">
+          <Link href={backHref} className="mb-6 inline-flex items-center gap-2 text-sm font-medium" style={{ color: primaryColor }}>
+            <ArrowLeft className="h-4 w-4" />
+            {backLabel}
+          </Link>
+          <section className="grid flex-1 overflow-hidden rounded-[2rem] border border-white/80 bg-white/80 shadow-[0_28px_90px_-50px_rgba(8,47,73,0.45)] backdrop-blur md:grid-cols-[0.9fr_1.1fr]">
+            <div className="relative overflow-hidden bg-[#fff8ec] p-6 md:p-8">
+              <div className="absolute inset-0 opacity-80" style={{ background: `radial-gradient(circle at 25% 18%, ${primaryColor}24 0, transparent 32%), radial-gradient(circle at 80% 20%, #fbbf2438 0, transparent 28%)` }} />
+              <div className="relative z-10 flex h-full flex-col justify-between gap-8">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src={resolvedBranding?.logo?.dark || resolvedBranding?.logo?.light || '/assets/icons/Ayahay_blue_vertical.svg'}
+                    alt={`${brandName} Logo`}
+                    width={44}
+                    height={44}
+                    className="h-11 w-11 rounded-2xl bg-white object-contain p-2 shadow-sm"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">{brandName}</p>
+                    <p className="text-sm text-slate-500">Island Premium access</p>
+                  </div>
+                </div>
+                <AnimatedSection
+                  id="section-login_hero"
+                  className={cn(
+                    'space-y-4',
+                    loginHeroAnim && loginHeroAnim !== 'none' && `anim-section-login_hero`,
+                    activeSectionId === 'login_hero' && 'ring-4 ring-primary ring-offset-4 ring-opacity-50 rounded-lg relative z-50'
+                  )}
+                >
+                  <p className="w-fit rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
+                    {step === 'verify' ? 'Secure access' : 'Welcome back'}
+                  </p>
+                  <h1 className="text-4xl font-semibold leading-tight text-slate-950 md:text-5xl" style={heroFontStyle}>{heroTitle}</h1>
+                  <p className="max-w-md text-sm leading-7 text-slate-600">{heroDescription}</p>
+                </AnimatedSection>
+                {hasSidebar ? (
+                  <div className="rounded-[1.5rem] bg-white/76 p-5 shadow-sm">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">Island assurance</p>
+                    <p className="mt-3 text-lg font-semibold text-slate-950">
+                      Secure staff access for smoother coastal operations.
+                    </p>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">
+                      Manage bookings, schedules, and passenger support from a calm mobile-first login surface.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+            <div className="flex items-center justify-center p-5 md:p-8">
+              <AnimatedSection
+                id="section-login_form"
+                className={cn(
+                  'w-full max-w-md rounded-[1.75rem] border border-cyan-100 bg-[#fffaf2] p-5 shadow-[0_22px_70px_-45px_rgba(8,47,73,0.45)] md:p-7',
+                  loginFormAnim && loginFormAnim !== 'none' && `anim-section-login_form`,
+                  activeSectionId === 'login_form' && 'ring-4 ring-primary ring-offset-4 ring-opacity-50 relative z-50'
+                )}
+              >
+                {renderForm()}
+                {footerSection?.enabled !== false && (
+                  <p className="mt-6 text-center text-xs text-slate-500">{footerCopy}</p>
+                )}
+              </AnimatedSection>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
   if (isRoundedCanvas) {
     return (
       <main
@@ -753,7 +848,9 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
         <div
           className="pointer-events-none absolute inset-0 opacity-90"
           style={{
-            background: `radial-gradient(circle at 18% 18%, ${primaryColor}18 0, transparent 28%), radial-gradient(circle at 82% 16%, ${secondaryColor}18 0, transparent 30%), linear-gradient(180deg, ${surfaceAltColor} 0%, ${surfaceColor} 100%)`
+            background: isIslandPremium
+              ? `radial-gradient(circle at 18% 18%, ${primaryColor}24 0, transparent 30%), radial-gradient(circle at 84% 18%, #fbbf2440 0, transparent 28%), linear-gradient(180deg, #fff8ec 0%, ${surfaceColor} 100%)`
+              : `radial-gradient(circle at 18% 18%, ${primaryColor}18 0, transparent 28%), radial-gradient(circle at 82% 16%, ${secondaryColor}18 0, transparent 30%), linear-gradient(180deg, ${surfaceAltColor} 0%, ${surfaceColor} 100%)`
           }}
         />
         <div className="pointer-events-none absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(15,23,42,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.16)_1px,transparent_1px)] [background-size:40px_40px]" />
@@ -836,6 +933,7 @@ export function LoginPageBuilder({ loginPage, step, themeSettings, branding }: L
                       'border border-slate-200 bg-white p-5 shadow-sm md:p-7 transition-all duration-500',
                       formVariant === 'simple' && 'rounded-2xl p-4 md:p-5 shadow-none',
                       formVariant === 'spacious' && 'p-8 md:p-9',
+                      formVariant === 'island-premium' && 'border-white/80 bg-[#fffaf2] p-6 shadow-[0_20px_70px_-45px_rgba(8,47,73,0.45)] md:p-8',
                       brandRadiusClass,
                       loginFormAnim && loginFormAnim !== 'none' && `anim-section-login_form`,
                       activeSectionId === 'login_form' &&

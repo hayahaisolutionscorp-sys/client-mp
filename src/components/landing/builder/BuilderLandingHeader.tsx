@@ -22,12 +22,14 @@ import {
 
 interface BuilderLandingHeaderProps {
   variant: string;
+  useFloatingBehavior?: boolean;
   theme: IThemeSettings & { text: string; surfaceAlt: string };
   headerSectionOverride?: HeaderNavigationConfig | null;
 }
 
 export default function BuilderLandingHeader({
   variant,
+  useFloatingBehavior = true,
   theme,
   headerSectionOverride,
 }: BuilderLandingHeaderProps) {
@@ -60,6 +62,7 @@ export default function BuilderLandingHeader({
         navItems={navItems}
         scrollToElement={scrollToElement}
         theme={theme}
+        useFloatingBehavior={useFloatingBehavior}
       />
     );
   }
@@ -70,6 +73,7 @@ export default function BuilderLandingHeader({
         navItems={navItems}
         scrollToElement={scrollToElement}
         theme={theme}
+        useFloatingBehavior={useFloatingBehavior}
       />
     );
   }
@@ -80,6 +84,7 @@ export default function BuilderLandingHeader({
         navItems={navItems}
         scrollToElement={scrollToElement}
         theme={theme}
+        useFloatingBehavior={useFloatingBehavior}
       />
     );
   }
@@ -230,6 +235,120 @@ export default function BuilderLandingHeader({
                     href={item.redirect_url}
                     onClick={() => setIsMenuOpen(false)}
                     className="block w-full py-4 text-center text-lg font-medium transition-colors hover:opacity-80"
+                    style={{ color: theme.text }}
+                  >
+                    {item.name}
+                  </Link>
+                )
+              )}
+              <div className="flex w-full justify-center pt-6">
+                <UserDropdown shouldBeTransparent={false} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (variant === "island-premium") {
+    return (
+      <>
+        <header
+          className="relative z-[200] mx-3 mt-3 rounded-[30px] border px-4 py-3 shadow-[0_24px_80px_-45px_rgba(8,47,73,0.42)] backdrop-blur sm:mx-5 sm:mt-5 sm:px-5"
+          style={{
+            color: theme.text,
+            backgroundColor: `${theme.surfaceAlt}EB`,
+            borderColor: `${theme.primary}22`,
+          }}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <Link href="/" className="flex flex-shrink-0 items-center gap-3">
+              <BrandingLogo
+                logoSrc={logoSrc}
+                brandName={branding?.brand_name}
+                imageClassName="h-[38px] w-auto object-contain transition-all duration-300"
+                textClassName="text-lg font-semibold capitalize"
+                textStyle={{ color: theme.text, fontFamily: "var(--font-title)" }}
+              />
+            </Link>
+            <nav className="hidden flex-1 items-center justify-center gap-6 text-sm font-medium lg:flex" style={{ color: `${theme.text}CC` }}>
+              {navItems.map((item) =>
+                item.trigger.toLowerCase() === "scroll" ? (
+                  <button
+                    key={item.id}
+                    type="button"
+                    data-template-ignore="true"
+                    onClick={() => handleScroll(item.id)}
+                    className="transition-opacity hover:opacity-70"
+                  >
+                    {item.name}
+                  </button>
+                ) : (
+                  <Link key={item.id} href={item.redirect_url} className="transition-opacity hover:opacity-70">
+                    {item.name}
+                  </Link>
+                )
+              )}
+            </nav>
+            <div className="flex items-center gap-3">
+              <div className="hidden lg:flex">
+                <UserDropdown shouldBeTransparent={false} />
+              </div>
+              <button
+                type="button"
+                className="relative z-50 inline-flex items-center justify-center p-2 lg:hidden"
+                data-template-ignore="true"
+                aria-label="Toggle menu"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <div className="relative h-6 w-6">
+                  <span className={`absolute block h-0.5 w-6 transform transition-all duration-300 ${isMenuOpen ? "translate-y-0 rotate-45" : "-translate-y-2"}`} style={{ backgroundColor: theme.text }} />
+                  <span className={`absolute block h-0.5 w-6 transform transition-all duration-300 ${isMenuOpen ? "opacity-0" : "opacity-100"}`} style={{ backgroundColor: theme.text }} />
+                  <span className={`absolute block h-0.5 w-6 transform transition-all duration-300 ${isMenuOpen ? "translate-y-0 -rotate-45" : "translate-y-2"}`} style={{ backgroundColor: theme.text }} />
+                </div>
+              </button>
+            </div>
+          </div>
+        </header>
+        <div
+          className={`fixed inset-0 z-[150] transition-opacity duration-300 lg:hidden ${
+            isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
+          style={{ backgroundColor: theme.surface }}
+        >
+            <button
+              type="button"
+            className="absolute right-4 top-4 z-50 p-2"
+              data-template-ignore="true"
+            aria-label="Close menu"
+            onClick={() => setIsMenuOpen(false)}
+            >
+              <div className="relative h-6 w-6">
+              <span className="absolute block h-0.5 w-6 translate-y-0 rotate-45" style={{ backgroundColor: theme.text }} />
+              <span className="absolute block h-0.5 w-6 translate-y-0 -rotate-45" style={{ backgroundColor: theme.text }} />
+              </div>
+            </button>
+          <div className="h-full w-full overflow-y-auto px-6 pt-[100px]">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              {navItems.map((item) =>
+                item.trigger.toLowerCase() === "scroll" ? (
+                  <button
+                    key={item.id}
+                    type="button"
+                    data-template-ignore="true"
+                    onClick={() => handleScroll(item.id)}
+                    className="block w-full py-3 text-center text-lg font-medium"
+                    style={{ color: theme.text }}
+                  >
+                    {item.name}
+                  </button>
+                ) : (
+                  <Link
+                    key={item.id}
+                    href={item.redirect_url}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full py-3 text-center text-lg font-medium"
                     style={{ color: theme.text }}
                   >
                     {item.name}
