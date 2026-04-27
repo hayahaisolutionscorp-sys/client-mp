@@ -275,7 +275,7 @@ function mapTripSummaryToTrip(summary: ITripSummary, shippingLineId?: number, lo
       shippingLineId: shippingLineId,
       vehicle_capacities: vehicleCapacities,
     } as any
-  } as ITrip;
+  } as unknown as ITrip;
 }
 
 function resolveCabinFare(cabin: { code?: string | null; name: string }, cabinPrices: Record<string, string>): number {

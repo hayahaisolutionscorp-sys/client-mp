@@ -39,7 +39,7 @@ export async function getThemeSettings(): Promise<IThemeSettings | undefined> {
   try {
     const res = await fetch(
       THEME_SETTINGS_API,
-      IS_BROWSER ? { cache: 'no-store' } : { next: { tags: ['branding'], revalidate: 3600 } }
+      IS_BROWSER ? { cache: 'no-store' } : { next: { tags: ['branding'], revalidate: 0 } }
     );
 
     if (res.ok) {

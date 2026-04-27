@@ -9,7 +9,7 @@ export interface IGetToKnowData {
   id: string;
   page_id: string;
   type: string;
-  bg_type: 'image' | 'video' | null;
+  bg_type: 'image' | 'video' | 'youtube' | null;
   bg_url: string | null;
   bg_alt: string | null;
   title: string;

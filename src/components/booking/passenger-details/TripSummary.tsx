@@ -86,7 +86,7 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
   const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [liveVehicleCapacities, setLiveVehicleCapacities] = useState<Record<string, number>>({});
 
-  const applyLiveCapacity = useCallback((trips: ITrip[]) => {
+  const applyLiveCapacity = useCallback((trips: ITrip[]): ITrip[] => {
     return trips.map((trip) => {
       const liveCapacity = liveVehicleCapacities[String(trip.id)];
       if (typeof liveCapacity !== 'number') return trip;
@@ -100,7 +100,7 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
             max: trip.remainingVehicleCapacity?.sedanFit?.max ?? liveCapacity
           }
         }
-      };
+      } as unknown as ITrip;
     });
   }, [liveVehicleCapacities]);
 

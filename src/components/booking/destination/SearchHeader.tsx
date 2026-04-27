@@ -396,7 +396,7 @@ export default function SearchHeader({ isScroll, onClose }: SearchHeaderProps) {
   );
 
   const renderDesktopHeader = () => (
-    <div className="flex flex-row items-center justify-center gap-6 bg-white shadow-md sticky top-0 z-20 p-6">
+    <div className="flex flex-row items-center justify-center gap-6 bg-white shadow-md sticky top-[var(--destination-sticky-top,0px)] z-20 p-6">
       {/* Logo and Tagline */}
       <div className="flex flex-col items-center justify-center w-[280px]">
         <div className={(isScroll || internalIsScroll) ? 'block' : 'hidden'}>

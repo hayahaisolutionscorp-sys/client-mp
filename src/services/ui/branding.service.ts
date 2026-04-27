@@ -62,7 +62,7 @@ export const getBrandingConfigWithSource = async (init?: RequestInit): Promise<B
             }
           : {
               ...requestInit,
-              next: { tags: ['branding'], revalidate: 3600 },
+              next: { tags: ['branding'], revalidate: 0 },
             }),
         timeoutMs: 12_000,
       }

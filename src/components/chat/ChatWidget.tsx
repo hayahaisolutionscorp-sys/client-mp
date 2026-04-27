@@ -152,6 +152,34 @@ export default function ChatWidget({ agentId, threadId, tenantId = 1, builderCon
       }
     };
     customClass = 'hayahai-modern-dark shadow-2xl';
+  } else if (ctaVariant === 'boarding-pass') {
+    widgetTheme = {
+      ...baseTheme,
+      colors: {
+        ...baseTheme.colors,
+        background: '#FFFDF7',
+        headerBg: '#FFFDF7',
+        headerText: '#0F172A',
+        headerSubtext: '#64748B',
+        inputBg: '#FAF7F0',
+        inputText: '#0F172A',
+        inputPlaceholder: '#94A3B8',
+        inputBorder: 'rgba(15,23,42,0.2)',
+        userBubble: primaryColor,
+        userBubbleText: '#FFFFFF',
+        botBubble: '#FAF7F0',
+        botBubbleText: '#0F172A',
+        botBubbleBorder: 'rgba(15,23,42,0.15)',
+        border: 'rgba(15,23,42,0.15)',
+      },
+      borderRadius: {
+        widget: '16px',
+        button: '14px',
+        bubble: '10px',
+        input: '10px',
+      },
+    };
+    customClass = 'hayahai-boarding-pass';
   } else if (ctaVariant === 'minimal-light') {
     widgetTheme = {
       ...baseTheme,
@@ -180,10 +208,17 @@ export default function ChatWidget({ agentId, threadId, tenantId = 1, builderCon
     };
     customClass = 'hayahai-minimal-light shadow-sm border border-gray-200';
   }
+  const widgetClassName = `hayahai-floating-cta ${customClass}`.trim();
 
   return (
     <div ref={wrapperRef}>
       <style>{`
+        /* Keep floating CTA above all app chrome */
+        .hayahai-floating-cta > button,
+        .hayahai-floating-cta > div {
+          z-index: 3000 !important;
+        }
+
         /* Modern Dark Layout & Design Overrides */
         .hayahai-modern-dark > div {
           border-radius: 12px !important;
@@ -254,6 +289,29 @@ export default function ChatWidget({ agentId, threadId, tenantId = 1, builderCon
           display: block !important;
         }
 
+        /* Boarding Pass Layout & Design Overrides */
+        .hayahai-boarding-pass > div {
+          border-radius: 16px !important;
+          border: 2px solid rgba(15,23,42,0.14) !important;
+          box-shadow: 0 20px 40px -20px rgba(15,23,42,0.3), 0 8px 20px -8px rgba(15,23,42,0.15) !important;
+          background: #FFFDF7 !important;
+        }
+        .hayahai-boarding-pass > button {
+          border-radius: 14px !important;
+          border: 2px solid rgba(15,23,42,0.14) !important;
+          background: #FFFDF7 !important;
+          box-shadow: 0 4px 0 rgba(15,23,42,0.15) !important;
+          width: 56px !important;
+          height: 56px !important;
+        }
+        .hayahai-boarding-pass > button:hover {
+          transform: translateY(-1px) !important;
+          box-shadow: 0 6px 0 rgba(15,23,42,0.18) !important;
+        }
+        .hayahai-boarding-pass > button > svg {
+          stroke: #0F172A !important;
+        }
+
         /* Markdown rendered content */
         .hayahai-md { line-height: 1.6; }
         .hayahai-md p { margin: 0 0 0.5em; }
@@ -295,7 +353,7 @@ export default function ChatWidget({ agentId, threadId, tenantId = 1, builderCon
         poweredByText="Powered by HayahAI"
         subtitle="Ask about trip schedules, ticket prices, or booking assistance."
         theme={widgetTheme}
-        className={customClass}
+        className={widgetClassName}
       />
     </div>
   );

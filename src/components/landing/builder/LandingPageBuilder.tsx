@@ -14,36 +14,63 @@ import HeroSplit from "./templates/hero/HeroSplit";
 import HeroMinimal from "./templates/hero/HeroMinimal";
 import HeroCards from "./templates/hero/HeroCards";
 import HeroProfessional from "./templates/hero/HeroProfessional";
+import HeroGlassmorphic from "./templates/hero/HeroGlassmorphic";
+import HeroBoardingPass from "./templates/hero/HeroBoardingPass";
 import RoutesCarousel from "./templates/routes/RoutesCarousel";
 import RoutesModernGrid from "./templates/routes/RoutesModernGrid";
 import RoutesMinimalList from "./templates/routes/RoutesMinimalList";
+import RoutesGlassmorphic from "./templates/routes/RoutesGlassmorphic";
 import BookingOverlay from "./templates/booking/BookingOverlay";
 import BookingBanner from "./templates/booking/BookingBanner";
 import BookingCard from "./templates/booking/BookingCard";
 import BookingPremiumDark from "./templates/booking/BookingPremiumDark";
 import BookingProfessional from "./templates/booking/BookingProfessional";
 import BookingHorizontal from "./templates/booking/BookingHorizontal";
+import BookingGlassmorphic from "./templates/booking/BookingGlassmorphic";
+import BookingGlassmorphicOverlay from "./templates/booking/BookingGlassmorphicOverlay";
+import BookingBoardingPass from "./templates/booking/BookingBoardingPass";
+import PromotionsBoardingPass from "./templates/promotions/PromotionsBoardingPass";
+import RoutesBoardingPass from "./templates/routes/RoutesBoardingPass";
+import WhyChooseBoardingPass from "./templates/why-choose/WhyChooseBoardingPass";
+import GetToKnowBoardingPass from "./templates/get-to-know/GetToKnowBoardingPass";
+import PartnersBoardingPass from "./templates/partners/PartnersBoardingPass";
+import FooterBoardingPass from "./templates/footer/FooterBoardingPass";
 import HeroConcierge from "./templates/hero/HeroConcierge";
 import WhyChooseConcierge from "./templates/why-choose/WhyChooseConcierge";
 import RoutesEditorialGrid from "./templates/routes/RoutesEditorialGrid";
 import PromotionsConcierge from "./templates/promotions/PromotionsConcierge";
 import PromotionsGrid from "./templates/promotions/PromotionsGrid";
 import PromotionsBanner from "./templates/promotions/PromotionsBanner";
+import PromotionsGlassmorphic from "./templates/promotions/PromotionsGlassmorphic";
 import WhyChooseSteps from "./templates/why-choose/WhyChooseSteps";
 import WhyChooseGrid from "./templates/why-choose/WhyChooseGrid";
 import WhyChooseMinimal from "./templates/why-choose/WhyChooseMinimal";
 import WhyChooseDefault from "./templates/why-choose/WhyChooseDefault";
+import WhyChooseGlassmorphic from "./templates/why-choose/WhyChooseGlassmorphic";
 import GetToKnowTimeline from "./templates/get-to-know/GetToKnowTimeline";
 import GetToKnowModern from "./templates/get-to-know/GetToKnowModern";
 import GetToKnowCenter from "./templates/get-to-know/GetToKnowCenter";
 import GetToKnowDefault from "./templates/get-to-know/GetToKnowDefault";
+import GetToKnowGlassmorphic from "./templates/get-to-know/GetToKnowGlassmorphic";
 import PartnersStrip from "./templates/partners/PartnersStrip";
 import PartnersMarquee from "./templates/partners/PartnersMarquee";
 import PartnersGridPremium from "./templates/partners/PartnersGridPremium";
 import PartnersDefault from "./templates/partners/PartnersDefault";
+import PartnersGlassmorphic from "./templates/partners/PartnersGlassmorphic";
 import FooterCentered from "./templates/footer/FooterCentered";
 import FooterPremium from "./templates/footer/FooterPremium";
 import FooterProfessional from "./templates/footer/FooterProfessional";
+import FooterGlassmorphic from "./templates/footer/FooterGlassmorphic";
+import {
+  BookingIslandPremium,
+  FooterIslandPremium,
+  GetToKnowIslandPremium,
+  HeroIslandPremium,
+  PartnersIslandPremium,
+  PromotionsIslandPremium,
+  RoutesIslandPremium,
+  WhyChooseIslandPremium,
+} from "./templates/island-premium/IslandPremiumLandingSections";
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { cn } from "@/lib/utils";
@@ -97,6 +124,23 @@ export default function LandingPageBuilder({
   const builder = normalizeLandingBuilderContent(config);
   const layout = getLandingBuilderLayoutState(builder);
   const templatePreset = layout.templatePreset;
+
+  // When the glassmorphic preset is active, the booking card (variant
+  // "glassmorphic-overlay") is rendered as a floating overlay inside the
+  // HeroGlassmorphic section rather than as its own standalone section below.
+  const heroBuilderSection = layout.contentSections.find((s) => s.section_key === "hero");
+  const bookingBuilderSection = layout.bookingSection;
+  const renderBookingInsideGlassmorphicHero =
+    heroBuilderSection?.variant === "glassmorphic" &&
+    bookingBuilderSection?.enabled !== false &&
+    bookingBuilderSection?.variant === "glassmorphic-overlay";
+
+  // Boarding-pass preset: the hero is itself a ticket stub and the booking
+  // form is rendered INSIDE the hero ticket (no separate section below).
+  const renderBookingInsideBoardingPassHero =
+    heroBuilderSection?.variant === "boarding-pass" &&
+    bookingBuilderSection?.enabled !== false &&
+    bookingBuilderSection?.variant === "boarding-pass";
 
   const sections = previewPayload?.sections ?? [];
   const heroSection = sections.find((section) => section.type === "hero") ?? landingData?.heroSection ?? null;
@@ -359,6 +403,16 @@ export default function LandingPageBuilder({
                   tripSearchEnabledOverride={true}
                 />
               );
+            } else if (section.variant === "island-premium") {
+              content = (
+                <HeroIslandPremium
+                  heroSection={heroSection as any}
+                  theme={theme}
+                  brandName={landingBranding?.brand_name}
+                  showNavbar={layout.showNavbarInHero}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
+                />
+              );
             } else if (section.variant === "concierge") {
               content = (
                 <HeroConcierge
@@ -370,6 +424,52 @@ export default function LandingPageBuilder({
                   portsOverride={landingData?.ports ?? null}
                   bookingRoutesOverride={landingData?.bookingRoutes ?? null}
                   tripSearchEnabledOverride={true}
+                />
+              );
+            } else if (section.variant === "glassmorphic") {
+              content = (
+                <HeroGlassmorphic
+                  heroSectionOverride={heroSection}
+                  forceHomeNavbar={Boolean(previewPayload)}
+                  showNavbar={layout.showNavbarInHero}
+                  showBookingSearch={layout.showBookingInHero}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
+                  portsOverride={landingData?.ports ?? null}
+                  bookingRoutesOverride={landingData?.bookingRoutes ?? null}
+                  tripSearchEnabledOverride={true}
+                  bookingSlot={
+                    renderBookingInsideGlassmorphicHero ? (
+                      <BookingGlassmorphicOverlay
+                        theme={theme}
+                        ports={landingData?.ports ?? []}
+                        routes={landingData?.bookingRoutes ?? []}
+                        floatingInHero
+                      />
+                    ) : null
+                  }
+                />
+              );
+            } else if (section.variant === "boarding-pass") {
+              content = (
+                <HeroBoardingPass
+                  heroSectionOverride={heroSection}
+                  forceHomeNavbar={Boolean(previewPayload)}
+                  showNavbar={layout.showNavbarInHero}
+                  showBookingSearch={layout.showBookingInHero}
+                  headerSectionOverride={previewPayload?.headerConfig ?? landingData?.headerSection}
+                  portsOverride={landingData?.ports ?? null}
+                  bookingRoutesOverride={landingData?.bookingRoutes ?? null}
+                  tripSearchEnabledOverride={true}
+                  bookingSlot={
+                    renderBookingInsideBoardingPassHero ? (
+                      <BookingBoardingPass
+                        theme={theme}
+                        ports={landingData?.ports ?? []}
+                        routes={landingData?.bookingRoutes ?? []}
+                        floatingInHero
+                      />
+                    ) : null
+                  }
                 />
               );
             } else {
@@ -388,6 +488,11 @@ export default function LandingPageBuilder({
             }
             break;
           case "booking":
+            if (renderBookingInsideGlassmorphicHero || renderBookingInsideBoardingPassHero) {
+              // Booking card is rendered inside the hero (glassmorphic / boarding-pass).
+              content = null;
+              break;
+            }
             if (section.variant === "banner") {
               content = <BookingBanner theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             } else if (section.variant === "card") {
@@ -400,15 +505,29 @@ export default function LandingPageBuilder({
               content = <BookingProfessional theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             } else if (section.variant === "modern-horizontal") {
               content = <BookingHorizontal theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "glassmorphic") {
+              content = <BookingGlassmorphic theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "glassmorphic-overlay") {
+              content = <BookingGlassmorphicOverlay theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "boarding-pass") {
+              content = <BookingBoardingPass theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (section.variant === "island-premium") {
+              content = <BookingIslandPremium theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             }
             break;
           case "promotions":
             if (section.variant === "grid" || section.variant === "professional-banner") {
               content = <PromotionsGrid promos={(promotions as any) ?? []} theme={theme} />;
+            } else if (section.variant === "island-premium") {
+              content = <PromotionsIslandPremium promos={(promotions as any) ?? []} theme={theme} />;
             } else if (section.variant === "concierge-mosaic") {
               content = <PromotionsConcierge promos={(promotions as any) ?? []} theme={theme} />;
             } else if (section.variant === "banner") {
               content = <PromotionsBanner promos={(promotions as any) ?? []} theme={theme} />;
+            } else if (section.variant === "glassmorphic") {
+              content = <PromotionsGlassmorphic promos={(promotions as any) ?? []} theme={theme} />;
+            } else if (section.variant === "boarding-pass") {
+              content = <PromotionsBoardingPass promos={(promotions as any) ?? []} theme={theme} />;
             } else {
               content = <Promos promosOverride={promotions as any} />;
             }
@@ -420,8 +539,14 @@ export default function LandingPageBuilder({
               content = <RoutesModernGrid routes={(routes as any) ?? []} theme={theme} />;
             } else if (section.variant === "list") {
               content = <RoutesMinimalList routes={(routes as any) ?? []} theme={theme} />;
+            } else if (section.variant === "island-premium") {
+              content = <RoutesIslandPremium routes={(routes as any) ?? []} theme={theme} />;
             } else if (section.variant === "editorial-grid" || section.variant === "concierge") {
               content = <RoutesEditorialGrid routes={(routes as any) ?? []} theme={theme} />;
+            } else if (section.variant === "glassmorphic") {
+              content = <RoutesGlassmorphic routes={(routes as any) ?? []} theme={theme} />;
+            } else if (section.variant === "boarding-pass") {
+              content = <RoutesBoardingPass routes={(routes as any) ?? []} theme={theme} />;
             } else {
               content = <PopularRoutes routesOverride={routes as any} />;
             }
@@ -433,8 +558,14 @@ export default function LandingPageBuilder({
               content = <WhyChooseGrid section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else if (section.variant === "minimal") {
               content = <WhyChooseMinimal section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            } else if (section.variant === "island-premium") {
+              content = <WhyChooseIslandPremium section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else if (section.variant === "concierge") {
               content = <WhyChooseConcierge section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            } else if (section.variant === "glassmorphic") {
+              content = <WhyChooseGlassmorphic section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
+            } else if (section.variant === "boarding-pass") {
+              content = <WhyChooseBoardingPass section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             } else {
               content = <WhyChooseDefault section={whyChooseSection as any} reasons={(whyChooseReasons as any) ?? []} theme={theme} />;
             }
@@ -442,10 +573,16 @@ export default function LandingPageBuilder({
           case "get_to_know":
             if (section.variant === "timeline" && getToKnowMain && getToKnowMission && getToKnowVision) {
               content = <GetToKnowTimeline main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+            } else if (section.variant === "island-premium" && getToKnowMain && getToKnowMission && getToKnowVision) {
+              content = <GetToKnowIslandPremium main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             } else if ((section.variant === "modern" || section.variant === "professional-panel") && getToKnowMain && getToKnowMission && getToKnowVision) {
               content = <GetToKnowModern main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             } else if (section.variant === "center" && getToKnowMain && getToKnowMission && getToKnowVision) {
               content = <GetToKnowCenter main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+            } else if (section.variant === "glassmorphic" && getToKnowMain && getToKnowMission && getToKnowVision) {
+              content = <GetToKnowGlassmorphic main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
+            } else if (section.variant === "boarding-pass" && getToKnowMain) {
+              content = <GetToKnowBoardingPass main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             } else {
               content = <GetToKnowDefault main={getToKnowMain as any} mission={getToKnowMission as any} vision={getToKnowVision as any} theme={theme} />;
             }
@@ -455,8 +592,14 @@ export default function LandingPageBuilder({
               content = <PartnersStrip partners={(partners as any) ?? []} theme={theme} />;
             } else if (section.variant === "marquee") {
               content = <PartnersMarquee partners={(partners as any) ?? []} theme={theme} />;
+            } else if (section.variant === "island-premium") {
+              content = <PartnersIslandPremium partners={(partners as any) ?? []} theme={theme} />;
             } else if (section.variant === "grid-premium") {
               content = <PartnersGridPremium partners={(partners as any) ?? []} theme={theme} />;
+            } else if (section.variant === "glassmorphic") {
+              content = <PartnersGlassmorphic partners={(partners as any) ?? []} theme={theme} />;
+            } else if (section.variant === "boarding-pass") {
+              content = <PartnersBoardingPass partners={(partners as any) ?? []} theme={theme} />;
             } else {
               content = <PartnersDefault partners={(partners as any) ?? []} theme={theme} />;
             }
@@ -490,6 +633,9 @@ export default function LandingPageBuilder({
           {layout.footerSection.variant === "centered" && <FooterCentered key={layout.footerSection.id} theme={theme} />}
           {layout.footerSection.variant === "premium" && <FooterPremium key={layout.footerSection.id} theme={theme} />}
           {layout.footerSection.variant === "professional-anchored" && <FooterProfessional key={layout.footerSection.id} theme={theme} />}
+          {layout.footerSection.variant === "island-premium" && <FooterIslandPremium key={layout.footerSection.id} theme={theme} brandName={landingBranding?.brand_name} />}
+          {layout.footerSection.variant === "glassmorphic" && <FooterGlassmorphic key={layout.footerSection.id} theme={theme} />}
+          {layout.footerSection.variant === "boarding-pass" && <FooterBoardingPass key={layout.footerSection.id} theme={theme} />}
           {layout.footerSection.variant === "default" && <Footer key={layout.footerSection.id} />}
           {layout.footerSection.variant === "default-no-banner" && <Footer key={layout.footerSection.id} showSubscribeBanner={false} />}
         </>

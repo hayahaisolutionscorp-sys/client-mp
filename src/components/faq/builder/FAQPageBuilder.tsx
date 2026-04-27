@@ -10,6 +10,7 @@ import { createBuilderTheme } from '@/components/landing/builder/theme';
 import { useThemeSettings as useThemeSettingsHook } from '@/hooks/theme-settings';
 import { useBranding as useBrandingHook } from '@/hooks/branding';
 import { brandRadiusScopeStyle } from '@/lib/branding/brand-radius';
+import TipTapRenderer from '@/components/shared/TipTapRenderer';
 
 // Hero variants
 import HeroDefault from './templates/hero/HeroDefault';
@@ -17,6 +18,8 @@ import HeroMinimal from './templates/hero/HeroMinimal';
 import HeroCentered from './templates/hero/HeroCentered';
 import HeroGradient from './templates/hero/HeroGradient';
 import HeroCompact from './templates/hero/HeroCompact';
+import HeroGlassmorphicFaq from './templates/hero/HeroGlassmorphicFaq';
+import HeroBoardingPassFaq from './templates/hero/HeroBoardingPassFaq';
 
 // FAQ List variants
 import FAQListDefault from './templates/faq-list/FAQListDefault';
@@ -24,6 +27,8 @@ import FAQListAccordion from './templates/faq-list/FAQListAccordion';
 import FAQListCards from './templates/faq-list/FAQListCards';
 import FAQListCompact from './templates/faq-list/FAQListCompact';
 import FAQListMinimal from './templates/faq-list/FAQListMinimal';
+import FAQListGlassmorphic from './templates/faq-list/FAQListGlassmorphic';
+import FAQListBoardingPass from './templates/faq-list/FAQListBoardingPass';
 
 interface FAQPageBuilderProps {
   faqPageContent: unknown | null;
@@ -47,6 +52,9 @@ export default function FAQPageBuilder({
   const builderTheme = createBuilderTheme((resolvedBranding ?? {}) as IBrandingConfig);
 
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const [islandCategory, setIslandCategory] = useState<string>(categories[0] || '');
+  const [openIslandFaqs, setOpenIslandFaqs] = useState<Set<number>>(new Set());
+  const islandFaqs = islandCategory ? faqs.filter((faq) => faq.category === islandCategory) : faqs;
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -186,6 +194,18 @@ export default function FAQPageBuilder({
     switch (section_key) {
       case 'hero':
         switch (variant) {
+          case 'island-premium':
+            sectionContent = (
+              <section className="overflow-hidden rounded-[2rem] p-6 shadow-[0_24px_80px_-55px_rgba(8,47,73,0.45)] md:p-10" style={{ backgroundColor: surfaceAltColor }}>
+                <h1 className="text-4xl font-semibold leading-tight" style={{ color: textOnSurface }}>
+                  {heroTitle}
+                </h1>
+                <p className="mt-4 max-w-2xl text-sm leading-7" style={{ color: mutedOnSurface }}>
+                  {heroDescription}
+                </p>
+              </section>
+            );
+            break;
           case 'minimal':
             sectionContent = (
               <HeroMinimal key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
@@ -206,6 +226,16 @@ export default function FAQPageBuilder({
               <HeroCompact key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
+          case 'glassmorphic':
+            sectionContent = (
+              <HeroGlassmorphicFaq key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+            );
+            break;
+          case 'boarding-pass':
+            sectionContent = (
+              <HeroBoardingPassFaq key="hero" title={heroTitle} description={heroDescription} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+            );
+            break;
           case 'default':
           default:
             sectionContent = (
@@ -217,6 +247,72 @@ export default function FAQPageBuilder({
 
       case 'faq_list':
         switch (variant) {
+          case 'island-premium':
+            sectionContent = (
+              <section className="rounded-[2rem] p-5 shadow-[0_24px_80px_-55px_rgba(8,47,73,0.45)] md:p-8" style={{ backgroundColor: surfaceColor }}>
+                <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <h2 className="text-3xl font-semibold" style={{ color: textOnSurface }}>
+                      Frequently Asked Questions
+                    </h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((category) => (
+                      <button
+                        key={category}
+                        type="button"
+                        onClick={() => setIslandCategory(category)}
+                        className={cn(
+                          'rounded-full px-4 py-2 text-sm font-semibold transition',
+                          islandCategory === category ? 'text-white' : 'hover:opacity-90'
+                        )}
+                        style={{
+                          backgroundColor: islandCategory === category ? primaryColor : surfaceAltColor,
+                          color: islandCategory === category ? textOnPrimary : textOnSurface,
+                        }}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid gap-4">
+                  {islandFaqs.map((faq) => {
+                    const isOpen = openIslandFaqs.has(faq.id);
+                    return (
+                      <article key={faq.id} className="overflow-hidden rounded-[1.5rem] border" style={{ borderColor: `${primaryColor}26`, backgroundColor: surfaceAltColor }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOpenIslandFaqs((current) => {
+                              const next = new Set(current);
+                              if (next.has(faq.id)) next.delete(faq.id);
+                              else next.add(faq.id);
+                              return next;
+                            });
+                          }}
+                          className="flex w-full items-start justify-between gap-4 p-5 text-left"
+                        >
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: primaryColor }}>{faq.category}</p>
+                            <h3 className="mt-3 text-lg font-semibold" style={{ color: textOnSurface }}>{faq.question}</h3>
+                          </div>
+                          <span className="rounded-full px-3 py-1 text-sm font-semibold" style={{ backgroundColor: surfaceColor, color: textOnSurface }}>
+                            {isOpen ? '−' : '+'}
+                          </span>
+                        </button>
+                        {isOpen ? (
+                          <div className="border-t border-cyan-100 px-5 pb-5 text-sm leading-7" style={{ color: mutedOnSurface }}>
+                            <TipTapRenderer content={faq.answer} />
+                          </div>
+                        ) : null}
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+            break;
           case 'accordion':
             sectionContent = (
               <FAQListAccordion key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} textOnPrimary={textOnPrimary} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
@@ -235,6 +331,16 @@ export default function FAQPageBuilder({
           case 'minimal':
             sectionContent = (
               <FAQListMinimal key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
+            );
+            break;
+          case 'glassmorphic':
+            sectionContent = (
+              <FAQListGlassmorphic key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+            );
+            break;
+          case 'boarding-pass':
+            sectionContent = (
+              <FAQListBoardingPass key="faq_list" faqs={faqs} categories={categories} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
           case 'default':

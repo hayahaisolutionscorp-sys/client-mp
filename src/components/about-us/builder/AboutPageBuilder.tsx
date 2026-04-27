@@ -16,33 +16,44 @@ import HeroOverlay from './templates/hero/HeroOverlay';
 import HeroCards from './templates/hero/HeroCards';
 import HeroCentered from './templates/hero/HeroCentered';
 import HeroConcierge from './templates/hero/HeroConcierge';
+import HeroGlassmorphicAbout from './templates/hero/HeroGlassmorphicAbout';
 import WelcomeDefault from './templates/welcome/WelcomeDefault';
 import WelcomeSpotlight from './templates/welcome/WelcomeSpotlight';
 import WelcomeHighlight from './templates/welcome/WelcomeHighlight';
 import WelcomeQuote from './templates/welcome/WelcomeQuote';
 import WelcomeSideAccent from './templates/welcome/WelcomeSideAccent';
+import WelcomeGlassmorphic from './templates/welcome/WelcomeGlassmorphic';
 import OurStoryDefault from './templates/our-story/OurStoryDefault';
 import OurStoryTimeline from './templates/our-story/OurStoryTimeline';
 import OurStoryMilestone from './templates/our-story/OurStoryMilestone';
 import OurStoryNarrative from './templates/our-story/OurStoryNarrative';
 import OurStoryJourney from './templates/our-story/OurStoryJourney';
 import OurStoryConcierge from './templates/our-story/OurStoryConcierge';
+import OurStoryGlassmorphic from './templates/our-story/OurStoryGlassmorphic';
 import OurExpertiseDefault from './templates/our-expertise/OurExpertiseDefault';
 import OurExpertiseChecklist from './templates/our-expertise/OurExpertiseChecklist';
 import OurExpertiseGrid from './templates/our-expertise/OurExpertiseGrid';
 import OurExpertiseShowcase from './templates/our-expertise/OurExpertiseShowcase';
 import OurExpertiseBadges from './templates/our-expertise/OurExpertiseBadges';
+import OurExpertiseGlassmorphic from './templates/our-expertise/OurExpertiseGlassmorphic';
 import CoreValuesDefault from './templates/core-values/CoreValuesDefault';
 import CoreValuesPillars from './templates/core-values/CoreValuesPillars';
 import CoreValuesIconGrid from './templates/core-values/CoreValuesIconGrid';
 import CoreValuesTimeline from './templates/core-values/CoreValuesTimeline';
 import CoreValuesAccordion from './templates/core-values/CoreValuesAccordion';
 import CoreValuesCompact from './templates/core-values/CoreValuesCompact';
+import CoreValuesGlassmorphic from './templates/core-values/CoreValuesGlassmorphic';
+import HeroBoardingPassAbout from './templates/hero/HeroBoardingPassAbout';
+import WelcomeBoardingPass from './templates/welcome/WelcomeBoardingPass';
+import OurStoryBoardingPass from './templates/our-story/OurStoryBoardingPass';
+import OurExpertiseBoardingPass from './templates/our-expertise/OurExpertiseBoardingPass';
+import CoreValuesBoardingPass from './templates/core-values/CoreValuesBoardingPass';
 import CTASection from './CTASection';
 import { useThemeSettings as useThemeSettingsHook } from '@/hooks/theme-settings';
 import { useBranding as useBrandingHook } from '@/hooks/branding';
 import { brandRadiusScopeStyle } from '@/lib/branding/brand-radius';
 import { formatCssFontStack } from '@/lib/theme-document';
+import Media from '@/components/landing/Media';
 
 export interface AboutPageBuilderProps {
   aboutPage: { title: string; content: unknown | null } | null;
@@ -203,6 +214,22 @@ export default function AboutPageBuilder({
   const welcome = sectionByType.get('welcome');
   const ourStory = sectionByType.get('our_story');
   const ourExpertise = sectionByType.get('our_expertise');
+  const renderAboutMedia = (content: IAboutUsSection | undefined, className: string) => {
+    if (!content?.bg_url) return null;
+    return (
+      <Media
+        src={content.bg_url}
+        type={(content.bg_type?.toLowerCase() as 'image' | 'video' | 'youtube') || 'image'}
+        alt={content.bg_alt || content.title || ''}
+        className={className}
+        autoPlay
+        loop
+        muted
+        playsInline
+        playing
+      />
+    );
+  };
 
   const heroEnabled = orderedSections.some((section) => section.section_key === 'hero');
 
@@ -243,7 +270,29 @@ export default function AboutPageBuilder({
           let sectionContent = null;
           switch (sectionKey) {
             case 'hero':
-              if (section.variant === 'split') {
+              if (section.variant === 'island-premium') {
+                sectionContent = (
+                  <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-[#fff8ec] p-5 shadow-[0_28px_90px_-55px_rgba(8,47,73,0.5)] md:p-8">
+                    <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+                      <div className="flex flex-col justify-center py-6">
+                        <h1 className="text-4xl font-semibold leading-tight md:text-5xl" style={{ color: textOnSurface, fontFamily: 'var(--font-title)' }}>
+                          {hero?.title || aboutPage?.title || 'About Us'}
+                        </h1>
+                        <p className="mt-4 max-w-2xl text-sm leading-7" style={{ color: mutedOnSurface }}>
+                          {hero?.description || hero?.subtitle}
+                        </p>
+                      </div>
+                      {hero?.bg_url ? (
+                        <div className="relative min-h-[280px] overflow-hidden rounded-[1.75rem] bg-cyan-50">
+                          {renderAboutMedia(hero, 'h-full w-full object-cover')}
+                          <div className="absolute inset-0 bg-gradient-to-t from-cyan-950/35 to-transparent" />
+                        </div>
+                      ) : null}
+                    </div>
+                  </section>
+                );
+              }
+              else if (section.variant === 'split') {
                 sectionContent = (
                   <HeroSplit
                     key={section.id}
@@ -320,6 +369,30 @@ export default function AboutPageBuilder({
                   />
                 );
               }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <HeroGlassmorphicAbout
+                    key={section.id}
+                    hero={hero ?? null}
+                    aboutPageTitle={aboutPage?.title || 'About Us'}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <HeroBoardingPassAbout
+                    key={section.id}
+                    hero={hero ?? null}
+                    aboutPageTitle={aboutPage?.title || 'About Us'}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                  />
+                );
+              }
               else {
                 sectionContent = (
                   <HeroDefault
@@ -335,7 +408,22 @@ export default function AboutPageBuilder({
               break;
 
             case 'welcome':
-              if (section.variant === 'spotlight' || section.variant === 'glass') {
+              if (section.variant === 'island-premium') {
+                sectionContent = (
+                  <section className="grid gap-5 rounded-[2rem] bg-white p-6 shadow-[0_24px_80px_-55px_rgba(8,47,73,0.45)] md:grid-cols-[0.8fr_1.2fr] md:p-8">
+                    {welcome?.bg_url ? (
+                      <div className="min-h-64 overflow-hidden rounded-[1.5rem] bg-cyan-50">
+                        {renderAboutMedia(welcome, 'h-full w-full object-cover')}
+                      </div>
+                    ) : null}
+                    <div className="flex flex-col justify-center">
+                      <h2 className="text-3xl font-semibold" style={{ color: textOnSurface }}>{welcome?.title || 'Welcome'}</h2>
+                      <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-7" style={{ color: mutedOnSurface }}>{welcome?.description}</p>
+                    </div>
+                  </section>
+                );
+              }
+              else if (section.variant === 'spotlight' || section.variant === 'glass') {
                 sectionContent = (
                   <WelcomeSpotlight
                     key={section.id}
@@ -374,6 +462,30 @@ export default function AboutPageBuilder({
               else if (section.variant === 'side-accent') {
                 sectionContent = (
                   <WelcomeSideAccent
+                    key={section.id}
+                    content={welcome ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <WelcomeGlassmorphic
+                    key={section.id}
+                    content={welcome ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <WelcomeBoardingPass
                     key={section.id}
                     content={welcome ?? null}
                     primaryColor={primaryColor}
@@ -434,6 +546,21 @@ export default function AboutPageBuilder({
                   />
                 );
               }
+              else if (section.variant === 'island-premium') {
+                sectionContent = (
+                  <section className="grid gap-5 rounded-[2rem] bg-[#fff8ec] p-5 md:grid-cols-[0.8fr_1.2fr] md:p-8">
+                    <div className="overflow-hidden rounded-[1.5rem] bg-white">
+                      {ourStory?.bg_url ? (
+                        <div className="h-52">{renderAboutMedia(ourStory, 'h-full w-full object-cover')}</div>
+                      ) : null}
+                      <div className="p-5">
+                        <h2 className="text-3xl font-semibold" style={{ color: textOnSurface }}>{ourStory?.title || 'Our Story'}</h2>
+                      </div>
+                    </div>
+                    <p className="whitespace-pre-wrap rounded-[1.5rem] bg-white p-5 text-sm leading-7" style={{ color: mutedOnSurface }}>{ourStory?.description}</p>
+                  </section>
+                );
+              }
               else if (section.variant === 'journey') {
                 sectionContent = (
                   <OurStoryJourney
@@ -457,6 +584,30 @@ export default function AboutPageBuilder({
                     mutedColor={mutedOnSurface}
                     surfaceColor={surfaceColor}
                     surfaceAltColor={surfaceAltColor}
+                  />
+                );
+              }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <OurStoryGlassmorphic
+                    key={section.id}
+                    content={ourStory ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <OurStoryBoardingPass
+                    key={section.id}
+                    content={ourStory ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
                   />
                 );
               }
@@ -487,6 +638,23 @@ export default function AboutPageBuilder({
                     surfaceAltColor={surfaceAltColor}
                     textOnSurfaceAlt={textOnSurfaceAlt}
                   />
+                );
+              }
+              else if (section.variant === 'island-premium') {
+                sectionContent = (
+                  <section className="rounded-[2rem] bg-white p-6 md:p-8">
+                    <div className="grid gap-6 md:grid-cols-[1fr_0.8fr]">
+                      <div>
+                        <h2 className="text-3xl font-semibold" style={{ color: textOnSurface }}>{ourExpertise?.title || 'Our Expertise'}</h2>
+                        <p className="mt-4 whitespace-pre-wrap text-sm leading-7" style={{ color: mutedOnSurface }}>{ourExpertise?.description}</p>
+                      </div>
+                      {ourExpertise?.bg_url ? (
+                        <div className="min-h-56 overflow-hidden rounded-[1.5rem] bg-cyan-50">
+                          {renderAboutMedia(ourExpertise, 'h-full w-full object-cover')}
+                        </div>
+                      ) : null}
+                    </div>
+                  </section>
                 );
               }
               else if (section.variant === 'grid' || section.variant === 'feature-cards') {
@@ -527,6 +695,30 @@ export default function AboutPageBuilder({
                   />
                 );
               }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <OurExpertiseGlassmorphic
+                    key={section.id}
+                    content={ourExpertise ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <OurExpertiseBoardingPass
+                    key={section.id}
+                    content={ourExpertise ?? null}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    mutedColor={mutedOnSurface}
+                    surfaceColor={surfaceColor}
+                  />
+                );
+              }
               else {
                 sectionContent = (
                   <OurExpertiseDefault
@@ -542,7 +734,23 @@ export default function AboutPageBuilder({
               break;
 
             case 'core_values':
-              if (section.variant === 'pillars') {
+              if (section.variant === 'island-premium') {
+                sectionContent = (
+                  <section className="rounded-[2rem] bg-[#fff8ec] p-5 md:p-8">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700">Core values</p>
+                    <div className="mt-6 grid gap-4 md:grid-cols-3">
+                      {coreValues.slice(0, 6).map((value) => (
+                        <article key={value.id} className="rounded-[1.5rem] bg-white p-5 shadow-sm">
+                          {value.icon_url ? <img src={value.icon_url} alt={value.icon_alt || value.title} className="mb-4 h-10 w-10 object-contain" /> : null}
+                          <h3 className="text-lg font-semibold" style={{ color: textOnSurface }}>{value.title}</h3>
+                          <p className="mt-2 text-sm leading-6" style={{ color: mutedOnSurface }}>{value.description}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                );
+              }
+              else if (section.variant === 'pillars') {
                 sectionContent = (
                   <CoreValuesPillars
                     key={section.id}
@@ -606,6 +814,32 @@ export default function AboutPageBuilder({
                     textColor={textOnSurface}
                     surfaceColor={surfaceColor}
                     mutedColor={mutedOnSurface}
+                  />
+                );
+              }
+              else if (section.variant === 'glassmorphic') {
+                sectionContent = (
+                  <CoreValuesGlassmorphic
+                    key={section.id}
+                    coreValues={coreValues}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    surfaceColor={surfaceColor}
+                    surfaceAltColor={surfaceAltColor}
+                    textOnSurfaceAlt={textOnSurfaceAlt}
+                  />
+                );
+              }
+              else if (section.variant === 'boarding-pass') {
+                sectionContent = (
+                  <CoreValuesBoardingPass
+                    key={section.id}
+                    coreValues={coreValues}
+                    primaryColor={primaryColor}
+                    textColor={textOnSurface}
+                    surfaceColor={surfaceColor}
+                    surfaceAltColor={surfaceAltColor}
+                    textOnSurfaceAlt={textOnSurfaceAlt}
                   />
                 );
               }

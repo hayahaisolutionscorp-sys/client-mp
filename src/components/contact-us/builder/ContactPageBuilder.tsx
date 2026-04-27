@@ -11,6 +11,7 @@ import { createBuilderTheme } from '@/components/landing/builder/theme';
 import { useThemeSettings as useThemeSettingsHook } from '@/hooks/theme-settings';
 import { useBranding as useBrandingHook } from '@/hooks/branding';
 import { brandRadiusScopeStyle } from '@/lib/branding/brand-radius';
+import Media from '@/components/landing/Media';
 
 // Hero variants
 import HeroDefault from './templates/hero/HeroDefault';
@@ -19,6 +20,8 @@ import HeroCentered from './templates/hero/HeroCentered';
 import HeroGradient from './templates/hero/HeroGradient';
 import HeroSplit from './templates/hero/HeroSplit';
 import HeroConcierge from './templates/hero/HeroConcierge';
+import HeroGlassmorphicContact from './templates/hero/HeroGlassmorphicContact';
+import HeroBoardingPassContact from './templates/hero/HeroBoardingPassContact';
 
 // Contact Form variants
 import ContactFormDefault from './templates/contact-form/ContactFormDefault';
@@ -26,6 +29,8 @@ import ContactFormSideBySide from './templates/contact-form/ContactFormSideBySid
 import ContactFormMinimal from './templates/contact-form/ContactFormMinimal';
 import ContactFormFloating from './templates/contact-form/ContactFormFloating';
 import ContactFormPremium from './templates/contact-form/ContactFormPremium';
+import ContactFormGlassmorphic from './templates/contact-form/ContactFormGlassmorphic';
+import ContactFormBoardingPass from './templates/contact-form/ContactFormBoardingPass';
 
 interface ContactPageBuilderProps {
   contactPage: IContactPage;
@@ -184,6 +189,20 @@ export default function ContactPageBuilder({
     .join("\n");
 
   const heroSection = sections.find((s) => s.type === 'hero') || sections[0];
+  const activeContactInfo = contactInfo.filter((item) => item.is_active).slice(0, 4);
+  const heroMedia = heroSection?.bg_url ? (
+    <Media
+      src={heroSection.bg_url}
+      type={(heroSection.bg_type?.toLowerCase() as 'image' | 'video' | 'youtube') || 'image'}
+      alt={heroSection.bg_alt || heroSection.title || ''}
+      className="h-full w-full object-cover"
+      autoPlay
+      loop
+      muted
+      playsInline
+      playing
+    />
+  ) : null;
 
   const renderSection = (sectionConfig: ContactBuilderSectionConfig) => {
     const { section_key, variant } = sectionConfig;
@@ -192,6 +211,40 @@ export default function ContactPageBuilder({
     switch (section_key) {
       case 'hero':
         switch (variant) {
+          case 'island-premium':
+            sectionContent = (
+              <section className="overflow-hidden rounded-[2rem] p-5 shadow-[0_24px_80px_-55px_rgba(8,47,73,0.45)] md:p-8" style={{ backgroundColor: surfaceAltColor }}>
+                <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+                  <div>
+                    <h1 className="text-4xl font-semibold leading-tight" style={{ color: textOnSurface }}>
+                      {heroSection?.title || contactPage.title}
+                    </h1>
+                    <p className="mt-4 text-sm leading-7" style={{ color: mutedOnSurface }}>
+                      {heroSection?.subtitle || heroSection?.description}
+                    </p>
+                  </div>
+                  {heroMedia ? (
+                    <div className="relative min-h-72 overflow-hidden rounded-[1.75rem]" style={{ backgroundColor: surfaceColor }}>
+                      {heroMedia}
+                    </div>
+                  ) : activeContactInfo.length > 0 ? (
+                    <div className="grid gap-3 rounded-[1.75rem] p-5" style={{ backgroundColor: surfaceColor }}>
+                      {activeContactInfo.map((item) => (
+                        <a
+                          key={item.id}
+                          href={item.type === 'email' ? `mailto:${item.value}` : item.type === 'phone' ? `tel:${item.value}` : item.value}
+                          className="rounded-[1rem] px-4 py-3 text-sm font-medium transition hover:-translate-y-0.5"
+                          style={{ backgroundColor: surfaceAltColor, color: textOnSurface }}
+                        >
+                          {item.label || item.type}: {item.value}
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </section>
+            );
+            break;
           case 'minimal':
             sectionContent = (
               <HeroMinimal key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
@@ -217,6 +270,16 @@ export default function ContactPageBuilder({
               <HeroConcierge key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
+          case 'glassmorphic':
+            sectionContent = (
+              <HeroGlassmorphicContact key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
+            );
+            break;
+          case 'boarding-pass':
+            sectionContent = (
+              <HeroBoardingPassContact key="hero" hero={heroSection} contactPageTitle={contactPage.title} primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} />
+            );
+            break;
           case 'default':
           default:
             sectionContent = (
@@ -228,6 +291,30 @@ export default function ContactPageBuilder({
 
       case 'contact_form':
         switch (variant) {
+          case 'island-premium':
+            sectionContent = (
+              <section className="rounded-[2rem] p-5 shadow-[0_24px_80px_-55px_rgba(8,47,73,0.45)] md:p-8" style={{ backgroundColor: surfaceColor }}>
+                <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+                  {activeContactInfo.length > 0 ? (
+                    <div className="space-y-3">
+                      {activeContactInfo.map((item) => (
+                        <a
+                          key={item.id}
+                          href={item.type === 'email' ? `mailto:${item.value}` : item.type === 'phone' ? `tel:${item.value}` : item.value}
+                          className="block rounded-[1.25rem] p-4 text-sm transition hover:-translate-y-0.5"
+                          style={{ backgroundColor: surfaceAltColor, color: textOnSurface }}
+                        >
+                          <span className="block text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: primaryColor }}>{item.label || item.type}</span>
+                          <span className="mt-1 block">{item.value}</span>
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                  <ContactFormDefault key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+                </div>
+              </section>
+            );
+            break;
           case 'side-by-side':
             sectionContent = (
               <ContactFormSideBySide key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} surfaceAltColor={surfaceAltColor} textOnSurfaceAlt={textOnSurfaceAlt} />
@@ -246,6 +333,16 @@ export default function ContactPageBuilder({
           case 'premium':
             sectionContent = (
               <ContactFormPremium key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} textOnPrimary={textOnPrimary} />
+            );
+            break;
+          case 'glassmorphic':
+            sectionContent = (
+              <ContactFormGlassmorphic key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
+            );
+            break;
+          case 'boarding-pass':
+            sectionContent = (
+              <ContactFormBoardingPass key="contact_form" primaryColor={primaryColor} textColor={textOnSurface} mutedColor={mutedOnSurface} surfaceColor={surfaceColor} />
             );
             break;
           case 'default':

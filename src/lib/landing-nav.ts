@@ -52,8 +52,20 @@ export function scrollToLandingTarget({
   const done = () => onDone?.();
   const isHomePath = pathname === "/";
 
+  // Map legacy/standardized nav IDs to actual section keys used in LandingPageBuilder
+  const sectionIdMap: Record<string, string> = {
+    'Book': 'section-booking',
+    'Promos': 'section-promotions',
+    'Routes': 'section-routes',
+    'WhyChooseUs': 'section-why_choose',
+    'Partner': 'section-partners',
+    'Resources': 'section-footer',
+  };
+
+  const targetId = sectionIdMap[id] || id;
+
   if (id === "Resources") {
-    const resourcesElement = document.getElementById("Resources");
+    const resourcesElement = document.getElementById("Resources") || document.getElementById("section-footer");
     if (resourcesElement) {
       resourcesElement.scrollIntoView({ behavior: "smooth" });
       done();
@@ -61,7 +73,7 @@ export function scrollToLandingTarget({
     }
 
     if (!isHomePath) {
-      navigate("/#Resources");
+      navigate(`/#${targetId}`);
       done();
       return;
     }
@@ -74,7 +86,7 @@ export function scrollToLandingTarget({
     return;
   }
 
-  const element = document.getElementById(id);
+  const element = document.getElementById(targetId) || document.getElementById(id);
   if (element) {
     element.scrollIntoView({ behavior: "smooth" });
     done();
@@ -82,7 +94,7 @@ export function scrollToLandingTarget({
   }
 
   if (!isHomePath) {
-    navigate(`/#${id}`);
+    navigate(`/#${targetId}`);
   }
   done();
 }

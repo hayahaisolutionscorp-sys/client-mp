@@ -21,6 +21,8 @@ interface SearchBoxWrapperProps {
     initialTripSearchEnabled?: boolean;
     initialPorts?: IPort[];
     initialRoutes?: IRoute[];
+    isRelative?: boolean;
+    isGlassmorphic?: boolean;
 }
 
 interface HayahAIButtonProps {
@@ -34,6 +36,8 @@ export default function SearchBoxWrapper({
     initialTripSearchEnabled = true,
     initialPorts = [],
     initialRoutes = [],
+    isRelative = false,
+    isGlassmorphic = false,
 }: SearchBoxWrapperProps) {
     const [mode, setMode] = useState<Mode>("form"); // Default to AI chat
     const [bookingType, setBookingType] = useState<string | undefined>(DEFAULT_BOOKING_TYPE);
@@ -93,13 +97,13 @@ export default function SearchBoxWrapper({
 
     return (
         <div
-            className={`flex items-center justify-center absolute z-20 inset-0 w-full px-4 
+            className={isRelative ? "w-full" : `flex items-center justify-center absolute z-20 inset-0 w-full px-4 
             ${bookingType?.toLowerCase() === "round trip"
                     ? "top-[440px]"
                     : "top-[400px]"
                 } sm:top-[260px] md:top-[420px] lg:top-[640px]`}
         >
-            <div className="w-full sm:w-[95%] md:w-[95%] lg:w-[1300px]">
+            <div className={isRelative ? "w-full" : "w-full sm:w-[95%] md:w-[95%] lg:w-[1300px]"}>
                 {mode === "chat" && tripSearchEnabled ? (
                     <TripSearchWidget
                         tenantId={
@@ -124,6 +128,7 @@ export default function SearchBoxWrapper({
                         showChatToggle={tripSearchEnabled}
                         initialPorts={initialPorts}
                         initialRoutes={initialRoutes}
+                        isGlassmorphic={isGlassmorphic}
                     />
                 )}
             </div>
@@ -173,6 +178,7 @@ function SearchBoxWithToggle({
     showChatToggle = true,
     initialPorts = [],
     initialRoutes = [],
+    isGlassmorphic = false,
 }: {
     onSwitchToChat: () => void;
     bookingType: string | undefined;
@@ -180,10 +186,11 @@ function SearchBoxWithToggle({
     showChatToggle?: boolean;
     initialPorts?: IPort[];
     initialRoutes?: IRoute[];
+    isGlassmorphic?: boolean;
 }) {
     return (
         <div className="relative">
-            <div className="bg-white rounded-3xl shadow-2xl p-4 w-full h-auto transition-all duration-300 ease-in-out hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] sm:p-6 md:p-8">
+            <div className={`${isGlassmorphic ? "bg-white/10 backdrop-blur-3xl border border-white/20" : "bg-white"} rounded-3xl shadow-2xl p-4 w-full h-auto transition-all duration-300 ease-in-out hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] sm:p-6 md:p-8`}>
                 {/* Header with toggle */}
                 <div className="flex items-center justify-between mb-4">
                     <div className="space-y-1">

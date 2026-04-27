@@ -80,7 +80,7 @@ export default function CrossTenantTripSummary({ legs, departureCabinName, depar
   const [legPricingLoading, setLegPricingLoading] = useState<boolean[]>(legs.map(() => false));
   const [liveVehicleCapacities, setLiveVehicleCapacities] = useState<Record<string, number>>({});
 
-  const applyLiveCapacity = useCallback((trips: ITrip[]) => {
+  const applyLiveCapacity = useCallback((trips: ITrip[]): ITrip[] => {
     return trips.map((trip) => {
       const liveCapacity = liveVehicleCapacities[String(trip.id)];
       if (typeof liveCapacity !== 'number') return trip;
@@ -94,7 +94,7 @@ export default function CrossTenantTripSummary({ legs, departureCabinName, depar
             max: trip.remainingVehicleCapacity?.sedanFit?.max ?? liveCapacity
           }
         }
-      };
+      } as unknown as ITrip;
     });
   }, [liveVehicleCapacities]);
 
