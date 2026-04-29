@@ -177,6 +177,7 @@ export default function FAQPageBuilder({
   const textOnSurface = getReadableTextColor(surfaceColor);
   const mutedOnSurface = textOnSurface === '#f8fafc' ? '#cbd5e1' : '#64748b';
   const textOnPrimary = getReadableTextColor(primaryColor);
+  const surfaceAltColor = resolvedThemeSettings?.surfaceAlt || builderTheme.surfaceAlt;
 
   const builderConfig = normalizeFaqBuilderContent(faqPageContent);
 
