@@ -102,7 +102,7 @@ const PortDropdownFieldset = ({
 
   return (
     <fieldset
-      className="relative z-10 border rounded-md bg-white w-full h-[55px] overflow-visible focus-within:z-[140] focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2"
+      className={`relative border rounded-md bg-white w-full h-[55px] overflow-visible focus-within:outline-none focus-within:border-[rgba(var(--border-color),1)] focus-within:border-2 ${isOpen ? "z-[200]" : "z-10"}`}
       style={
         {
           "--border-color": hexToRgb(themeSettings?.accent || "#8C1F21"),

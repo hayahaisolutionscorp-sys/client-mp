@@ -49,7 +49,7 @@ const VehicleDropdown: React.FC<VehicleDropdownProps> = ({ value = DEFAULT_NUM_V
   }, []);
 
   return (
-    <div ref={dropdownRef} className="relative z-10 inline-block w-full h-[40px] overflow-visible text-left focus-within:z-[120]">
+    <div ref={dropdownRef} className={`relative inline-block w-full h-[40px] overflow-visible text-left ${isOpen ? "z-[200]" : "z-10"}`}>
       {/* Button to toggle dropdown */}
       <button
         data-template-ignore="true"
