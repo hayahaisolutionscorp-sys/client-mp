@@ -129,20 +129,41 @@ export async function createMayaCheckout(
   }
 }
 
+export interface EnabledPaymentMethod {
+  id: string;
+  code: string;
+  name: string;
+  is_enabled: boolean;
+}
+
+export interface EnabledPaymentProvider {
+  id: number;
+  code: string;
+  name: string;
+  is_enabled: boolean;
+  methods: EnabledPaymentMethod[];
+}
+
 /**
- * Fetch enabled payment providers from ayahay-api-v2.
- * Returns provider codes in order, e.g. ['maya'] or ['paymongo'] or ['maya','paymongo'].
- * Throws if the API is unreachable — provider config is managed by admins, not env vars.
+ * Fetch enabled payment providers from ayahay-client-api.
+ * Returns full provider objects with their enabled payment methods nested.
  */
-export async function getEnabledPaymentProviders(): Promise<string[]> {
+export async function getEnabledPaymentProviders(): Promise<EnabledPaymentProvider[]> {
   try {
     const { data } = await axios.get(`${PAYMENT_PROVIDERS_API}/enabled`);
-    const providers: { code: string }[] = Array.isArray(data) ? data : data.data ?? [];
-    return providers.map((p) => p.code);
+    const providers: EnabledPaymentProvider[] = Array.isArray(data) ? data : data.data ?? [];
+    return providers;
   } catch (e) {
     console.error('Could not fetch enabled payment providers from API:', e);
     return [];
   }
+}
+
+/**
+ * Convenience helper: extract just the provider codes from enabled providers.
+ */
+export function getProviderCodes(providers: EnabledPaymentProvider[]): string[] {
+  return providers.map((p) => p.code);
 }
 
 /**

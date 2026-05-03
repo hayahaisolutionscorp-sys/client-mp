@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
@@ -22,7 +22,8 @@ import {
   createPaymongoCheckout,
   createMayaCheckout,
   getEnabledPaymentProviders,
-  initiatePaymongoPaymentIntent
+  initiatePaymongoPaymentIntent,
+  type EnabledPaymentProvider
 } from '@/services';
 import { getShip } from '@/services/shipping-line/ship.service';
 import { SuccessModal } from '@/components/ui/SuccessModal';
@@ -63,7 +64,7 @@ export default function PaymentConfirmationDetails({
   const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [seatLabels, setSeatLabels] = useState<Record<string, Record<string, string>>>({});
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [enabledProviders, setEnabledProviders] = useState<string[]>([]);
+  const [enabledProviders, setEnabledProviders] = useState<EnabledPaymentProvider[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<PaymentPickerMethod | null>(null);
   const { currentUser } = useAuth();
   const { error: toastError } = useToast();
@@ -82,6 +83,9 @@ export default function PaymentConfirmationDetails({
   useEffect(() => {
     getEnabledPaymentProviders().then(setEnabledProviders);
   }, []);
+
+  // Derived codes for provider logic
+  const enabledProviderCodes = enabledProviders.map((p) => p.code);
 
   // Map TripSummary to ITrip (copied/adapted from passenger-details/page.tsx)
   const mapTripSummaryToTrip = useCallback((summary: ITripSummary, shippingLineId: number = 0): ITrip => {
@@ -520,8 +524,8 @@ export default function PaymentConfirmationDetails({
 
     const allVehicleTripAssignments = allLegIds.map((id) => ({ tripId: id }));
 
-    const isMayaEnabled = enabledProviders.includes('maya');
-    const isPaymongoEnabled = enabledProviders.includes('paymongo');
+    const isMayaEnabled = enabledProviderCodes.includes('maya');
+    const isPaymongoEnabled = enabledProviderCodes.includes('paymongo');
     const bothEnabled = isMayaEnabled && isPaymongoEnabled;
 
     if (!isMayaEnabled && !isPaymongoEnabled) {
@@ -810,8 +814,12 @@ export default function PaymentConfirmationDetails({
           <div className="space-y-6">
             <PassengerTripCard departureTrips={departureTrips} returnTrips={returnTrips} />
             {/* Payment method picker â€” shown when both Maya and PayMongo are enabled */}
-            {enabledProviders.includes('maya') && enabledProviders.includes('paymongo') && (
-              <PaymentMethodPicker selected={selectedMethod} onChange={setSelectedMethod} />
+            {enabledProviders.length > 0 && (
+              <PaymentMethodPicker
+                providers={enabledProviders}
+                selected={selectedMethod}
+                onChange={setSelectedMethod}
+              />
             )}
             {/* Booking details â€” Passengers, Vehicles, Cargo */}
             <TripDetails booking={booking} seatLabels={seatLabels} />
@@ -830,7 +838,7 @@ export default function PaymentConfirmationDetails({
             prepareBookingData={prepareBookingData}
             isLoading={isPricingLoading}
             onPay={handleCreateBooking}
-            enabledProviders={enabledProviders}
+            enabledProviders={enabledProviderCodes}
             selectedMethod={selectedMethod}
           />
         </div>
