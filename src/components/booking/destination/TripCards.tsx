@@ -40,12 +40,8 @@ interface TripCardProps {
 }
 
 const getVehicleCapacityDisplay = (trip: ITrip) => {
-  const breakdown = trip.remainingVehicleCapacity || {};
-  const fourWheel = breakdown['4w'];
-  const count = fourWheel != null
-    ? fourWheel.remaining
-    : Math.min(...Object.values(breakdown).map(v => v.remaining), Infinity) || 0;
-  return { count: isFinite(count) ? count : 0, icon: FaCar };
+  const count = trip.availableVehicleCapacity ?? (trip as any).available_vehicle_capacity ?? 0;
+  return { count, icon: FaCar };
 };
 
 export default function TripCards({

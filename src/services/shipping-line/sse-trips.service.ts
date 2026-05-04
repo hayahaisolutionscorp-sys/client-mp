@@ -251,7 +251,7 @@ function mapSSEToITrip(rawTrips: any[]): ITrip[] {
                 .filter((c: any) => c !== null);
 
             const breakdown = seg.vehicle_capacity_breakdown ?? actualSegment.vehicle_capacity_breakdown ?? null;
-            const totalVehicleCapacity = getVehicleCapacityTotal(breakdown);
+            const totalVehicleCapacity = actualSegment.available_vehicle_capacity ?? seg.available_vehicle_capacity ?? getVehicleCapacityTotal(breakdown);
 
             return {
                 id: seg.id || actualSegment.id,
@@ -285,9 +285,9 @@ function mapSSEToITrip(rawTrips: any[]): ITrip[] {
         });
 
         const firstSegment = mappedSegments[0] || {};
-        const totalTripVehicleCapacity = mappedSegments.length > 0
+        const totalTripVehicleCapacity = t.available_vehicle_capacity ?? (mappedSegments.length > 0
             ? Math.min(...mappedSegments.map((s: any) => s.availableVehicleCapacity))
-            : 0;
+            : 0);
 
         return {
             id: t.id,

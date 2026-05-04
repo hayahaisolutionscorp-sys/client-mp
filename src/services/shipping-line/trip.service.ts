@@ -185,7 +185,7 @@ export async function getAvailableTrips(
             .filter((c: any) => c !== null);
 
           const breakdown = seg.vehicle_capacity_breakdown ?? actualSegment.vehicle_capacity_breakdown ?? null;
-          const totalVehicleCapacity = getVehicleCapacityTotal(breakdown);
+          const totalVehicleCapacity = actualSegment.available_vehicle_capacity ?? seg.available_vehicle_capacity ?? getVehicleCapacityTotal(breakdown);
 
           return {
             id: seg.id || actualSegment.id,
@@ -214,9 +214,9 @@ export async function getAvailableTrips(
         });
 
         const firstSegment = mappedSegments[0] || {};
-        const totalTripVehicleCapacity = mappedSegments.length > 0
+        const totalTripVehicleCapacity = t.available_vehicle_capacity ?? (mappedSegments.length > 0
           ? Math.min(...mappedSegments.map((s: any) => s.availableVehicleCapacity))
-          : 0;
+          : 0);
 
         // For connecting trips, the logo lives on each leg rather than a top-level field
         const connectingLogo = isConnecting && t.legs?.[0]?.logo;
