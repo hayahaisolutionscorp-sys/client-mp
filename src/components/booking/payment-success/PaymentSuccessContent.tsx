@@ -6,6 +6,7 @@ import { FaCheckCircle } from 'react-icons/fa';
 import { Button } from '@/components/ui/Button';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import LoadingScreen from '@/components/ui/LoadingScreen';
+import { reconcilePaymongoBooking } from '@/services/booking/payment.service';
 
 export default function PaymentSuccessContent() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function PaymentSuccessContent() {
   const tenantId = searchParams.get('tenant_id');
   const themeSettings = useThemeSettings();
   const [countdown, setCountdown] = useState(5);
+  const [reconciling, setReconciling] = useState(true);
 
   useEffect(() => {
     if (!bookingId) {
@@ -21,20 +23,35 @@ export default function PaymentSuccessContent() {
       return;
     }
 
-    // Countdown timer
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          router.push(`/booking/confirmed/${bookingId}${tenantId ? `?tenant_id=${tenantId}` : ''}`);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    let cancelled = false;
+    // Reconcile against PayMongo before showing the booking page so the
+    // booking is flipped to `completed` even if the webhook is delayed.
+    // Capped at ~6s so a hung gateway doesn't block the redirect forever.
+    const timeoutPromise = new Promise<void>((resolve) =>
+      setTimeout(resolve, 6000),
+    );
+    Promise.race([reconcilePaymongoBooking(bookingId), timeoutPromise]).finally(() => {
+      if (!cancelled) setReconciling(false);
+    });
 
-    return () => clearInterval(timer);
+    return () => {
+      cancelled = true;
+    };
   }, [bookingId, router]);
+
+  useEffect(() => {
+    if (!bookingId || reconciling) return;
+    const timer = setInterval(() => {
+      setCountdown((prev) => (prev <= 0 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [bookingId, reconciling]);
+
+  useEffect(() => {
+    if (!bookingId || reconciling) return;
+    if (countdown > 0) return;
+    router.push(`/booking/confirmed/${bookingId}${tenantId ? `?tenant_id=${tenantId}` : ''}`);
+  }, [countdown, bookingId, tenantId, reconciling, router]);
 
   if (!bookingId) {
     return <LoadingScreen />;
@@ -51,11 +68,13 @@ export default function PaymentSuccessContent() {
         </div>
         
         <h1 className="text-2xl font-bold text-gray-800 mb-4">
-          Payment Successful!
+          {reconciling ? 'Confirming your payment…' : 'Payment Successful!'}
         </h1>
-        
+
         <p className="text-gray-600 mb-6">
-          Your payment has been processed successfully. Your booking is now confirmed.
+          {reconciling
+            ? 'Verifying with the payment gateway. This usually takes a few seconds.'
+            : 'Your payment has been processed successfully. Your booking is now confirmed.'}
         </p>
 
         <div className="bg-gray-100 rounded-lg p-4 mb-6">
@@ -64,7 +83,9 @@ export default function PaymentSuccessContent() {
         </div>
 
         <p className="text-sm text-gray-500 mb-6">
-          Redirecting to booking details in {countdown} seconds...
+          {reconciling
+            ? 'Please wait…'
+            : `Redirecting to booking details in ${countdown} seconds...`}
         </p>
 
         <Button

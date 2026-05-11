@@ -141,6 +141,15 @@ const UserDropdown = ({ shouldBeTransparent = false }: { shouldBeTransparent: bo
             Profile
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href="/my-activity"
+            onMouseEnter={() => router.prefetch('/my-activity')}
+            className="w-full cursor-pointer"
+          >
+            My Activity
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => logout()}

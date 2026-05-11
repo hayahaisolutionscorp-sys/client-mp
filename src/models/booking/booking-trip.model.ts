@@ -5,6 +5,8 @@ import { IBookingTripVehicle } from './booking-trip-vehicle.model';
 export interface IBookingTrip {
   bookingId: string;
   tripId: number;
+  /** booking_trips.id — the per-leg row id; required to target a leg in round-trip rebook/transfer flows. */
+  bookingTripId?: string | null;
   trip?: ITrip;
   direction?: 'departure' | 'return';
 

@@ -74,4 +74,12 @@ export interface IBooking {
   bookingTrips?: IBookingTrip[];
   bookingPaymentItems?: IBookingPaymentItem[];
   tenantId?: number;
+
+  /**
+   * Online payment gateway used for this booking, if any.
+   * 'paymongo' or 'maya' triggers gateway-locked refund flow;
+   * undefined / other values fall back to manual payout.
+   */
+  gatewayCode?: string;
+  paymentMethod?: string;
 }

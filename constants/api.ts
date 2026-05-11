@@ -118,3 +118,9 @@ export const SEAT_PLAN_API = `${BASE_URL}/seat-plans`;
 export const SEATMAP_PUBLIC_API = `${CLIENT_API_BASE_URL}/public`;
 
 export const PROFILES_API = `${BASE_URL}/profiles`;
+
+export const PASSENGER_REQUESTS_API = `${BASE_URL}/passenger-requests`;
+export const PASSENGER_REQUESTS_BY_BOOKING_API = (bookingId: string) =>
+  `${BASE_URL}/passenger-requests/booking/${bookingId}`;
+
+export const PASSENGER_ACTIONS_API = `${BASE_URL}/passenger-actions`;

@@ -39,12 +39,20 @@ export default function TripDetails({ booking, seatLabels }: TripDetailsProps) {
               ?? null;
             const seatCandidate = typeof seatCandidateRaw === 'string' ? seatCandidateRaw.trim() : '';
             const seatCellId = seatCandidate.length > 0 && !isUuid(seatCandidate) ? seatCandidate : null;
+            const isRebooked =
+              (passenger as any)?.removedReasonType === 'Rebooked' ||
+              (passenger as any)?.bookingStatus === 'Rebooked';
             return (
               <div key={index} className="text-customText">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-medium">
+                  <p className={`text-sm font-medium ${isRebooked ? 'text-gray-400 line-through' : ''}`}>
                     {passenger.passenger?.firstName} {passenger.passenger?.lastName}
                   </p>
+                  {isRebooked && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium border border-amber-200">
+                      Rebooked
+                    </span>
+                  )}
                   {seatCellId && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 font-mono border border-violet-200">
                       {seatCellId}
@@ -83,12 +91,22 @@ export default function TripDetails({ booking, seatLabels }: TripDetailsProps) {
             const displayName = v?.modelName || v?.model || v?.make || 'Vehicle';
             const description = v?.modelBody || v?.vehicleType?.name || '';
             const plate = v?.plateNo || v?.plateNumber || v?.plate_number || v?.plate_no;
+            const isRebooked =
+              (vehicle as any)?.removedReasonType === 'Rebooked' ||
+              (vehicle as any)?.bookingStatus === 'Rebooked';
 
             return (
               <div key={index} className="text-customText">
-                <p className="text-sm font-medium">
-                  {displayName} {plate ? `(${plate})` : ''} {description ? `| ${description}` : ''}
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className={`text-sm font-medium ${isRebooked ? 'text-gray-400 line-through' : ''}`}>
+                    {displayName} {plate ? `(${plate})` : ''} {description ? `| ${description}` : ''}
+                  </p>
+                  {isRebooked && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium border border-amber-200">
+                      Rebooked
+                    </span>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -109,13 +127,25 @@ export default function TripDetails({ booking, seatLabels }: TripDetailsProps) {
           <h3 className="text-sm font-semibold text-gray-700">Cargo</h3>
         </div>
         <div className="pl-7 space-y-3">
-          {cargos.map((cargo: any, index: number) => (
-            <div key={index} className="text-customText">
-              <p className="text-sm font-medium">
-                {cargo.commodity?.name || cargo.cargoTypeDescription || 'Cargo'} {cargo.quantity}
-              </p>
-            </div>
-          ))}
+          {cargos.map((cargo: any, index: number) => {
+            const isRebooked =
+              cargo?.removedReasonType === 'Rebooked' ||
+              cargo?.bookingStatus === 'Rebooked';
+            return (
+              <div key={index} className="text-customText">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className={`text-sm font-medium ${isRebooked ? 'text-gray-400 line-through' : ''}`}>
+                    {cargo.commodity?.name || cargo.cargoTypeDescription || 'Cargo'} {cargo.quantity}
+                  </p>
+                  {isRebooked && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium border border-amber-200">
+                      Rebooked
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );

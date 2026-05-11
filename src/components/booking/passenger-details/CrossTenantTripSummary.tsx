@@ -186,6 +186,10 @@ export default function CrossTenantTripSummary({ legs, departureCabinName, depar
 
       const pricingRequest = {
         routeCode: allTrips[0].route_code,
+        // Same snapshot-locking the single-tenant TripSummary uses — without
+        // it, the backend returns no charges and the leg's FareSummary loses
+        // additional charges (fuel surcharge, VAT, terminal fees, …).
+        snapshotId: allTrips[0].rate_snapshot_id ?? undefined,
         tripIds: allTrips.map(t => t.id),
         passengers,
         cargos: [...vehicleCargos, ...looseCargos],

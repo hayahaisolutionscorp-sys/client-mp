@@ -11,7 +11,7 @@ import FareSummary from '@/components/booking/FareSummary';
 import PaymentMethodPicker, { PaymentPickerMethod } from '@/components/booking/payment-confirmation/PaymentMethodPicker';
 import { cacheItem, fetchItem, invalidateItem } from 'helpers/cache.helpers';
 import { useThemeSettings } from '@/hooks/theme-settings';
-import { createBooking, prepareBooking, calculatePricing, getBookingPaymentId, createPaymongoCheckout, createMayaCheckout, getEnabledPaymentProviders, initiatePaymongoPaymentIntent } from '@/services';
+import { createBooking, prepareBooking, calculatePricing, getBookingPaymentId, createPaymongoCheckout, createMayaCheckout, getEnabledPaymentProviders, initiatePaymongoPaymentIntent, type EnabledPaymentProvider } from '@/services';
 import { getShip } from '@/services/shipping-line/ship.service';
 import { SuccessModal } from '@/components/ui/SuccessModal';
 import { useToast } from '@/hooks/use-toast';
@@ -47,7 +47,8 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
   );
   const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [enabledProviders, setEnabledProviders] = useState<string[]>([]);
+  const [enabledProviders, setEnabledProviders] = useState<EnabledPaymentProvider[]>([]);
+  const enabledProviderCodes = enabledProviders.map((p) => p.code);
   const [selectedMethod, setSelectedMethod] = useState<PaymentPickerMethod | null>(null);
   const { currentUser } = useAuth();
   const { error: toastError } = useToast();
@@ -178,8 +179,8 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
     }
 
     // Resolve payment provider
-    const isMayaEnabled = enabledProviders.includes('maya');
-    const isPaymongoEnabled = enabledProviders.includes('paymongo');
+    const isMayaEnabled = enabledProviderCodes.includes('maya');
+    const isPaymongoEnabled = enabledProviderCodes.includes('paymongo');
     const bothEnabled = isMayaEnabled && isPaymongoEnabled;
 
     if (!isMayaEnabled && !isPaymongoEnabled) {
@@ -424,6 +425,8 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
         checkoutUrl = mayaResponse.data.checkoutUrl;
 
       } else if (effectiveMethod === 'paymongo-checkout') {
+        // No specific method picked — let PayMongo's hosted page show its
+        // picker (only PayMongo enabled, no marketplace picker rendered).
         const checkoutRequest = {
           bookingPaymentId: primaryPaymentId,
           lineItems: [{
@@ -433,7 +436,7 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
             currency: 'PHP',
             description: `Payment for bookings ${bookingIds.join(', ')}`,
           }],
-          paymentMethodTypes: ['gcash', 'paymaya', 'qrph', 'card', 'dob'],
+          paymentMethodTypes: ['gcash', 'paymaya', 'qrph', 'dob', 'grab_pay'],
           successUrl,
           cancelUrl,
           referenceNumber: primaryBookingId,
@@ -446,8 +449,9 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
           return false;
         }
         checkoutUrl = checkoutResponse.data.checkoutUrl;
-
       } else if (effectiveMethod === 'qrph' || effectiveMethod === 'dob') {
+        // PayMongo Checkout Session restricted to one method — hosted page
+        // skips its picker because only one method is allowed.
         const checkoutRequest = {
           bookingPaymentId: primaryPaymentId,
           lineItems: [{
@@ -470,9 +474,9 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
           return false;
         }
         checkoutUrl = checkoutResponse.data.checkoutUrl;
-
       } else {
-        // Payment Intent flow: gcash, paymaya, grab_pay
+        // Payment Intent flow — gcash / paymaya / grab_pay redirect
+        // straight to the e-wallet, no PayMongo picker shown.
         const intentRequest = {
           bookingPaymentId: primaryPaymentId,
           amount: combinedGrandTotal,
@@ -535,8 +539,9 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
 
           <div className="space-y-6">
             <PassengerTripCard departureTrips={departureTrips} returnTrips={returnTrips} />
-            {enabledProviders.includes('maya') && enabledProviders.includes('paymongo') && (
+            {enabledProviderCodes.includes('maya') && enabledProviderCodes.includes('paymongo') && (
               <PaymentMethodPicker
+                providers={enabledProviders}
                 selected={selectedMethod}
                 onChange={setSelectedMethod}
               />
@@ -555,7 +560,7 @@ export default function CrossTenantPaymentConfirmationDetails({ legs, commodityI
             commodityId={commodityId}
             isLoading={isPricingLoading}
             onPay={handleCreateBooking}
-            enabledProviders={enabledProviders}
+            enabledProviders={enabledProviderCodes}
             selectedMethod={selectedMethod}
             isCrossTenant={true}
             legPricingData={legs.map((leg, index) => ({

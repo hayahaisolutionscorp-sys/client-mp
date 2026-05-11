@@ -20,6 +20,46 @@ export async function createBooking(payload: any, shippingLineId?: string): Prom
   }
 }
 
+export interface RefundPreviewItem {
+  description: string;
+  charge_code: string | null;
+  category: 'FARE' | 'CHARGES' | 'TAXES' | string;
+  amount: number;
+  is_refundable: boolean;
+  booking_trip_passenger_id: string | null;
+  booking_trip_cargo_id: string | null;
+}
+
+export interface RefundPreview {
+  items: RefundPreviewItem[];
+  subtotal_refundable: number;
+  fault_type: string | null;
+  refund_percentage: number;
+  estimated_refund_total: number;
+}
+
+export async function getRefundPreview(
+  bookingId: string,
+  options: {
+    passengerIds?: string[];
+    cargoIds?: string[];
+    faultType?: string;
+  } = {},
+): Promise<RefundPreview> {
+  const params = new URLSearchParams();
+  if (options.passengerIds && options.passengerIds.length > 0) {
+    params.set('passenger_ids', options.passengerIds.join(','));
+  }
+  if (options.cargoIds && options.cargoIds.length > 0) {
+    params.set('cargo_ids', options.cargoIds.join(','));
+  }
+  if (options.faultType) params.set('fault_type', options.faultType);
+  const qs = params.toString();
+  const url = `${BOOKING_API}/${bookingId}/refund-preview${qs ? `?${qs}` : ''}`;
+  const { data } = await axios.get(url);
+  return data?.data ?? data;
+}
+
 export async function createTentativeBooking(booking: IBooking): Promise<IBooking> {
   try {
     const { data } = await axios.post(BOOKING_API, booking);
@@ -57,13 +97,39 @@ export async function getBookingById(bookingId: string, shippingLineId?: number)
 export function mapBookingData(raw: any): IBooking {
   if (!raw) throw new Error('mapBookingData: raw booking data is null/undefined');
 
-  const mapTrip = (t: any, direction?: 'departure' | 'return') => ({
+  const mapTrip = (t: any, direction?: 'departure' | 'return') => {
+    // Pull the best port identifiers we can from the API response.
+    // For marketplace bookings, `t.origin` / `t.destination` are typically the port codes
+    // (e.g., "MNG", "TLSY") since no separate code field is returned. Treat them as code.
+    const srcCode =
+      t.src_port_code ??
+      t.origin_code ??
+      t.route_code?.split('-')[0] ??
+      t.origin ??
+      null;
+    const destCode =
+      t.dest_port_code ??
+      t.destination_code ??
+      t.route_code?.split('-')[1] ??
+      t.destination ??
+      null;
+    const srcName = t.src_port_name || t.origin || srcCode;
+    const destName = t.dest_port_name || t.destination || destCode;
+    const srcPortId = t.src_port_id ?? t.srcPortId ?? null;
+    const destPortId = t.dest_port_id ?? t.destPortId ?? null;
+    return ({
     tripId: t.id || t.trip_id,
+    bookingTripId: t.booking_trip_id ?? null,
     direction,
     trip: {
       id: t.id || t.trip_id,
-      srcPort: { name: t.origin || t.route_code?.split('-')[0] },
-      destPort: { name: t.destination || t.route_code?.split('-')[1] },
+      shippingLineId: t.shipping_line_id ?? raw.shipping_line_id ?? null,
+      srcPortId,
+      destPortId,
+      srcPortName: srcName,
+      destPortName: destName,
+      srcPort: { id: srcPortId, name: srcName, code: srcCode },
+      destPort: { id: destPortId, name: destName, code: destCode },
       departureDateIso: t.departure,
       arrivalDateIso: t.arrival,
       ship: { name: t.ship_name || raw.ships_used },
@@ -72,9 +138,14 @@ export function mapBookingData(raw: any): IBooking {
     bookingTripPassengers: (t.passengers || []).map((p: any) => ({
       id: p.booking_trip_passenger_id,
       discountType: p.discount_type,
-      price: p.price,
+      price: p.price ?? p.total_price ?? p.totalPrice,
+      totalPrice: Number(p.total_price ?? p.totalPrice ?? p.price ?? 0),
       cabin: { name: p.cabin || p.accommodation },
       seatCellId: p.seatCellId ?? null,
+      bookingStatus: p.booking_status ?? p.bookingStatus ?? null,
+      removedReason: p.removed_reason ?? p.removedReason ?? null,
+      removedReasonType: p.removed_reason_type ?? p.removedReasonType ?? null,
+      paymentBreakdown: p.payment_breakdown ?? null,
       passenger: {
         firstName: p.first_name,
         lastName: p.last_name,
@@ -87,6 +158,9 @@ export function mapBookingData(raw: any): IBooking {
     })),
     bookingTripVehicles: (t.vehicles || []).map((v: any) => ({
       price: v.price,
+      bookingStatus: v.booking_status ?? v.bookingStatus ?? null,
+      removedReason: v.removed_reason ?? v.removedReason ?? null,
+      removedReasonType: v.removed_reason_type ?? v.removedReasonType ?? null,
       vehicle: {
         plateNo: v.plate_no || v.plate_number || v.plateNumber,
         make: v.make,
@@ -100,13 +174,26 @@ export function mapBookingData(raw: any): IBooking {
     bookingTripCargos: (t.cargos || t.cargo || []).map((c: any) => ({
       price: c.price,
       quantity: c.quantity,
+      bookingStatus: c.booking_status ?? c.bookingStatus ?? null,
+      removedReason: c.removed_reason ?? c.removedReason ?? null,
+      removedReasonType: c.removed_reason_type ?? c.removedReasonType ?? null,
       commodity: { name: c.description || c.commodity_name || 'Cargo' }
     }))
   });
+  };
+
+  // Hide soft-deleted booking_trips from the marketplace view. When TMS
+  // transfers a booking to a new trip, the OLD booking_trip row is
+  // soft-deleted (deleted_at set) and a new row is created with the moved
+  // passengers/cargos. The backend's findOne returns both rows; without
+  // this filter the customer sees a phantom "Depart" leg with no
+  // passengers and no contact details — and a single transfer reads as a
+  // round-trip.
+  const isActiveTrip = (t: any) => !t.deleted_at && !t.deletedAt;
 
   let bookingTrips: any[] = [];
   if (Array.isArray(raw.trips)) {
-    const rawTrips = raw.trips || [];
+    const rawTrips = (raw.trips || []).filter(isActiveTrip);
     const depTrips = rawTrips
       .filter((t: any) => t.type === 'departure' || !t.type)
       .sort((a: any, b: any) => (a.sequence || 0) - (b.sequence || 0))
@@ -121,13 +208,37 @@ export function mapBookingData(raw: any): IBooking {
   } else {
     bookingTrips = [
       ...(raw.trips?.departure || [])
+        .filter(isActiveTrip)
         .sort((a: any, b: any) => (a.sequence || 0) - (b.sequence || 0))
         .map((t: any) => mapTrip(t, 'departure')),
       ...(raw.trips?.return || [])
+        .filter(isActiveTrip)
         .sort((a: any, b: any) => (a.sequence || 0) - (b.sequence || 0))
         .map((t: any) => mapTrip(t, 'return'))
     ];
   }
+
+  // Expose charges/taxes from payment_breakdown so downstream UI (e.g. rebook modal)
+  // can re-apply them in calculations without an extra fetch.
+  const pb = raw.payment_breakdown ?? {};
+  const passengersFare = Number(pb.passengers_fare ?? 0);
+  const cargoFare = Number(pb.cargo_fare ?? 0);
+  const chargesTotal = Number(pb.charges_total ?? 0);
+  const taxesTotal = Number(pb.taxes_total ?? 0);
+  const chargesBreakdown = [
+    ...((pb.charges as any[]) ?? []).map((c: any) => ({
+      code: c.charge_code ?? '',
+      description: c.description ?? '',
+      amount: Number(c.amount ?? 0),
+      kind: 'charge' as const,
+    })),
+    ...((pb.taxes as any[]) ?? []).map((t: any) => ({
+      code: t.charge_code ?? '',
+      description: t.description ?? '',
+      amount: Number(t.amount ?? 0),
+      kind: 'tax' as const,
+    })),
+  ];
 
   return {
     id: raw.id,
@@ -136,14 +247,42 @@ export function mapBookingData(raw: any): IBooking {
     paymentStatus: (raw.payment_status || 'pending').toLowerCase() as any,
     totalPrice: parseFloat(raw.total_price),
     priceWithoutMarkup: parseFloat(raw.price_without_markup || raw.total_price),
+    paymentBreakdown: {
+      passengersFare,
+      cargoFare,
+      chargesTotal,
+      taxesTotal,
+      charges: chargesBreakdown,
+    },
     bookingType: raw.booking_type,
-    contactEmail: raw.contact_email || raw.email || (raw.trips?.departure?.[0]?.passengers?.[0]?.email),
-    contactMobile: raw.contact_mobile || raw.mobile || (raw.trips?.departure?.[0]?.passengers?.[0]?.mobile_number) || (raw.trips?.departure?.[0]?.passengers?.[0]?.mobileNumber),
+    // Pull contact fallbacks from the first ACTIVE leg's first passenger.
+    // After a transfer, raw.trips.departure[0] is the old soft-deleted leg
+    // (no passengers) — using bookingTrips[0] (already filtered above)
+    // ensures we hit the post-transfer leg with real passengers.
+    contactEmail:
+      raw.contact_email ||
+      raw.email ||
+      bookingTrips[0]?.bookingTripPassengers?.[0]?.passenger?.email,
+    contactMobile:
+      raw.contact_mobile ||
+      raw.mobile ||
+      bookingTrips[0]?.bookingTripPassengers?.[0]?.passenger?.mobileNumber,
     createdAtIso: raw.booking_created_at || raw.booking_date,
     consigneeName: raw.consignee_name || raw.booked_by_name || (bookingTrips[0]?.bookingTripPassengers?.[0]?.passenger?.firstName + ' ' + bookingTrips[0]?.bookingTripPassengers?.[0]?.passenger?.lastName),
     bookingTrips: bookingTrips as any,
     isBookingRequest: false,
     shippingLineId: 0,
+    gatewayCode: raw.gateway_code ?? raw.payments?.find?.((p: any) =>
+      p?.gateway_code && ['paymongo', 'maya'].includes(String(p.gateway_code).toLowerCase()),
+    )?.gateway_code ?? undefined,
+    // Prefer epayment_method (the sub-method, e.g. 'GCash' / 'PayMaya' /
+    // 'OnlineBanking' / 'QRPh' / 'GrabPay' / 'Maya' for card) over
+    // payment_method (which is just the high-level type 'ONLINE' / 'OTC'
+    // and not specific enough for the refund-destination label).
+    paymentMethod:
+      raw.payments?.[0]?.epayment_method ??
+      raw.payments?.[0]?.payment_method ??
+      undefined,
   } as IBooking;
 }
 

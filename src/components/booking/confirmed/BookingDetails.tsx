@@ -6,23 +6,133 @@ import { FiLoader } from 'react-icons/fi';
 import Image from 'next/image';
 
 import FareSummary from '@/components/booking/FareSummary';
+import ManageBookingSection from '@/components/booking/confirmed/manage-booking/ManageBookingSection';
 import InfoCard from '@/components/booking/confirmed/InfoCard';
 import PassengerConfirmedTripCard from '@/components/booking/confirmed/PassengerConfirmedTripCard';
 import TripDetails from '@/components/booking/payment-confirmation/TripDetails';
 import PaymentSuccessCard from '@/components/booking/confirmed/PaymentSuccessCard';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import { getBookingById, prepareBooking, calculatePricing, derivePricingStateFromBooking } from '@/services';
+import {
+  cancelPassengerAction,
+  finalizePassengerAction,
+} from '@/services/passenger-actions/passenger-actions.service';
 import { getShip } from '@/services/shipping-line/ship.service';
 import { IBooking, ITrip } from '@/models';
 import { IPrepareBookingData, ITripSummary } from '@/models/booking/prepare-booking.model';
 import { PricingResponse } from '@/types/booking/pricing';
+
+const ACTION_FEEDBACK: Record<
+  string,
+  { title: string; description: string; tone: 'success' | 'cancel' }
+> = {
+  'upgrade-success': {
+    title: 'Cabin upgraded',
+    description:
+      'Payment received. Your cabin has been upgraded — check the latest details below.',
+    tone: 'success',
+  },
+  'upgrade-cancel': {
+    title: 'Upgrade payment cancelled',
+    description:
+      'No charge was made. Your booking is unchanged — feel free to try again.',
+    tone: 'cancel',
+  },
+  'rebook-success': {
+    title: 'Rebook confirmed',
+    description:
+      'Payment received. Your booking has been rebooked to the new trip — see the updated itinerary below.',
+    tone: 'success',
+  },
+  'rebook-cancel': {
+    title: 'Rebook payment cancelled',
+    description:
+      'No charge was made. Your original booking is unchanged.',
+    tone: 'cancel',
+  },
+};
 
 export default function BookingDetails() {
   const params = useParams();
   const searchParams = useSearchParams();
   const bookingId = params?.id as string;
   const tenantId = searchParams?.get('tenant_id') ? Number(searchParams.get('tenant_id')) : undefined;
+  const action = searchParams?.get('action') ?? null;
+  const actionId = searchParams?.get('action_id') ?? null;
   const themeSettings = useThemeSettings();
+  const [, setFinalizing] = useState(false);
+  const [bookingRefreshKey, setBookingRefreshKey] = useState(0);
+
+  const [actionFeedback, setActionFeedback] = useState<typeof ACTION_FEEDBACK[string] | null>(
+    null,
+  );
+
+  // On mount, surface a banner when the user just returned from a gateway flow.
+  // If an action_id is present, also finalize it server-side as a webhook
+  // fallback (covers localhost dev where PayMongo can't reach our webhook).
+  useEffect(() => {
+    if (action && ACTION_FEEDBACK[action]) {
+      setActionFeedback(ACTION_FEEDBACK[action]);
+    }
+    const isSuccess =
+      action === 'upgrade-success' || action === 'rebook-success';
+    const isCancel =
+      action === 'upgrade-cancel' || action === 'rebook-cancel';
+    let cancelled = false;
+    (async () => {
+      if (isCancel && actionId) {
+        try {
+          await cancelPassengerAction(actionId);
+        } catch {
+          // Best-effort — webhook may have already failed/cancelled it.
+        }
+      }
+      if (isSuccess && actionId) {
+        setFinalizing(true);
+        try {
+          let result = await finalizePassengerAction(actionId);
+          // The webhook may still be mid-flight when we land here (it just
+          // claimed the row atomically and is running bulkRebook). Retry once
+          // after a short delay so we still get the new_booking_id.
+          if (
+            !cancelled &&
+            action === 'rebook-success' &&
+            !result?.newBookingId &&
+            (result?.status === 'PROCESSING' ||
+              result?.status === 'PENDING_PAYMENT')
+          ) {
+            await new Promise((r) => setTimeout(r, 1500));
+            if (!cancelled) result = await finalizePassengerAction(actionId);
+          }
+          if (
+            !cancelled &&
+            action === 'rebook-success' &&
+            result?.newBookingId &&
+            result.newBookingId !== bookingId
+          ) {
+            const next = `/booking/confirmed/${result.newBookingId}?action=rebook-success`;
+            window.location.replace(next);
+            return;
+          }
+          if (!cancelled) setBookingRefreshKey((k) => k + 1);
+        } catch {
+          // Surface nothing — the webhook may have already settled this, or
+          // the user can refresh to retry. Banner already informs them.
+        } finally {
+          if (!cancelled) setFinalizing(false);
+        }
+      }
+      if (action && typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('action');
+        url.searchParams.delete('action_id');
+        window.history.replaceState({}, '', url.toString());
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [action, actionId]);
 
   const [booking, setBooking] = useState<IBooking | undefined>(undefined);
   const [loading, setLoading] = useState(true);
@@ -52,13 +162,46 @@ export default function BookingDetails() {
 
         if (hasPb) {
           const departureLeg = raw.trips?.departure?.[0] || {};
-          const passengers: any[] = departureLeg.passengers || [];
-          const vehicles: any[] = departureLeg.vehicles || [];
-          const cargos: any[] = departureLeg.cargos || departureLeg.cargo || [];
+          const allPassengers: any[] = departureLeg.passengers || [];
+          const allVehicles: any[] = departureLeg.vehicles || [];
+          const allCargos: any[] = departureLeg.cargos || departureLeg.cargo || [];
+
+          // Hide rebooked passengers / vehicles / cargos from the fare summary —
+          // they've been transferred to a new booking and the matching credit
+          // already shows up under "Additional Charges" as "Credit to New
+          // Booking". Without this filter the summary still lists the rebooked
+          // pax with a halved per-pax price.
+          const isRebooked = (item: any) =>
+            item?.removed_reason_type === 'Rebooked' ||
+            item?.removedReasonType === 'Rebooked' ||
+            item?.booking_status === 'Rebooked' ||
+            item?.bookingStatus === 'Rebooked';
+
+          const passengers = allPassengers.filter((p) => !isRebooked(p));
+          const vehicles = allVehicles.filter((v) => !isRebooked(v));
+          const cargos = allCargos.filter((c) => !isRebooked(c));
 
           const paxCount = passengers.length;
           const cargoCount = vehicles.length + cargos.length;
+          const allPaxCount = allPassengers.length;
+          const allCargoCount = allVehicles.length + allCargos.length;
 
+          // pb.passengers_fare is the booking-wide aggregate (still includes
+          // the rebooked pax's fare). Scale it down by active/total so the
+          // summary reflects only what's left on this booking.
+          const activePassengersFare =
+            allPaxCount > 0 ? (pb.passengers_fare * paxCount) / allPaxCount : 0;
+          const activeCargoFare =
+            allCargoCount > 0 ? (pb.cargo_fare * cargoCount) / allCargoCount : 0;
+
+          // Prefer each passenger's own payment_breakdown.base_fare (summed
+          // from that passenger's FARE line items by the API) over a flat
+          // average of the booking-wide aggregate. Without this, a per-pax
+          // cabin upgrade shows both passengers at the average instead of
+          // the upgraded passenger's actual fare. Fall back to the average
+          // only when payment_breakdown is missing (older bookings).
+          const fallbackPaxFare =
+            paxCount > 0 ? activePassengersFare / paxCount : 0;
           const passengerPrices = passengers.map((p: any, i: number) => ({
             index: i,
             tripId: '',
@@ -66,17 +209,25 @@ export default function BookingDetails() {
             passengerType: p.discount_type || p.discountType || 'ADULT',
             accommodationCode:
               p.cabin_type_name || p.cabinTypeName || p.cabin || p.accommodation || '',
-            baseFare: paxCount > 0 ? pb.passengers_fare / paxCount : 0,
+            baseFare:
+              p.payment_breakdown?.base_fare != null
+                ? Number(p.payment_breakdown.base_fare)
+                : fallbackPaxFare,
             currency: 'PHP',
           }));
 
+          const fallbackCargoFare =
+            cargoCount > 0 ? activeCargoFare / cargoCount : 0;
           const cargoPriceItems = [
             ...vehicles.map((v: any, i: number) => ({
               index: i,
               tripId: '',
               cargoType: 'VEHICLE',
               cargoClassCode: v.type || v.vehicle_type || v.make || 'Vehicle',
-              baseFare: cargoCount > 0 ? pb.cargo_fare / cargoCount : 0,
+              baseFare:
+                v.payment_breakdown?.base_fare != null
+                  ? Number(v.payment_breakdown.base_fare)
+                  : fallbackCargoFare,
               currency: 'PHP',
               rateUnit: 'unit',
             })),
@@ -85,7 +236,10 @@ export default function BookingDetails() {
               tripId: '',
               cargoType: 'CARGO',
               cargoClassCode: c.description || 'Cargo',
-              baseFare: cargoCount > 0 ? pb.cargo_fare / cargoCount : 0,
+              baseFare:
+                c.payment_breakdown?.base_fare != null
+                  ? Number(c.payment_breakdown.base_fare)
+                  : fallbackCargoFare,
               currency: 'PHP',
               rateUnit: 'unit',
             })),
@@ -166,7 +320,7 @@ export default function BookingDetails() {
     };
 
     fetchBooking();
-  }, [bookingId]);
+  }, [bookingId, bookingRefreshKey]);
 
   // Map TripSummary to ITrip (reused logic)
   const mapTripSummaryToTrip = useCallback((summary: ITripSummary, shippingLineId: number = 0): ITrip => {
@@ -207,6 +361,29 @@ export default function BookingDetails() {
             <div className="flex flex-col lg:flex-row justify-center gap-6 lg:gap-8">
               {/* Left Column */}
               <div className="w-full lg:w-2/3 space-y-6">
+                {actionFeedback && (
+                  <div
+                    className={`flex items-start justify-between gap-3 rounded-xl border p-4 shadow-sm ${
+                      actionFeedback.tone === 'success'
+                        ? 'bg-green-50 border-green-200 text-green-900'
+                        : 'bg-amber-50 border-amber-200 text-amber-900'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-semibold text-sm">{actionFeedback.title}</p>
+                      <p className="text-xs mt-0.5 leading-snug">
+                        {actionFeedback.description}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActionFeedback(null)}
+                      className="text-xs font-medium underline opacity-70 hover:opacity-100"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
                 <PaymentSuccessCard booking={booking} />
                 <TripDetails booking={booking} />
                 <PassengerConfirmedTripCard booking={booking} />
@@ -215,6 +392,7 @@ export default function BookingDetails() {
               {/* Right Column */}
               <div className="w-full lg:w-1/3 space-y-6">
                 <div>
+                  <ManageBookingSection booking={booking!} />
                   <FareSummary
                     booking={booking}
                     pricingData={pricingData}

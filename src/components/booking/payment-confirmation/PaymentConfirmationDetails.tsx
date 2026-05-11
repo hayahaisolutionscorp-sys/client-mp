@@ -22,7 +22,6 @@ import {
   createPaymongoCheckout,
   createMayaCheckout,
   getEnabledPaymentProviders,
-  initiatePaymongoPaymentIntent,
   type EnabledPaymentProvider
 } from '@/services';
 import { getShip } from '@/services/shipping-line/ship.service';
@@ -387,6 +386,11 @@ export default function PaymentConfirmationDetails({
 
         const pricingRequest = {
           routeCode: allTrips[0].route_code,
+          // Lock pricing to the trip's frozen rate snapshot so charge rules
+          // (fuel surcharge, VAT, terminal fees, …) are applied — without
+          // it the backend returns charges:[] and the FareSummary collapses
+          // to bare fare. Must match TripSummary's request on the booking page.
+          snapshotId: allTrips[0].rate_snapshot_id ?? undefined,
           tripIds: allTrips.map((trip) => trip.id),
           passengers,
           cargos
@@ -546,7 +550,7 @@ export default function PaymentConfirmationDetails({
       grab_pay: 'GrabPay',
       qrph: 'QRPh',
       dob: 'OnlineBanking',
-      'paymongo-checkout': 'PayMongo'
+      'paymongo-checkout': 'PayMongo',
     };
     const resolvedPaymentMethod = 'ONLINE';
     const resolvedEpaymentMethod = epaymentMethodForDB[effectiveMethod] ?? 'PayMongo';
@@ -682,7 +686,8 @@ export default function PaymentConfirmationDetails({
         }
         checkoutUrl = mayaResponse.data.checkoutUrl;
       } else if (effectiveMethod === 'paymongo-checkout') {
-        // Only PayMongo enabled → use checkout session (user picks method on PayMongo's page)
+        // No specific method picked (e.g. only PayMongo enabled and no
+        // picker shown) — let PayMongo's hosted page show its own picker.
         const amountInCentsCalc = Math.round(grandTotal * 100);
         const checkoutRequest = {
           bookingPaymentId,
@@ -695,7 +700,7 @@ export default function PaymentConfirmationDetails({
               description: `Payment for booking ${bookingId}`
             }
           ],
-          paymentMethodTypes: ['gcash', 'paymaya', 'qrph', 'card', 'dob'],
+          paymentMethodTypes: ['gcash', 'paymaya', 'qrph', 'dob', 'grab_pay'],
           successUrl,
           cancelUrl,
           referenceNumber: bookingId,
@@ -708,7 +713,11 @@ export default function PaymentConfirmationDetails({
           return false;
         }
         checkoutUrl = checkoutResponse.data.checkoutUrl;
-      } else if (effectiveMethod === 'qrph' || effectiveMethod === 'dob') {
+      } else {
+        // Any other PayMongo method (gcash / paymaya / grab_pay / qrph / dob)
+        // — go through PayMongo's hosted Checkout Session restricted to the
+        // chosen method. The hosted page shows the method, amount, and any
+        // method-specific UI before proceeding to e-wallet authorization.
         const amountInCentsCalc = Math.round(grandTotal * 100);
         const checkoutRequest = {
           bookingPaymentId,
@@ -734,27 +743,6 @@ export default function PaymentConfirmationDetails({
           return false;
         }
         checkoutUrl = checkoutResponse.data.checkoutUrl;
-      } else {
-        // Payment Intent flow: gcash, paymaya, grab_pay
-        const intentRequest = {
-          bookingPaymentId,
-          amount: grandTotal,
-          paymentMethodType: effectiveMethod as 'gcash' | 'paymaya' | 'grab_pay',
-          returnUrl: successUrl,
-          billing: {
-            name:
-              `${currentUser?.passenger?.firstName || ''} ${currentUser?.passenger?.lastName || ''}`.trim() ||
-              undefined,
-            email: currentUser?.email || undefined,
-            phone: currentUser?.passenger?.phone || undefined
-          }
-        };
-        const intentResponse = await initiatePaymongoPaymentIntent(intentRequest, shippingLineId);
-        if (!intentResponse?.data?.redirectUrl) {
-          toastError('Failed to initiate PayMongo payment. Please try again.', { title: 'Payment Error' });
-          return false;
-        }
-        checkoutUrl = intentResponse.data.redirectUrl;
       }
 
       invalidateItem('seat-assignments');

@@ -10,6 +10,7 @@ import { ITrip } from '../shipping-line/trip.model';
 import { IPassenger } from '../user-management/passenger.model';
 
 export interface IBookingTripPassenger {
+  id?: string;
   bookingId: string;
   booking?: IBooking;
   tripId: number;
@@ -52,6 +53,17 @@ export interface IBookingTripPassenger {
   // see IBooking.cancellationReasonType
   removedReasonType?: keyof typeof BOOKING_CANCELLATION_TYPE;
   discountType?: keyof typeof DISCOUNT_TYPE;
+
+  bookingStatus?: string | null;
+
+  paymentBreakdown?: {
+    base_fare?: number;
+    charges_total?: number;
+    taxes_total?: number;
+    charges?: Array<{ description: string; charge_code: string | null; amount: number }>;
+    taxes?: Array<{ description: string; charge_code: string | null; amount: number }>;
+    total?: number;
+  } | null;
 
   bookingPaymentItems?: IBookingPaymentItem[];
 }

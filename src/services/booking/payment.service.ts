@@ -103,6 +103,26 @@ export async function createPaymongoCheckout(
 }
 
 /**
+ * Reconcile any pending PayMongo transactions for a booking against the
+ * live gateway. Called from the marketplace `success_url` page so the
+ * booking flips to `completed` even when the webhook is delayed/lost.
+ *
+ * Idempotent — safe to call regardless of whether the webhook already
+ * fired. Returns `{ status: 'completed' | 'pending' | 'no_transaction', promoted }`.
+ */
+export async function reconcilePaymongoBooking(
+  bookingId: string,
+): Promise<{ status: string; promoted: number } | undefined> {
+  try {
+    const { data } = await axios.post(`${PAYMONGO_API}/reconcile/booking/${bookingId}`);
+    return data;
+  } catch (e: any) {
+    console.error('Failed to reconcile PayMongo booking:', e?.response?.data || e?.message);
+    return undefined;
+  }
+}
+
+/**
  * Create a Maya hosted checkout session
  */
 export async function createMayaCheckout(

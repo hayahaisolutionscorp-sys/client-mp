@@ -38,7 +38,19 @@ export default function PassengerConfirmedTripCard({ booking }: PassengerConfirm
 
   const TripCard = ({ type, tripIndex, tripData }: { type: 'Depart' | 'Return'; tripIndex: number; tripData?: any }) => {
     const trip = tripData || booking?.bookingTrips?.[tripIndex];
-    const cabinName = trip?.bookingTripPassengers?.[0]?.cabin?.name;
+    // After per-passenger cabin upgrade/downgrade, passengers on the same trip
+    // can be on different cabins. List one badge per (cabin × passenger count)
+    // so the trip card reflects the actual mix instead of just the first
+    // passenger's cabin.
+    const cabinCounts: Record<string, number> = {};
+    for (const p of (trip?.bookingTripPassengers ?? []) as any[]) {
+      // Skip rebooked passengers — their cabin moved to the new booking.
+      if (p?.removedReasonType === 'Rebooked' || p?.bookingStatus === 'Rebooked') continue;
+      const name = p?.cabin?.name;
+      if (!name) continue;
+      cabinCounts[name] = (cabinCounts[name] ?? 0) + 1;
+    }
+    const cabinBadges = Object.entries(cabinCounts).map(([name, count]) => ({ name, count }));
 
     return (
       <div className="border rounded-lg shadow-md bg-white p-3 sm:p-4">
@@ -89,17 +101,23 @@ export default function PassengerConfirmedTripCard({ booking }: PassengerConfirm
             </span>
           </div>
 
-          {cabinName && (
-            <span
-              className="rounded-full text-[10px] sm:text-xs font-semibold px-3 py-1 border shadow-sm"
-              style={{
-                borderColor: `${themeSettings?.accent || '#8C1F21'}40`,
-                color: '#4B5563', // gray-600 for better readability
-                backgroundColor: '#F9FAFB' // gray-50
-              }}
-            >
-              {cabinName}
-            </span>
+          {cabinBadges.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {cabinBadges.map(({ name, count }) => (
+                <span
+                  key={name}
+                  className="rounded-full text-[10px] sm:text-xs font-semibold px-3 py-1 border shadow-sm"
+                  style={{
+                    borderColor: `${themeSettings?.accent || '#8C1F21'}40`,
+                    color: '#4B5563',
+                    backgroundColor: '#F9FAFB',
+                  }}
+                >
+                  {name}
+                  {cabinBadges.length > 1 || count > 1 ? ` × ${count}` : ''}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </div>
