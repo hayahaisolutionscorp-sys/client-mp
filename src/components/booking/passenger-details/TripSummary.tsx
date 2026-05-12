@@ -9,7 +9,7 @@ import PassengerTripCard from '@/components/booking/PassengerTripCard';
 import PaymentMethodSelector, { PaymentMethodType } from '@/components/booking/payment/PaymentMethodSelector';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { PiInfo } from 'react-icons/pi';
 import { FiPlus } from 'react-icons/fi';
 import Image from 'next/image';
@@ -25,6 +25,8 @@ import { VehicleInformationFormHandle } from '@/components/VehicleInformationFor
 import { Button } from '@/components/ui/Button';
 import { IPrepareBookingData } from '@/models/booking/prepare-booking.model';
 import { getTripSedanFitCapacity } from '@/services/shipping-line/trip.service';
+import { usePricingPreview } from '@/hooks/use-pricing-preview';
+import type { CalculatePricingRequest } from '@/types/booking/pricing';
 
 interface Props {
   departureTripId?: string;
@@ -82,8 +84,6 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
   const cargoFormRef = useRef<CargoInformationFormHandle>(null);
   const passengerFormRef = useRef<{ handleAddCompanion: () => void }>(null);
 
-  const [pricingData, setPricingData] = useState<any>(() => getCachedData()?.pricingData || null);
-  const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [liveVehicleCapacities, setLiveVehicleCapacities] = useState<Record<string, number>>({});
 
   const applyLiveCapacity = useCallback((trips: ITrip[]): ITrip[] => {
@@ -202,83 +202,68 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
     };
   }, [departureTrips, returnTrips]);
 
-  useEffect(() => {
-    const fetchPricing = async () => {
-      if (!prepareBookingData || !passengerDetails) return;
+  const pricingRequest = useMemo((): CalculatePricingRequest | null => {
+    if (!prepareBookingData || !passengerDetails) return null;
+    const allTrips = [...(prepareBookingData.departure || []), ...(prepareBookingData.return || [])];
+    if (!allTrips.length) return null;
+    if (vehicleDepartureDetails?.some(v => !v.vehicleTypeId || !v.plateNumber)) return null;
+    if (cargoDetails?.some(c => !c.commodityId || !c.quantity)) return null;
 
-      const allTrips = [...(prepareBookingData.departure || []), ...(prepareBookingData.return || [])];
-      if (!allTrips.length) return;
+    const departureCabinIds = (departureCabinId || '').split('|');
+    const returnCabinIds = (returnCabinId || '').split('|');
+    const tripCabinMap = new Map<string, number>();
+    (prepareBookingData.departure || []).forEach((t, i) => {
+      const id = Number(departureCabinIds[i] || departureCabinIds[0]);
+      if (id) tripCabinMap.set(t.id, id);
+    });
+    (prepareBookingData.return || []).forEach((t, i) => {
+      const id = Number(returnCabinIds[i] || returnCabinIds[0]);
+      if (id) tripCabinMap.set(t.id, id);
+    });
 
-      const allPassengers = [passengerDetails.passenger, ...passengerDetails.companions];
+    const allPassengers = [passengerDetails.passenger, ...passengerDetails.companions];
+    const passengers = allPassengers.map((p, i) => ({
+      index: i,
+      passengerType: p?.discountType || 'Adult',
+      tripAssignments: allTrips.map(t => ({
+        tripId: t.id,
+        cabinId: tripCabinMap.get(t.id) ?? null,
+        discountType: (p?.discountType || 'ADULT').toUpperCase(),
+      })),
+    }));
 
-      // Validate vehicles and cargos are complete before pricing
-      if (vehicleDepartureDetails?.some(v => !v.vehicleTypeId || !v.plateNumber)) return;
-      if (cargoDetails?.some(c => !c.commodityId || !c.quantity)) return;
-
-      const departureCabinIds = (departureCabinId || '').split('|');
-      const returnCabinIds = (returnCabinId || '').split('|');
-      const tripCabinMap = new Map<string, number>();
-      (prepareBookingData.departure || []).forEach((t, i) => {
-        const id = Number(departureCabinIds[i] || departureCabinIds[0]);
-        if (id) tripCabinMap.set(t.id, id);
-      });
-      (prepareBookingData.return || []).forEach((t, i) => {
-        const id = Number(returnCabinIds[i] || returnCabinIds[0]);
-        if (id) tripCabinMap.set(t.id, id);
-      });
-
-      const passengers = allPassengers.map((p, i) => ({
+    const vehicleCargos = (vehicleDepartureDetails || [])
+      .filter(v => v.vehicleTypeId)
+      .map((v, i) => ({
         index: i,
-        passengerType: p?.discountType || 'Adult',
-        tripAssignments: allTrips.map(t => ({
-          tripId: t.id,
-          cabinId: tripCabinMap.get(t.id) ?? null,
-          discountType: (p?.discountType || 'ADULT').toUpperCase(),
-        })),
+        cargoType: 'rolling' as const,
+        cargoClassCode: String(v.vehicleTypeId),
+        tripAssignments: allTrips.map(t => ({ tripId: t.id })),
       }));
 
-      const vehicleCargos = (vehicleDepartureDetails || [])
-        .filter(v => v.vehicleTypeId)
-        .map((v, i) => ({
-          index: i,
-          cargoType: 'rolling' as const,
-          cargoClassCode: String(v.vehicleTypeId),
-          tripAssignments: allTrips.map(t => ({ tripId: t.id })),
-        }));
+    const looseCargos = (cargoDetails || [])
+      .filter(c => c.commodityId && c.quantity)
+      .map((c, i) => ({
+        index: vehicleCargos.length + i,
+        cargoType: 'loose' as const,
+        cargoClassCode: c.cargo_class || undefined,
+        quantity: c.quantity,
+        tripAssignments: allTrips.map(t => ({ tripId: t.id })),
+      }));
 
-      const looseCargos = (cargoDetails || [])
-        .filter(c => c.commodityId && c.quantity)
-        .map((c, i) => ({
-          index: vehicleCargos.length + i,
-          cargoType: 'loose' as const,
-          cargoClassCode: c.cargo_class || undefined,
-          quantity: c.quantity,
-          tripAssignments: allTrips.map(t => ({ tripId: t.id })),
-        }));
-
-      const pricingRequest = {
-        routeCode: allTrips[0].route_code,
-        snapshotId: allTrips[0].rate_snapshot_id ?? undefined,
-        tripIds: allTrips.map(t => t.id),
-        passengers,
-        cargos: [...vehicleCargos, ...looseCargos],
-      };
-
-      setIsPricingLoading(true);
-      try {
-        const { calculatePricing } = await import('@/services/booking/booking.service');
-        const data = await calculatePricing(pricingRequest, undefined, shippingLineId);
-        setPricingData(data?.data);
-      } catch (error) {
-        console.error('Failed to fetch pricing:', error);
-      } finally {
-        setIsPricingLoading(false);
-      }
+    return {
+      routeCode: allTrips[0].route_code,
+      snapshotId: allTrips[0].rate_snapshot_id ?? undefined,
+      tripIds: allTrips.map(t => t.id),
+      passengers,
+      cargos: [...vehicleCargos, ...looseCargos],
     };
+  }, [prepareBookingData, departureCabinId, returnCabinId, passengerDetails, vehicleDepartureDetails, cargoDetails]);
 
-    const debounceTimer = setTimeout(fetchPricing, 500);
-    return () => clearTimeout(debounceTimer);
-  }, [prepareBookingData, departureCabinId, returnCabinId, passengerDetails, vehicleDepartureDetails, cargoDetails, shippingLineId]);
+  const { pricingData, isLoading: isPricingLoading } = usePricingPreview({
+    request: pricingRequest,
+    shippingLineId,
+  });
 
   return (
     <>
@@ -414,7 +399,7 @@ export default function TripSummary({ departureTripId, returnTripId, initialDepa
           contactDetails={contactDetails ? contactDetails : undefined}
           vehicleDepartureDetails={vehicleDepartureDetails || undefined}
           vehicleReturnDetails={vehicleDepartureDetails || undefined}
-          pricingData={pricingData}
+          pricingData={pricingData ?? undefined}
           prepareBookingData={prepareBookingData}
           cargoDetails={cargoDetails}
           commodityId={commodityId}

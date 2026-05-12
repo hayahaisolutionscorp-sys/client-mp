@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -17,19 +17,19 @@ import { useThemeSettings } from '@/hooks/theme-settings';
 import {
   createBooking,
   prepareBooking,
-  calculatePricing,
   getBookingPaymentId,
   createPaymongoCheckout,
   createMayaCheckout,
   getEnabledPaymentProviders,
   type EnabledPaymentProvider
 } from '@/services';
+import { usePricingPreview } from '@/hooks/use-pricing-preview';
+import type { CalculatePricingRequest } from '@/types/booking/pricing';
 import { getShip } from '@/services/shipping-line/ship.service';
 import { SuccessModal } from '@/components/ui/SuccessModal';
 import { useToast } from '@/hooks/use-toast';
 import { ITrip, IBooking, IVehicleModel } from '@/models';
 import { IPrepareBookingData, ITripSummary } from '@/models/booking/prepare-booking.model';
-import { PricingResponse } from '@/types/booking/pricing';
 
 interface Props {
   departureTripId?: string;
@@ -59,8 +59,6 @@ export default function PaymentConfirmationDetails({
   const [prepareBookingData, setPrepareBookingData] = useState<IPrepareBookingData | undefined>(
     initialPrepareBookingData
   );
-  const [pricingData, setPricingData] = useState<PricingResponse['data'] | undefined>(undefined);
-  const [isPricingLoading, setIsPricingLoading] = useState(false);
   const [seatLabels, setSeatLabels] = useState<Record<string, Record<string, string>>>({});
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [enabledProviders, setEnabledProviders] = useState<EnabledPaymentProvider[]>([]);
@@ -252,7 +250,6 @@ export default function PaymentConfirmationDetails({
       // Use local state directly instead of creating a tentative booking
       setBooking(fullMetadata);
 
-      // If cached prepareBookingData and pricingData exist, set them to avoid redundant calls
       if (rawData.prepareBookingData) {
         setPrepareBookingData(rawData.prepareBookingData);
 
@@ -276,10 +273,6 @@ export default function PaymentConfirmationDetails({
         setReturnTrips(mappedRetTrips.length > 0 ? mappedRetTrips : undefined);
       }
 
-      if (rawData.pricingData) {
-        setPricingData(rawData.pricingData);
-      }
-
       cacheItem('booking-response', fullMetadata, 60 * 24);
       invalidateItem('booking-json');
     } else {
@@ -292,122 +285,94 @@ export default function PaymentConfirmationDetails({
     processBooking();
   }, [processBooking]);
 
-  // Pricing Calculation
-  useEffect(() => {
-    const fetchPricing = async () => {
-      if (!booking || !prepareBookingData || pricingData) return;
+  const pricingRequest = useMemo((): CalculatePricingRequest | null => {
+    if (!booking || !prepareBookingData) return null;
+    const allTrips = [...(prepareBookingData.departure || []), ...(prepareBookingData.return || [])];
+    if (!allTrips.length) return null;
 
-      setIsPricingLoading(true);
-      try {
-        const rawData = booking as any;
-        const passengerDetails = rawData.passengerDetails;
-        const allTrips = [...(prepareBookingData.departure || []), ...(prepareBookingData.return || [])];
-        if (!allTrips.length) return;
+    const rawData = booking as any;
+    const passengerDetails = rawData.passengerDetails;
 
-        const departureCabinIds = (searchParams.get('departureCabinId') || '').split('|');
-        const returnCabinIds = (searchParams.get('returnCabinId') || '').split('|');
-        const tripCabinMap = new Map<string, number>();
-        (prepareBookingData.departure || []).forEach((trip, index) => {
-          const id = Number(departureCabinIds[index] || departureCabinIds[0]);
-          if (id) tripCabinMap.set(trip.id, id);
-        });
-        (prepareBookingData.return || []).forEach((trip, index) => {
-          const id = Number(returnCabinIds[index] || returnCabinIds[0]);
-          if (id) tripCabinMap.set(trip.id, id);
-        });
+    const departureCabinIds = (searchParams.get('departureCabinId') || '').split('|');
+    const returnCabinIds = (searchParams.get('returnCabinId') || '').split('|');
+    const tripCabinMap = new Map<string, number>();
+    (prepareBookingData.departure || []).forEach((trip, index) => {
+      const id = Number(departureCabinIds[index] || departureCabinIds[0]);
+      if (id) tripCabinMap.set(trip.id, id);
+    });
+    (prepareBookingData.return || []).forEach((trip, index) => {
+      const id = Number(returnCabinIds[index] || returnCabinIds[0]);
+      if (id) tripCabinMap.set(trip.id, id);
+    });
 
-        // 1. Passenger Mapping
-        let passengers: {
-          index: number;
-          passengerType: string;
-          tripAssignments: { tripId: string; cabinId?: number | null; discountType?: string }[];
-        }[] = [];
-
-        if (passengerDetails) {
-          const allPass = [passengerDetails.passenger, ...passengerDetails.companions];
-          passengers = allPass.map((passenger, index) => ({
-            index,
-            passengerType: passenger?.discountType || 'Adult',
-            tripAssignments: allTrips.map((trip) => ({
-              tripId: trip.id,
-              cabinId: tripCabinMap.get(trip.id) ?? null,
-              discountType: (passenger?.discountType || 'ADULT').toUpperCase()
-            }))
-          }));
-        } else if (rawData.bookingTrips?.[0]?.bookingTripPassengers) {
-          passengers = rawData.bookingTrips[0].bookingTripPassengers.map((passenger: any, index: number) => ({
-            index,
-            passengerType: passenger?.discountType || 'Adult',
-            tripAssignments: allTrips.map((trip) => ({
-              tripId: trip.id,
-              cabinId: tripCabinMap.get(trip.id) ?? null,
-              discountType: (passenger?.discountType || 'ADULT').toUpperCase()
-            }))
-          }));
-        }
-
-        // 2. Vehicle + cargo mapping
-        const cargos: {
-          index: number;
-          cargoType: 'rolling' | 'loose';
-          cargoClassCode?: string;
-          quantity?: number;
-          tripAssignments: { tripId: string }[];
-        }[] = [];
-
-        const vehicleDetails =
-          rawData.vehicleDepartureDetails || rawData.bookingTrips?.[0]?.bookingTripVehicles?.map((v: any) => v.vehicle);
-        if (vehicleDetails) {
-          vehicleDetails.forEach((vehicle: any, index: number) => {
-            const cargoClassCode = String(vehicle.vehicleTypeId || vehicle.vehicleType?.id || '').trim();
-            if (!cargoClassCode) return;
-
-            cargos.push({
-              index,
-              cargoType: 'rolling',
-              cargoClassCode,
-              tripAssignments: allTrips.map((trip) => ({ tripId: trip.id }))
-            });
-          });
-        }
-
-        const cargoDetails = rawData.cargoDetails || rawData.bookingTrips?.[0]?.bookingTripCargos;
-        if (cargoDetails) {
-          cargoDetails.forEach((cargo: any, index: number) => {
-            cargos.push({
-              index: cargos.length + index,
-              cargoType: 'loose',
-              cargoClassCode: cargo.cargo_class || undefined,
-              quantity: Number(cargo.quantity || 1),
-              tripAssignments: allTrips.map((trip) => ({ tripId: trip.id }))
-            });
-          });
-        }
-
-        const pricingRequest = {
-          routeCode: allTrips[0].route_code,
-          // Lock pricing to the trip's frozen rate snapshot so charge rules
-          // (fuel surcharge, VAT, terminal fees, …) are applied — without
-          // it the backend returns charges:[] and the FareSummary collapses
-          // to bare fare. Must match TripSummary's request on the booking page.
-          snapshotId: allTrips[0].rate_snapshot_id ?? undefined,
-          tripIds: allTrips.map((trip) => trip.id),
-          passengers,
-          cargos
-        };
-        const pricing = await calculatePricing(pricingRequest, undefined, shippingLineId);
-        setPricingData(pricing.data);
-      } catch (error) {
-        console.error('Failed to fetch pricing:', error);
-      } finally {
-        setIsPricingLoading(false);
-      }
-    };
-
-    if (booking && prepareBookingData) {
-      fetchPricing();
+    let passengers: CalculatePricingRequest['passengers'] = [];
+    if (passengerDetails) {
+      const allPass = [passengerDetails.passenger, ...passengerDetails.companions];
+      passengers = allPass.map((passenger: any, index: number) => ({
+        index,
+        passengerType: passenger?.discountType || 'Adult',
+        tripAssignments: allTrips.map((trip) => ({
+          tripId: trip.id,
+          cabinId: tripCabinMap.get(trip.id) ?? null,
+          discountType: (passenger?.discountType || 'ADULT').toUpperCase()
+        }))
+      }));
+    } else if (rawData.bookingTrips?.[0]?.bookingTripPassengers) {
+      passengers = rawData.bookingTrips[0].bookingTripPassengers.map((passenger: any, index: number) => ({
+        index,
+        passengerType: passenger?.discountType || 'Adult',
+        tripAssignments: allTrips.map((trip) => ({
+          tripId: trip.id,
+          cabinId: tripCabinMap.get(trip.id) ?? null,
+          discountType: (passenger?.discountType || 'ADULT').toUpperCase()
+        }))
+      }));
     }
+
+    if (passengers.length === 0) return null;
+
+    const cargos: CalculatePricingRequest['cargos'] = [];
+    const vehicleDetails =
+      rawData.vehicleDepartureDetails || rawData.bookingTrips?.[0]?.bookingTripVehicles?.map((v: any) => v.vehicle);
+    if (vehicleDetails) {
+      vehicleDetails.forEach((vehicle: any, index: number) => {
+        const cargoClassCode = String(vehicle.vehicleTypeId || vehicle.vehicleType?.id || '').trim();
+        if (!cargoClassCode) return;
+        cargos!.push({
+          index,
+          cargoType: 'rolling',
+          cargoClassCode,
+          tripAssignments: allTrips.map((trip) => ({ tripId: trip.id }))
+        });
+      });
+    }
+    const cargoDetails = rawData.cargoDetails || rawData.bookingTrips?.[0]?.bookingTripCargos;
+    if (cargoDetails) {
+      cargoDetails.forEach((cargo: any, index: number) => {
+        cargos!.push({
+          index: cargos!.length + index,
+          cargoType: 'loose',
+          cargoClassCode: cargo.cargo_class || undefined,
+          quantity: Number(cargo.quantity || 1),
+          tripAssignments: allTrips.map((trip) => ({ tripId: trip.id }))
+        });
+      });
+    }
+
+    return {
+      routeCode: allTrips[0].route_code,
+      snapshotId: allTrips[0].rate_snapshot_id ?? undefined,
+      tripIds: allTrips.map((trip) => trip.id),
+      passengers,
+      cargos
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [booking, prepareBookingData]);
+
+  const { pricingData, isLoading: isPricingLoading } = usePricingPreview({
+    request: pricingRequest,
+    shippingLineId,
+  });
 
   // Final Booking Creation and PayMongo Integration
   const handleCreateBooking = useCallback(async () => {
@@ -822,7 +787,7 @@ export default function PaymentConfirmationDetails({
             booking={booking}
             cargoDetails={(booking as any)?.cargoDetails}
             commodityId={commodityId}
-            pricingData={pricingData}
+            pricingData={pricingData ?? undefined}
             prepareBookingData={prepareBookingData}
             isLoading={isPricingLoading}
             onPay={handleCreateBooking}
