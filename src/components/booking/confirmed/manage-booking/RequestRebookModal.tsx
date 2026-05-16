@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -37,7 +37,8 @@ import type {
   TripSeat,
 } from '@/components/booking/seat-selection/seat-picker.types';
 import { SeatPickerDialog } from '@/components/booking/seat-selection/SeatPickerDialog';
-import { calculatePricing } from '@/services/booking/booking.service';
+import { usePricingPreview } from '@/hooks/use-pricing-preview';
+import type { CalculatePricingRequest } from '@/types/booking/pricing';
 
 interface Props {
   isOpen: boolean;
@@ -106,14 +107,6 @@ export default function RequestRebookModal({ isOpen, onClose, booking, onSuccess
     Record<string, { seatId: string; cellId: string; rateAmount: number } | null>
   >({});
   const [seatPickerOpen, setSeatPickerOpen] = useState(false);
-  // Charges fetched fresh for the new trip + chosen accommodation. We surface
-  // these (rather than the original booking's charges) so the customer's preview
-  // reflects what they'll actually be billed on the new trip.
-  const [newCharges, setNewCharges] = useState<
-    Array<{ chargeName: string; chargeCode: string; amount: number }>
-  >([]);
-  const [newChargesLoading, setNewChargesLoading] = useState(false);
-
   // For round-trip bookings, the customer picks which leg to rebook. The
   // marketplace rebook flow runs one leg at a time — submitting both legs
   // at once would invalidate the unchanged leg's existing payment ledger.
@@ -450,70 +443,44 @@ export default function RequestRebookModal({ isOpen, onClose, booking, onSuccess
   const originalCharges: Array<{ code: string; description: string; amount: number; kind: 'charge' | 'tax' }> =
     paymentBreakdown.charges ?? [];
 
-  // Fetch fresh charges from the new trip + accommodation so the preview shows
-  // the surcharges that will actually apply on the new booking. Falls back to
-  // the original charges if pricing can't be reached.
-  useEffect(() => {
-    if (!selectedTrip || !selectedCabin || selectedPassengerIds.length === 0) {
-      setNewCharges([]);
-      return;
-    }
+  const newChargesPricingRequest = useMemo((): CalculatePricingRequest | null => {
+    if (!selectedTrip || !selectedCabin || selectedPassengerIds.length === 0) return null;
     const tripId = cleanTripId(selectedTrip.id);
-    if (!tripId) return;
-    const routeCode =
-      originPortCode && destPortCode ? `${originPortCode}-${destPortCode}` : '';
-    if (!routeCode) return;
+    if (!tripId) return null;
+    const routeCode = originPortCode && destPortCode ? `${originPortCode}-${destPortCode}` : '';
+    if (!routeCode) return null;
 
-    let cancelled = false;
-    setNewChargesLoading(true);
-    (async () => {
-      try {
-        const passengers = selectedPassengers.map((p, idx) => ({
-          index: idx,
-          passengerType: (p as any).discountType || 'Adult',
-          tripAssignments: [
-            {
-              tripId,
-              cabinId: selectedCabin.cabinId,
-              discountType: (p as any).discountType || 'Adult',
-            },
-          ],
-        }));
-        const res = await calculatePricing({
-          routeCode,
-          tripIds: [tripId],
-          passengers,
-        });
-        if (cancelled) return;
-        const trips = res?.data?.trips ?? [];
-        const charges = (trips[0]?.charges ?? []) as any[];
-        setNewCharges(
-          charges
-            .filter((c: any) => Number(c?.amount ?? 0) > 0)
-            .filter((c: any) => (c?.chargeCode ?? c?.charge_code) !== 'SEAT_MARKUP')
-            .map((c: any) => ({
-              chargeName: c?.chargeName ?? c?.description ?? '',
-              chargeCode: c?.chargeCode ?? c?.charge_code ?? '',
-              amount: Number(c?.amount ?? 0),
-            })),
-        );
-      } catch {
-        if (!cancelled) setNewCharges([]);
-      } finally {
-        if (!cancelled) setNewChargesLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    selectedTrip,
-    selectedCabin,
-    selectedPassengerIds.join('|'),
-    originPortCode,
-    destPortCode,
-  ]);
+    const passengers = selectedPassengers.map((p, idx) => ({
+      index: idx,
+      passengerType: (p as any).discountType || 'Adult',
+      tripAssignments: [
+        {
+          tripId,
+          cabinId: selectedCabin.cabinId,
+          discountType: (p as any).discountType || 'Adult',
+        },
+      ],
+    }));
+
+    return { routeCode, tripIds: [tripId], passengers };
+  }, [selectedTrip, selectedCabin, selectedPassengerIds, selectedPassengers, originPortCode, destPortCode]);
+
+  const { pricingData: newChargesPricingData, isLoading: newChargesLoading } = usePricingPreview({
+    request: newChargesPricingRequest,
+  });
+
+  const newCharges = useMemo(() => {
+    const trips = newChargesPricingData?.trips ?? [];
+    const charges = (trips[0]?.charges ?? []) as any[];
+    return charges
+      .filter((c: any) => Number(c?.amount ?? 0) > 0)
+      .filter((c: any) => (c?.chargeCode ?? c?.charge_code) !== 'SEAT_MARKUP')
+      .map((c: any) => ({
+        chargeName: c?.chargeName ?? c?.description ?? '',
+        chargeCode: c?.chargeCode ?? c?.charge_code ?? '',
+        amount: Number(c?.amount ?? 0),
+      }));
+  }, [newChargesPricingData]);
 
   // Charges total that the customer will actually be billed on the new booking.
   // Uses fresh new-trip pricing for the chosen accommodation when available;

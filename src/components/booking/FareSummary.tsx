@@ -25,6 +25,7 @@ import { ITrip, IBooking } from '@/models';
 import { startPaymentForBooking } from '@/services';
 import { useAuth } from '@/contexts/AuthContexts';
 import { PricingResponse } from '@/types/booking/pricing';
+import { ChargeList } from '@/components/booking/pricing/ChargeList';
 
 interface PassengerDetails {
   passenger: PassengerData;
@@ -698,13 +699,8 @@ const handlePayment = async () => {
                               </span>
                             </div>
                             {isChargesDepExpanded && (
-                              <div className="pl-4 mt-2 space-y-1">
-                                {tCharges.map((c: any, cIdx: number) => (
-                                  <div key={`${legIdx}-dep-ch-${cIdx}`} className="flex justify-between text-sm text-gray-500">
-                                    <span>{c.chargeName}{c.isInclusive && <span className="ml-1 text-xs text-gray-400">(incl.)</span>}</span>
-                                    <ObscuredPrice price={c.amount} isLoading={leg.isLoading} />
-                                  </div>
-                                ))}
+                              <div className="pl-4 mt-2">
+                                <ChargeList charges={tCharges.filter((c: any) => c.showOnReceipt && c.amount !== 0)} />
                               </div>
                             )}
                           </div>
@@ -793,13 +789,8 @@ const handlePayment = async () => {
                                   </span>
                                 </div>
                                 {isChargesRetExpanded && (
-                                  <div className="pl-4 mt-2 space-y-1">
-                                    {tCharges.map((c: any, cIdx: number) => (
-                                      <div key={`${legIdx}-ret-ch-${cIdx}`} className="flex justify-between text-sm text-gray-500">
-                                        <span>{c.chargeName}{c.isInclusive && <span className="ml-1 text-xs text-gray-400">(incl.)</span>}</span>
-                                        <ObscuredPrice price={c.amount} isLoading={leg.isLoading} />
-                                      </div>
-                                    ))}
+                                  <div className="pl-4 mt-2">
+                                    <ChargeList charges={tCharges.filter((c: any) => c.showOnReceipt && c.amount !== 0)} />
                                   </div>
                                 )}
                               </div>
@@ -908,13 +899,8 @@ const handlePayment = async () => {
                         </span>
                       </div>
                       {isChargesDepExpanded && (
-                        <div className="pl-4 mt-2 space-y-1">
-                          {tCharges.map((c: any) => (
-                            <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
-                              <span>{c.chargeName}{c.isInclusive && <span className="ml-1 text-xs text-gray-400">(incl.)</span>}</span>
-                              <ObscuredPrice price={c.amount} isLoading={isLoading} />
-                            </div>
-                          ))}
+                        <div className="pl-4 mt-2">
+                          <ChargeList charges={tCharges.filter((c: any) => c.showOnReceipt && c.amount !== 0)} />
                         </div>
                       )}
                     </div>
@@ -1005,13 +991,8 @@ const handlePayment = async () => {
                             </span>
                           </div>
                           {isChargesRetExpanded && (
-                            <div className="pl-4 mt-2 space-y-1">
-                              {tCharges.map((c: any) => (
-                                <div key={uuidv4()} className="flex justify-between text-sm text-gray-500">
-                                  <span>{c.chargeName}{c.isInclusive && <span className="ml-1 text-xs text-gray-400">(incl.)</span>}</span>
-                                  <ObscuredPrice price={c.amount} isLoading={isLoading} />
-                                </div>
-                              ))}
+                            <div className="pl-4 mt-2">
+                              <ChargeList charges={tCharges.filter((c: any) => c.showOnReceipt && c.amount !== 0)} />
                             </div>
                           )}
                         </div>
