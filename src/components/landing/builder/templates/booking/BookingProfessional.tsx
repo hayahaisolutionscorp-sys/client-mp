@@ -90,7 +90,7 @@ export default function BookingProfessional({
             }}
           >
             <div
-              className="relative overflow-hidden rounded-t-[36px] border-b px-6 py-5 md:px-8"
+              className="relative hidden overflow-hidden rounded-t-[36px] border-b px-6 py-5 sm:block md:px-8"
               style={{
                 borderColor: `${theme.text}10`,
                 background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent})`,
@@ -124,7 +124,7 @@ export default function BookingProfessional({
               </div>
             </div>
 
-            <div className="relative z-20 overflow-visible rounded-b-[36px] bg-white px-6 py-6 md:px-8 md:py-8">
+            <div className="relative z-20 overflow-visible rounded-[36px] bg-white px-6 py-6 sm:rounded-t-none md:px-8 md:py-8">
               {mode === "chat" && tripSearchEnabled ? (
                 <div className="relative z-[40] overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-3">
                   <TripSearchWidget

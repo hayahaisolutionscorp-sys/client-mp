@@ -66,7 +66,7 @@ export default function BookingBanner({ theme, ports = [], routes = [] }: Bookin
   };
 
   return (
-    <section id="Book" className="relative z-30 -mt-24 px-4 pb-20 sm:px-6 lg:px-10">
+    <section id="Book" className="relative z-30 -mt-36 sm:-mt-24 px-4 pb-20 sm:px-6 lg:px-10">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -81,7 +81,7 @@ export default function BookingBanner({ theme, ports = [], routes = [] }: Bookin
             borderColor: `${theme.primary}22`,
           }}
         >
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="mb-6 hidden flex-col gap-3 md:flex-row md:items-end md:justify-between sm:flex">
             <div>
               <h2 className="text-2xl font-black tracking-tight md:text-3xl" style={{ color: theme.text }}>
                 Plan Your Next Sailing

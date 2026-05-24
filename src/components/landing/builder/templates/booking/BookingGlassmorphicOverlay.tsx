@@ -93,7 +93,7 @@ export default function BookingGlassmorphicOverlay({ theme, ports = [], routes =
           />
 
           <div className="relative rounded-[3.25rem] border border-white/30 bg-white/60 p-5 sm:p-7 md:p-9 backdrop-blur-xl">
-            <div className="relative z-10 mb-5 flex flex-col justify-between gap-3 border-b border-black/5 pb-4 md:mb-6 md:flex-row md:items-end md:gap-6 md:pb-5">
+            <div className="relative z-10 mb-5 hidden flex-col justify-between gap-3 border-b border-black/5 pb-4 sm:flex md:mb-6 md:flex-row md:items-end md:gap-6 md:pb-5">
               <div className="space-y-2">
                 <span
                   className="inline-block rounded-full px-4 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-white shadow-lg sm:text-[10px]"
@@ -126,7 +126,7 @@ export default function BookingGlassmorphicOverlay({ theme, ports = [], routes =
               </div>
             ) : (
               <>
-                <div className="relative z-10 mb-4 flex items-center justify-end sm:mb-5">
+                <div className="relative z-10 mb-4 hidden items-center justify-end sm:flex sm:mb-5">
                   {tripSearchEnabled && (
                     <button 
                         onClick={() => setMode("chat")}

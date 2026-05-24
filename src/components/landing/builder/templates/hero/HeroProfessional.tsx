@@ -54,7 +54,7 @@ export default function HeroProfessional({
     fetchData();
   }, [heroSectionOverride, headerSectionOverride]);
 
-  if (loading) return <div className="h-[720px] bg-[var(--surface-alt)] animate-pulse rounded-[36px] mx-4 mt-4" />;
+  if (loading) return <div className="h-[320px] bg-[var(--surface-alt)] animate-pulse rounded-[36px] mx-4 mt-4 lg:h-[720px]" />;
 
   const title = heroSection?.title || `Sail better with ${branding?.brand_name || "Ayahay"}`;
   const subtitle = heroSection?.subtitle || "A better marketplace for ferry passengers.";
@@ -124,8 +124,8 @@ export default function HeroProfessional({
           </div>
         ) : null}
 
-        <div className="relative z-10 grid min-h-[720px] lg:grid-cols-[0.92fr_1.08fr]">
-          <div className="flex flex-col justify-center gap-6 px-6 py-16 lg:px-14 lg:py-20">
+        <div className="relative z-10 grid lg:min-h-[720px] lg:grid-cols-[0.92fr_1.08fr]">
+          <div className="flex flex-col justify-center gap-6 px-6 py-6 lg:px-14 lg:py-20">
             <div className="space-y-4">
               <h1 className="max-w-2xl text-[30px] font-semibold leading-tight md:text-[48px] lg:text-[60px]">
                 {title}
@@ -136,7 +136,7 @@ export default function HeroProfessional({
             </div>
           </div>
 
-          <div className="relative min-h-[360px] overflow-hidden lg:min-h-full">
+          <div className="relative min-h-[160px] overflow-hidden sm:min-h-[240px] lg:min-h-full">
             {renderMedia()}
             <div
               className="absolute inset-0"

@@ -75,7 +75,7 @@ export default function BookingHorizontal({ theme, ports = [], routes = [] }: Bo
         <div className="bg-white/90 backdrop-blur-xl p-2 rounded-2xl shadow-[0_15px_40px_-10px_rgba(0,0,0,0.1)] border border-white max-w-5xl mx-auto ring-1 ring-slate-100 relative">
           
           {mode === "form" && tripSearchEnabled && (
-             <div className="absolute -top-10 right-4">
+             <div className="mb-2 flex justify-end md:absolute md:-top-10 md:right-4 md:mb-0">
                <HayahAIButton onClick={() => setMode("chat")} variant="default" />
              </div>
           )}
@@ -110,20 +110,20 @@ export default function BookingHorizontal({ theme, ports = [], routes = [] }: Bo
       <style jsx global>{`
         .booking-horizontal-form-wrapper form {
           display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: 12px;
+          flex-direction: column;
+          gap: 8px;
           padding: 8px 12px;
         }
-        
+
         .booking-horizontal-form-wrapper form > div {
            margin-bottom: 0 !important;
         }
-        
-        /* Attempt to make the layout horizontal on desktop */
+
         @media (min-width: 768px) {
            .booking-horizontal-form-wrapper form {
               flex-direction: row;
+              align-items: center;
+              gap: 12px;
            }
            .booking-horizontal-form-wrapper fieldset {
               flex: 1;

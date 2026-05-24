@@ -69,7 +69,7 @@ export default function HeroMinimal({
     fetchData();
   }, [heroSectionOverride, headerSectionOverride, portsOverride]);
 
-  if (loading) return <div className="h-[580px] md:h-[680px] bg-[var(--surface-alt)] animate-pulse rounded-none" />;
+  if (loading) return <div className="h-[420px] sm:h-[580px] md:h-[680px] bg-[var(--surface-alt)] animate-pulse rounded-none" />;
 
   let captionBackground;
   if (heroSection?.bg_type?.toLowerCase() === "youtube") {
@@ -109,7 +109,7 @@ export default function HeroMinimal({
   return (
     <header id="Book" className="relative">
       {/* Full-bleed container — no rounded card, no margin */}
-      <div className="relative w-full h-[580px] md:h-[680px] overflow-hidden">
+      <div className="relative w-full h-[420px] sm:h-[580px] md:h-[680px] overflow-hidden">
         {showNavbar ? (
           <Navbar forceHomeStyle={forceHomeNavbar} initialHeaderSection={headerSection} />
         ) : null}

@@ -145,9 +145,11 @@ export function HeroIslandPremium({
         {heroMedia ? <div className="absolute inset-0 opacity-35">{heroMedia}</div> : null}
         <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/25" />
         {showNavbar ? (
-          <Navbar forceHomeStyle initialHeaderSection={headerSectionOverride ?? undefined} />
+          <div className="absolute inset-x-0 top-0 z-20">
+            <Navbar forceHomeStyle initialHeaderSection={headerSectionOverride ?? undefined} />
+          </div>
         ) : null}
-        <div className="relative z-10 grid min-h-[560px] gap-8 px-5 py-14 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:px-14">
+        <div className="relative z-10 grid gap-3 px-5 pt-[80px] pb-4 sm:px-8 sm:pt-[100px] sm:pb-14 lg:min-h-[560px] lg:grid-cols-[1.05fr_0.95fr] lg:px-14 lg:pt-14 lg:pb-14">
           <div className="flex flex-col justify-center">
             <h1 className="max-w-3xl text-[32px] font-semibold leading-tight sm:text-[46px] lg:text-[62px]">
               {title}
@@ -155,7 +157,7 @@ export function HeroIslandPremium({
             <p className="mt-5 max-w-xl text-sm leading-7 text-white/84 sm:text-base">{subtitle}</p>
           </div>
           {heroMedia ? (
-            <div className="relative min-h-[280px] overflow-hidden rounded-[2rem] border border-white/25 bg-white/16 backdrop-blur">
+            <div className="relative min-h-[120px] overflow-hidden rounded-[2rem] border border-white/25 bg-white/16 backdrop-blur sm:min-h-[240px]">
               {heroMedia}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             </div>
@@ -213,10 +215,10 @@ export function BookingIslandPremium({ theme, ports = [], routes = [] }: Booking
   };
 
   return (
-    <section id="Book" className="relative z-[60] -mt-12 overflow-visible px-3 pb-16 sm:-mt-16 sm:px-6 lg:px-10">
+    <section id="Book" className="relative z-[60] -mt-24 overflow-visible px-3 pb-16 sm:-mt-16 sm:px-6 lg:px-10">
       <div className="container mx-auto max-w-[1180px] overflow-visible">
         <div className="overflow-visible rounded-[2rem] border border-white/80 p-3 shadow-[0_28px_90px_-45px_rgba(8,47,73,0.45)] sm:p-5" style={{ backgroundColor: islandSurfaceAlt }}>
-          <div className="mb-4 flex flex-col gap-3 rounded-[1.5rem] p-4 sm:flex-row sm:items-center sm:justify-between" style={{ backgroundColor: islandSurface }}>
+          <div className="mb-2 hidden flex-col gap-3 rounded-[1.5rem] p-4 sm:mb-4 sm:flex sm:flex-row sm:items-center sm:justify-between" style={{ backgroundColor: islandSurface }}>
             <div>
               <h2 className="text-xl font-semibold" style={{ color: islandText }}>Booking Search</h2>
             </div>

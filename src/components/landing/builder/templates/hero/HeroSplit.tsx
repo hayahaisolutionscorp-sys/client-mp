@@ -77,9 +77,9 @@ export default function HeroSplit({
         ) : null}
 
         {/* Split layout */}
-        <div className="flex min-h-[650px] flex-col lg:flex-row">
+        <div className="flex min-h-[320px] flex-col sm:min-h-[500px] lg:min-h-[650px] lg:flex-row">
           {/* Left: text content */}
-          <div className="relative z-10 flex flex-1 flex-col justify-center bg-customPrimary px-8 py-24 lg:px-14 lg:py-32">
+          <div className="relative z-10 flex flex-1 flex-col justify-center bg-customPrimary px-8 pt-24 pb-8 lg:px-14 lg:py-32">
             {/* Decorative circles */}
             <div className="pointer-events-none absolute -left-16 -top-16 h-64 w-64 rounded-full bg-customText/10" />
             <div className="pointer-events-none absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-customText/10" />
@@ -111,7 +111,7 @@ export default function HeroSplit({
           </div>
 
           {/* Right: media */}
-          <div className="relative flex-1 overflow-hidden lg:min-h-[650px]">
+          <div className="relative min-h-[140px] flex-1 overflow-hidden sm:min-h-[200px] lg:min-h-[650px]">
             {heroSection?.bg_url && heroSection.bg_type ? (
               <Media
                 src={heroSection.bg_url}

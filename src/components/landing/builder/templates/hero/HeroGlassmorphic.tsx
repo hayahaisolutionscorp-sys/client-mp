@@ -109,8 +109,8 @@ export default function HeroGlassmorphic({
 
       {/* Floating Navbar */}
       {showNavbar ? (
-        <div className="absolute inset-x-0 top-0 z-30 pt-4 px-4 sm:px-6">
-          <div className="mx-auto max-w-7xl overflow-hidden rounded-full border border-white/20 bg-white/10 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
+        <div className="absolute inset-x-0 top-0 z-30 pt-3 px-3 sm:pt-4 sm:px-6">
+          <div className="mx-auto max-w-7xl rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.1)] sm:rounded-full">
             <Navbar forceHomeStyle={forceHomeNavbar} initialHeaderSection={headerSection} />
           </div>
         </div>
@@ -118,7 +118,7 @@ export default function HeroGlassmorphic({
 
       {/* Main Glass Content Layer — arranged top (headline) + bottom (booking) so
           the entire booking flow lives in the hero viewport. */}
-      <div className="relative z-10 flex min-h-[100dvh] flex-col px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-28 pb-6 sm:pb-8 lg:pb-10">
+      <div className="relative z-10 flex min-h-[100dvh] flex-col px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-6 sm:pb-8 lg:pb-10">
 
         {/* Compact, Wide Hero Text Panel */}
         <div className="mx-auto flex w-full max-w-4xl flex-col items-center text-center">

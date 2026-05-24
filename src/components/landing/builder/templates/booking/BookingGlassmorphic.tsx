@@ -68,7 +68,7 @@ export default function BookingGlassmorphic({ theme, ports = [], routes = [], va
   };
 
   return (
-    <section id="Book" className="relative z-30 -mt-24 px-4 pb-24 sm:px-6 lg:px-10">
+    <section id="Book" className="relative z-30 -mt-36 sm:-mt-24 px-4 pb-24 sm:px-6 lg:px-10">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -88,8 +88,8 @@ export default function BookingGlassmorphic({ theme, ports = [], routes = [], va
              style={{ backgroundColor: theme.accent }}
           />
 
-          <div className="relative rounded-[3.25rem] border border-white/20 bg-white/40 p-8 md:p-14">
-            <div className="relative z-10 mb-10 flex flex-col justify-between gap-6 border-b border-black/5 pb-8 md:flex-row md:items-end">
+          <div className="relative rounded-[3.25rem] border border-white/20 bg-white/40 p-5 sm:p-8 md:p-14">
+            <div className="relative z-10 mb-10 hidden flex-col justify-between gap-6 border-b border-black/5 pb-8 md:flex-row md:items-end sm:flex">
               <div className="space-y-3">
                 <span
                   className="inline-block rounded-full px-5 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-xl"
@@ -122,7 +122,7 @@ export default function BookingGlassmorphic({ theme, ports = [], routes = [], va
               </div>
             ) : (
               <>
-                <div className="relative z-10 mb-8 flex items-center justify-end">
+                <div className="relative z-10 mb-8 hidden items-center justify-end sm:flex">
                   {tripSearchEnabled && (
                     <button 
                         onClick={() => setMode("chat")}

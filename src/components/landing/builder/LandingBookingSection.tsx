@@ -31,6 +31,7 @@ export default function LandingBookingSection({ variant, initialPorts = [], init
             initialTripSearchEnabled={true}
             initialPorts={initialPorts}
             initialRoutes={initialRoutes}
+            isRelative={true}
           />
         </div>
       </div>

@@ -99,8 +99,8 @@ export default function SearchBoxWrapper({
         <div
             className={isRelative ? "w-full" : `flex items-center justify-center absolute z-20 inset-0 w-full px-4 
             ${bookingType?.toLowerCase() === "round trip"
-                    ? "top-[440px]"
-                    : "top-[400px]"
+                    ? "top-[calc(220px-var(--pwa-search-lift,0px))]"
+                    : "top-[calc(230px-var(--pwa-search-lift,0px))]"
                 } sm:top-[260px] md:top-[420px] lg:top-[640px]`}
         >
             <div className={isRelative ? "w-full" : "w-full sm:w-[95%] md:w-[95%] lg:w-[1300px]"}>
@@ -190,11 +190,11 @@ function SearchBoxWithToggle({
 }) {
     return (
         <div className="relative">
-            <div className={`${isGlassmorphic ? "bg-white/10 backdrop-blur-3xl border border-white/20" : "bg-white"} rounded-3xl shadow-2xl p-4 w-full h-auto transition-all duration-300 ease-in-out hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] sm:p-6 md:p-8`}>
+            <div className={`landing-search-form ${isGlassmorphic ? "bg-white/10 backdrop-blur-3xl border border-white/20" : "bg-white"} rounded-3xl shadow-2xl p-3 w-full h-auto transition-all duration-300 ease-in-out hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] sm:p-6 md:p-8`}>
                 {/* Header with toggle */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-2 sm:mb-4">
                     <div className="space-y-1">
-                        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-customText">
+                        <h2 className="text-base sm:text-xl md:text-2xl font-bold text-customText">
                             Where Do You Want to Go?
                         </h2>
                         <p className="text-xs sm:text-sm text-customText/80">
@@ -214,6 +214,39 @@ function SearchBoxWithToggle({
                     initialRoutes={initialRoutes}
                 />
             </div>
+            <style>{`
+                @media (max-width: 639px) {
+                    .landing-search-form .grid {
+                        gap: 0.5rem !important;
+                    }
+
+                    .landing-search-form .mt-2,
+                    .landing-search-form .mt-3 {
+                        margin-top: 0.5rem !important;
+                    }
+
+                    .landing-search-form .mb-4 {
+                        margin-bottom: 0.5rem !important;
+                    }
+
+                    .landing-search-form .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+                        margin-top: 0.5rem !important;
+                    }
+
+                    .landing-search-form fieldset {
+                        height: 48px !important;
+                        min-width: 0 !important;
+                    }
+
+                    .landing-search-form [data-template-ignore="true"].h-10 {
+                        height: 38px !important;
+                    }
+
+                    .landing-search-form [data-booking-search-submit] {
+                        height: 44px !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }
@@ -222,7 +255,6 @@ function SearchBoxWithToggle({
 import { useState as useStateForm, SetStateAction, Dispatch } from "react";
 import { LuArrowRightLeft } from "react-icons/lu";
 import { BiSolidShip } from "react-icons/bi";
-import { FiLoader } from "react-icons/fi";
 import PortDropdownFieldset from "@/components/booking/destination/PortDropdownFieldset";
 import PassengerDropdown from "@/components/booking/destination/PassengerDropdown";
 import VehicleDropdown from "@/components/ui/VehicleDropdown";

@@ -29,6 +29,7 @@ import BookingHorizontal from "./templates/booking/BookingHorizontal";
 import BookingGlassmorphic from "./templates/booking/BookingGlassmorphic";
 import BookingGlassmorphicOverlay from "./templates/booking/BookingGlassmorphicOverlay";
 import BookingBoardingPass from "./templates/booking/BookingBoardingPass";
+import LandingBookingSection from "./LandingBookingSection";
 import PromotionsBoardingPass from "./templates/promotions/PromotionsBoardingPass";
 import RoutesBoardingPass from "./templates/routes/RoutesBoardingPass";
 import WhyChooseBoardingPass from "./templates/why-choose/WhyChooseBoardingPass";
@@ -513,6 +514,16 @@ export default function LandingPageBuilder({
               content = <BookingBoardingPass theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
             } else if (section.variant === "island-premium") {
               content = <BookingIslandPremium theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+            } else if (!section.variant || section.variant === "default") {
+              // "default" booking variant means it was designed to render inside the hero.
+              // Heroes that don't support showBookingSearch (professional-editorial, island-premium)
+              // need a standalone themed booking section below the hero.
+              const heroVariant = heroBuilderSection?.variant ?? "default";
+              if (heroVariant === "professional-editorial") {
+                content = <BookingProfessional theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+              } else if (heroVariant === "island-premium") {
+                content = <BookingIslandPremium theme={theme} ports={landingData?.ports ?? []} routes={landingData?.bookingRoutes ?? []} />;
+              }
             }
             break;
           case "promotions":

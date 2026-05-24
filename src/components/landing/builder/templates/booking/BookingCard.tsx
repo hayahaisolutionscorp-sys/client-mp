@@ -66,7 +66,7 @@ export default function BookingCard({ theme, ports = [], routes = [] }: BookingC
   };
 
   return (
-    <section id="Book" className="relative z-30 -mt-16 px-4 pb-20 sm:px-6 lg:px-10">
+    <section id="Book" className="relative z-30 -mt-36 sm:-mt-16 px-4 pb-20 sm:px-6 lg:px-10">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -75,7 +75,7 @@ export default function BookingCard({ theme, ports = [], routes = [] }: BookingC
         className="container mx-auto max-w-[1300px]"
       >
         <div className="mx-auto max-w-5xl rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_22px_60px_-26px_rgba(15,23,42,0.4)] md:p-7">
-          <div className="mb-5 flex items-center justify-between gap-3">
+          <div className="mb-5 hidden items-center justify-between gap-3 sm:flex">
             <h2 className="text-xl font-extrabold tracking-tight md:text-2xl" style={{ color: theme.text }}>
               Booking Search
             </h2>

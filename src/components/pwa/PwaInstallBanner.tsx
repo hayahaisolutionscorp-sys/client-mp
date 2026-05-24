@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useThemeSettings } from '@/hooks/theme-settings';
 import { useTheme } from '@/components/ThemeProvider';
@@ -10,6 +10,23 @@ const PWAInstallBanner = () => {
     const { isVisible, handleInstallClick, handleDismiss } = usePWAInstall();
     const themeSettings = useThemeSettings();
     const { branding } = useTheme();
+
+    useEffect(() => {
+        if (isVisible) {
+            document.documentElement.style.setProperty('--pwa-install-height', '102px');
+            document.documentElement.style.setProperty('--pwa-hero-lift', '25px');
+            document.documentElement.style.setProperty('--pwa-search-lift', '60px');
+            return () => {
+                document.documentElement.style.removeProperty('--pwa-install-height');
+                document.documentElement.style.removeProperty('--pwa-hero-lift');
+                document.documentElement.style.removeProperty('--pwa-search-lift');
+            };
+        }
+
+        document.documentElement.style.removeProperty('--pwa-install-height');
+        document.documentElement.style.removeProperty('--pwa-hero-lift');
+        document.documentElement.style.removeProperty('--pwa-search-lift');
+    }, [isVisible]);
 
     if (!isVisible) return null;
 

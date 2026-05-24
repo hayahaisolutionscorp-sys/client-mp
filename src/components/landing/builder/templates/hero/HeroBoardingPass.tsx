@@ -23,6 +23,14 @@ interface HeroBoardingPassProps {
   bookingSlot?: ReactNode;
 }
 
+function unwrapServiceData<T>(response: T | { data?: T } | null | undefined): T | null {
+  if (response && typeof response === "object" && "data" in response) {
+    return (response as { data?: T }).data ?? null;
+  }
+
+  return (response as T) ?? null;
+}
+
 function formatDateParts() {
   const d = new Date();
   const month = d.toLocaleString("en-US", { month: "short" }).toUpperCase();
@@ -55,17 +63,17 @@ export default function HeroBoardingPass({
         const [heroRes, headerRes, portsRes] = await Promise.all([
           heroSectionOverride
             ? Promise.resolve(heroSectionOverride)
-            : getHeroSections().then((res: any) => res?.data || res),
+            : getHeroSections().then((res) => unwrapServiceData<PreviewPageSection | null>(res)),
           headerSectionOverride !== undefined
             ? Promise.resolve(headerSectionOverride)
-            : getHeadersSections().catch(() => null).then((res: any) => res?.data || res),
+            : getHeadersSections().catch(() => null).then((res) => unwrapServiceData<HeaderNavigationConfig | null>(res)),
           portsOverride !== undefined
             ? Promise.resolve(portsOverride ?? [])
-            : getPorts().catch(() => []).then((res: any) => res?.data || res),
+            : getPorts().catch(() => []).then((res) => unwrapServiceData<IPort[]>(res)),
         ]);
-        setHeroSection(heroRes as any);
-        setHeaderSection(headerRes as any);
-        setPorts(portsRes as any);
+        setHeroSection(heroRes ?? null);
+        setHeaderSection(headerRes ?? null);
+        setPorts(Array.isArray(portsRes) ? portsRes : []);
       } catch (error) {
         console.error("Failed to load HeroBoardingPass data", error);
       } finally {
@@ -77,10 +85,10 @@ export default function HeroBoardingPass({
 
   const { month, day, yr } = formatDateParts();
 
-  if (loading) return <div className="h-[650px] bg-[var(--surface-alt)] animate-pulse rounded-xl mx-4 mt-4" />;
+  if (loading) return <div className="h-[520px] sm:h-[650px] bg-[var(--surface-alt)] animate-pulse rounded-xl mx-4 mt-4" />;
 
   return (
-    <header id="Book" className="relative w-full overflow-hidden pb-16" style={{ backgroundColor: "#FAF7F0" }}>
+    <header id="Book" className="relative w-full overflow-hidden pb-8 sm:pb-16" style={{ backgroundColor: "#FAF7F0" }}>
       {/* Soft warm background wash */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: "radial-gradient(circle at 1px 1px, rgba(15,23,42,0.4) 1px, transparent 0)",
@@ -110,7 +118,7 @@ export default function HeroBoardingPass({
         <Navbar forceHomeStyle={forceHomeNavbar} initialHeaderSection={headerSection} />
       ) : null}
 
-      <div className="relative z-10 container mx-auto w-full max-w-[min(96vw,1400px)] lg:max-w-[min(77vw,946px)] 2xl:max-w-[min(96vw,1400px)] px-3 sm:px-6 lg:px-6 pt-20 sm:pt-28">
+      <div className="relative z-10 container mx-auto w-full max-w-[min(96vw,1400px)] lg:max-w-[min(77vw,946px)] 2xl:max-w-[min(96vw,1400px)] px-3 pt-20 sm:px-6 sm:pt-28 lg:px-6">
         {/* TICKET CARD */}
         <div
           className="relative rounded-2xl border-2 shadow-[0_20px_40px_-20px_rgba(15,23,42,0.25),0_8px_20px_-8px_rgba(15,23,42,0.15)]"
@@ -159,7 +167,7 @@ export default function HeroBoardingPass({
           </div>
 
           {/* Body */}
-          <div className="px-4 py-5 sm:px-7 sm:py-8 lg:px-7 lg:py-6 2xl:px-12 2xl:py-10">
+          <div className="px-4 py-2 sm:px-7 sm:py-5 lg:px-7 lg:py-4 2xl:px-12 2xl:py-8">
             <h1
               className="text-xl sm:text-3xl md:text-4xl lg:text-[2.25rem] xl:text-5xl 2xl:text-7xl font-black leading-[1.1] sm:leading-[1.05] tracking-tight text-slate-900 max-w-5xl"
               style={{ fontFamily: "var(--font-title)" }}
@@ -191,7 +199,7 @@ export default function HeroBoardingPass({
           </div>
 
           {/* Booking body — the stub */}
-          <div className="px-3 py-4 sm:px-6 sm:py-6 lg:px-7 lg:py-5 2xl:px-12 2xl:py-8">
+          <div className="px-3 py-2 sm:px-6 sm:py-4 lg:px-7 lg:py-4 2xl:px-12 2xl:py-6">
             {bookingSlot ? (
               bookingSlot
             ) : showBookingSearch ? (

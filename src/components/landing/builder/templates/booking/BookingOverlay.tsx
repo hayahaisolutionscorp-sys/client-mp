@@ -69,7 +69,7 @@ export default function BookingOverlay({ theme, ports = [], routes = [], variant
   };
 
   return (
-    <section id="Book" className="relative z-30 -mt-32 px-4 pb-20 sm:px-6 lg:px-10">
+    <section id="Book" className="relative z-30 -mt-48 px-4 pb-20 sm:-mt-40 sm:px-6 lg:-mt-32 lg:px-10">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -88,7 +88,7 @@ export default function BookingOverlay({ theme, ports = [], routes = [], variant
               style={{ backgroundColor: theme.accent }}
             />
 
-            <div className="relative z-10 mb-8 flex flex-col justify-between gap-4 border-b border-black/5 pb-6 md:flex-row md:items-end">
+            <div className="relative z-10 mb-8 hidden flex-col justify-between gap-4 border-b border-black/5 pb-6 sm:flex md:flex-row md:items-end">
               <div className="space-y-1">
                 <span
                   className="inline-block rounded-full px-3 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white"
@@ -121,7 +121,7 @@ export default function BookingOverlay({ theme, ports = [], routes = [], variant
               </div>
             ) : (
               <>
-                <div className="relative z-10 mb-6 flex items-center justify-end">
+                <div className="relative z-10 mb-4 hidden items-center justify-end sm:flex">
                   {tripSearchEnabled && <HayahAIButton onClick={() => setMode("chat")} variant="overlay" />}
                 </div>
 

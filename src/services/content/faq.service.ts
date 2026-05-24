@@ -1,6 +1,6 @@
 import { IFaq } from '@/models';
-import { FAQS_API } from 'constants/api';
-import { SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
+import { FAQS_API, SEO_API } from 'constants/api';
+import { IS_BUILD_TIME, SHOULD_FETCH_REMOTE_WHITELABEL } from '../config';
 import { DEFAULT_FAQ_BUILDER_CONTENT, type FaqBuilderContent } from '@/lib/faq-builder';
 
 import faqsData from '@/data/faqs.json';
@@ -32,8 +32,30 @@ const FALLBACK_FAQ_PAGE: IFaqPage = {
 };
 
 export async function getFaqPage(): Promise<IFaqPage> {
-  // For now, always return fallback until backend endpoint is implemented
-  return FALLBACK_FAQ_PAGE;
+  if (IS_BUILD_TIME) {
+    return FALLBACK_FAQ_PAGE;
+  }
+
+  try {
+    const res = await fetch(`${SEO_API}/faq`, {
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      if (typeof window === 'undefined') {
+        console.error('Error fetching faq page:', `${res.status} ${res.statusText}`);
+      }
+      return FALLBACK_FAQ_PAGE;
+    }
+
+    const { data } = await res.json();
+    return data;
+  } catch (e) {
+    if (typeof window === 'undefined') {
+      console.error('Error fetching faq page:', e);
+    }
+    return FALLBACK_FAQ_PAGE;
+  }
 }
 
 export async function getFaqs(): Promise<IFaq[]> {

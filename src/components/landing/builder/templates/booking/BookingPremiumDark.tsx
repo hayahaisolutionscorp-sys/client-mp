@@ -64,7 +64,7 @@ export default function BookingCleanMinimal({ theme, ports = [], routes = [] }: 
   };
 
   return (
-    <section id="Book" className="relative z-30 -mt-20 px-4 pb-12 sm:px-6 lg:px-10">
+    <section id="Book" className="relative z-30 -mt-32 px-4 pb-12 sm:-mt-20 sm:px-6 lg:px-10">
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -82,7 +82,7 @@ export default function BookingCleanMinimal({ theme, ports = [], routes = [] }: 
           />
 
           <div className="flex flex-col gap-6">
-             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+             <div className="hidden flex-col gap-4 md:flex-row md:items-center md:justify-between sm:flex">
                <div className="flex items-center gap-3">
                  <div className="p-2 rounded-xl" style={{ backgroundColor: `${theme.primary}15` }}>
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

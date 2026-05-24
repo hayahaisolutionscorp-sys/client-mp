@@ -21,6 +21,14 @@ interface HeroProps {
   tripSearchEnabledOverride?: boolean;
 }
 
+function unwrapServiceData<T>(response: T | { data?: T } | null | undefined): T | null {
+  if (response && typeof response === "object" && "data" in response) {
+    return (response as { data?: T }).data ?? null;
+  }
+
+  return (response as T) ?? null;
+}
+
 export default function Hero({
   heroSectionOverride,
   forceHomeNavbar = false,
@@ -61,18 +69,18 @@ export default function Hero({
     const fetchData = async () => {
       try {
         const [heroRes, headerRes, portsRes] = await Promise.all([
-          heroSectionOverride ? Promise.resolve(heroSectionOverride) : getHeroSections().then((res: any) => res?.data || res),
+          heroSectionOverride ? Promise.resolve(heroSectionOverride) : getHeroSections().then((res) => unwrapServiceData<PreviewPageSection | null>(res)),
           headerSectionOverride !== undefined
             ? Promise.resolve(headerSectionOverride)
-            : getHeadersSections().catch(() => null).then((res: any) => res?.data || res),
+            : getHeadersSections().catch(() => null).then((res) => unwrapServiceData<HeaderNavigationConfig | null>(res)),
           portsOverride !== undefined
             ? Promise.resolve(portsOverride ?? [])
-            : getPorts().catch(() => []).then((res: any) => res?.data || res),
+            : getPorts().catch(() => []).then((res) => unwrapServiceData<IPort[]>(res)),
         ]);
 
-        setHeroSection(heroRes as any);
-        setHeaderSection(headerRes as any);
-        setPorts(portsRes as any);
+        setHeroSection(heroRes ?? null);
+        setHeaderSection(headerRes ?? null);
+        setPorts(Array.isArray(portsRes) ? portsRes : []);
       } catch (error) {
         console.error("Failed to load hero data", error);
       } finally {
@@ -149,8 +157,8 @@ export default function Hero({
         <div className="absolute inset-0 bg-black bg-opacity-40 z-[5] pointer-events-none" />
 
         {/* Content overlay on top of the video */}
-        <div className="flex flex-col items-center absolute z-[10] inset-0 text-white text-center mt-[85px] md:mt-[100px] lg:mt-[150px]">
-          <h1 className="font-bold leading-tight px-6 text-[22px] min-w-[500px] max-w-[500px] md:text-[40px] md:max-w-[800px] lg:text-[50px] lg:max-w-[1002px]">
+        <div className="flex flex-col items-center absolute z-[10] inset-0 text-white text-center mt-[calc(85px-var(--pwa-hero-lift,0px))] md:mt-[100px] lg:mt-[150px]">
+          <h1 className="w-full max-w-[500px] px-6 text-[22px] font-bold leading-tight text-balance md:max-w-[800px] md:text-[40px] lg:max-w-[1002px] lg:text-[50px]">
             {heroSection?.title}
           </h1>
           <p className="font-medium px-4 pt-3 text-sm md:text-2xl">{heroSection?.subtitle}</p>
