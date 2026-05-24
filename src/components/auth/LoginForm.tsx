@@ -10,8 +10,10 @@ import { useAuth } from "@/contexts/AuthContexts";
 import { useThemeSettings } from "@/hooks/theme-settings";
 import { useBranding } from "@/hooks/branding";
 import { buildReturnUrlParam, resolvePostAuthPath, sanitizeReturnUrl, withReturnUrl } from "@/lib/return-url";
-import { isEffectiveClientApiMode } from "constants/api";
+import { useEnabledProviders } from "@/hooks/useEnabledProviders";
 import { FALLBACK_CSS_PRIMARY } from "@/lib/theme-css-fallbacks";
+import { AUTH_PROVIDERS } from "@/constants/auth-providers";
+import { cn } from "@/lib/utils";
 
 const STEP_KEY = 'login-step';
 const STEP_TTL_MS = 5 * 60 * 1000;
@@ -31,6 +33,7 @@ export function LoginForm({ mode = 'default' }: LoginFormProps) {
   const primaryColor = theme?.primaryColor || theme?.primary || FALLBACK_CSS_PRIMARY;
 
   const { clearSession, signInWithGoogle, signInWithFacebook, signInWithHayahai } = useAuth();
+  const enabledProviders = useEnabledProviders();
   const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState('');
@@ -125,6 +128,16 @@ export function LoginForm({ mode = 'default' }: LoginFormProps) {
     }
   };
 
+  const activeProviders = AUTH_PROVIDERS.filter((p) => enabledProviders?.includes(p.id));
+  const socialProviders = activeProviders.filter((p) => p.variant === "social");
+  const nativeProviders = activeProviders.filter((p) => p.variant === "native");
+
+  const providerHandlers: Record<string, () => void> = {
+    google: handleGoogleLogin,
+    facebook: handleFacebookLogin,
+    hayahai: handleHayahaiLogin,
+  };
+
   return (
     <div className="w-full max-w-md space-y-6">
       <h1 className="sr-only">Login</h1>
@@ -174,45 +187,37 @@ export function LoginForm({ mode = 'default' }: LoginFormProps) {
         </Button>
       </form>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Button
-          onClick={handleGoogleLogin}
-          variant="outline"
-          disabled={loading}
-          className="w-full border-[var(--theme-primary)] text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/10"
-        >
-          <Image src="/assets/icons/google_logo.svg" alt="Google" width={20} height={20} className="mr-2" />
-          Continue with Google
-        </Button>
-        <Button
-          onClick={handleFacebookLogin}
-          variant="outline"
-          disabled={loading}
-          className="w-full border-[var(--theme-primary)] text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/10"
-        >
-          <Image src="/assets/icons/facebook_logo.svg" alt="Facebook" width={20} height={20} className="mr-2" />
-          Continue with Facebook
-        </Button>
-        {isEffectiveClientApiMode && (
-          <Button
-            onClick={handleHayahaiLogin}
-            variant="outline"
-            disabled={loading}
-            className="w-full sm:col-span-2 border-[var(--theme-primary)] text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/10"
-          >
-            <Image src="/assets/icons/hayahai_logo.svg" alt="Ayahay" width={20} height={20} className="mr-2" />
-            Continue with Hayahai
-          </Button>
-        )}
-      </div>
+      {activeProviders.length > 0 && (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {activeProviders.map((provider, index) => (
+              <Button
+                key={provider.id}
+                onClick={providerHandlers[provider.id]}
+                variant="outline"
+                disabled={loading}
+                className={cn(
+                  "w-full border-[var(--theme-primary)] text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/10",
+                  (activeProviders.length === 1 ||
+                    (index === activeProviders.length - 1 && activeProviders.length % 2 !== 0)) &&
+                    "sm:col-span-2"
+                )}
+              >
+                <Image src={provider.icon} alt={provider.name} width={20} height={20} className="mr-2" />
+                Continue with {provider.name}
+              </Button>
+            ))}
+          </div>
+        </>
+      )}
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
