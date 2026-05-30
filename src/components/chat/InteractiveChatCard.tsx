@@ -285,10 +285,20 @@ export default function InteractiveChatCard({
                     const price = firstSegment?.base_fare
                         ?? firstSegment?.passenger_rates?.find((r: any) => r.passenger_type_code === "ADULT")?.amount
                         ?? 0;
-                    // Seats: bottleneck remaining across all segments
+                    // Seats: bottleneck remaining across all segments.
+                    // Prefer cabin[].remaining_capacity (same source as TripCards/trip.service.ts)
+                    // so the count matches what the user sees in the per-cabin trip summary.
+                    // Fall back to cabin_capacities for responses that lack the cabins array.
                     const availableSeats = (t.segments ?? [firstSegment]).reduce((min: number, s: any) => {
-                        const cabinCaps: Record<string, { remaining: number }> = s?.cabin_capacities ?? {};
-                        const total = Object.values(cabinCaps).reduce((sum, c) => sum + (c.remaining ?? 0), 0);
+                        const actualSeg = (s.segments && s.segments.length > 0) ? s.segments[0] : s;
+                        const cabins: any[] = actualSeg?.cabins ?? s?.cabins ?? [];
+                        let total: number;
+                        if (cabins.length > 0) {
+                            total = cabins.reduce((sum: number, c: any) => sum + (c.remaining_capacity ?? c.max_passenger_capacity ?? 0), 0);
+                        } else {
+                            const cabinCaps: Record<string, { remaining: number }> = s?.cabin_capacities ?? {};
+                            total = Object.values(cabinCaps).reduce((sum, c) => sum + (c.remaining ?? 0), 0);
+                        }
                         return total > 0 ? Math.min(min, total) : min;
                     }, Infinity);
                     return {
