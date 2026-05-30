@@ -74,6 +74,8 @@ export function SeatPickerDialog({
   onConfirm,
 }: SeatPickerDialogProps) {
   const { error: toastError, warn: toastWarn } = useToast();
+  const toastErrorRef = useRef(toastError);
+  useEffect(() => { toastErrorRef.current = toastError; }, [toastError]);
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [activeTripIndex, setActiveTripIndex] = useState(0);
@@ -203,7 +205,7 @@ export function SeatPickerDialog({
         const next = Math.max(0, prev - 1);
         if (next === 0) {
           if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-          toastError('Your seat hold time expired. Please reselect your seats.');
+          toastErrorRef.current('Your seat hold time expired. Please reselect your seats.');
           // Use ref so we always release seats assigned up to this moment
           const currentAssignments = assignmentsRef.current;
           const seatsByTrip: Record<string, string[]> = {};
@@ -227,7 +229,7 @@ export function SeatPickerDialog({
     return () => {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
-  }, [open, fetchSeats, toastError]); // assignments intentionally excluded — use assignmentsRef
+  }, [open, fetchSeats]); // toastErrorRef is stable via ref — no need in deps; assignments excluded — use assignmentsRef
 
   async function handleClose() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
