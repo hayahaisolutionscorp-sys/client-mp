@@ -313,13 +313,16 @@ function DoubleDeckCell({
           <div
             role="button"
             onClick={() => {
-              if (upperSeat && upperStatus === 'available' && !focusedPassengerIsPwd) {
+              if (!upperSeat) return;
+              const canDeselect = upperAssigned;
+              const canSelect = upperStatus === 'available' && !focusedPassengerIsPwd;
+              if (canDeselect || canSelect) {
                 onSeatClick(upperSeat);
                 setActivePopoverId((prev) => (prev === popoverId ? null : prev));
               }
             }}
             className={`grid grid-cols-[8px_minmax(0,1fr)_auto_auto] items-center gap-2 px-1.5 py-1 rounded text-[11px] mb-0.5 transition-colors ${
-              upperAssigned ? 'bg-[#E6F1FB]' :
+              upperAssigned ? 'bg-[#E6F1FB] hover:bg-[#D6E8F8] cursor-pointer' :
               upperStatus === 'available' && !focusedPassengerIsPwd ? 'hover:bg-zinc-100 cursor-pointer' :
               'opacity-50 cursor-not-allowed'
             }`}
@@ -351,13 +354,16 @@ function DoubleDeckCell({
           <div
             role="button"
             onClick={() => {
-              if (lowerSeat && lowerStatus === 'available') {
+              if (!lowerSeat) return;
+              const canDeselect = lowerAssigned;
+              const canSelect = lowerStatus === 'available';
+              if (canDeselect || canSelect) {
                 onSeatClick(lowerSeat);
                 setActivePopoverId((prev) => (prev === popoverId ? null : prev));
               }
             }}
             className={`grid grid-cols-[8px_minmax(0,1fr)_auto_auto] items-center gap-2 px-1.5 py-1 rounded text-[11px] transition-colors ${
-              lowerAssigned ? 'bg-[#E6F1FB]' :
+              lowerAssigned ? 'bg-[#E6F1FB] hover:bg-[#D6E8F8] cursor-pointer' :
               lowerStatus === 'available' ? 'hover:bg-zinc-100 cursor-pointer' :
               'opacity-50 cursor-not-allowed'
             }`}

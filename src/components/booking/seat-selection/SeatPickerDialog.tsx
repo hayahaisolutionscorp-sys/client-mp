@@ -123,7 +123,10 @@ export function SeatPickerDialog({
       if (pollRef.current) clearInterval(pollRef.current);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     }
-  }, [open]);
+  // initialAssignments intentionally included: when open transitions false→true,
+  // the effect must capture the current prop value, not a stale closure.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initialAssignments]);
 
   // ── Fetch decks when trip changes ─────────────────────────────────────────
   useEffect(() => {
