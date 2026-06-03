@@ -2,13 +2,6 @@
 
 import { useState, useEffect, FC } from "react";
 import { Input } from "@/components/ui/Input";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/Select";
 import { PassengerData } from "@/types/booking/passenger-data";
 import { ContactData } from "@/types/booking/contact-data";
 import { useThemeSettings } from "@/hooks/theme-settings";
@@ -32,7 +25,7 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
 }) => {
   const themeSettings = useThemeSettings();
   const { currentUser } = useAuth();
-  const [usePassengerDetails, setUsePassengerDetails] = useState(false);
+  const [usePassengerDetails, setUsePassengerDetails] = useState(true);
   const ph = defaultCountries.find(c => parseCountry(c).iso2 === 'ph') || defaultCountries[0];
   const defaultCountry = parseCountry(ph);
 
@@ -136,21 +129,21 @@ const ContactDetailsForm: FC<ContactDetailsFormProps> = ({
   const handleCheckboxChange = () => {
     setUsePassengerDetails((prev) => {
       const newValue = !prev;
-      if (newValue && passengerDetails) {
+      if (newValue) {
+        setContactDetails({
+          firstname: '',
+          lastname: '',
+          mobileNumber: '',
+          email: '',
+          countryCode: defaultCountry.iso2
+        });
+      } else if (passengerDetails) {
         setContactDetails({
           firstname: passengerDetails.firstname,
           lastname: passengerDetails.lastname,
-          mobileNumber: "",
-          email: "",
-          countryCode: "PH",
-        });
-      } else {
-        setContactDetails({
-          firstname: "",
-          lastname: "",
-          mobileNumber: "",
-          email: "",
-          countryCode: defaultCountry.iso2,
+          mobileNumber: '',
+          email: '',
+          countryCode: 'PH'
         });
       }
       return newValue;
