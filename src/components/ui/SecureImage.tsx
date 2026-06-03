@@ -14,12 +14,16 @@ interface SecureImageProps extends Omit<ImageProps, 'src'> {
 /**
  * A secure wrapper around Next.js Image component.
  *
- * For internal file keys (e.g. "view/kyc/1/identity-documents/abc.jpg"),
- * it constructs the full backend URL and lets the browser's native <img>
- * follow the 302 redirect to the S3 presigned URL. This avoids CORS issues
- * that occur when Axios tries to follow the redirect via XHR.
+ * Pass a directly-usable URL: http(s), blob:, and data: values are used as-is.
+ * This is the normal case — the backend presigns private S3 keys (e.g. KYC ID
+ * documents) into full https URLs before returning them, so callers should
+ * already have a usable URL here.
  *
- * Direct http(s), blob:, and data: URLs are passed through as-is.
+ * As a fallback, a bare internal key (e.g. "kyc/1/identity-documents/abc.jpg")
+ * is turned into `${UPLOAD_API}/<key>`. Note: there is no backend route that
+ * resolves such keys to a presigned URL, so a bare key will fail to load and
+ * render the "Unavailable" placeholder. Always presign private keys
+ * server-side rather than relying on this branch.
  */
 export const SecureImage = ({ src, alt, className, fallbackToDefault = true, ...props }: SecureImageProps) => {
   const [error, setError] = useState(false);
@@ -38,9 +42,10 @@ export const SecureImage = ({ src, alt, className, fallbackToDefault = true, ...
       return src;
     }
 
-    // Internal file key → build the full backend URL.
-    // The backend will 302 redirect to the S3 presigned URL,
-    // and the browser's <img> tag follows redirects natively (no CORS issue).
+    // Fallback for a bare internal key. There is no backend endpoint that
+    // resolves these to a presigned S3 URL, so this only renders if the key
+    // happens to be publicly reachable — otherwise the <img> errors and we
+    // show the "Unavailable" placeholder. Presign private keys server-side.
     return `${UPLOAD_API}/${src}`;
   })();
 
