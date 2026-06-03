@@ -98,6 +98,8 @@ export function SeatPickerDialog({
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const assignmentsRef = useRef<AssignmentsMap>(initialAssignments);
   const confirmedRef = useRef(false);
+  // Tracks seats explicitly released mid-session so the seeding effect doesn't ghost-restore them.
+  const releasedSeatIdsRef = useRef<Set<string>>(new Set());
 
   const activeTrip = trips[activeTripIndex];
   const zoom = ZOOM_STEPS[zoomIdx] ?? 1.0;
@@ -115,8 +117,13 @@ export function SeatPickerDialog({
       setLayout(null);
       setSeats([]);
       setFocusedIdx(0);
+      // `initialAssignments` is read from the current render's closure — always
+      // fresh when open transitions false→true. Omitting it from deps prevents
+      // the effect from firing again (and wiping in-progress picks) if the parent
+      // re-renders with a new reference while the dialog is already open.
       setAssignments(initialAssignments);
       assignmentsRef.current = initialAssignments;
+      releasedSeatIdsRef.current = new Set();
       confirmedRef.current = false;
       setZoomIdx(DEFAULT_ZOOM_IDX);
       setHoldSecondsLeft(HOLD_SESSION_SECONDS);
@@ -125,10 +132,8 @@ export function SeatPickerDialog({
       if (pollRef.current) clearInterval(pollRef.current);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     }
-  // initialAssignments intentionally included: when open transitions false→true,
-  // the effect must capture the current prop value, not a stale closure.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, initialAssignments]);
+  }, [open]);
 
   // ── Fetch decks when trip changes ─────────────────────────────────────────
   useEffect(() => {
@@ -173,23 +178,27 @@ export function SeatPickerDialog({
 
   // ── Seed assignments from is_held_by_session when seats load ─────────────
   // Primary path: backend confirms "this hold is yours" — use initialAssignments for the mapping.
+  // Guards:
+  //  - releasedSeatIdsRef: prevents ghost-restoring seats the user explicitly released
+  //  - dirty-check: only calls setAssignments when something actually changed
   useEffect(() => {
     if (!open || seats.length === 0) return;
     setAssignments((prev) => {
+      let changed = false;
       const seeded = { ...prev };
       for (const seat of seats) {
         if (!seat.is_held_by_session) continue;
+        if (releasedSeatIdsRef.current.has(seat.id)) continue;
         for (const [passengerKey, tripMap] of Object.entries(initialAssignments)) {
           for (const [tripId, seatId] of Object.entries(tripMap)) {
-            if (seatId === seat.id && seat.trip_id === tripId) {
-              if (!seeded[passengerKey]?.[tripId]) {
-                seeded[passengerKey] = { ...(seeded[passengerKey] ?? {}), [tripId]: seat.id };
-              }
+            if (seatId === seat.id && seat.trip_id === tripId && !seeded[passengerKey]?.[tripId]) {
+              seeded[passengerKey] = { ...(seeded[passengerKey] ?? {}), [tripId]: seat.id };
+              changed = true;
             }
           }
         }
       }
-      return seeded;
+      return changed ? seeded : prev;
     });
   }, [open, seats, initialAssignments]);
 
@@ -306,6 +315,7 @@ export function SeatPickerDialog({
 
     // Deselect: tapping the same seat again
     if (currentSeatId === seat.id) {
+      releasedSeatIdsRef.current.add(seat.id);
       try { await releaseSeats(tripId, [seat.id]); } catch { /* best effort */ }
       setAssignments((prev) => {
         const updated = { ...prev };
@@ -366,6 +376,7 @@ export function SeatPickerDialog({
         })),
         currentAssignments: assignments,
         releaseExisting: true,
+        sessionId: seatSessionId,
       });
 
       if (result.unassigned.length > 0) {

@@ -108,10 +108,10 @@ export default function RequestRebookModal({ isOpen, onClose, booking, onSuccess
   >({});
   const [seatPickerOpen, setSeatPickerOpen] = useState(false);
   const [seatSessionId] = useState<string>(() => {
-    const stored = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('ayahay-seat-session-rebook') : null;
+    const stored = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('marketplace:ayahay-seat-session-rebook') : null;
     if (stored) return stored;
     const id = crypto.randomUUID();
-    if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('ayahay-seat-session-rebook', id);
+    if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('marketplace:ayahay-seat-session-rebook', id);
     return id;
   });
   // For round-trip bookings, the customer picks which leg to rebook. The
