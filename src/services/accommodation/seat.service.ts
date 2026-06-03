@@ -63,10 +63,10 @@ export async function getDeckLayout(deckId: number): Promise<DeckLayout | null> 
   };
 }
 
-export async function getTripSeats(tripId: string, cabinDeckId: number): Promise<TripSeat[]> {
-  const { data } = await axiosInstance.get(`${BASE}/trips/${tripId}/seats`, {
-    params: { cabin_deck_id: cabinDeckId },
-  });
+export async function getTripSeats(tripId: string, cabinDeckId: number, sessionId?: string): Promise<TripSeat[]> {
+  const params: Record<string, string | number> = { cabin_deck_id: cabinDeckId };
+  if (sessionId) params.session_id = sessionId;
+  const { data } = await axiosInstance.get(`${BASE}/trips/${tripId}/seats`, { params });
   return (data.data as any[]).map((s) => ({
     id: s.id,
     trip_id: s.trip_id,
@@ -78,6 +78,7 @@ export async function getTripSeats(tripId: string, cabinDeckId: number): Promise
     status: s.status,
     held_until: s.held_until ?? null,
     booking_trip_passenger_id: s.booking_trip_passenger_id ?? undefined,
+    is_held_by_session: s.is_held_by_session ?? false,
   }));
 }
 
@@ -87,11 +88,13 @@ export async function holdSeats(
   tripId: string,
   seatIds: string[],
   cabinDeckId: number,
+  sessionId?: string,
 ): Promise<void> {
   try {
     await axiosInstance.post(`${BASE}/trips/${tripId}/seats/hold`, {
       seatIds,
       cabinDeckId,
+      ...(sessionId ? { sessionId } : {}),
     });
   } catch (err: any) {
     if (err.response?.status === 409) throw new Error('SEAT_CONFLICT');

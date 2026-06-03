@@ -23,9 +23,13 @@ export function getStatusColor(
   cellType: string,
   isAssigned: boolean,
   isFocusedPwd: boolean,
+  isHeldBySession?: boolean,
 ): string {
   if (isAssigned)
     return 'bg-blue-100 border-blue-500 text-blue-800 ring-2 ring-blue-400 ring-offset-1 shadow-sm';
+  // Seat held by this session but not yet reflected in local state (e.g. first render after reopen)
+  if (isHeldBySession)
+    return 'bg-blue-50 border-blue-400 text-blue-700 ring-1 ring-blue-300 ring-offset-1 cursor-pointer';
 
   switch (status) {
     case 'available':

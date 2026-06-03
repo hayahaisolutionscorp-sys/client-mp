@@ -63,6 +63,7 @@ export interface TripSeat {
   status: 'available' | 'held' | 'booked' | 'blocked';
   held_until?: string | null;
   booking_trip_passenger_id?: string;
+  is_held_by_session?: boolean;
 }
 
 export interface SeatAssignment {

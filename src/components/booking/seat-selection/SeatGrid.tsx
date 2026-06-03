@@ -543,7 +543,7 @@ export function SeatGrid({
                   onClick={() => inventorySeat && isClickable && onSeatClick(inventorySeat)}
                   className={`rounded-md flex flex-col items-stretch overflow-hidden transition-colors border ${
                     inventorySeat
-                      ? getStatusColor(inventorySeat.status, cell.type, isAssigned, focusedPassengerIsPwd)
+                      ? getStatusColor(inventorySeat.status, cell.type, isAssigned, focusedPassengerIsPwd, inventorySeat.is_held_by_session)
                       : 'bg-zinc-50 text-zinc-300 cursor-not-allowed border-zinc-200'
                   }`}
                   style={gridStyle}

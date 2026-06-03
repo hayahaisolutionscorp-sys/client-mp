@@ -107,6 +107,13 @@ export default function RequestRebookModal({ isOpen, onClose, booking, onSuccess
     Record<string, { seatId: string; cellId: string; rateAmount: number } | null>
   >({});
   const [seatPickerOpen, setSeatPickerOpen] = useState(false);
+  const [seatSessionId] = useState<string>(() => {
+    const stored = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('ayahay-seat-session-rebook') : null;
+    if (stored) return stored;
+    const id = crypto.randomUUID();
+    if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('ayahay-seat-session-rebook', id);
+    return id;
+  });
   // For round-trip bookings, the customer picks which leg to rebook. The
   // marketplace rebook flow runs one leg at a time — submitting both legs
   // at once would invalidate the unchanged leg's existing payment ledger.
@@ -1563,6 +1570,7 @@ export default function RequestRebookModal({ isOpen, onClose, booking, onSuccess
         <SeatPickerDialog
           open={seatPickerOpen}
           onClose={() => setSeatPickerOpen(false)}
+          seatSessionId={seatSessionId}
           trips={[
             {
               tripId: cleanTripId(selectedTrip.id),

@@ -43,6 +43,7 @@ interface SeatPickerDialogProps {
   passengers: SeatPickerDialogPassenger[];
   initialAssignments?: AssignmentsMap;
   onConfirm: (assignments: AssignmentsMap, labels: SeatLabelsMap) => void;
+  seatSessionId?: string;
 }
 
 const ZOOM_STEPS = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3] as const;
@@ -72,6 +73,7 @@ export function SeatPickerDialog({
   passengers,
   initialAssignments = {},
   onConfirm,
+  seatSessionId,
 }: SeatPickerDialogProps) {
   const { error: toastError, warn: toastWarn } = useToast();
   const toastErrorRef = useRef(toastError);
@@ -153,12 +155,12 @@ export function SeatPickerDialog({
     if (!activeTrip || !activeDeckId) return;
     setSeatsLoading(true);
     try {
-      const s = await getTripSeats(activeTrip.tripId, activeDeckId);
+      const s = await getTripSeats(activeTrip.tripId, activeDeckId, seatSessionId);
       setSeats(s);
     } finally {
       setSeatsLoading(false);
     }
-  }, [activeTrip?.tripId, activeDeckId]);
+  }, [activeTrip?.tripId, activeDeckId, seatSessionId]);
 
   useEffect(() => {
     if (!open) return;
@@ -168,6 +170,28 @@ export function SeatPickerDialog({
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [fetchSeats, open]);
+
+  // ── Seed assignments from is_held_by_session when seats load ─────────────
+  // Primary path: backend confirms "this hold is yours" — use initialAssignments for the mapping.
+  useEffect(() => {
+    if (!open || seats.length === 0) return;
+    setAssignments((prev) => {
+      const seeded = { ...prev };
+      for (const seat of seats) {
+        if (!seat.is_held_by_session) continue;
+        for (const [passengerKey, tripMap] of Object.entries(initialAssignments)) {
+          for (const [tripId, seatId] of Object.entries(tripMap)) {
+            if (seatId === seat.id && seat.trip_id === tripId) {
+              if (!seeded[passengerKey]?.[tripId]) {
+                seeded[passengerKey] = { ...(seeded[passengerKey] ?? {}), [tripId]: seat.id };
+              }
+            }
+          }
+        }
+      }
+      return seeded;
+    });
+  }, [open, seats, initialAssignments]);
 
   // ── Release holds on hard page close / reload ────────────────────────────
   useEffect(() => {
@@ -304,7 +328,7 @@ export function SeatPickerDialog({
 
     // Hold new seat
     try {
-      await holdSeats(tripId, [seat.id], activeDeckId);
+      await holdSeats(tripId, [seat.id], activeDeckId, seatSessionId);
     } catch (err: unknown) {
       const isSeatConflict = err instanceof Error && err.message === 'SEAT_CONFLICT';
       if (isSeatConflict) {
