@@ -16,6 +16,7 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const themeSettings = useThemeSettings();
+  const primaryColorRgb = hexToRgb(themeSettings?.primary || "#8C1F21");
 
   // Set default value if value is undefined
   const displayedValue = value || DEFAULT_BOOKING_TYPE;
@@ -26,6 +27,13 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
     onChange(trip); // Call onChange to update the parent state
     setIsOpen(false);
   };
+
+  const optionClassName = (option: string) =>
+    `px-4 py-2 cursor-pointer transition-colors ${
+      displayedValue === option
+        ? "bg-[rgba(var(--primary-color),0.12)] text-customText font-medium"
+        : "text-customText hover:bg-[rgba(var(--primary-color),0.08)]"
+    }`;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -46,19 +54,23 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
   }, []);
 
   return (
-    <div ref={dropdownRef} className={`relative inline-block w-full h-[40px] overflow-visible text-left focus-within:z-[120] ${isOpen ? "z-[100]" : "z-10"}`}>
+    <div
+      ref={dropdownRef}
+      className={`relative inline-block w-full h-[40px] overflow-visible text-left focus-within:z-[120] ${isOpen ? "z-[100]" : "z-10"}`}
+      style={
+        {
+          "--primary-color": primaryColorRgb,
+        } as React.CSSProperties
+      }
+    >
       <button
+        type="button"
         data-template-ignore="true"
         onClick={toggleDropdown}
         className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[rgba(var(--primary-color),1)] disabled:cursor-not-allowed disabled:opacity-50"
-        style={
-          {
-            "--primary-color": hexToRgb(themeSettings?.primary || "#8C1F21"),
-          } as React.CSSProperties
-        }
       >
         <span className="font-natural text-customText">{displayedValue}</span>
-        <FaAngleDown className="w-4 h-4" style={{ color: `rgba(${hexToRgb(themeSettings?.primary || "#8C1F21")}, 1)` }} />
+        <FaAngleDown className="w-4 h-4" style={{ color: `rgba(${primaryColorRgb}, 1)` }} />
       </button>
 
       {isOpen && (
@@ -66,29 +78,13 @@ const TripDropdown = ({ value, onChange }: TripDropdownProps) => {
           <ul className="py-1">
             <li
               onClick={() => handleSelection("Single Trip")}
-              className={`px-4 py-2 cursor-pointer ${displayedValue === "Single Trip"
-                ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
-                : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
-                }`}
-              style={
-                {
-                  "--bg-color": hexToRgb("#FFFFFF"),
-                } as React.CSSProperties
-              }
+              className={optionClassName("Single Trip")}
             >
               Single Trip
             </li>
             <li
               onClick={() => handleSelection("Round Trip")}
-              className={`px-4 py-2 cursor-pointer ${displayedValue === "Round Trip"
-                ? "bg-[rgba(var(--bg-color),0.2)] text-customText"
-                : "hover:bg-[rgba(var(--bg-color),0.1)] hover:text-[rgba(var(--bg-color),1)]"
-                }`}
-              style={
-                {
-                  "--bg-color": hexToRgb("#FFFFFF"),
-                } as React.CSSProperties
-              }
+              className={optionClassName("Round Trip")}
             >
               Round Trip
             </li>

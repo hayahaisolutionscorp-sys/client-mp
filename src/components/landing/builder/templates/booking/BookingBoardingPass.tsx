@@ -333,6 +333,62 @@ export default function BookingBoardingPass({
         border-color: ${theme.primary} !important;
         background: white !important;
       }
+      /* Route/date/action row: avoid six controls competing on one laptop-width line. */
+      .boarding-pass-booking-form > div:nth-child(2) {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr) !important;
+        align-items: start !important;
+        gap: 8px !important;
+        overflow: visible !important;
+      }
+      .boarding-pass-booking-form > div:nth-child(2) > * {
+        min-width: 0 !important;
+      }
+      .boarding-pass-booking-form > div:nth-child(2) > *:nth-child(4) {
+        grid-column: 1 / 3 !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        height: auto !important;
+        min-width: 0 !important;
+        padding-top: 0 !important;
+      }
+      .boarding-pass-booking-form > div:nth-child(2) > *:nth-child(4) > * {
+        min-width: 0 !important;
+        width: 100% !important;
+      }
+      .boarding-pass-booking-form > div:nth-child(2) > *:nth-child(5) {
+        grid-column: 3 / 4 !important;
+        display: flex !important;
+        align-items: stretch !important;
+        height: 46px !important;
+        min-width: 0 !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+      }
+      .boarding-pass-booking-form > div:nth-child(2) > *:nth-child(5) [data-booking-search-submit] {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 46px !important;
+        white-space: nowrap !important;
+      }
+      @media (max-width: 1180px) {
+        .boarding-pass-booking-form > div:nth-child(2) > *:nth-child(4),
+        .boarding-pass-booking-form > div:nth-child(2) > *:nth-child(5) {
+          grid-column: 1 / -1 !important;
+        }
+      }
+      @media (max-width: 640px) {
+        .boarding-pass-booking-form > div:nth-child(2) {
+          grid-template-columns: 1fr !important;
+        }
+        .boarding-pass-booking-form > div:nth-child(2) > *:nth-child(2) {
+          display: none !important;
+        }
+        .boarding-pass-booking-form > div:nth-child(2) > *:nth-child(4) {
+          grid-template-columns: 1fr !important;
+        }
+      }
     `}</style>
   );
 
