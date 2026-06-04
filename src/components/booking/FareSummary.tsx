@@ -121,6 +121,15 @@ const FareSummary: FC<FareSummaryProps> = ({
   const [showSeatLoginModal, setShowSeatLoginModal] = useState(false);
   const [seatDialogOpen, setSeatDialogOpen] = useState(false);
   const [selectedSeatAssignments, setSelectedSeatAssignments] = useState<AssignmentsMap>({});
+  // Stable UUID per booking session — persisted in sessionStorage so a page refresh
+  // allows the backend to return is_held_by_session: true for the user's own holds.
+  const [seatSessionId] = useState<string>(() => {
+    const stored = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('marketplace:ayahay-seat-session') : null;
+    if (stored) return stored;
+    const id = crypto.randomUUID();
+    if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('marketplace:ayahay-seat-session', id);
+    return id;
+  });
   const [selectedSeatLabels, setSelectedSeatLabels] = useState<SeatLabelsMap>({});
   const pendingSeatAssignmentsRef = useRef<AssignmentsMap>({});
 
@@ -1119,6 +1128,7 @@ const handlePayment = async () => {
                     trips={dialogTrips}
                     passengers={dialogPassengers}
                     initialAssignments={selectedSeatAssignments}
+                    seatSessionId={seatSessionId}
                     onConfirm={(assignments, labels) => {
                       setSelectedSeatAssignments(assignments);
                       setSelectedSeatLabels(labels);

@@ -43,6 +43,7 @@ interface SeatPickerDialogProps {
   passengers: SeatPickerDialogPassenger[];
   initialAssignments?: AssignmentsMap;
   onConfirm: (assignments: AssignmentsMap, labels: SeatLabelsMap) => void;
+  seatSessionId?: string;
 }
 
 const ZOOM_STEPS = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3] as const;
@@ -72,6 +73,7 @@ export function SeatPickerDialog({
   passengers,
   initialAssignments = {},
   onConfirm,
+  seatSessionId,
 }: SeatPickerDialogProps) {
   const { error: toastError, warn: toastWarn } = useToast();
   const toastErrorRef = useRef(toastError);
@@ -96,6 +98,8 @@ export function SeatPickerDialog({
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const assignmentsRef = useRef<AssignmentsMap>(initialAssignments);
   const confirmedRef = useRef(false);
+  // Tracks seats explicitly released mid-session so the seeding effect doesn't ghost-restore them.
+  const releasedSeatIdsRef = useRef<Set<string>>(new Set());
 
   const activeTrip = trips[activeTripIndex];
   const zoom = ZOOM_STEPS[zoomIdx] ?? 1.0;
@@ -113,8 +117,13 @@ export function SeatPickerDialog({
       setLayout(null);
       setSeats([]);
       setFocusedIdx(0);
+      // `initialAssignments` is read from the current render's closure — always
+      // fresh when open transitions false→true. Omitting it from deps prevents
+      // the effect from firing again (and wiping in-progress picks) if the parent
+      // re-renders with a new reference while the dialog is already open.
       setAssignments(initialAssignments);
       assignmentsRef.current = initialAssignments;
+      releasedSeatIdsRef.current = new Set();
       confirmedRef.current = false;
       setZoomIdx(DEFAULT_ZOOM_IDX);
       setHoldSecondsLeft(HOLD_SESSION_SECONDS);
@@ -123,6 +132,7 @@ export function SeatPickerDialog({
       if (pollRef.current) clearInterval(pollRef.current);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   // ── Fetch decks when trip changes ─────────────────────────────────────────
@@ -150,12 +160,12 @@ export function SeatPickerDialog({
     if (!activeTrip || !activeDeckId) return;
     setSeatsLoading(true);
     try {
-      const s = await getTripSeats(activeTrip.tripId, activeDeckId);
+      const s = await getTripSeats(activeTrip.tripId, activeDeckId, seatSessionId);
       setSeats(s);
     } finally {
       setSeatsLoading(false);
     }
-  }, [activeTrip?.tripId, activeDeckId]);
+  }, [activeTrip?.tripId, activeDeckId, seatSessionId]);
 
   useEffect(() => {
     if (!open) return;
@@ -165,6 +175,32 @@ export function SeatPickerDialog({
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [fetchSeats, open]);
+
+  // ── Seed assignments from is_held_by_session when seats load ─────────────
+  // Primary path: backend confirms "this hold is yours" — use initialAssignments for the mapping.
+  // Guards:
+  //  - releasedSeatIdsRef: prevents ghost-restoring seats the user explicitly released
+  //  - dirty-check: only calls setAssignments when something actually changed
+  useEffect(() => {
+    if (!open || seats.length === 0) return;
+    setAssignments((prev) => {
+      let changed = false;
+      const seeded = { ...prev };
+      for (const seat of seats) {
+        if (!seat.is_held_by_session) continue;
+        if (releasedSeatIdsRef.current.has(seat.id)) continue;
+        for (const [passengerKey, tripMap] of Object.entries(initialAssignments)) {
+          for (const [tripId, seatId] of Object.entries(tripMap)) {
+            if (seatId === seat.id && seat.trip_id === tripId && !seeded[passengerKey]?.[tripId]) {
+              seeded[passengerKey] = { ...(seeded[passengerKey] ?? {}), [tripId]: seat.id };
+              changed = true;
+            }
+          }
+        }
+      }
+      return changed ? seeded : prev;
+    });
+  }, [open, seats, initialAssignments]);
 
   // ── Release holds on hard page close / reload ────────────────────────────
   useEffect(() => {
@@ -279,6 +315,7 @@ export function SeatPickerDialog({
 
     // Deselect: tapping the same seat again
     if (currentSeatId === seat.id) {
+      releasedSeatIdsRef.current.add(seat.id);
       try { await releaseSeats(tripId, [seat.id]); } catch { /* best effort */ }
       setAssignments((prev) => {
         const updated = { ...prev };
@@ -301,7 +338,7 @@ export function SeatPickerDialog({
 
     // Hold new seat
     try {
-      await holdSeats(tripId, [seat.id], activeDeckId);
+      await holdSeats(tripId, [seat.id], activeDeckId, seatSessionId);
     } catch (err: unknown) {
       const isSeatConflict = err instanceof Error && err.message === 'SEAT_CONFLICT';
       if (isSeatConflict) {
@@ -339,6 +376,7 @@ export function SeatPickerDialog({
         })),
         currentAssignments: assignments,
         releaseExisting: true,
+        sessionId: seatSessionId,
       });
 
       if (result.unassigned.length > 0) {

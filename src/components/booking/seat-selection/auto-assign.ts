@@ -26,6 +26,7 @@ interface AutoAssignOptions {
   currentAssignments?: AssignmentsMap;
   currentLabels?: SeatLabelsMap;
   releaseExisting?: boolean;
+  sessionId?: string;
 }
 
 interface SeatCandidate {
@@ -72,6 +73,7 @@ export async function autoAssignSeats({
   currentAssignments = {},
   currentLabels = {},
   releaseExisting = false,
+  sessionId,
 }: AutoAssignOptions): Promise<AutoAssignResult> {
   const tripIds = new Set(trips.map((trip) => trip.tripId));
   const assignments = cloneAssignments(currentAssignments);
@@ -174,7 +176,7 @@ export async function autoAssignSeats({
           if (!candidate || usedSeatIds.has(candidate.seat.id)) continue;
 
           try {
-            await holdSeats(trip.tripId, [candidate.seat.id], candidate.deckId);
+            await holdSeats(trip.tripId, [candidate.seat.id], candidate.deckId, sessionId);
             usedSeatIds.add(candidate.seat.id);
             return candidate.seat;
           } catch (error) {
